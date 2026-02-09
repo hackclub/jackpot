@@ -1,1 +1,1 @@
-# jackpot
+# Jackpot - Las Vegas Hackathon from May 8-12
