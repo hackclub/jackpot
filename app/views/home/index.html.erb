@@ -1,0 +1,39 @@
+<div class="main">
+<h1>Jackpot</h1>
+<p><b><em>Las Vegas</em> | <em>May 8-12th</em></b></p>
+</div>
+
+<style>
+body {
+background: url(<%= image_path 'bg.png' %>);
+min-height: 100vh;
+margin: 0;
+padding:0;
+background-repeat: no-repeat;
+background-size: cover; /* Scales the image to cover the div */
+}
+
+.main {
+margin-top: 10px;
+color: white;
+text-align: center;
+}
+.main h1 {
+font-size: 96px;
+margin-bottom: 10px;
+
+  font-weight: 500;
+color: #CEBFBB;
+  /* outline / stroke look */
+  -webkit-text-stroke: 3px #5a1f16;
+
+  /* depth */
+  text-shadow:
+    1px 1px 0 #3e120c,
+    2px 2px 6px rgba(0, 0, 0, 0.35);
+}
+.main p {
+font-size: 24px;
+
+}
+</style>
