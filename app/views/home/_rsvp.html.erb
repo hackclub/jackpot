@@ -1,0 +1,296 @@
+<div id="rsvp-container">
+  <%# RSVP Button — pure CSS vintage card, horizontal %>
+  <button class="rsvp-button" onclick="document.getElementById('rsvp-overlay').classList.add('rsvp-modal--visible'); document.body.style.overflow='hidden';">
+    <span class="rsvp-button__label">RSVP</span>
+  </button>
+
+  <%# Modal Overlay %>
+  <div id="rsvp-overlay" class="rsvp-modal" onclick="if(event.target===this){this.classList.remove('rsvp-modal--visible'); document.body.style.overflow='';}">
+    <div class="rsvp-modal__card vintage-card">
+      <div class="rsvp-modal__content">
+        <button class="rsvp-modal__close" onclick="document.getElementById('rsvp-overlay').classList.remove('rsvp-modal--visible'); document.body.style.overflow='';">&times;</button>
+
+        <h2 class="rsvp-modal__title">RSVP</h2>
+        <div class="rsvp-modal__divider"></div>
+
+        <form id="rsvp-form" onsubmit="submitRsvp(event)">
+          <div class="rsvp-modal__fields">
+            <label class="rsvp-modal__label">
+              Email:
+              <input type="email" name="emails[]" class="rsvp-modal__input" placeholder="you@example.com" required />
+            </label>
+          </div>
+
+          <div id="rsvp-message" class="rsvp-message" style="display:none;"></div>
+
+          <button type="submit" id="rsvp-submit-btn" class="rsvp-modal__submit">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /**
+   * Submits the RSVP form via fetch, sending emails and the ?ref query param.
+   * Captures IP and user agent server-side.
+   * @param {Event} event - The form submit event
+   */
+  async function submitRsvp(event) {
+    event.preventDefault();
+
+    var form = document.getElementById("rsvp-form");
+    var formData = new FormData(form);
+    var emails = formData.getAll("emails[]").filter(function(e) { return e.trim() !== ""; });
+
+    if (emails.length === 0) {
+      showRsvpMessage("Please enter at least one email.", true);
+      return;
+    }
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var ref = urlParams.get("ref") || "";
+
+    var submitBtn = document.getElementById("rsvp-submit-btn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    try {
+      var csrfToken = document.querySelector('meta[name="csrf-token"]');
+      var headers = { "Content-Type": "application/json" };
+      if (csrfToken) headers["X-CSRF-Token"] = csrfToken.content;
+
+      var response = await fetch("/rsvps", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ emails: emails, ref: ref })
+      });
+
+      var data = await response.json();
+
+      if (response.ok) {
+        showRsvpMessage("RSVP submitted! See you in Vegas.", false);
+        form.reset();
+        setTimeout(function() {
+          document.getElementById("rsvp-overlay").classList.remove("rsvp-modal--visible");
+          document.body.style.overflow = "";
+        }, 2000);
+      } else {
+        var errorMsg = data.error || (data.errors && data.errors.map(function(e) { return e.errors.join(", "); }).join("; ")) || "Something went wrong.";
+        showRsvpMessage(errorMsg, true);
+      }
+    } catch (err) {
+      showRsvpMessage("Network error. Please try again.", true);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit";
+    }
+  }
+
+  /**
+   * Displays a status message in the RSVP modal.
+   * @param {string} text - The message to display
+   * @param {boolean} isError - Whether this is an error message
+   */
+  function showRsvpMessage(text, isError) {
+    var msg = document.getElementById("rsvp-message");
+    msg.textContent = text;
+    msg.className = isError ? "rsvp-message rsvp-message--error" : "rsvp-message rsvp-message--success";
+    msg.style.display = "block";
+  }
+</script>
+
+<style>
+/* --- Vintage Card (reusable) --- */
+.vintage-card {
+  background: #d9cbab;
+  border-radius: 10px;
+  position: relative;
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.3),
+    inset 0 0 30px rgba(0, 0, 0, 0.05);
+}
+.vintage-card::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 2px solid #2a2019;
+  border-radius: 6px;
+  pointer-events: none;
+}
+.vintage-card::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid #2a2019;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* --- RSVP Button (horizontal) --- */
+.rsvp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  padding: 14px 48px;
+  transition: transform 0.15s ease;
+  background: #d9cbab;
+  border-radius: 10px;
+  position: relative;
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.3),
+    inset 0 0 30px rgba(0, 0, 0, 0.05);
+}
+.rsvp-button::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 2px solid #2a2019;
+  border-radius: 6px;
+  pointer-events: none;
+}
+.rsvp-button::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid #2a2019;
+  border-radius: 4px;
+  pointer-events: none;
+}
+.rsvp-button:hover {
+  transform: scale(1.05);
+}
+.rsvp-button__label {
+  font-size: 28px;
+  font-weight: 700;
+  color: #5a1f16;
+  font-style: italic;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+/* --- Modal Overlay --- */
+.rsvp-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  align-items: center;
+  justify-content: center;
+}
+.rsvp-modal--visible {
+  display: flex;
+}
+
+/* --- Modal Card --- */
+.rsvp-modal__card {
+  width: 320px;
+  max-width: 90vw;
+}
+.rsvp-modal__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 30px;
+}
+
+.rsvp-modal__close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #5a1f16;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 1;
+}
+
+.rsvp-modal__title {
+  font-size: 36px;
+  font-weight: 700;
+  font-style: italic;
+  color: #5a1f16;
+  margin: 0 0 4px 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.rsvp-modal__divider {
+  width: 60%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #5a1f16, transparent);
+  margin-bottom: 18px;
+  border-radius: 2px;
+}
+
+.rsvp-modal__fields {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.rsvp-modal__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a1f16;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rsvp-modal__input {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid #a08060;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  color: #3e120c;
+  outline: none;
+}
+.rsvp-modal__input:focus {
+  border-color: #5a1f16;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.rsvp-modal__submit {
+  font-size: 22px;
+  font-weight: 700;
+  color: #5a1f16;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: transform 0.15s ease;
+}
+.rsvp-modal__submit:hover {
+  transform: scale(1.08);
+}
+.rsvp-modal__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rsvp-message {
+  font-size: 13px;
+  text-align: center;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+.rsvp-message--error {
+  color: #8b0000;
+  background: rgba(139, 0, 0, 0.1);
+}
+.rsvp-message--success {
+  color: #2d5016;
+  background: rgba(45, 80, 22, 0.1);
+}
+</style>
