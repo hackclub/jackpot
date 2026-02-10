@@ -41,6 +41,20 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 gem "dotenv-rails", groups: [:development, :test]
 
+# Feature flags [https://www.flippercloud.io/]
+gem "flipper"
+gem "flipper-active_record"
+gem "flipper-ui"
+gem "lockbox"
+gem "pundit", "~> 2.5"
+gem "paper_trail"
+gem "rails_performance"
+# Business intelligence and data exploration [https://github.com/ankane/blazer]
+gem "blazer"
+
+# Web UI for Solid Queue [https://github.com/rails/mission_control-jobs]
+gem "mission_control-jobs"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -65,3 +79,4 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+gem "omniauth"
