@@ -1,11 +1,19 @@
 # frozen_string_literal: true
 
 class SessionsController < ApplicationController
+  skip_before_action :check_access_flipper
   def create
     auth = request.env["omniauth.auth"]
     user = User.from_omniauth(auth)
 
     if user.persisted?
+      # Check if user has access flipper enabled
+      unless Flipper.enabled?(:access, user)
+        flash[:alert] = "We are not open yet wait!."
+        redirect_to root_path
+        return
+      end
+
       session[:user_id] = user.id
       flash[:notice] = "Signed in successfully!"
       redirect_to after_sign_in_path

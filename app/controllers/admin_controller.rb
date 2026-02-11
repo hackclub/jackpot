@@ -1,4 +1,5 @@
 class AdminController < ApplicationController
+  skip_before_action :check_access_flipper
   before_action :authenticate_admin!
 
   def index
