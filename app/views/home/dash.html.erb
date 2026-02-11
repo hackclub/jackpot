@@ -1,2 +1,6 @@
 <h1>Dashboard</h1>
 <p>Welcome, <%= current_user.name %>!</p>
+
+<% if admin? %>
+  <p><%= link_to "Admin Panel", "/admin" %></p>
+<% end %>

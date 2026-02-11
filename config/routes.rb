@@ -1,3 +1,5 @@
+require_relative "../lib/admin_constraint"
+
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -17,6 +19,15 @@ Rails.application.routes.draw do
   delete "/signout", to: "sessions#destroy", as: :signout
 
   get "/dash", to: "home#dash", as: :dash
+  get "/admin", to: "admin#index"
+
+  namespace :admin do
+    constraints AdminConstraint do
+      mount Blazer::Engine => "/blazer"
+      mount Flipper::UI.app(Flipper) => "/flipper"
+      mount MissionControl::Jobs::Engine => "/jobs"
+    end
+  end
 
   root "home#index"
   # Defines the root path route ("/")
