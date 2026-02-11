@@ -16,6 +16,8 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "sessions#failure"
   delete "/signout", to: "sessions#destroy", as: :signout
 
+  get "/dash", to: "home#dash", as: :dash
+
   root "home#index"
   # Defines the root path route ("/")
   # root "posts#index"
