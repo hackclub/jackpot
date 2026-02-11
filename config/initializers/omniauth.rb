@@ -2,9 +2,9 @@
 
 Rails.application.config.middleware.use OmniAuth::Builder do
   provider :hack_club,
-           ENV.fetch("HACK_CLUB_CLIENT_ID", nil),
-           ENV.fetch("HACK_CLUB_CLIENT_SECRET", nil),
-           scope: "email profile",
+           Rails.application.config.x.hack_club.client_id,
+           Rails.application.config.x.hack_club.client_secret,
+           scope: "email profile slack_id address basic_info",
            callback_path: "/auth/hack_club/callback"
 end
 

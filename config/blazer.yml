@@ -2,7 +2,6 @@
 
 data_sources:
   main:
-    url: <%= ENV["BLAZER_DATABASE_URL"] %>
 
     # statement timeout, in seconds
     # none by default
