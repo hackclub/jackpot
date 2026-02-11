@@ -1,13 +1,18 @@
 <div class="main">
-<h1>Jackpot</h1>
-<p><b><em>Las Vegas</em> | <em>May 8-12th</em></b></p>
+<div class="hero-overlays">
+<%= image_tag 'title.PNG', alt: 'Jackpot Title', class: 'hero-title' %>
+<%= image_tag 'centralmg.png', alt: 'Center Art', class: 'hero-center' %>
+<%= image_tag 'HC_logo.png', alt: 'Hack Club Logo', class: 'hero-logo' %>
+</div>
 <%= render "home/rsvp" %>
 </div>
 
 <style>
 body {
-background: url(<%= image_path 'bg.png' %>);
+background: url(<%= image_path 'background.png' %>);
 min-height: 100vh;
+height: 100vh;
+overflow: hidden;
 margin: 0;
 padding:0;
 background-repeat: no-repeat;
@@ -18,23 +23,85 @@ background-size: cover; /* Scales the image to cover the div */
 margin-top: 10px;
 color: white;
 text-align: center;
+position: relative;
+min-height: 100vh;
 }
-.main h1 {
-font-size: 96px;
-margin-bottom: 10px;
+</style>
 
-  font-weight: 500;
-color: #CEBFBB;
-  /* outline / stroke look */
-  -webkit-text-stroke: 3px #5a1f16;
-
-  /* depth */
-  text-shadow:
-    1px 1px 0 #3e120c,
-    2px 2px 6px rgba(0, 0, 0, 0.35);
+<style>
+.hero-overlays {
+position: fixed;
+inset: 0;
+pointer-events: none;
 }
-.main p {
-font-size: 24px;
-
+.hero-title {
+position: absolute;
+left: 50%;
+top: -24vh; /* TITLE FROM TOP */
+transform: translateX(-50%) rotate(3deg);
+max-width: 90vw;
+width: 42vw;
+height: auto;
+/* gentle glow + occasional flicker */
+filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35));
+animation: title-flicker 4.5s infinite steps(1, end);
+}
+.hero-title::after {
+content: "";
+position: absolute;
+inset: -8px;
+pointer-events: none;
+/* sweeping sheen to mimic moving lights */
+background: linear-gradient(75deg, rgba(255,240,180,0) 0%, rgba(255,240,180,0.0) 35%, rgba(255,240,180,0.45) 50%, rgba(255,240,180,0.0) 65%, rgba(255,240,180,0) 100%);
+mix-blend-mode: screen;
+transform: translateX(-160%);
+animation: title-sheen 5.75s infinite;
+}
+.hero-center {
+position: absolute;
+left: 50%;
+top: 8vh; /* IMG FROM TOP */
+transform: translateX(-50%);
+max-width: 80vw; 
+width: 85vw; /* IMG SIZE */
+height: auto;
+/* bright pulsing glow around the image */
+filter:
+  drop-shadow(0 0 18px rgba(255, 230, 170, 0.35))
+  drop-shadow(0 0 48px rgba(255, 170, 60, 0.22));
+animation: center-glow 2.8s ease-in-out infinite;
+}
+.hero-logo {
+position: absolute;
+top: 0px;
+left: 8px;
+width: 180px;
+height: auto;
+}
+@keyframes title-sheen {
+  0%   { transform: translateX(-160%); opacity: 0.0; }
+  12%  { transform: translateX(160%);  opacity: 1.0; }
+  100% { transform: translateX(160%);  opacity: 0.0; }
+}
+@keyframes title-flicker {
+  0%, 87%, 100%   { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.35)) brightness(1) }
+  88%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.35)) brightness(0.8) }
+  89%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.55)) brightness(1.2) }
+  90%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.30)) brightness(0.9) }
+  92%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.60)) brightness(1.25) }
+}
+@keyframes center-glow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 16px rgba(255, 230, 170, 0.28))
+      drop-shadow(0 0 40px rgba(255, 170, 60, 0.15))
+      brightness(1);
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 32px rgba(255, 240, 190, 0.55))
+      drop-shadow(0 0 80px rgba(255, 180, 70, 0.35))
+      brightness(1.08);
+  }
 }
 </style>
