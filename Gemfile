@@ -48,7 +48,6 @@ gem "flipper-ui"
 gem "lockbox"
 gem "pundit", "~> 2.5"
 gem "paper_trail"
-gem "rails_performance"
 # Business intelligence and data exploration [https://github.com/ankane/blazer]
 gem "blazer"
 
@@ -80,3 +79,5 @@ group :test do
   gem "selenium-webdriver"
 end
 gem "omniauth"
+gem "omniauth-hack_club", github: "hackclub/omniauth-hack_club"
+gem "omniauth-rails_csrf_protection"

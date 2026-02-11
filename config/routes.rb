@@ -10,6 +10,12 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   post "/rsvps", to: "rsvps#create"
 
+  # OmniAuth routes
+  # Note: OmniAuth middleware handles /auth/:provider internally
+  match "/auth/:provider/callback", to: "sessions#create", via: [ :get, :post ]
+  get "/auth/failure", to: "sessions#failure"
+  delete "/signout", to: "sessions#destroy", as: :signout
+
   root "home#index"
   # Defines the root path route ("/")
   # root "posts#index"
