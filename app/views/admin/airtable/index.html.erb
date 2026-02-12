@@ -1,0 +1,70 @@
+<div style="padding: 2rem; font-family: monospace;">
+  <h1>🔄 Airtable Sync Logs</h1>
+  <p style="margin-bottom: 1rem;">
+    <a href="/admin" style="color: #0066ff; text-decoration: none;">&larr; Back to Admin</a>
+  </p>
+
+  <div style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;">
+    <span>Total: <strong><%= @total_count %></strong> sync logs</span>
+    <span>|</span>
+    <span style="color: green;">✓ <%= AirtableSyncLog.successful.count %> success</span>
+    <span style="color: red;">✗ <%= AirtableSyncLog.failed.count %> failed</span>
+    <span style="color: orange;">⏳ <%= AirtableSyncLog.pending.count %> pending</span>
+  </div>
+
+  <% if @sync_logs.any? %>
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+      <thead>
+        <tr style="background: #1a1a2e; color: #eee; text-align: left;">
+          <th style="padding: 0.5rem; border: 1px solid #333;">ID</th>
+          <th style="padding: 0.5rem; border: 1px solid #333;">RSVP Email</th>
+          <th style="padding: 0.5rem; border: 1px solid #333;">Status</th>
+          <th style="padding: 0.5rem; border: 1px solid #333;">HTTP Code</th>
+          <th style="padding: 0.5rem; border: 1px solid #333;">Error</th>
+          <th style="padding: 0.5rem; border: 1px solid #333;">Synced At</th>
+          <th style="padding: 0.5rem; border: 1px solid #333;">Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @sync_logs.each do |log| %>
+          <tr style="border-bottom: 1px solid #333;">
+            <td style="padding: 0.5rem; border: 1px solid #333;"><%= log.id %></td>
+            <td style="padding: 0.5rem; border: 1px solid #333;"><%= log.rsvp_table&.email %></td>
+            <td style="padding: 0.5rem; border: 1px solid #333;">
+              <% case log.status %>
+              <% when "success" %>
+                <span style="color: green; font-weight: bold;">✓ success</span>
+              <% when "failed" %>
+                <span style="color: red; font-weight: bold;">✗ failed</span>
+              <% when "pending" %>
+                <span style="color: orange; font-weight: bold;">⏳ pending</span>
+              <% else %>
+                <%= log.status %>
+              <% end %>
+            </td>
+            <td style="padding: 0.5rem; border: 1px solid #333;"><%= log.response_code %></td>
+            <td style="padding: 0.5rem; border: 1px solid #333; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= log.error_message %>">
+              <%= log.error_message&.truncate(100) %>
+            </td>
+            <td style="padding: 0.5rem; border: 1px solid #333;"><%= log.synced_at&.strftime("%Y-%m-%d %H:%M:%S") %></td>
+            <td style="padding: 0.5rem; border: 1px solid #333;"><%= log.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% if @total_pages > 1 %>
+      <div style="margin-top: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+        <% if @page > 1 %>
+          <a href="<%= admin_airtable_index_path(page: @page - 1) %>" style="color: #0066ff;">&larr; Prev</a>
+        <% end %>
+        <span>Page <%= @page %> of <%= @total_pages %></span>
+        <% if @page < @total_pages %>
+          <a href="<%= admin_airtable_index_path(page: @page + 1) %>" style="color: #0066ff;">Next &rarr;</a>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <p style="color: #888; margin-top: 2rem;">No sync logs yet. Sync jobs will appear here after RSVPs are submitted.</p>
+  <% end %>
+</div>

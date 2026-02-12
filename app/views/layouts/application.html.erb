@@ -24,7 +24,7 @@
   </head>
 
   <body>
-    <header style="padding: 1rem; border-bottom: 1px solid #ccc; margin-bottom: 1rem;">
+    <header style="padding: 1rem; margin-bottom: 1rem;">
       <% if user_signed_in? %>
         <span style="<%= 'color: orange;' if admin? %>">Welcome, <%= current_user.name %>!</span>
         <%= link_to "Sign out", signout_path, method: :delete, data: { turbo_method: :delete } %>

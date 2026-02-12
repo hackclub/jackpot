@@ -17,6 +17,8 @@ margin: 0;
 padding:0;
 background-repeat: no-repeat;
 background-size: cover; /* Scales the image to cover the div */
+background-position: center;
+background-color: #000;
 }
 
 .main {
@@ -25,6 +27,22 @@ color: white;
 text-align: center;
 position: relative;
 min-height: 100vh;
+}
+
+@media (max-width: 600px) {
+  body {
+    background-size: 100% auto;
+    background-position: top center;
+    background-color: #000;
+  }
+  .hero-title {
+    top: 10vh !important;
+    width: 80vw !important;
+  }
+  .hero-center {
+    top: 25vh !important;
+    width: 90vw !important;
+  }
 }
 </style>
 

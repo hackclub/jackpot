@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_11_172614) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_12_164711) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "airtable_sync_logs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.text "response_body"
+    t.integer "response_code"
+    t.bigint "rsvp_table_id", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "synced_at"
+    t.datetime "updated_at", null: false
+    t.index ["rsvp_table_id"], name: "index_airtable_sync_logs_on_rsvp_table_id"
+  end
 
   create_table "blazer_audits", force: :cascade do |t|
     t.datetime "created_at"
@@ -107,4 +119,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_11_172614) do
     t.integer "role"
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "airtable_sync_logs", "rsvp_tables"
 end

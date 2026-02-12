@@ -3,6 +3,7 @@
   <button class="rsvp-button" onclick="document.getElementById('rsvp-overlay').classList.add('rsvp-modal--visible'); document.body.style.overflow='hidden';">
     <span class="rsvp-button__label">RSVP</span>
   </button>
+</div>
 
   <%# Modal Overlay %>
   <div id="rsvp-overlay" class="rsvp-modal" onclick="if(event.target===this){this.classList.remove('rsvp-modal--visible'); document.body.style.overflow='';}">
@@ -28,7 +29,6 @@
       </div>
     </div>
   </div>
-</div>
 
 <script>
   /**
@@ -69,7 +69,7 @@
       var data = await response.json();
 
       if (response.ok) {
-        showRsvpMessage("RSVP submitted! See you in Vegas.", false);
+        showRsvpMessage("RSVP submitted! See you in Vegas!", false);
         form.reset();
         setTimeout(function() {
           document.getElementById("rsvp-overlay").classList.remove("rsvp-modal--visible");
@@ -160,7 +160,8 @@
   justify-content: center;
   border: none;
   cursor: pointer;
-  padding: 32px 120px;
+  /* adjusted for smaller layout */
+  padding: 24px 80px;
   transition: transform 0.15s ease;
   background: #d9cbab;
   border-radius: 18px;
@@ -190,7 +191,7 @@
 }
 .rsvp-button__label {
   font-family: "Katibeh", serif;
-  font-size: 72px;
+  font-size: 56px;
   font-weight: 700;
   color: #5a1f16;
   font-style: italic;
@@ -230,7 +231,7 @@
 
 .rsvp-modal__close {
   position: absolute;
-  top: 4px;
+  top: 8px;
   right: 8px;
   background: none;
   border: none;
@@ -262,6 +263,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -270,12 +272,13 @@
   font-weight: 600;
   color: #5a1f16;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
 }
 .rsvp-modal__input {
-  flex: 1;
-  padding: 5px 8px;
+  width: 240px;
+  padding: 8px 12px;
   border: 1px solid #a08060;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.5);
@@ -321,5 +324,20 @@
 .rsvp-message--success {
   color: #2d5016;
   background: rgba(45, 80, 22, 0.1);
+}
+
+@media (max-width: 600px) {
+  .rsvp-button {
+    padding: 16px 40px;
+    width: 85vw;
+    box-sizing: border-box;
+  }
+  .rsvp-button__label {
+    font-size: 42px;
+    top: 8px;
+  }
+  #rsvp-container {
+    bottom: 20px;
+  }
 }
 </style>
