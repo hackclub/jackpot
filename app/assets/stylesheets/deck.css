@@ -188,13 +188,14 @@
   position: relative;
   display: flex;
   align-items: center;
-  max-width: 80vw;
+  overflow: visible;
 }
 
 .cards-track {
   display: flex;
   gap: 18px;
   align-items: center;
+  width: 618px;
   overflow-x: auto;
   scroll-behavior: smooth;
   padding: 20px 10px;
@@ -231,11 +232,11 @@
 }
 
 .scroll-arrow-left {
-  left: -24px;
+  left: -44px;
 }
 
 .scroll-arrow-right {
-  right: -24px;
+  right: -44px;
 }
 
 .card-slot {
