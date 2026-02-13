@@ -137,6 +137,9 @@ GEM
       logger
     faraday-net_http (3.4.2)
       net-http (~> 0.5)
+    faraday-net_http_persistent (2.3.1)
+      faraday (~> 2.5)
+      net-http-persistent (>= 4.0.4, < 5)
     ffi (1.17.3-aarch64-linux-gnu)
     ffi (1.17.3-aarch64-linux-musl)
     ffi (1.17.3-arm-linux-gnu)
@@ -230,6 +233,8 @@ GEM
       bigdecimal (>= 3.1, < 5)
     net-http (0.9.1)
       uri (>= 0.11.1)
+    net-http-persistent (4.0.8)
+      connection_pool (>= 2.2.4, < 4)
     net-imap (0.6.2)
       date
       net-protocol
@@ -259,6 +264,10 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.0-x86_64-linux-musl)
       racc (~> 1.4)
+    norairrecord (0.5.1)
+      faraday (>= 1.0, < 3.0)
+      faraday-net_http_persistent
+      net-http-persistent
     oauth2 (2.0.18)
       faraday (>= 0.17.3, < 4.0)
       jwt (>= 1.0, < 4.0)
@@ -488,6 +497,7 @@ DEPENDENCIES
   capybara
   debug
   dotenv-rails
+  faraday-net_http_persistent (~> 2.0)
   flipper
   flipper-active_record
   flipper-ui
@@ -497,6 +507,7 @@ DEPENDENCIES
   kamal
   lockbox
   mission_control-jobs
+  norairrecord
   omniauth
   omniauth-hack_club!
   omniauth-rails_csrf_protection
@@ -518,4 +529,4 @@ DEPENDENCIES
   web-console
 
 BUNDLED WITH
-   2.6.9
+   2.6.7

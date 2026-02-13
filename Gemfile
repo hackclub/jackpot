@@ -81,3 +81,5 @@ end
 gem "omniauth"
 gem "omniauth-hack_club", github: "hackclub/omniauth-hack_club"
 gem "omniauth-rails_csrf_protection"
+gem "norairrecord"
+gem "faraday-net_http_persistent", "~> 2.0"
