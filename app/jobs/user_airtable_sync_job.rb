@@ -49,10 +49,10 @@ class UserAirtableSyncJob < ApplicationJob
     uri = URI("https://api.airtable.com/v0/#{base_id}/#{table_id}")
 
     fields = {
-      "Name" => user.name,
+      "Name" => user.display_name,
       "Email" => user.email,
       "chip_am" => user.chip_am.to_f,
-      "projects" => user.projects.to_s 
+      "Projects" => user.projects.to_s 
     }
 
     body = { fields: fields }.to_json
@@ -62,11 +62,6 @@ class UserAirtableSyncJob < ApplicationJob
     request["Content-Type"] = "application/json"
     request.body = body
 
-    Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 10) do |http|
-      http.request(request)
-    end
-    request.body = body
-
     response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 10) do |http|
       http.request(request)
     end
@@ -74,5 +69,7 @@ class UserAirtableSyncJob < ApplicationJob
     unless response.code.to_i.between?(200, 299)
       raise "Airtable API Error: #{response.code} - #{response.body}"
     end
+
+    response
   end
 end
