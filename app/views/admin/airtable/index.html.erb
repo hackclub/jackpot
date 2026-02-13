@@ -10,6 +10,9 @@
     <span style="color: green;">✓ <%= AirtableSyncLog.successful.count %> success</span>
     <span style="color: red;">✗ <%= AirtableSyncLog.failed.count %> failed</span>
     <span style="color: orange;">⏳ <%= AirtableSyncLog.pending.count %> pending</span>
+    <br style="margin: 0.5rem 0;">
+    <span style="color: blue;"><%= AirtableSyncLog.for_rsvps.count %> RSVPs</span>
+    <span style="color: purple;"><%= AirtableSyncLog.for_users.count %> Users</span>
   </div>
 
   <% if @sync_logs.any? %>
@@ -17,7 +20,8 @@
       <thead>
         <tr style="background: #1a1a2e; color: #eee; text-align: left;">
           <th style="padding: 0.5rem; border: 1px solid #333;">ID</th>
-          <th style="padding: 0.5rem; border: 1px solid #333;">RSVP Email</th>
+          <th style="padding: 0.5rem; border: 1px solid #333;">Type</th>
+          <th style="padding: 0.5rem; border: 1px solid #333;">Email/Name</th>
           <th style="padding: 0.5rem; border: 1px solid #333;">Status</th>
           <th style="padding: 0.5rem; border: 1px solid #333;">HTTP Code</th>
           <th style="padding: 0.5rem; border: 1px solid #333;">Error</th>
@@ -29,7 +33,24 @@
         <% @sync_logs.each do |log| %>
           <tr style="border-bottom: 1px solid #333;">
             <td style="padding: 0.5rem; border: 1px solid #333;"><%= log.id %></td>
-            <td style="padding: 0.5rem; border: 1px solid #333;"><%= log.rsvp_table&.email %></td>
+            <td style="padding: 0.5rem; border: 1px solid #333;">
+              <% if log.syncable_type == "RsvpTable" %>
+                <span style="color: #007BFF;">RSVP</span>
+              <% elsif log.syncable_type == "User" %>
+                <span style="color: #6F42C1;">User</span>
+              <% else %>
+                <%= log.syncable_type %>
+              <% end %>
+            </td>
+            <td style="padding: 0.5rem; border: 1px solid #333;">
+              <% if log.syncable_type == "RsvpTable" %>
+                <%= log.syncable&.email %>
+              <% elsif log.syncable_type == "User" %>
+                <%= log.syncable&.name || log.syncable&.email %>
+              <% else %>
+                N/A
+              <% end %>
+            </td>
             <td style="padding: 0.5rem; border: 1px solid #333;">
               <% case log.status %>
               <% when "success" %>

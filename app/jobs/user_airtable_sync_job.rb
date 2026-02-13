@@ -13,10 +13,22 @@ class UserAirtableSyncJob < ApplicationJob
     user = User.find_by(id: user_id)
     return unless user
 
+    sync_log = AirtableSyncLog.create!(syncable: user, status: "pending")
+
     begin
-      send_to_airtable(user)
+      response = send_to_airtable(user)
+
+      sync_log.update!(
+        status: response.code.to_i.between?(200, 299) ? "success" : "failed",
+        response_code: response.code.to_i,
+        response_body: response.body.truncate(5000),
+        synced_at: Time.current
+      )
     rescue StandardError => e
-      Rails.logger.error "Airtable User Sync Failed for User #{user_id}: #{e.message}"
+      sync_log.update!(
+        status: "failed",
+        error_message: "#{e.class}: #{e.message}".truncate(5000)
+      )
       raise
     end
   end
@@ -48,6 +60,11 @@ class UserAirtableSyncJob < ApplicationJob
     request = Net::HTTP::Post.new(uri)
     request["Authorization"] = "Bearer #{token}"
     request["Content-Type"] = "application/json"
+    request.body = body
+
+    Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 10) do |http|
+      http.request(request)
+    end
     request.body = body
 
     response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 10) do |http|

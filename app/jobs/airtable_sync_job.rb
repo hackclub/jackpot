@@ -13,7 +13,7 @@ class AirtableSyncJob < ApplicationJob
     rsvp = RsvpTable.find_by(id: rsvp_id)
     return unless rsvp
 
-    sync_log = AirtableSyncLog.create!(rsvp_table: rsvp, status: "pending")
+    sync_log = AirtableSyncLog.create!(syncable: rsvp, status: "pending")
 
     begin
       response = send_to_airtable(rsvp)

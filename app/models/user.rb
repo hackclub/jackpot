@@ -2,6 +2,7 @@
 
 class User < ApplicationRecord
   has_encrypted :access_token
+  has_many :airtable_sync_logs, as: :syncable, dependent: :destroy
 
   enum :role, { user: 0, admin: 1 }, prefix: true
 

@@ -8,7 +8,7 @@ class Admin::AirtableController < ApplicationController
 
   def index
     @page = [ params.fetch(:page, 1).to_i, 1 ].max
-    @sync_logs = AirtableSyncLog.includes(:rsvp_table)
+    @sync_logs = AirtableSyncLog.includes(:syncable)
                                 .recent
                                 .limit(PER_PAGE)
                                 .offset((@page - 1) * PER_PAGE)
