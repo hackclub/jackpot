@@ -28,7 +28,6 @@ Rails.application.routes.draw do
 
   namespace :admin do
     constraints AdminConstraint do
-      resources :airtable, only: [:index]
       mount Blazer::Engine => "/blazer"
       mount Flipper::UI.app(Flipper) => "/flipper"
       mount MissionControl::Jobs::Engine => "/jobs"

@@ -11,7 +11,6 @@ class DeckController < ApplicationController
     project_number = projects.size + 1
     projects << { "name" => "Project #{project_number}", "created_at" => Time.current.iso8601 }
     current_user.update!(projects: projects)
-    UserAirtableSyncJob.perform_later(current_user.id)
     redirect_to deck_path
   end
 

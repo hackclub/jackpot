@@ -2,8 +2,6 @@
 
 class User < ApplicationRecord
   has_encrypted :access_token
-  has_many :airtable_sync_logs, as: :syncable, dependent: :destroy
-
   enum :role, { user: 0, admin: 1 }, prefix: true
 
   validates :hack_club_id, presence: true, uniqueness: true
@@ -33,12 +31,7 @@ class User < ApplicationRecord
     end
 
     user.role ||= :user
-    if user.new_record?
-      user.save!
-      UserAirtableSyncJob.perform_later(user.id)
-    else
-      user.save!
-    end
+    user.save!
     user
   end
 
