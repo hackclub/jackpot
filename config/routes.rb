@@ -18,8 +18,8 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "sessions#failure"
   delete "/signout", to: "sessions#destroy", as: :signout
 
-  get "/dash", to: "home#dash", as: :dash
-  get "/admin", to: "admin#index"
+  get "/deck", to: "deck#index", as: :deck
+  get "/admin", to: "admin#index", as: :admin
 
   namespace :admin do
     constraints AdminConstraint do

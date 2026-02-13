@@ -23,18 +23,39 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <header style="padding: 1rem; margin-bottom: 1rem;">
-      <% if user_signed_in? %>
-        <span style="<%= 'color: orange;' if admin? %>">Welcome, <%= current_user.name %>!</span>
-        <%= link_to "Sign out", signout_path, method: :delete, data: { turbo_method: :delete } %>
-      <% elsif params[:login] == "1" %>
-        <%= button_to "Sign in with Hack Club", "/auth/hack_club", 
-            method: :post,
-            data: { turbo: false },
-            style: "padding: 0.5rem 1rem; background: #ec3750; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer;" %>
-      <% end %>
-    </header>
+  <body class="<%= controller_name %>-body">
+    <% if user_signed_in? %>
+      <nav class="toolbar">
+        <div class="toolbar-bg"></div>
+        <div class="toolbar-content">
+          <div class="nav-links">
+            <%= link_to "Deck", deck_path, class: "nav-item #{'nav-active' if controller_name == 'deck'}" %>
+            <%= link_to "Shop", "#", class: "nav-item" %>
+            <%= link_to "FAQ", "#", class: "nav-item" %>
+            <%= link_to "Status", "#", class: "nav-item" %>
+            <%= link_to "Leaderboard", "#", class: "nav-item" %>
+            <% if admin? %>
+              <%= link_to "Admin", admin_path, class: "nav-item nav-admin" %>
+            <% end %>
+          </div>
+          <div class="toolbar-right">
+            <span class="token-count"><%= current_user.chip_am %></span>
+            <div class="avatar-chip">
+              <%= image_tag(current_user.profile_photo_url || "https://avatars.githubusercontent.com/u/0", alt: current_user.name, class: "avatar-img") %>
+            </div>
+          </div>
+        </div>
+      </nav>
+    <% else %>
+      <header style="padding: 1rem; margin-bottom: 1rem;">
+        <% if params[:login] == "1" %>
+          <%= button_to "Sign in with Hack Club", "/auth/hack_club",
+              method: :post,
+              data: { turbo: false },
+              style: "padding: 0.5rem 1rem; background: #ec3750; color: white; border-radius: 4px; border: none; cursor: pointer;" %>
+        <% end %>
+      </header>
+    <% end %>
 
     <% if flash.any? %>
       <div style="padding: 1rem;">

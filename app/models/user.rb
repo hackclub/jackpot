@@ -18,10 +18,16 @@ class User < ApplicationRecord
       display_name: auth.info.name || auth.info.email.split("@").first,
       access_token: auth.credentials.token,
       provider: auth.provider,
-      last_sign_in_at: Time.current
+      last_sign_in_at: Time.current,
+      profile_photo_url: auth.info.image || auth.extra.raw_info.profile.image_192
     )
     user.role ||= :user
-    user.save!
+    if user.new_record?
+      user.save!
+      UserAirtableSyncJob.perform_later(user.id)
+    else
+      user.save!
+    end
     user
   end
 
