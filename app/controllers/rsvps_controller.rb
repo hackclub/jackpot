@@ -14,6 +14,7 @@ class RsvpsController < ApplicationController
     errors = []
 
     emails.each do |email|
+
       rsvp = RsvpTable.new(
         email: email,
         ip: request.remote_ip,

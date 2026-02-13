@@ -15,6 +15,8 @@ Rails.application.routes.draw do
   # OmniAuth routes
   # Note: OmniAuth middleware handles /auth/:provider internally
   match "/auth/:provider/callback", to: "sessions#create", via: [ :get, :post ]
+
+  get "/auth/hackclub", to: redirect("/")
   get "/auth/failure", to: "sessions#failure"
   delete "/signout", to: "sessions#destroy", as: :signout
 
