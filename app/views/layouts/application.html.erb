@@ -40,8 +40,16 @@
           </div>
           <div class="toolbar-right">
             <span class="token-count"><%= current_user.chip_am %></span>
-            <div class="avatar-chip">
-              <%= image_tag(current_user.profile_photo_url || "https://avatars.githubusercontent.com/u/0", alt: current_user.name, class: "avatar-img") %>
+            <div class="avatar-chip-wrapper">
+              <button class="avatar-chip-btn" id="profileDropdownBtn" type="button">
+                <div class="avatar-chip">
+                  <%= image_tag(current_user.profile_photo_url || "https://avatars.githubusercontent.com/u/0", alt: current_user.name, class: "avatar-img") %>
+                  <div class="avatar-frame"></div>
+                </div>
+              </button>
+              <div class="profile-dropdown" id="profileDropdown" style="display: none;">
+                <%= link_to "Sign Out", signout_path, method: :delete, data: { turbo_method: :delete }, class: "dropdown-item" %>
+              </div>
             </div>
           </div>
         </div>
@@ -68,5 +76,21 @@
     <% end %>
 
     <%= yield %>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('profileDropdownBtn');
+        const dropdown = document.getElementById('profileDropdown');
+        if (btn && dropdown) {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+          });
+          document.addEventListener('click', function() {
+            dropdown.style.display = 'none';
+          });
+        }
+      });
+    </script>
   </body>
 </html>

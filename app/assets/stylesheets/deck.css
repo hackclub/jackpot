@@ -69,20 +69,83 @@
   text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.7);
 }
 
+.avatar-chip-wrapper {
+  position: relative;
+}
+
+.avatar-chip-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: block;
+}
+
 .avatar-chip {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid #8b0000;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
-  background: #333;
+  position: relative;
+  overflow: visible;
 }
 
 .avatar-img {
-  width: 100%;
-  height: 100%;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   object-fit: cover;
+  display: block;
+}
+
+.avatar-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -50%);
+  background-image: url('pfp_icon.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.avatar-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: rgba(30, 20, 10, 0.95);
+  border: 2px solid #8b6914;
+  border-radius: 6px;
+  min-width: 140px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  z-index: 1001;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 10px 16px;
+  color: #f0e6d2;
+  text-decoration: none;
+  font-family: 'Georgia', serif;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+  background: rgba(139, 105, 20, 0.3);
+  color: #fff;
 }
 
 .deck-body {
@@ -132,7 +195,6 @@
   background-image: url('proj_card.png');
   background-size: cover;
   background-position: center;
-  border: 3px solid #5c4033;
   border-radius: 6px;
   display: flex;
   align-items: center;
