@@ -3,7 +3,7 @@
 class Airtable::UserSyncJob < Airtable::BaseSyncJob
   # @return [String] Airtable table name
   def table_name
-    ENV.fetch("AIRTABLE_USERS_TABLE", "Users")
+    ENV.fetch("AIRTABLE_USERS_TABLE", "_users")
   end
 
   # @return [ActiveRecord::Relation] all User records

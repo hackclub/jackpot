@@ -72,7 +72,7 @@ class Airtable::BaseSyncJob < ApplicationJob
   end
 
   def sync_limit
-    10
+    50
   end
 
   def null_sync_limit

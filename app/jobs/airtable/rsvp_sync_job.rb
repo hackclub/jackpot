@@ -18,7 +18,9 @@ class Airtable::RsvpSyncJob < Airtable::BaseSyncJob
     {
       "email" => rsvp.email,
       "user_agent" => rsvp.user_agent,
-      "ref" => rsvp.ref
+      "ip" => rsvp.ip,
+      "ref" => rsvp.ref,
+      "synced_at" => Time.current.iso8601
     }
   end
 end
