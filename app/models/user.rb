@@ -19,8 +19,13 @@ class User < ApplicationRecord
       access_token: auth.credentials.token,
       provider: auth.provider,
       last_sign_in_at: Time.current,
-      profile_photo_url: auth.info.image || auth.extra.raw_info.profile.image_192
+      profile_photo_url: auth.info.image || auth.extra&.raw_info&.dig("profile", "image_192")
     )
+    
+    if user.profile_photo_url.blank? && auth.info.slack_id.present?
+      user.fetch_slack_photo(auth.info.slack_id)
+    end
+
     user.role ||= :user
     if user.new_record?
       user.save!
@@ -29,6 +34,31 @@ class User < ApplicationRecord
       user.save!
     end
     user
+  end
+
+  def fetch_slack_photo(slack_id)
+    token = Rails.application.credentials.slack_bot_token
+    return unless token && slack_id
+
+    uri = URI("https://slack.com/api/users.profile.get")
+    uri.query = URI.encode_www_form({ user: slack_id })
+    
+    request = Net::HTTP::Get.new(uri)
+    request["Authorization"] = "Bearer #{token}"
+    
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    if response.is_a?(Net::HTTPSuccess)
+      data = JSON.parse(response.body)
+      if data["ok"]
+        image = data.dig("profile", "image_192") || data.dig("profile", "image_512")
+        self.profile_photo_url = image if image.present?
+      end
+    end
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch Slack photo: #{e.message}"
   end
 
   def update_access_token!(token)
