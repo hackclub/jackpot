@@ -22,7 +22,6 @@ class RsvpsController < ApplicationController
       )
 
       if rsvp.save
-        AirtableSyncJob.perform_later(rsvp.id)
         created << rsvp
       else
         errors << { email: email, errors: rsvp.errors.full_messages }
