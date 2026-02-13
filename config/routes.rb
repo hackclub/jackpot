@@ -19,6 +19,9 @@ Rails.application.routes.draw do
   delete "/signout", to: "sessions#destroy", as: :signout
 
   get "/deck", to: "deck#index", as: :deck
+  post "/deck/add_project", to: "deck#add_project", as: :add_project
+  post "/deck/complete_tutorial", to: "deck#complete_tutorial", as: :complete_tutorial
+  get "/leaderboard", to: "leaderboard#index", as: :leaderboard
   get "/admin", to: "admin#index", as: :admin
 
   namespace :admin do

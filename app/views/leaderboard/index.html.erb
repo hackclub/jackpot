@@ -1,0 +1,67 @@
+<% content_for(:title) { "Leaderboard" } %>
+
+<div class="leaderboard-page">
+  <div class="leaderboard-container">
+    <h1 class="leaderboard-title">Leaderboard</h1>
+
+    <% if @users.any? %>
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th class="col-rank">#</th>
+            <th class="col-player">Player</th>
+            <th class="col-chips">Chips</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @users.each_with_index do |user, i| %>
+            <% rank = (@page - 1) * LeaderboardController::PER_PAGE + i + 1 %>
+            <tr class="<%= 'highlight-row' if user.id == current_user.id %> <%= 'top-3' if rank <= 3 %>">
+              <td class="col-rank">
+                <% if rank == 1 %>
+                  <span class="rank-medal">🥇</span>
+                <% elsif rank == 2 %>
+                  <span class="rank-medal">🥈</span>
+                <% elsif rank == 3 %>
+                  <span class="rank-medal">🥉</span>
+                <% else %>
+                  <span class="rank-number"><%= rank %></span>
+                <% end %>
+              </td>
+              <td class="col-player">
+                <div class="player-info">
+                  <%= image_tag(user.profile_photo_url || "https://avatars.githubusercontent.com/u/0", class: "player-avatar", alt: user.leaderboard_name) %>
+                  <span class="player-name"><%= user.leaderboard_name %></span>
+                  <% if user.id == current_user.id %>
+                    <span class="you-badge">YOU</span>
+                  <% end %>
+                </div>
+              </td>
+              <td class="col-chips">
+                <span class="chip-count"><%= user.chip_am.to_f %></span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <% if @total_pages > 1 %>
+        <div class="pagination">
+          <% if @page > 1 %>
+            <%= link_to "← Prev", leaderboard_path(page: @page - 1), class: "page-link" %>
+          <% end %>
+
+          <span class="page-info">Page <%= @page %> of <%= @total_pages %></span>
+
+          <% if @page < @total_pages %>
+            <%= link_to "Next →", leaderboard_path(page: @page + 1), class: "page-link" %>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="empty-state">
+        <p>No players yet. Be the first!</p>
+      </div>
+    <% end %>
+  </div>
+</div>

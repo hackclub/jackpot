@@ -48,11 +48,17 @@ class UserAirtableSyncJob < ApplicationJob
 
     uri = URI("https://api.airtable.com/v0/#{base_id}/#{table_id}")
 
+    projects_text = if user.projects.present?
+                      user.projects.map { |p| p["name"] || "Unnamed Project" }.join(", ")
+                    else
+                      "No projects yet"
+                    end
+
     fields = {
       "Name" => user.display_name,
       "Email" => user.email,
       "chip_am" => user.chip_am.to_f,
-      "Projects" => user.projects.to_s 
+      "Projects" => projects_text
     }
 
     body = { fields: fields }.to_json

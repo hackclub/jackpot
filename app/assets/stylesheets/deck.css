@@ -184,12 +184,62 @@
   box-sizing: border-box;
 }
 
-.card-slots {
+.cards-viewport {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 80vw;
+}
+
+.cards-track {
   display: flex;
   gap: 18px;
+  align-items: center;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 20px 10px;
+  scrollbar-width: none;
+}
+
+.cards-track::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: rgba(30, 20, 10, 0.85);
+  color: #f0e6d2;
+  border: 2px solid #8b6914;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.scroll-arrow:hover {
+  background: rgba(139, 105, 20, 0.6);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.scroll-arrow-left {
+  left: -24px;
+}
+
+.scroll-arrow-right {
+  right: -24px;
 }
 
 .card-slot {
+  flex-shrink: 0;
   width: 120px;
   height: 175px;
   background-image: url('proj_card.png');
@@ -208,6 +258,16 @@
     inset 0 0 0 8px rgba(92, 64, 51, 0.08),
     2px 4px 8px rgba(0, 0, 0, 0.3);
   position: relative;
+  cursor: pointer;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.card-slot:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 0 0 0 4px rgba(92, 64, 51, 0.15),
+    inset 0 0 0 8px rgba(92, 64, 51, 0.08),
+    2px 8px 16px rgba(0, 0, 0, 0.45);
 }
 
 .card-slot::before {
@@ -217,4 +277,108 @@
   border: 1.5px solid rgba(92, 64, 51, 0.25);
   border-radius: 3px;
   pointer-events: none;
+}
+
+.add-project-btn {
+  flex-shrink: 0;
+  width: 50px;
+  height: 175px;
+  background: rgba(30, 20, 10, 0.35);
+  border: 2.5px dashed rgba(139, 105, 20, 0.6);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.add-project-btn:hover {
+  background: rgba(139, 105, 20, 0.25);
+  border-color: #d4a017;
+  transform: scale(1.05);
+}
+
+.add-icon {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #d4a017;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.tutorial-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.tutorial-spotlight {
+  position: absolute;
+  z-index: 2;
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  background: transparent;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.tutorial-active .card-slot[data-index="0"] {
+  position: relative;
+  z-index: 2001;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.tutorial-tooltip {
+  position: absolute;
+  z-index: 2002;
+  transform: translate(-50%, -100%);
+  text-align: center;
+  pointer-events: none;
+  animation: tutorialBounce 1.5s ease-in-out infinite;
+}
+
+.tutorial-text {
+  background: linear-gradient(135deg, #d4a017 0%, #8b6914 100%);
+  color: #fff;
+  font-family: 'Georgia', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 14px 24px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  margin: 0;
+}
+
+.tutorial-arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid #8b6914;
+  margin: 0 auto;
+}
+
+@keyframes tutorialBounce {
+  0%, 100% { transform: translate(-50%, -100%); }
+  50% { transform: translate(-50%, calc(-100% - 10px)); }
+}
+
+.tutorial-fade-out {
+  animation: tutorialFadeOut 0.4s ease forwards;
+}
+
+@keyframes tutorialFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }

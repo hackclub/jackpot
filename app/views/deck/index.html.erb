@@ -1,12 +1,134 @@
 <% content_for(:title) { "Deck (My Project)" } %>
 
-<div class="deck-page">
+<div class="deck-page <%= 'tutorial-active' if @show_tutorial %>">
   <div class="deck-table">
-    <div class="card-slots">
-      <div class="card-slot"><span>Project 1</span></div>
-      <div class="card-slot"><span>Project 2</span></div>
-      <div class="card-slot"><span>Project 3</span></div>
-      <div class="card-slot"><span>Project 4</span></div>
+    <div class="cards-viewport">
+      <% if @projects.size > 4 %>
+        <button class="scroll-arrow scroll-arrow-left" id="scrollLeft" style="display: none;">&#9664;</button>
+      <% end %>
+
+      <div class="cards-track" id="cardsTrack">
+        <% if @projects.empty? %>
+          <div class="card-slot" id="projectCard0" data-index="0">
+            <span>Project 1</span>
+          </div>
+        <% else %>
+          <% @projects.each_with_index do |project, i| %>
+            <div class="card-slot" data-index="<%= i %>">
+              <span><%= project["name"] || "Project #{i + 1}" %></span>
+            </div>
+          <% end %>
+        <% end %>
+
+        <button class="add-project-btn" id="addProjectBtn" title="Add new project">
+          <span class="add-icon">+</span>
+        </button>
+      </div>
+
+      <% if @projects.size > 4 %>
+        <button class="scroll-arrow scroll-arrow-right" id="scrollRight">&#9654;</button>
+      <% end %>
     </div>
   </div>
 </div>
+
+<% if @show_tutorial %>
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-dim" id="tutorialDim"></div>
+  <div class="tutorial-spotlight" id="tutorialSpotlight"></div>
+  <div class="tutorial-tooltip" id="tutorialTooltip">
+    <p class="tutorial-text">Click here to start your first project!</p>
+    <div class="tutorial-arrow-down"></div>
+  </div>
+</div>
+<% end %>
+
+<%= form_with url: add_project_path, method: :post, id: "addProjectForm", local: true, style: "display:none;" do %>
+<% end %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const track = document.getElementById('cardsTrack');
+  const leftBtn = document.getElementById('scrollLeft');
+  const rightBtn = document.getElementById('scrollRight');
+
+  if (track && leftBtn && rightBtn) {
+    const scrollAmount = 150;
+
+    function updateArrows() {
+      leftBtn.style.display = track.scrollLeft > 0 ? 'flex' : 'none';
+      rightBtn.style.display = (track.scrollLeft + track.clientWidth) < track.scrollWidth - 5 ? 'flex' : 'none';
+    }
+
+    leftBtn.addEventListener('click', function() {
+      track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+
+    rightBtn.addEventListener('click', function() {
+      track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+
+    track.addEventListener('scroll', updateArrows);
+    window.addEventListener('resize', updateArrows);
+    setTimeout(updateArrows, 100);
+  }
+
+  // --- Add project button ---
+  const addBtn = document.getElementById('addProjectBtn');
+  const addForm = document.getElementById('addProjectForm');
+  if (addBtn && addForm) {
+    addBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      addForm.submit();
+    });
+  }
+
+  // --- Tutorial logic ---
+  const overlay = document.getElementById('tutorialOverlay');
+  if (!overlay) {
+    // Tutorial already completed, nothing more to do
+    return;
+  }
+
+  const spotlight = document.getElementById('tutorialSpotlight');
+  const tooltip = document.getElementById('tutorialTooltip');
+  const targetCard = document.querySelector('.card-slot[data-index="0"]');
+
+  if (!targetCard) return;
+
+  function positionTutorial() {
+    const rect = targetCard.getBoundingClientRect();
+    const pad = 16;
+
+    spotlight.style.left = (rect.left - pad) + 'px';
+    spotlight.style.top = (rect.top - pad) + 'px';
+    spotlight.style.width = (rect.width + pad * 2) + 'px';
+    spotlight.style.height = (rect.height + pad * 2) + 'px';
+
+    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+    tooltip.style.top = (rect.top - pad - 16) + 'px';
+  }
+
+  positionTutorial();
+  window.addEventListener('resize', positionTutorial);
+
+  targetCard.addEventListener('click', function handleTutorialClick(e) {
+    overlay.classList.add('tutorial-fade-out');
+    document.querySelector('.deck-page').classList.remove('tutorial-active');
+    setTimeout(function() {
+      overlay.remove();
+    }, 400);
+
+    fetch('<%= complete_tutorial_path %>', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    targetCard.removeEventListener('click', handleTutorialClick);
+  });
+});
+</script>

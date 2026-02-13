@@ -27,6 +27,11 @@ class User < ApplicationRecord
       user.fetch_slack_photo(auth.info.slack_id)
     end
 
+    slack_id = auth.info.slack_id
+    if user.slack_username.blank? && slack_id.present?
+      user.fetch_slack_username(slack_id)
+    end
+
     user.role ||= :user
     if user.new_record?
       user.save!
@@ -64,6 +69,41 @@ class User < ApplicationRecord
 
   def update_access_token!(token)
     update!(access_token: token, last_sign_in_at: Time.current)
+  end
+
+  def fetch_slack_username(slack_id)
+    token = Rails.application.credentials.slack_bot_token
+    return unless token && slack_id
+
+    uri = URI("https://slack.com/api/users.profile.get")
+    uri.query = URI.encode_www_form({ user: slack_id })
+
+    request = Net::HTTP::Get.new(uri)
+    request["Authorization"] = "Bearer #{token}"
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    if response.is_a?(Net::HTTPSuccess)
+      data = JSON.parse(response.body)
+      Rails.logger.info "Slack API Response: #{data.inspect}"
+      if data["ok"] && data["profile"]
+        username = data.dig("profile", "display_name").presence ||
+                   data.dig("profile", "real_name").presence ||
+                   data.dig("profile", "display_name_normalized")
+        self.slack_username = username
+        Rails.logger.info "Set slack_username to: #{username}"
+      else
+        Rails.logger.warn "Slack API returned ok=false: #{data['error']}"
+      end
+    end
+  rescue StandardError => e
+    Rails.logger.error "Failed to fetch Slack username: #{e.message}"
+  end
+
+  def leaderboard_name
+    slack_username.presence || display_name.presence || email.split("@").first
   end
 
   def name

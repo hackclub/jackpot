@@ -1,0 +1,213 @@
+.leaderboard-body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.leaderboard-page {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow-y: auto;
+}
+
+.leaderboard-page::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100vh;
+  height: 100vw;
+  transform: translate(-50%, -50%) rotate(270deg);
+  background-image: url('home-bg.jpg');
+  background-size: 100% 100%;
+  background-position: center;
+  z-index: -1;
+}
+
+.leaderboard-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 100px 24px 60px;
+}
+
+.leaderboard-title {
+  font-family: 'Georgia', serif;
+  font-size: 2.2rem;
+  color: #f0e6d2;
+  text-shadow: 2px 3px 6px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  margin: 0 0 4px;
+}
+
+.leaderboard-subtitle {
+  font-family: 'Georgia', serif;
+  font-size: 1rem;
+  color: #c4b89a;
+  text-align: center;
+  margin: 0 0 28px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Table --- */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+
+.leaderboard-table thead tr {
+  background: none;
+}
+
+.leaderboard-table th {
+  font-family: 'Georgia', serif;
+  font-size: 0.85rem;
+  color: #a89878;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  text-align: left;
+  border: none;
+}
+
+.leaderboard-table th.col-rank {
+  width: 50px;
+  text-align: center;
+}
+
+.leaderboard-table th.col-chips {
+  text-align: right;
+  width: 100px;
+}
+
+.leaderboard-table tbody tr {
+  background: rgba(30, 20, 10, 0.6);
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.leaderboard-table tbody tr:hover {
+  background: rgba(50, 35, 15, 0.75);
+}
+
+.leaderboard-table tbody tr.highlight-row {
+  background: rgba(139, 105, 20, 0.35);
+  box-shadow: inset 0 0 0 2px rgba(212, 160, 23, 0.4);
+}
+
+.leaderboard-table tbody tr.top-3 {
+  background: rgba(40, 28, 10, 0.75);
+}
+
+.leaderboard-table td {
+  padding: 12px;
+  border: none;
+  color: #f0e6d2;
+  font-family: 'Georgia', serif;
+}
+
+.leaderboard-table td:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.leaderboard-table td:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.col-rank {
+  text-align: center;
+}
+
+.rank-medal {
+  font-size: 1.5rem;
+}
+
+.rank-number {
+  font-size: 1.1rem;
+  color: #a89878;
+  font-weight: 700;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(139, 105, 20, 0.5);
+}
+
+.player-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f0e6d2;
+}
+
+.you-badge {
+  background: #d4a017;
+  color: #1a1a2e;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.col-chips {
+  text-align: right;
+}
+
+.chip-count {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #d4a017;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.page-link {
+  color: #d4a017;
+  text-decoration: none;
+  font-family: 'Georgia', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 2px solid rgba(139, 105, 20, 0.5);
+  border-radius: 6px;
+  background: rgba(30, 20, 10, 0.6);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.page-link:hover {
+  background: rgba(139, 105, 20, 0.3);
+  border-color: #d4a017;
+  color: #fff;
+}
+
+.page-info {
+  color: #a89878;
+  font-family: 'Georgia', serif;
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #a89878;
+  font-family: 'Georgia', serif;
+  font-size: 1.1rem;
+}

@@ -31,7 +31,7 @@
             <%= link_to "Shop", "#", class: "nav-item" %>
             <%= link_to "FAQ", "#", class: "nav-item" %>
             <%= link_to "Status", "#", class: "nav-item" %>
-            <%= link_to "Leaderboard", "#", class: "nav-item" %>
+            <%= link_to "Leaderboard", leaderboard_path, class: "nav-item #{'nav-active' if controller_name == 'leaderboard'}" %>
             <% if admin? %>
               <%= link_to "Admin", admin_path, class: "nav-item nav-admin" %>
             <% end %>
