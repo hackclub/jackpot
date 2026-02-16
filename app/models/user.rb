@@ -99,6 +99,18 @@ class User < ApplicationRecord
     slack_username.presence || display_name.presence || email.split("@").first
   end
 
+  def eligible_hackatime_projects
+    return [] unless hack_club_id
+
+    service = HackatimeService.new
+    start_date = Date.new(2026, 2, 14)
+    
+    projects_data = service.get_user_project_stats(hack_club_id, start_date: start_date)
+    return [] unless projects_data
+
+    projects_data.select { |p| (p["total_seconds"] || 0) > 0 }
+  end
+
   def name
     display_name.presence || email
   end
