@@ -18,9 +18,6 @@ class AdminController < ApplicationController
     @all_users.each do |user|
       projects = user.projects || []
       projects.each_with_index do |project, index|
-        # Skip nil projects
-        next if project.nil?
-        
         # Calculate hours (same as deck_controller)
         total_hours = calculate_project_hours(user, project, index, service, start_date)
         journal_entries = user.journal_entries.for_project(index)
@@ -50,12 +47,18 @@ class AdminController < ApplicationController
     
     if hackatime_id && project["hackatime_projects"]
       linked = project["hackatime_projects"] || []
+      Rails.logger.info("AdminController#calculate_project_hours: user=#{user.id}, hackatime_id=#{hackatime_id}, projects=#{linked.inspect}")
       hackatime_hours = linked.sum do |hp_name|
-        service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
+        hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
+        Rails.logger.info("  #{hp_name}: #{hours}h")
+        hours
       end
+    else
+      Rails.logger.warn("AdminController#calculate_project_hours: no hackatime_id or hackatime_projects for user #{user.id}, slack_id=#{user.slack_id}, hack_club_id=#{user.hack_club_id}")
     end
     
     journal_hours = user.journal_entries.for_project(project_index).sum(:hours_worked).to_f
+    Rails.logger.info("  total: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{hackatime_hours + journal_hours}h")
     hackatime_hours + journal_hours
   end
 

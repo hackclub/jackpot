@@ -9,15 +9,19 @@ class DeckController < ApplicationController
     service = HackatimeService.new
     start_date = Date.new(2026, 2, 14)
     hackatime_id = current_user.slack_id || current_user.hack_club_id
+    Rails.logger.info("DeckController#index: user=#{current_user.id}, slack_id=#{current_user.slack_id}, hack_club_id=#{current_user.hack_club_id}, hackatime_id=#{hackatime_id}")
 
      @projects = projects.map.with_index do |project, index|
        linked = project["hackatime_projects"] || []
        hackatime_hours = linked.sum do |hp_name|
-         service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
+         hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
+         Rails.logger.info("  project[#{index}] #{hp_name}: #{hours}h from hackatime")
+         hours
        end
 
        journal_hours = current_user.journal_entries.for_project(index).sum(:hours_worked).to_f
        total_hours = hackatime_hours + journal_hours
+       Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
        project.merge("hours" => total_hours)
      end
@@ -61,11 +65,26 @@ class DeckController < ApplicationController
       is_new = true
     end
 
-    current_user.update!(projects: projects)
-
-    if request.xhr?
-      render json: { success: true, project_index: project_index, is_new: is_new }
+    if current_user.update!(projects: projects)
+      if request.xhr?
+        render json: { success: true, project_index: project_index, is_new: is_new }
+      else
+        redirect_to deck_path
+      end
     else
+      if request.xhr?
+        render json: { error: "Failed to save project" }, status: :unprocessable_entity
+      else
+        flash[:alert] = "Failed to save project"
+        redirect_to deck_path
+      end
+    end
+  rescue => e
+    Rails.logger.error("Error saving project: #{e.message}\n#{e.backtrace.join("\n")}")
+    if request.xhr?
+      render json: { error: "Error saving project: #{e.message}" }, status: :unprocessable_entity
+    else
+      flash[:alert] = "Error saving project"
       redirect_to deck_path
     end
   end
@@ -98,6 +117,14 @@ class DeckController < ApplicationController
     else
       redirect_to deck_path
     end
+  rescue => e
+    Rails.logger.error("Error shipping project: #{e.message}\n#{e.backtrace.join("\n")}")
+    if request.xhr?
+      render json: { error: "Error shipping project: #{e.message}" }, status: :unprocessable_entity
+    else
+      flash[:alert] = "Error shipping project"
+      redirect_to deck_path
+    end
   end
 
   def complete_tutorial
@@ -127,6 +154,9 @@ class DeckController < ApplicationController
     )
 
     render json: entry
+  rescue => e
+    Rails.logger.error("Error creating journal entry: #{e.message}\n#{e.backtrace.join("\n")}")
+    render json: { error: "Error creating journal entry: #{e.message}" }, status: :unprocessable_entity
   end
 
   def get_journal_entries
