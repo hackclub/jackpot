@@ -109,13 +109,14 @@
   font-display: swap;
 }
 
-/* --- Position RSVP button bottom-center --- */
+/* --- Position RSVP button bottom-center (within hero section, scrolls with page) --- */
 #rsvp-container {
-  position: fixed;
+  position: absolute;
   left: 50%;
   bottom: 40px;
   transform: translateX(-50%);
   z-index: 100;
+  pointer-events: auto;
   animation: rsvp-bob 3.2s ease-in-out infinite;
 }
 
