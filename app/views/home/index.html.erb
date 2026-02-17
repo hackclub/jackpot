@@ -15,7 +15,10 @@
       <a href="https://hackclub.enterprise.slack.com/archives/C0ADEGZL5HD" target="_blank" rel="noopener noreferrer" class="steps-card-link"><%= image_tag 'Card_2.png', alt: 'Updates and News!', class: 'steps-card' %></a>
       <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4" target="_blank" rel="noopener noreferrer" class="steps-card-link"><%= image_tag 'Card_3.png', alt: 'Join the community', class: 'steps-card' %></a>
     </div>
-  </div>
+    <p class="steps-coming-soon">
+    More info<br>coming soon
+  </p>
+    </div>
 </div>
 <div class="page-section page-section--tail"></div>
 </div>
@@ -46,7 +49,7 @@ align-items: center;
 justify-content: center;
 }
 .page-section--tail {
-min-height: 135vh;
+min-height: 55vh;
 }
 .page-section--steps .steps-content {
 display: flex;
@@ -70,6 +73,19 @@ align-items: center;
 justify-content: center;
 gap: 2vw;
 flex-wrap: wrap;
+}
+.page-section--steps .steps-coming-soon {
+margin: 0;
+margin-top: 40vh;
+font-size: 8rem;
+color: rgba(255, 240, 200, 0.9);
+font-style: italic;
+letter-spacing: 0.15em;
+animation: coming-soon-pulse 2.5s ease-in-out infinite;
+}
+@keyframes coming-soon-pulse {
+0%, 100% { opacity: 0.7; transform: scale(1); }
+50% { opacity: 1; transform: scale(1.05); }
 }
 .page-section--steps .steps-card-link {
 display: block;
@@ -184,6 +200,10 @@ height: auto;
   }
   .page-section--steps .steps-card-link:hover {
     transform: scale(1.05) translateY(-4px);
+  }
+  .page-section--steps .steps-coming-soon {
+    font-size: 2.5rem;
+    margin-top: 12vh;
   }
 }
 
