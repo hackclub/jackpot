@@ -3,19 +3,42 @@
 <div class="deck-page <%= 'tutorial-active' if @show_tutorial %>">
   <div class="deck-table">
     <div class="cards-viewport">
-      <% if @projects.size > 4 %>
+      <% filled_count = @projects.count { |p| p.present? } %>
+      <% if filled_count > 4 %>
         <button class="scroll-arrow scroll-arrow-left" id="scrollLeft" style="display: none;">&#9664;</button>
       <% end %>
 
       <div class="cards-track" id="cardsTrack">
-        <% if @projects.empty? %>
-          <div class="card-slot" id="projectCard0" data-index="0">
-            <span>Project 1</span>
-          </div>
-        <% else %>
-          <% @projects.each_with_index do |project, i| %>
-            <div class="card-slot" data-index="<%= i %>">
-              <span><%= project["name"] || "Project #{i + 1}" %></span>
+        <% @projects.each_with_index do |project, i| %>
+          <% if project.nil? %>
+            <div
+              class="card-slot card-slot-empty"
+              data-empty="true"
+            >
+              <span class="empty-slot-icon">+</span>
+              <span class="empty-slot-label">New Project</span>
+            </div>
+          <% else %>
+            <div
+               class="card-slot card-slot-filled"
+               data-index="<%= i %>"
+               data-project-name="<%= project["name"] %>"
+               data-project-description="<%= project["description"] %>"
+               data-project-type="<%= project["project_type"] %>"
+               data-project-hours="<%= project["hours"] || 0 %>"
+               data-project-shipped="<%= project["shipped"] ? "true" : "false" %>"
+               data-playable-url="<%= project["playable_url"] %>"
+               data-code-url="<%= project["code_url"] %>"
+               data-hackatime-projects="<%= (project["hackatime_projects"] || []).join(",") %>"
+             >
+              <span class="card-project-name"><%= project["name"] %></span>
+              <div class="card-stats">
+                <span class="card-hours"><%= "%.1f" % (project["hours"] || 0) %></span>
+                <span class="card-hours-label">hours</span>
+              </div>
+              <% if project["shipped"] %>
+                <span class="card-shipped-badge">Shipped ✓</span>
+              <% end %>
             </div>
           <% end %>
         <% end %>
@@ -25,7 +48,7 @@
         </button>
       </div>
 
-      <% if @projects.size > 4 %>
+      <% if filled_count > 4 %>
         <button class="scroll-arrow scroll-arrow-right" id="scrollRight">&#9654;</button>
       <% end %>
     </div>
@@ -37,23 +60,189 @@
   <div class="tutorial-dim" id="tutorialDim"></div>
   <div class="tutorial-spotlight" id="tutorialSpotlight"></div>
   <div class="tutorial-tooltip" id="tutorialTooltip">
-    <p class="tutorial-text">Click here to start your first project!</p>
+    <p class="tutorial-text">Click a slot to start your first project!</p>
     <div class="tutorial-arrow-down"></div>
   </div>
 </div>
 <% end %>
 
-<%= form_with url: add_project_path, method: :post, id: "addProjectForm", local: true, style: "display:none;" do %>
-<% end %>
+<!-- Create / Edit modal -->
+<div class="modal-overlay" id="projectModal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+    <div class="modal-header">
+      <h3 class="modal-title" id="projectModalTitle">New Project</h3>
+      <button type="button" class="modal-close" id="projectModalClose" aria-label="Close">&times;</button>
+    </div>
+
+    <%= form_with url: save_project_path, method: :post, id: "projectModalForm", local: true do %>
+      <input type="hidden" name="project_index" id="projectIndexInput">
+
+      <div class="project-form-body">
+      <div class="project-form-field">
+        <label for="projectNameInput">Project name</label>
+        <input type="text" id="projectNameInput" name="project_name" required>
+      </div>
+
+      <div class="project-form-field">
+        <label for="projectDescriptionInput">Description</label>
+        <textarea id="projectDescriptionInput" name="project_description" rows="3"></textarea>
+      </div>
+
+      <div class="project-form-field">
+         <label>Type of project</label>
+         <div class="project-type-grid">
+           <div class="project-type-option">
+             <input type="radio" id="projectTypeSoftware" name="project_type" value="Software">
+             <label for="projectTypeSoftware">Software</label>
+           </div>
+           <div class="project-type-option">
+             <input type="radio" id="projectTypeHardware" name="project_type" value="Hardware">
+             <label for="projectTypeHardware">Hardware</label>
+           </div>
+           <div class="project-type-option">
+             <input type="radio" id="projectTypeArt" name="project_type" value="Art">
+             <label for="projectTypeArt">Art</label>
+           </div>
+           <div class="project-type-option">
+             <input type="radio" id="projectTypeOther" name="project_type" value="Other">
+             <label for="projectTypeOther">Other</label>
+           </div>
+         </div>
+       </div>
+
+      <div class="project-form-field">
+         <label for="playableUrlInput">Playable URL (optional)</label>
+         <input type="url" id="playableUrlInput" name="playable_url" placeholder="https://example.com">
+       </div>
+
+       <div class="project-form-field">
+         <label for="codeUrlInput">Code URL (optional)</label>
+         <input type="url" id="codeUrlInput" name="code_url" placeholder="https://github.com/...">
+       </div>
+
+       <div class="project-form-field">
+         <label>Hackatime projects (optional)</label>
+         <p class="hackatime-field-hint">Link your Hackatime projects to track hours.</p>
+         <div class="hackatime-picker" id="hackatimePicker">
+           <% if @hackatime_projects.present? %>
+             <% @hackatime_projects.each do |hp_name| %>
+               <label class="hackatime-option">
+                 <input type="checkbox" name="hackatime_projects[]" value="<%= hp_name %>" class="hackatime-checkbox">
+                 <span class="hackatime-option-name"><%= hp_name %></span>
+               </label>
+             <% end %>
+           <% else %>
+             <p class="hackatime-empty">No Hackatime projects found. Start coding to see them here!</p>
+           <% end %>
+         </div>
+         </div>
+         </div>
+
+         <div class="project-form-actions">
+        <button type="button" class="project-cancel-btn" id="projectModalCancel">Cancel</button>
+        <button type="button" class="project-save-btn" id="projectModalSubmit">Save Project</button>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+ <div class="modal-overlay" id="projectDetailModal" aria-hidden="true">
+   <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="projectDetailTitle">
+     <div class="modal-header">
+       <input type="text" class="modal-title-input" id="projectDetailTitle" placeholder="Project Name">
+       <button type="button" class="modal-close" id="projectDetailClose" aria-label="Close">&times;</button>
+     </div>
+
+     <div class="project-detail-body">
+       <div class="detail-stat-row">
+         <span class="detail-label">Hours coded</span>
+         <span class="detail-value" id="detailHours">0.0</span>
+       </div>
+       
+       <div class="detail-stat-row">
+         <span class="detail-label">Description</span>
+         <textarea class="detail-value detail-description-edit" id="detailDescription" rows="3"></textarea>
+       </div>
+       
+       <div class="detail-stat-row">
+         <span class="detail-label">Type</span>
+         <span class="detail-value" id="detailType">—</span>
+       </div>
+       
+       <div class="detail-stat-row" id="detailPlayableRow">
+         <span class="detail-label">Playable URL</span>
+         <input type="url" class="detail-value detail-url-input" id="detailPlayableUrl" placeholder="https://example.com">
+       </div>
+       
+       <div class="detail-stat-row" id="detailCodeRow">
+         <span class="detail-label">Code URL</span>
+         <input type="url" class="detail-value detail-url-input" id="detailCodeUrl" placeholder="https://github.com/...">
+       </div>
+       
+       <div class="detail-stat-row" id="detailHackatimeRow" style="display: none;">
+         <span class="detail-label">Hackatime</span>
+         <span class="detail-value" id="detailHackatime">—</span>
+       </div>
+       
+       <div class="detail-stat-row" id="detailShippedRow" style="display: none;">
+         <span class="detail-label">Status</span>
+         <span class="detail-value detail-shipped-text">Shipped ✓</span>
+       </div>
+     </div>
+
+     <div class="project-form-actions">
+       <input type="hidden" id="shipProjectIndex" name="project_index">
+       <button type="button" class="project-cancel-btn" id="detailSaveBtn">Save Changes</button>
+       <button type="button" class="project-cancel-btn" id="detailJournalBtn">Journal</button>
+       <button type="button" class="project-ship-btn" id="detailShipBtn">Ship It</button>
+     </div>
+   </div>
+ </div>
+
+ <div class="journal-drawer" id="journalDrawer" aria-hidden="true">
+   <div class="journal-drawer-header">
+     <h3 class="journal-drawer-title" id="journalProjectTitle">Project Journal</h3>
+     <button type="button" class="modal-close" id="journalDrawerClose" aria-label="Close">&times;</button>
+   </div>
+   
+   <div class="journal-drawer-content">
+     <div class="journal-entry-form">
+       <div class="journal-form-field">
+         <label for="journalTimeDone">Time Done</label>
+         <input type="datetime-local" id="journalTimeDone" name="time_done">
+       </div>
+       
+       <div class="journal-form-field">
+         <label for="journalHoursWorked">Hours Worked</label>
+         <input type="number" id="journalHoursWorked" name="hours_worked" step="0.5" min="0" placeholder="e.g. 2.5">
+       </div>
+       
+       <div class="journal-form-field">
+         <label for="journalDescription">Description</label>
+         <textarea id="journalDescription" name="description" rows="3" placeholder="What did you work on?"></textarea>
+       </div>
+       
+       <div class="journal-form-field">
+         <label for="journalToolsUsed">Tools Used</label>
+         <input type="text" id="journalToolsUsed" name="tools_used" placeholder="e.g. React, TypeScript, Figma (comma-separated)">
+       </div>
+       
+       <button type="button" class="project-save-btn" id="journalSaveBtn">Save Entry</button>
+     </div>
+     
+     <div class="journal-entries-list" id="journalEntriesList">
+     </div>
+   </div>
+ </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const track = document.getElementById('cardsTrack');
-  const leftBtn = document.getElementById('scrollLeft');
-  const rightBtn = document.getElementById('scrollRight');
+  var track = document.getElementById('cardsTrack');
+  var leftBtn = document.getElementById('scrollLeft');
+  var rightBtn = document.getElementById('scrollRight');
 
   if (track && leftBtn && rightBtn) {
-    const scrollAmount = 150;
+    var scrollAmount = 150;
 
     function updateArrows() {
       leftBtn.style.display = track.scrollLeft > 0 ? 'flex' : 'none';
@@ -73,62 +262,394 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(updateArrows, 100);
   }
 
-  // --- Add project button ---
-  const addBtn = document.getElementById('addProjectBtn');
-  const addForm = document.getElementById('addProjectForm');
-  if (addBtn && addForm) {
+  var projectModal = document.getElementById('projectModal');
+  var projectModalClose = document.getElementById('projectModalClose');
+  var projectModalCancel = document.getElementById('projectModalCancel');
+  var projectIndexInput = document.getElementById('projectIndexInput');
+   var projectNameInput = document.getElementById('projectNameInput');
+   var projectDescriptionInput = document.getElementById('projectDescriptionInput');
+   var projectModalTitle = document.getElementById('projectModalTitle');
+
+   function openProjectModal(data) {
+     if (!projectModal) return;
+     projectIndexInput.value = data.index;
+     projectNameInput.value = data.name || '';
+     projectDescriptionInput.value = data.description || '';
+     
+     var typeRadios = document.querySelectorAll('input[name="project_type"]');
+     typeRadios.forEach(function(radio) {
+       radio.checked = radio.value === data.projectType;
+     });
+     
+     var playableUrlInput = document.getElementById('playableUrlInput');
+     var codeUrlInput = document.getElementById('codeUrlInput');
+     if (playableUrlInput) playableUrlInput.value = data.playableUrl || '';
+     if (codeUrlInput) codeUrlInput.value = data.codeUrl || '';
+     
+     projectModalTitle.textContent = data.isNew ? 'New Project' : 'Edit Project';
+
+    var linked = (data.hackatimeProjects || '').split(',').filter(function(s) { return s.length > 0; });
+    var checkboxes = document.querySelectorAll('#hackatimePicker .hackatime-checkbox');
+    checkboxes.forEach(function(cb) {
+      cb.checked = linked.indexOf(cb.value) !== -1;
+    });
+
+    projectModal.classList.add('active');
+    projectModal.setAttribute('aria-hidden', 'false');
+    projectNameInput.focus();
+   }
+
+  function closeProjectModal() {
+    if (!projectModal) return;
+    projectModal.classList.remove('active');
+    projectModal.setAttribute('aria-hidden', 'true');
+  }
+
+  if (projectModalClose) projectModalClose.addEventListener('click', closeProjectModal);
+  if (projectModalCancel) projectModalCancel.addEventListener('click', closeProjectModal);
+  if (projectModal) {
+    projectModal.addEventListener('click', function(e) { if (e.target === projectModal) closeProjectModal(); });
+  }
+
+  var projectModalSubmit = document.getElementById('projectModalSubmit');
+  if (projectModalSubmit) {
+    projectModalSubmit.addEventListener('click', function() {
+      if (!projectNameInput.value.trim()) {
+        alert('Project name is required');
+        return;
+      }
+
+      var toolsArray = [];
+      var typeRadios = document.querySelectorAll('input[name="project_type"]');
+      var selectedType = '';
+      typeRadios.forEach(function(radio) {
+        if (radio.checked) selectedType = radio.value;
+      });
+
+      var formData = new FormData();
+      formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').content);
+      formData.append('project_index', projectIndexInput.value);
+      formData.append('project_name', projectNameInput.value);
+      formData.append('project_description', projectDescriptionInput.value);
+      formData.append('project_type', selectedType);
+      formData.append('playable_url', document.getElementById('playableUrlInput').value);
+      formData.append('code_url', document.getElementById('codeUrlInput').value);
+
+      var hackatimeCheckboxes = document.querySelectorAll('#hackatimePicker .hackatime-checkbox:checked');
+      hackatimeCheckboxes.forEach(function(cb) {
+        formData.append('hackatime_projects[]', cb.value);
+      });
+
+      fetch('<%= save_project_path %>', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          closeProjectModal();
+          location.reload();
+        }
+      })
+      .catch(function(e) { console.error('Error saving project:', e); });
+    });
+  }
+
+   var detailModal = document.getElementById('projectDetailModal');
+   var detailClose = document.getElementById('projectDetailClose');
+   var detailHours = document.getElementById('detailHours');
+   var detailDescription = document.getElementById('detailDescription');
+   var detailType = document.getElementById('detailType');
+   var detailTitle = document.getElementById('projectDetailTitle');
+   var detailSaveBtn = document.getElementById('detailSaveBtn');
+   var detailJournalBtn = document.getElementById('detailJournalBtn');
+   var detailShipBtn = document.getElementById('detailShipBtn');
+   var detailPlayableUrl = document.getElementById('detailPlayableUrl');
+   var detailCodeUrl = document.getElementById('detailCodeUrl');
+   var shipProjectIndex = document.getElementById('shipProjectIndex');
+   var detailShippedRow = document.getElementById('detailShippedRow');
+   var detailPlayableRow = document.getElementById('detailPlayableRow');
+   var detailCodeRow = document.getElementById('detailCodeRow');
+   var detailHackatime = document.getElementById('detailHackatime');
+   var detailHackatimeRow = document.getElementById('detailHackatimeRow');
+   var currentDetailData = null;
+
+   function openDetailModal(data) {
+     if (!detailModal) return;
+     currentDetailData = data;
+     detailTitle.value = data.name;
+     detailHours.textContent = parseFloat(data.hours || 0).toFixed(1) + ' hrs';
+     detailDescription.value = data.description || '';
+     detailType.textContent = data.projectType || '—';
+     detailPlayableUrl.value = data.playableUrl || '';
+     detailCodeUrl.value = data.codeUrl || '';
+     shipProjectIndex.value = data.index;
+
+     var linked = (data.hackatimeProjects || '').split(',').filter(function(s) { return s.length > 0; });
+     if (linked.length > 0) {
+       detailHackatime.textContent = linked.join(', ');
+       detailHackatimeRow.style.display = 'flex';
+     } else {
+       detailHackatimeRow.style.display = 'none';
+     }
+
+     var isShipped = data.shipped === 'true';
+     detailShippedRow.style.display = isShipped ? 'flex' : 'none';
+     detailShipBtn.style.display = isShipped ? 'none' : 'inline-block';
+
+     detailModal.classList.add('active');
+     detailModal.setAttribute('aria-hidden', 'false');
+   }
+
+   function closeDetailModal() {
+     if (!detailModal) return;
+     detailModal.classList.remove('active');
+     detailModal.setAttribute('aria-hidden', 'true');
+   }
+
+   if (detailClose) detailClose.addEventListener('click', closeDetailModal);
+   if (detailModal) {
+     detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
+   }
+
+   if (detailSaveBtn) {
+     detailSaveBtn.addEventListener('click', function() {
+       if (!currentDetailData) return;
+       var form = document.createElement('form');
+       form.method = 'POST';
+       form.action = '<%= save_project_path %>';
+       
+       var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+       form.innerHTML = '<input type="hidden" name="authenticity_token" value="' + csrfToken + '">' +
+         '<input type="hidden" name="project_index" value="' + currentDetailData.index + '">' +
+         '<input type="hidden" name="project_name" value="' + (detailTitle.value || '').replace(/"/g, '&quot;') + '">' +
+         '<input type="hidden" name="project_description" value="' + (detailDescription.value || '').replace(/"/g, '&quot;') + '">' +
+         '<input type="hidden" name="playable_url" value="' + (detailPlayableUrl.value || '').replace(/"/g, '&quot;') + '">' +
+         '<input type="hidden" name="code_url" value="' + (detailCodeUrl.value || '').replace(/"/g, '&quot;') + '">';
+       
+       document.body.appendChild(form);
+       form.submit();
+     });
+   }
+
+   if (detailShipBtn) {
+     detailShipBtn.addEventListener('click', function() {
+       if (!currentDetailData) return;
+       
+       if (!detailPlayableUrl.value.trim()) {
+         alert('Playable URL is required to ship');
+         return;
+       }
+       if (!detailCodeUrl.value.trim()) {
+         alert('Code URL is required to ship');
+         return;
+       }
+       
+       var formData = new FormData();
+       formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').content);
+       formData.append('project_index', currentDetailData.index);
+       
+       fetch('<%= ship_project_path %>', {
+         method: 'POST',
+         body: formData,
+         headers: {
+           'X-Requested-With': 'XMLHttpRequest'
+         }
+       })
+       .then(function(r) { return r.json(); })
+       .then(function(data) {
+         if (data.success) {
+           closeDetailModal();
+           location.reload();
+         }
+       })
+       .catch(function(e) { console.error('Error shipping project:', e); });
+     });
+   }
+
+   if (detailJournalBtn) {
+     detailJournalBtn.addEventListener('click', function() {
+       closeDetailModal();
+       if (currentDetailData) {
+         openJournalDrawer(currentDetailData);
+       }
+     });
+   }
+
+  var emptyCards = Array.from(document.querySelectorAll('.card-slot-empty'));
+  var filledCards = Array.from(document.querySelectorAll('.card-slot-filled'));
+
+  emptyCards.forEach(function(card) {
+    card.addEventListener('click', function() {
+      openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', isNew: true });
+    });
+  });
+
+  filledCards.forEach(function(card) {
+    card.addEventListener('click', function() {
+      openDetailModal({
+        index: card.dataset.index,
+        name: card.dataset.projectName,
+        description: card.dataset.projectDescription,
+        projectType: card.dataset.projectType,
+        hours: card.dataset.projectHours,
+        shipped: card.dataset.projectShipped,
+        playableUrl: card.dataset.playableUrl,
+        codeUrl: card.dataset.codeUrl,
+        hackatimeProjects: card.dataset.hackatimeProjects
+      });
+    });
+  });
+
+  var addBtn = document.getElementById('addProjectBtn');
+  if (addBtn) {
     addBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-      addForm.submit();
+      openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', isNew: true });
     });
   }
 
-  // --- Tutorial logic ---
-  const overlay = document.getElementById('tutorialOverlay');
-  if (!overlay) {
-    // Tutorial already completed, nothing more to do
-    return;
+  var journalDrawer = document.getElementById('journalDrawer');
+  var journalDrawerClose = document.getElementById('journalDrawerClose');
+  var journalSaveBtn = document.getElementById('journalSaveBtn');
+  var journalTimeDone = document.getElementById('journalTimeDone');
+  var journalHoursWorked = document.getElementById('journalHoursWorked');
+  var journalDescription = document.getElementById('journalDescription');
+  var journalToolsUsed = document.getElementById('journalToolsUsed');
+  var journalEntriesList = document.getElementById('journalEntriesList');
+  var journalProjectTitle = document.getElementById('journalProjectTitle');
+  var currentJournalData = null;
+
+  function openJournalDrawer(projectData) {
+    if (!journalDrawer) return;
+    currentJournalData = projectData;
+    journalProjectTitle.textContent = projectData.name + ' - Journal';
+    journalTimeDone.value = '';
+    journalHoursWorked.value = '';
+    journalDescription.value = '';
+    journalToolsUsed.value = '';
+    
+    journalDrawer.classList.add('active');
+    journalDrawer.setAttribute('aria-hidden', 'false');
+    
+    loadJournalEntries(projectData.index);
   }
 
-  const spotlight = document.getElementById('tutorialSpotlight');
-  const tooltip = document.getElementById('tutorialTooltip');
-  const targetCard = document.querySelector('.card-slot[data-index="0"]');
-
-  if (!targetCard) return;
-
-  function positionTutorial() {
-    const rect = targetCard.getBoundingClientRect();
-    const pad = 16;
-
-    spotlight.style.left = (rect.left - pad) + 'px';
-    spotlight.style.top = (rect.top - pad) + 'px';
-    spotlight.style.width = (rect.width + pad * 2) + 'px';
-    spotlight.style.height = (rect.height + pad * 2) + 'px';
-
-    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
-    tooltip.style.top = (rect.top - pad - 16) + 'px';
+  function closeJournalDrawer() {
+    if (!journalDrawer) return;
+    journalDrawer.classList.remove('active');
+    journalDrawer.setAttribute('aria-hidden', 'true');
   }
 
-  positionTutorial();
-  window.addEventListener('resize', positionTutorial);
+  function loadJournalEntries(projectIndex) {
+    fetch('/deck/journal_entries/' + projectIndex)
+      .then(function(r) { return r.json(); })
+      .then(function(entries) {
+        journalEntriesList.innerHTML = '';
+        if (entries.length === 0) {
+          journalEntriesList.innerHTML = '<p class="journal-empty">No journal entries yet.</p>';
+          return;
+        }
+        entries.forEach(function(entry) {
+          var entryEl = document.createElement('div');
+          entryEl.className = 'journal-entry';
+          var timeStr = entry.time_done ? new Date(entry.time_done).toLocaleString() : 'N/A';
+          entryEl.innerHTML = '<div class="journal-entry-header">' +
+            '<span class="journal-entry-time">' + timeStr + '</span>' +
+            '<span class="journal-entry-hours">' + (entry.hours_worked || 0) + ' hrs</span>' +
+            '</div>' +
+            '<p class="journal-entry-description">' + (entry.description || '') + '</p>' +
+            (entry.tools_used && entry.tools_used.length > 0 ? 
+              '<p class="journal-entry-tools"><strong>Tools:</strong> ' + entry.tools_used.join(', ') + '</p>' : '');
+          journalEntriesList.appendChild(entryEl);
+        });
+      })
+      .catch(function(e) { console.error('Failed to load journal entries:', e); });
+  }
 
-  targetCard.addEventListener('click', function handleTutorialClick(e) {
-    overlay.classList.add('tutorial-fade-out');
-    document.querySelector('.deck-page').classList.remove('tutorial-active');
-    setTimeout(function() {
-      overlay.remove();
-    }, 400);
+  if (journalDrawerClose) journalDrawerClose.addEventListener('click', closeJournalDrawer);
+  
+  if (journalSaveBtn) {
+    journalSaveBtn.addEventListener('click', function() {
+      if (!currentJournalData) return;
+      
+      var toolsArray = journalToolsUsed.value.split(',').map(function(t) { return t.trim(); }).filter(function(t) { return t.length > 0; });
+      
+      fetch('<%= create_journal_entry_path %>', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          project_index: currentJournalData.index,
+          time_done: journalTimeDone.value || new Date().toISOString(),
+          hours_worked: parseFloat(journalHoursWorked.value) || 0,
+          description: journalDescription.value,
+          tools_used: toolsArray
+        })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(entry) {
+        journalTimeDone.value = '';
+        journalHoursWorked.value = '';
+        journalDescription.value = '';
+        journalToolsUsed.value = '';
+        loadJournalEntries(currentJournalData.index);
+      })
+      .catch(function(e) { console.error('Failed to save journal entry:', e); });
+    });
+  }
 
-    fetch('<%= complete_tutorial_path %>', {
-      method: 'POST',
-      headers: {
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
-        'Content-Type': 'application/json'
+   document.addEventListener('keydown', function(e) {
+     if (e.key === 'Escape') {
+       closeProjectModal();
+       closeDetailModal();
+       closeJournalDrawer();
+     }
+   });
+
+  var overlay = document.getElementById('tutorialOverlay');
+  if (overlay) {
+    var spotlight = document.getElementById('tutorialSpotlight');
+    var tooltip = document.getElementById('tutorialTooltip');
+    var tutorialTarget = document.querySelector('.card-slot');
+
+    if (tutorialTarget) {
+      function positionTutorial() {
+        var rect = tutorialTarget.getBoundingClientRect();
+        var pad = 16;
+        spotlight.style.left = (rect.left - pad) + 'px';
+        spotlight.style.top = (rect.top - pad) + 'px';
+        spotlight.style.width = (rect.width + pad * 2) + 'px';
+        spotlight.style.height = (rect.height + pad * 2) + 'px';
+        tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+        tooltip.style.top = (rect.top - pad - 16) + 'px';
       }
-    });
 
-    targetCard.removeEventListener('click', handleTutorialClick);
-  });
+      positionTutorial();
+      window.addEventListener('resize', positionTutorial);
+
+      tutorialTarget.addEventListener('click', function handleTutorialClick() {
+        overlay.classList.add('tutorial-fade-out');
+        document.querySelector('.deck-page').classList.remove('tutorial-active');
+        setTimeout(function() { overlay.remove(); }, 400);
+
+        fetch('<%= complete_tutorial_path %>', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        tutorialTarget.removeEventListener('click', handleTutorialClick);
+      });
+    }
+  }
 });
 </script>

@@ -32,6 +32,25 @@ class HackatimeService
     nil
   end
 
+  def get_user_projects(slack_id, start_date: nil)
+    response = @conn.get("users/#{slack_id}/projects") do |req|
+      req.params["start_date"] = start_date.to_s if start_date
+    end
+
+    unless response.success?
+      Rails.logger.error("Hackatime projects API failed for #{slack_id}: #{response.status} - #{response.body}")
+      return []
+    end
+
+    body = response.body
+    projects = body.is_a?(Hash) ? (body["projects"] || []) : Array(body)
+    Rails.logger.info("Hackatime projects for #{slack_id}: #{projects.inspect}")
+    projects
+  rescue Faraday::Error => e
+    Rails.logger.error("Hackatime API Connection Error: #{e.message}")
+    []
+  end
+
   def get_project_hours(slack_id, project_name, start_date: nil, end_date: nil)
     response = @conn.get("users/#{slack_id}/stats") do |req|
       req.params["features"] = "projects"

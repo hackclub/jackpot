@@ -21,10 +21,16 @@ Rails.application.routes.draw do
   delete "/signout", to: "sessions#destroy", as: :signout
 
   get "/deck", to: "deck#index", as: :deck
-  post "/deck/add_project", to: "deck#add_project", as: :add_project
-  post "/deck/complete_tutorial", to: "deck#complete_tutorial", as: :complete_tutorial
+   post "/deck/save_project", to: "deck#save_project", as: :save_project
+   post "/deck/ship_project", to: "deck#ship_project", as: :ship_project
+   post "/deck/complete_tutorial", to: "deck#complete_tutorial", as: :complete_tutorial
+   post "/deck/journal_entries", to: "deck#create_journal_entry", as: :create_journal_entry
+    get "/deck/journal_entries/:project_index", to: "deck#get_journal_entries", as: :get_journal_entries
+    post "/deck/approve_project_admin", to: "deck#approve_project_admin", as: :approve_project_admin
+    post "/deck/reject_project_admin", to: "deck#reject_project_admin", as: :reject_project_admin
   get "/leaderboard", to: "leaderboard#index", as: :leaderboard
   get "/admin", to: "admin#index", as: :admin
+  get "/admin/review", to: "admin#review", as: :admin_review
 
   namespace :admin do
     constraints AdminConstraint do

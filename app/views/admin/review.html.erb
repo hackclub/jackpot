@@ -1,0 +1,473 @@
+<div style="padding: 3rem 2rem; max-width: 1400px; margin: 0 auto;">
+  <style>
+    .review-container {
+      font-family: 'Georgia', serif;
+      color: #333;
+    }
+
+    .review-header {
+      display: flex;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .review-section {
+      flex: 1;
+    }
+
+    .review-section h2 {
+      font-size: 1.8rem;
+      color: #8b6914;
+      margin: 0 0 1rem 0;
+      font-style: italic;
+    }
+
+    .project-card {
+      background: #f5f1e8;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .project-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .project-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .project-meta {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0.5rem 0 0 0;
+      line-height: 1.6;
+    }
+
+    .approved-hours {
+      text-align: right;
+    }
+
+    .approved-hours-value {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #8b6914;
+    }
+
+    .project-description {
+      color: #555;
+      margin: 1rem 0;
+      line-height: 1.6;
+    }
+
+    .project-buttons {
+      display: flex;
+      gap: 0.8rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+
+    .project-buttons a,
+    .project-buttons button {
+      padding: 0.6rem 1rem;
+      border: 1px solid #8b6914;
+      border-radius: 6px;
+      background: #f5f1e8;
+      color: #333;
+      text-decoration: none;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .project-buttons a:hover,
+    .project-buttons button:hover {
+      background: #e8dcc8;
+    }
+
+    .review-btn {
+      background: #8b6914 !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
+    .review-btn:hover {
+      background: #9a761a !important;
+    }
+
+    .journal-view {
+      background: white;
+      padding: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+    }
+
+    .review-inputs {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .review-inputs input,
+    .review-inputs textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: 'Georgia', serif;
+      font-size: 0.95rem;
+    }
+
+    .review-inputs textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .review-actions {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .approve-btn {
+      flex: 1;
+      background: #8b6914;
+      color: white;
+      border: 2px solid #8b6914;
+      padding: 0.8rem;
+      border-radius: 6px;
+      font-family: 'Georgia', serif;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .approve-btn:hover {
+      background: #9a761a;
+    }
+
+    .reject-btn {
+      flex: 1;
+      background: white;
+      color: #d42b2b;
+      border: 2px solid #d42b2b;
+      padding: 0.8rem;
+      border-radius: 6px;
+      font-family: 'Georgia', serif;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .reject-btn:hover {
+      background: #ffe6e6;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #ddd;
+    }
+
+    .tab-btn {
+      padding: 0.8rem 1.5rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-family: 'Georgia', serif;
+      font-size: 1.1rem;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: #8b6914;
+      border-bottom-color: #8b6914;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #999;
+    }
+  </style>
+
+  <div class="review-container">
+    <div class="review-header">
+      <div class="review-section">
+        <h2>All Projects (<%= @all_projects.length %>)</h2>
+      </div>
+      <div class="review-section">
+        <h2>Pending Review (<%= @projects_for_review.length %>)</h2>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('all')">All Projects</button>
+      <button class="tab-btn" onclick="switchTab('pending')">Pending Review</button>
+    </div>
+
+    <!-- All Projects Tab -->
+    <div id="all" class="tab-content active">
+      <% if @all_projects.empty? %>
+        <div class="empty-state">
+          <p>No projects yet.</p>
+        </div>
+      <% else %>
+        <% @all_projects.each do |item| %>
+          <% next if item.nil? || item[:project].nil? %>
+          <% project = item[:project] %>
+          <div class="project-card">
+            <div class="project-card-header">
+              <div>
+                <p class="project-title"><%= project["name"] || "Untitled Project" %></p>
+                <p class="project-meta">
+                  by <%= item[:user]&.display_name || item[:user]&.email || "Unknown" %> 
+                  (<%= item[:user]&.email || "N/A" %>) 
+                  • <%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %> logged 
+                  <% if project["created_at"].present? %>
+                    • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
+                  <% end %>
+                  <% status = project["status"] %>
+                  <% if status.present? %>
+                    <% case status
+                       when "approved" %>
+                        <br><span style="color: #3cb043; font-weight: bold;">✓ Approved</span>
+                       <% when "rejected" %>
+                        <br><span style="color: #d42b2b; font-weight: bold;">✗ Rejected</span>
+                       <% when "pending" %>
+                        <br><span style="color: #d4a017; font-weight: bold;">⏳ Pending Review</span>
+                       <% end %>
+                  <% end %>
+                </p>
+              </div>
+              <div class="approved-hours">
+                <div class="approved-hours-value"><%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %></div>
+              </div>
+            </div>
+
+            <p class="project-description"><%= project["description"] %></p>
+
+            <div class="project-buttons">
+              <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
+              <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+              <% if item[:journal_entries].present? %>
+                <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n") %>')">
+                  View Journal (<%= item[:journal_entries].length %> entries)
+                </button>
+              <% end %>
+            </div>
+
+            <% unless project["reviewed"] %>
+              <div class="review-inputs">
+                <input type="number" class="review-hours-input" placeholder="Approved Hours" value="<%= item[:hours] %>" step="0.5" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
+                <input type="text" class="review-justification-input" placeholder="Hour Justification (internal)" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
+                <textarea class="review-feedback-input" placeholder="Feedback for the user..." data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>"></textarea>
+              </div>
+              <div class="review-actions">
+                <button class="approve-btn" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">Approve</button>
+                <button class="reject-btn" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">Reject</button>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div id="pending" class="tab-content">
+      <% if @projects_for_review.empty? %>
+        <div class="empty-state">
+          <p>All projects have been reviewed!</p>
+        </div>
+      <% else %>
+        <% @projects_for_review.each do |item| %>
+          <% next if item.nil? || item[:project].nil? %>
+          <% project = item[:project] %>
+          <div class="project-card">
+            <div class="project-card-header">
+              <div>
+                <p class="project-title"><%= project["name"] || "Untitled Project" %></p>
+                <p class="project-meta">
+                  by <%= item[:user]&.display_name || item[:user]&.email || "Unknown" %> 
+                  (<%= item[:user]&.email || "N/A" %>) 
+                  • <%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %> logged 
+                  <% if project["created_at"].present? %>
+                    • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
+                  <% end %>
+                  <% status = project["status"] %>
+                  <% if status.present? %>
+                    <% case status
+                       when "approved" %>
+                        <br><span style="color: #3cb043; font-weight: bold;">✓ Approved</span>
+                       <% when "rejected" %>
+                        <br><span style="color: #d42b2b; font-weight: bold;">✗ Rejected</span>
+                       <% when "pending" %>
+                        <br><span style="color: #d4a017; font-weight: bold;">⏳ Pending Review</span>
+                       <% end %>
+                  <% end %>
+                </p>
+              </div>
+              <div class="approved-hours">
+                <div class="approved-hours-value"><%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %></div>
+              </div>
+            </div>
+
+            <p class="project-description"><%= project["description"] %></p>
+
+            <div class="project-buttons">
+              <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
+              <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+              <% if item[:journal_entries].present? %>
+                <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n") %>')">
+                  View Journal (<%= item[:journal_entries].length %> entries)
+                </button>
+              <% end %>
+            </div>
+
+            <div class="review-inputs">
+              <input type="number" class="review-hours-input" placeholder="Approved Hours" value="<%= item[:hours] %>" step="0.5" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
+              <input type="text" class="review-justification-input" placeholder="Hour Justification (internal)" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
+              <textarea class="review-feedback-input" placeholder="Feedback for the user..." data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>"></textarea>
+            </div>
+            <div class="review-actions">
+              <button class="approve-btn" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">Approve</button>
+              <button class="reject-btn" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">Reject</button>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+            </div>
+
+            <script>
+              function switchTab(tabName) {
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                  tab.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                  btn.classList.remove('active');
+                });
+
+                // Show selected tab
+                document.getElementById(tabName).classList.add('active');
+                event.target.classList.add('active');
+              }
+
+              document.addEventListener('DOMContentLoaded', function() {
+                // Approve button handlers
+                document.querySelectorAll('.approve-btn').forEach(btn => {
+                  btn.addEventListener('click', function() {
+                    const userId = this.dataset.userId;
+                    const projectIndex = this.dataset.projectIndex;
+                    const card = this.closest('.project-card');
+                    const hoursInput = card.querySelector('.review-hours-input');
+                    const justificationInput = card.querySelector('.review-justification-input');
+                    const feedbackInput = card.querySelector('.review-feedback-input');
+
+                    const approvedHours = hoursInput.value;
+                    const justification = justificationInput.value;
+                    const feedback = feedbackInput.value;
+
+                    if (!approvedHours || approvedHours <= 0) {
+                      alert('Please enter valid approved hours');
+                      return;
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                    fetch('<%= approve_project_admin_path %>', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        user_id: userId,
+                        project_index: projectIndex,
+                        approved_hours: approvedHours,
+                        hour_justification: justification,
+                        feedback: feedback
+                      })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                      if (data.success) {
+                        alert('Project approved!');
+                        location.reload();
+                      } else {
+                        alert('Error: ' + (data.error || 'Unknown error'));
+                      }
+                    })
+                    .catch(e => {
+                      console.error('Error:', e);
+                      alert('Failed to approve project');
+                    });
+                  });
+                });
+
+                // Reject button handlers
+                document.querySelectorAll('.reject-btn').forEach(btn => {
+                  btn.addEventListener('click', function() {
+                    const userId = this.dataset.userId;
+                    const projectIndex = this.dataset.projectIndex;
+                    const card = this.closest('.project-card');
+                    const feedbackInput = card.querySelector('.review-feedback-input');
+                    const feedback = feedbackInput.value;
+
+                    if (!feedback.trim()) {
+                      alert('Please provide feedback for rejection');
+                      return;
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                    fetch('<%= reject_project_admin_path %>', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        user_id: userId,
+                        project_index: projectIndex,
+                        feedback: feedback
+                      })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                      if (data.success) {
+                        alert('Project rejected!');
+                        location.reload();
+                      } else {
+                        alert('Error: ' + (data.error || 'Unknown error'));
+                      }
+                    })
+                    .catch(e => {
+                      console.error('Error:', e);
+                      alert('Failed to reject project');
+                    });
+                  });
+                });
+              });
+            </script>
+</div>

@@ -1,21 +1,171 @@
 class DeckController < ApplicationController
-  before_action :authenticate_user!
+   before_action :authenticate_user!
+   before_action :authenticate_admin!, only: [:approve_project_admin, :reject_project_admin]
 
   def index
-    @projects = current_user.projects || []
+    current_user.reload
+    projects = current_user.projects || []
+
+    service = HackatimeService.new
+    start_date = Date.new(2026, 2, 14)
+    hackatime_id = current_user.slack_id || current_user.hack_club_id
+
+     @projects = projects.map.with_index do |project, index|
+       linked = project["hackatime_projects"] || []
+       hackatime_hours = linked.sum do |hp_name|
+         service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
+       end
+
+       journal_hours = current_user.journal_entries.for_project(index).sum(:hours_worked).to_f
+       total_hours = hackatime_hours + journal_hours
+
+       project.merge("hours" => total_hours)
+     end
+
+    empty_count = [ 4 - @projects.size, 0 ].max
+    @projects += Array.new(empty_count, nil)
+
+    @hackatime_projects = service.get_user_projects(hackatime_id)
+
     @show_tutorial = !current_user.tutorial_completed?
   end
 
-  def add_project
+  def save_project
+    current_user.reload
     projects = current_user.projects || []
-    project_number = projects.size + 1
-    projects << { "name" => "Project #{project_number}", "created_at" => Time.current.iso8601 }
+
+    project_name = params[:project_name].to_s.strip
+    project_description = params[:project_description].to_s.strip
+    project_type = params[:project_type].to_s.strip
+    playable_url = params[:playable_url].to_s.strip
+    code_url = params[:code_url].to_s.strip
+    hackatime_projects = Array(params[:hackatime_projects]).map(&:strip).reject(&:blank?)
+
+    project_payload = {
+      "name" => project_name.presence || "Project #{projects.size + 1}",
+      "description" => project_description,
+      "project_type" => project_type,
+      "playable_url" => playable_url,
+      "code_url" => code_url,
+      "hackatime_projects" => hackatime_projects
+    }
+
+    project_index = params[:project_index].to_i
+    is_new = false
+    if params[:project_index].present? && project_index.between?(0, projects.size - 1)
+      existing_project = projects[project_index] || {}
+      projects[project_index] = existing_project.merge(project_payload)
+    else
+      projects << project_payload.merge("created_at" => Time.current.iso8601)
+      project_index = projects.size - 1
+      is_new = true
+    end
+
     current_user.update!(projects: projects)
-    redirect_to deck_path
+
+    if request.xhr?
+      render json: { success: true, project_index: project_index, is_new: is_new }
+    else
+      redirect_to deck_path
+    end
+  end
+
+  def ship_project
+    current_user.reload
+    projects = current_user.projects || []
+
+    project_index = params[:project_index].to_i
+    if project_index.between?(0, projects.size - 1)
+      project = projects[project_index]
+
+      if project["playable_url"].blank? || project["code_url"].blank?
+        if request.xhr?
+          return render json: { error: "Playable URL and Code URL are required to ship" }, status: :unprocessable_entity
+        else
+          flash[:alert] = "Playable URL and Code URL are required to ship"
+          return redirect_to deck_path
+        end
+      end
+
+      project["shipped"] = true
+      project["status"] = "pending"
+      project["shipped_at"] = Time.current.iso8601
+      current_user.update!(projects: projects)
+    end
+
+    if request.xhr?
+      render json: { success: true }
+    else
+      redirect_to deck_path
+    end
   end
 
   def complete_tutorial
     current_user.update!(tutorial_completed: true)
     head :ok
+  end
+
+  def create_journal_entry
+    project_index = params[:project_index].to_i
+    current_user.reload
+    projects = current_user.projects || []
+
+    if !project_index.between?(0, projects.size - 1)
+      return render json: { error: "Invalid project index" }, status: :unprocessable_entity
+    end
+
+    project = projects[project_index]
+    project_name = project["name"]
+
+    entry = current_user.journal_entries.create!(
+      project_name: project_name,
+      project_index: project_index,
+      time_done: params[:time_done],
+      hours_worked: params[:hours_worked],
+      description: params[:description],
+      tools_used: Array(params[:tools_used]).map(&:strip).reject(&:blank?)
+    )
+
+    render json: entry
+  end
+
+  def get_journal_entries
+    project_index = params[:project_index].to_i
+    entries = current_user.journal_entries.for_project(project_index).order(created_at: :desc)
+    render json: entries
+  end
+
+  def approve_project_admin
+    user_id = params[:user_id]
+    project_index = params[:project_index].to_i
+    approved_hours = params[:approved_hours]
+    justification = params[:hour_justification]
+    feedback = params[:feedback]
+
+    user = User.find(user_id)
+    if user.approve_project(project_index, approved_hours, justification, feedback)
+      render json: { success: true, message: "Project approved" }
+    else
+      render json: { error: "Could not approve project" }, status: :unprocessable_entity
+    end
+  end
+
+  def reject_project_admin
+    user_id = params[:user_id]
+    project_index = params[:project_index].to_i
+    feedback = params[:feedback]
+
+    user = User.find(user_id)
+    if user.reject_project(project_index, feedback)
+      render json: { success: true, message: "Project rejected" }
+    else
+      render json: { error: "Could not reject project" }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def authenticate_admin!
+    redirect_to root_path, alert: "Admin access required" unless admin?
   end
 end
