@@ -33,21 +33,33 @@ class HackatimeService
   end
 
   def get_user_projects(slack_id, start_date: nil)
-    response = @conn.get("users/#{slack_id}/projects") do |req|
+    return [] unless slack_id.present?
+    
+    response = @conn.get("users/#{slack_id}/stats") do |req|
+      req.params["features"] = "projects"
       req.params["start_date"] = start_date.to_s if start_date
     end
 
     unless response.success?
-      Rails.logger.error("Hackatime projects API failed for #{slack_id}: #{response.status} - #{response.body}")
+      Rails.logger.error("Hackatime stats API failed for #{slack_id}: #{response.status} - #{response.body}")
       return []
     end
 
-    body = response.body
-    projects = body.is_a?(Hash) ? (body["projects"] || []) : Array(body)
+    body = response.body || {}
+    if body.dig("trust_factor", "trust_value") == 1
+      Rails.logger.warn("User #{slack_id} is flagged as untrusted by Hackatime.")
+      return []
+    end
+
+    projects_data = body.dig("data", "projects") || []
+    projects = projects_data.map { |p| p.is_a?(Hash) ? p["name"] : p }.compact
     Rails.logger.info("Hackatime projects for #{slack_id}: #{projects.inspect}")
     projects
   rescue Faraday::Error => e
-    Rails.logger.error("Hackatime API Connection Error: #{e.message}")
+    Rails.logger.error("Hackatime API Connection Error for #{slack_id}: #{e.message}")
+    []
+  rescue => e
+    Rails.logger.error("Unexpected error in get_user_projects for #{slack_id}: #{e.message}")
     []
   end
 
