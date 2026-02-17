@@ -17,17 +17,17 @@
     </div>
   </div>
 </div>
-<div class="page-section"></div>
+<div class="page-section page-section--tail"></div>
 </div>
 
 <style>
 body {
-background: url(<%= image_path 'RSVP_extended.png' %>);
+background: url(<%= image_path 'RSVP_extended2.jpg' %>);
 min-height: 100vh;
 margin: 0;
 padding: 0;
 background-repeat: no-repeat;
-background-size: 100% 300vh;
+background-size: 100% 400vh;
 background-position: top center;
 background-color: #000;
 }
@@ -44,6 +44,9 @@ position: relative;
 display: flex;
 align-items: center;
 justify-content: center;
+}
+.page-section--tail {
+min-height: 135vh;
 }
 .page-section--steps .steps-content {
 display: flex;
@@ -187,7 +190,7 @@ height: auto;
 /* Mobile adjustments */
 @media (max-width: 600px) {
   body {
-    background-size: 100% 300vh;
+    background-size: 100% 315vh;
     background-position: top center;
   }
   .hero-title {
