@@ -1,45 +1,109 @@
 <div class="main">
-<div class="hero-overlays">
-<%= image_tag 'title.PNG', alt: 'Jackpot Title', class: 'hero-title' %>
-<%= image_tag 'centralmg.png', alt: 'Center Art', class: 'hero-center' %>
-<%= image_tag 'HC_logo.png', alt: 'Hack Club Logo', class: 'hero-logo' %>
+<div class="page-section page-section--hero">
+  <div class="hero-overlays">
+    <%= image_tag 'title.PNG', alt: 'Jackpot Title', class: 'hero-title' %>
+    <%= image_tag 'centralmg.png', alt: 'Center Art', class: 'hero-center' %>
+    <%= image_tag 'HC_logo.png', alt: 'Hack Club Logo', class: 'hero-logo' %>
+  </div>
+  <%= render "home/rsvp" %>
 </div>
-<%= render "home/rsvp" %>
+<div class="page-section page-section--steps">
+  <div class="steps-content">
+    <%= image_tag 'RSVP_steps.png', alt: 'RSVP Steps', class: 'steps-image' %>
+    <div class="steps-cards">
+      <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU" target="_blank" rel="noopener noreferrer" class="steps-card-link"><%= image_tag 'Card_1.png', alt: 'Ask a question', class: 'steps-card' %></a>
+      <a href="https://hackclub.enterprise.slack.com/archives/C0ADEGZL5HD" target="_blank" rel="noopener noreferrer" class="steps-card-link"><%= image_tag 'Card_2.png', alt: 'Updates and News!', class: 'steps-card' %></a>
+      <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4" target="_blank" rel="noopener noreferrer" class="steps-card-link"><%= image_tag 'Card_3.png', alt: 'Join the community', class: 'steps-card' %></a>
+    </div>
+  </div>
+</div>
+<div class="page-section"></div>
 </div>
 
 <style>
 body {
-background: url(<%= image_path 'background.png' %>);
+background: url(<%= image_path 'RSVP_extended.png' %>);
 min-height: 100vh;
-height: 100vh;
-overflow: hidden;
 margin: 0;
-padding:0;
+padding: 0;
 background-repeat: no-repeat;
-background-size: cover; /* Scales the image to cover the div */
-background-position: center;
+background-size: 100% 300vh;
+background-position: top center;
 background-color: #000;
 }
 
 .main {
-margin-top: 10px;
 color: white;
 text-align: center;
 position: relative;
+}
+
+.page-section {
 min-height: 100vh;
+position: relative;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.page-section--steps .steps-content {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 6vh;
+width: 100%;
+margin-top: 8vh;
+}
+.page-section--steps .steps-image {
+max-width: 70vw;
+width: 100%;
+height: auto;
+object-fit: contain;
+}
+.page-section--steps .steps-cards {
+display: flex;
+flex-direction: row;
+align-items: center;
+justify-content: center;
+gap: 2vw;
+flex-wrap: wrap;
+}
+.page-section--steps .steps-card-link {
+display: block;
+transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease, box-shadow 0.3s ease;
+}
+.page-section--steps .steps-card-link:hover {
+transform: scale(1.08) translateY(-8px);
+filter: drop-shadow(0 12px 24px rgba(255, 180, 80, 0.4));
+}
+.page-section--steps .steps-card {
+max-width: 380px;
+width: 32vw;
+height: auto;
+object-fit: contain;
+display: block;
+pointer-events: none;
+}
+.page-section--hero {
+position: relative;
+min-height: 100vh;
+}
+.page-section--hero #rsvp-container {
+bottom: calc(40px + 8vh);
 }
 </style>
 
 <style>
 .hero-overlays {
-position: fixed;
+position: absolute;
 inset: 0;
 pointer-events: none;
+transform: translateY(-12vh);
 }
 .hero-title {
 position: absolute;
 left: 50%;
-top: -24vh; /* TITLE FROM TOP */
+top: -20vh;
 transform: translateX(-50%) rotate(3deg);
 max-width: 90vw;
 width: 42vw;
@@ -62,7 +126,7 @@ animation: title-sheen 5.75s infinite;
 .hero-center {
 position: absolute;
 left: 50%;
-top: 8vh; /* IMG FROM TOP */
+top: 12vh;
 transform: translateX(-50%);
 max-width: 80vw; 
 width: 85vw; /* IMG SIZE */
@@ -75,7 +139,7 @@ animation: center-glow 2.8s ease-in-out infinite;
 }
 .hero-logo {
 position: absolute;
-top: 0px;
+top: 6vh;
 left: 8px;
 width: 180px;
 height: auto;
@@ -107,26 +171,38 @@ height: auto;
   }
 }
 
+@media (max-width: 600px) {
+  .page-section--steps .steps-cards {
+    gap: 3vw;
+  }
+  .page-section--steps .steps-card {
+    max-width: 240px;
+    width: 85vw;
+  }
+  .page-section--steps .steps-card-link:hover {
+    transform: scale(1.05) translateY(-4px);
+  }
+}
+
 /* Mobile adjustments */
 @media (max-width: 600px) {
   body {
-    height: 100dvh;             
-    background-size: cover;      
-    background-position: center top;
+    background-size: 100% 300vh;
+    background-position: top center;
   }
   .hero-title {
     width: 110vw;                  /* title sz */
     max-width: none;
-    top: -4vh;                   
+    top: -12vh;                   
   }
   .hero-center {
     width: 150vw;                /* image sz */
     max-width: none;
-    top: 30vh;                   
+    top: 0;                   
   }
   .hero-logo {
     width: 140px;                /* logo pos */
-    top: 8px;
+    top: 0;
     left: 8px;
   }
 }
