@@ -1,0 +1,413 @@
+<% content_for :title, "FAQ — Jackpot" %>
+
+<div class="faq-page">
+  <div class="faq-floating-icons" aria-hidden="true">
+    <%= image_tag "icons/chip.png", class: "faq-icon faq-icon--1", alt: "" %>
+    <%= image_tag "icons/cherry.png", class: "faq-icon faq-icon--2", alt: "" %>
+    <%= image_tag "icons/cards.png", class: "faq-icon faq-icon--3", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--4", alt: "" %>
+    <%= image_tag "icons/chip.png", class: "faq-icon faq-icon--5", alt: "" %>
+    <%= image_tag "icons/cherry.png", class: "faq-icon faq-icon--6", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--7", alt: "" %>
+    <%= image_tag "icons/cards.png", class: "faq-icon faq-icon--8", alt: "" %>
+    <%= image_tag "icons/cherry.png", class: "faq-icon faq-icon--9", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--10", alt: "" %>
+    <%= image_tag "icons/chip.png", class: "faq-icon faq-icon--11", alt: "" %>
+    <%= image_tag "icons/cards.png", class: "faq-icon faq-icon--12", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--13", alt: "" %>
+    <%= image_tag "icons/cherry.png", class: "faq-icon faq-icon--14", alt: "" %>
+    <%= image_tag "icons/chip.png", class: "faq-icon faq-icon--15", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--16", alt: "" %>
+  </div>
+  <div class="faq-content">
+  <%= link_to "← Back", root_path, class: "faq-back-btn" %>
+  <div class="faq-notice">
+    <p>Please note, day-of logistics, such as schedules or venue, are subject to change. We will provide more specific instructions to participants closer to the event.</p>
+  </div>
+
+  <h1 class="faq-title">FAQ</h1>
+
+  <section class="faq-section">
+    <h2 class="faq-section-heading">— General</h2>
+
+    <article class="faq-item">
+      <h3 class="faq-q">What if I can't (or don't wanna) attend Jackpot in Las Vegas?</h3>
+      <p class="faq-a">You will be able to redeem the hours you spent making projects in a shop for fun, neat prizes!</p>
+    </article>
+
+    <article class="faq-item">
+      <h3 class="faq-q">How Do I Register?</h3>
+      <p class="faq-a">Signup <a href="#" class="faq-link">here</a>!</p>
+    </article>
+
+    <article class="faq-item">
+      <h3 class="faq-q">Can I start?</h3>
+      <p class="faq-a">Yes, track your hours with Hackatime or use the journaling system.</p>
+    </article>
+
+    <article class="faq-item">
+      <h3 class="faq-q">Can I collab with my friends and make a single project?</h3>
+      <p class="faq-a">Yes BUT:</p>
+      <ul class="faq-list">
+        <li>You can work on the same repo but in different forks</li>
+        <li>Your hours will be obviously counted separately</li>
+      </ul>
+    </article>
+
+    <article class="faq-item">
+      <h3 class="faq-q">Can I ship a private (or partially private) project?</h3>
+      <p class="faq-a">No, your project MUST be open source, otherwise hours will not be counted.</p>
+    </article>
+
+    <article class="faq-item">
+      <h3 class="faq-q">Can I work in already started projects?</h3>
+      <p class="faq-a">As long it's not part of other HC programs, yes you can! We HIGHLY suggest to create a new Github repository — it's not mandatory, but it will increase your chances of being approved, and will make the process much faster.</p>
+    </article>
+  </section>
+
+  <section class="faq-section">
+    <h2 class="faq-section-heading">— In-Person Event</h2>
+
+    <article class="faq-item">
+      <h3 class="faq-q">How do I get invited?</h3>
+      <p class="faq-a">Log your hours, work on your project for 65 hours and ship it on Launchpad.</p>
+    </article>
+
+    <article class="faq-item">
+      <h3 class="faq-q">Who Can Participate?</h3>
+      <p class="faq-a">Anyone between the ages of 13 and 18 (included) can participate in Jackpot!</p>
+    </article>
+
+    <article class="faq-item">
+      <h3 class="faq-q">Is it free?</h3>
+      <p class="faq-a">Yes! Participation is entirely free once you're invited!</p>
+    </article>
+  </section>
+
+  <section class="faq-section faq-section--cta">
+    <h2 class="faq-section-heading">— Still Have Questions?</h2>
+    <p class="faq-cta">Ask directly in the HC Slack channel <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU" target="_blank" rel="noopener noreferrer" class="faq-link faq-link--channel">#jackpot-help</a></p>
+  </section>
+  </div>
+</div>
+
+<style>
+@font-face {
+  font-family: "Katibeh";
+  src: url(<%= asset_path "Katibeh/Katibeh-Regular.ttf" %>) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.faq-page {
+  min-height: 100vh;
+  color: #fff;
+  padding: 2rem 2rem 4rem;
+  max-width: 920px;
+  margin: 0 auto;
+  font-family: "Katibeh", serif;
+  position: relative;
+}
+
+.faq-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #000 url('<%= image_path("faq_bkg.jpg") %>') center center no-repeat;
+  background-size: cover;
+}
+
+.faq-floating-icons {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.faq-icon {
+  position: absolute;
+  object-fit: contain;
+  opacity: 0.5;
+}
+
+.faq-icon--1 { left: 3%;   top: 8%;   width: 56px;  animation: faq-float-1 42s ease-in-out infinite; animation-delay: 0s; }
+.faq-icon--2 { left: 90%; top: 14%; width: 72px;  animation: faq-float-2 46s ease-in-out infinite; animation-delay: -4s; }
+.faq-icon--3 { left: 12%; top: 48%; width: 44px;  animation: faq-float-3 38s ease-in-out infinite; animation-delay: -8s; }
+.faq-icon--4 { left: 85%; top: 58%; width: 64px;  animation: faq-float-4 48s ease-in-out infinite; animation-delay: -12s; }
+.faq-icon--5 { left: 92%; top: 32%; width: 40px;  animation: faq-float-5 40s ease-in-out infinite; animation-delay: -2s; }
+.faq-icon--6 { left: 2%;  top: 75%; width: 68px;  animation: faq-float-6 52s ease-in-out infinite; animation-delay: -6s; }
+.faq-icon--7 { left: 75%; top: 4%;  width: 48px;  animation: faq-float-7 44s ease-in-out infinite; animation-delay: -10s; }
+.faq-icon--8 { left: 38%; top: 18%; width: 52px;  animation: faq-float-8 46s ease-in-out infinite; animation-delay: -15s; }
+.faq-icon--9 { left: 22%; top: 68%; width: 60px;  animation: faq-float-9 50s ease-in-out infinite; animation-delay: -3s; }
+.faq-icon--10 { left: 58%; top: 88%; width: 46px; animation: faq-float-10 42s ease-in-out infinite; animation-delay: -7s; }
+.faq-icon--11 { left: 6%;  top: 32%; width: 50px;  animation: faq-float-11 45s ease-in-out infinite; animation-delay: -5s; }
+.faq-icon--12 { left: 94%; top: 72%; width: 58px;  animation: faq-float-12 40s ease-in-out infinite; animation-delay: -11s; }
+.faq-icon--13 { left: 48%; top: 6%;  width: 42px;  animation: faq-float-13 48s ease-in-out infinite; animation-delay: -9s; }
+.faq-icon--14 { left: 65%; top: 42%; width: 66px;  animation: faq-float-14 44s ease-in-out infinite; animation-delay: -1s; }
+.faq-icon--15 { left: 30%; top: 92%; width: 54px;  animation: faq-float-15 46s ease-in-out infinite; animation-delay: -13s; }
+.faq-icon--16 { left: 82%; top: 82%; width: 48px;  animation: faq-float-16 38s ease-in-out infinite; animation-delay: -14s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-icon { animation: none; }
+}
+
+@keyframes faq-float-1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(45px, -50px) rotate(12deg); }
+  50% { transform: translate(-35px, 40px) rotate(-10deg); }
+  75% { transform: translate(55px, 30px) rotate(8deg); }
+}
+@keyframes faq-float-2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-55px, 45px) rotate(-14deg); }
+  66% { transform: translate(40px, -65px) rotate(12deg); }
+}
+@keyframes faq-float-3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(70px, 55px) rotate(18deg); }
+}
+@keyframes faq-float-4 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-45px, -35px) rotate(-12deg); }
+  50% { transform: translate(25px, 60px) rotate(8deg); }
+  75% { transform: translate(-55px, 20px) rotate(5deg); }
+}
+@keyframes faq-float-5 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-40px, -48px) rotate(-10deg); }
+}
+@keyframes faq-float-6 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(55px, -40px) rotate(14deg); }
+  66% { transform: translate(-70px, 35px) rotate(-12deg); }
+}
+@keyframes faq-float-7 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(35px, 55px) rotate(9deg); }
+}
+@keyframes faq-float-8 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-52px, 28px) rotate(-9deg); }
+  75% { transform: translate(58px, -35px) rotate(11deg); }
+}
+@keyframes faq-float-9 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-65px, -52px) rotate(-16deg); }
+}
+@keyframes faq-float-10 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(42px, 48px) rotate(10deg); }
+  66% { transform: translate(-48px, -28px) rotate(-8deg); }
+}
+@keyframes faq-float-11 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(50px, 35px) rotate(10deg); }
+  75% { transform: translate(-40px, -45px) rotate(-12deg); }
+}
+@keyframes faq-float-12 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-60px, 50px) rotate(-14deg); }
+}
+@keyframes faq-float-13 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-45px, 40px) rotate(-10deg); }
+  66% { transform: translate(55px, -35px) rotate(12deg); }
+}
+@keyframes faq-float-14 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(60px, -45px) rotate(14deg); }
+  75% { transform: translate(-50px, 55px) rotate(-11deg); }
+}
+@keyframes faq-float-15 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(48px, -55px) rotate(15deg); }
+}
+@keyframes faq-float-16 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-55px, -40px) rotate(-13deg); }
+  66% { transform: translate(40px, 45px) rotate(9deg); }
+}
+
+.faq-content {
+  position: relative;
+  z-index: 1;
+}
+
+.faq-back-btn {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.7rem 1.4rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 200, 100, 0.4);
+  border-radius: 8px;
+  color: rgba(255, 220, 150, 0.95);
+  font-size: 1.35rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.faq-back-btn:hover {
+  background: rgba(255, 200, 100, 0.15);
+  border-color: rgba(255, 200, 100, 0.6);
+  color: #ffd4a0;
+}
+
+.faq-notice {
+  background: linear-gradient(135deg, rgba(255, 180, 80, 0.12) 0%, rgba(236, 55, 80, 0.08) 100%);
+  border: 1px solid rgba(255, 200, 100, 0.35);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 3rem;
+  font-size: 1.4rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.faq-title {
+  font-size: clamp(3.5rem, 11vw, 6rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0 0 2.5rem;
+  background: linear-gradient(180deg, #fff 0%, rgba(255, 220, 150, 0.9) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.faq-section {
+  margin-bottom: 2.5rem;
+}
+
+.faq-section-heading {
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 100, 0.95);
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 200, 100, 0.25);
+}
+
+.faq-item {
+  margin-bottom: 1.75rem;
+}
+
+.faq-q {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.5rem;
+  line-height: 1.4;
+}
+
+.faq-a {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.faq-list {
+  margin: 0.5rem 0 0 1.5rem;
+  padding: 0;
+  font-size: 1.45rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+.faq-link {
+  color: rgba(255, 200, 100, 0.95);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 200, 100, 0.4);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.faq-link:hover {
+  color: #ffc864;
+  border-bottom-color: rgba(255, 200, 100, 0.8);
+}
+
+.faq-link--channel {
+  font-family: ui-monospace, monospace;
+  font-size: 0.98em;
+}
+
+.faq-section--cta {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.faq-cta {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@media (min-width: 900px) {
+  .faq-page {
+    max-width: 1200px;
+    padding: 3rem 4rem 5rem;
+  }
+
+  .faq-back-btn {
+    font-size: 1.45rem;
+    padding: 0.8rem 1.6rem;
+  }
+
+  .faq-notice {
+    font-size: 1.55rem;
+    padding: 1.75rem 2.25rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .faq-title {
+    font-size: clamp(4rem, 6.5vw, 6.5rem);
+    margin-bottom: 3rem;
+  }
+
+  .faq-section-heading {
+    font-size: 1.65rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .faq-q {
+    font-size: 1.85rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .faq-a {
+    font-size: 1.65rem;
+    line-height: 1.65;
+  }
+
+  .faq-list {
+    font-size: 1.65rem;
+    line-height: 1.65;
+    margin-left: 1.75rem;
+  }
+
+  .faq-cta {
+    font-size: 1.65rem;
+  }
+
+  .faq-link--channel {
+    font-size: 1.05em;
+  }
+
+  .faq-section {
+    margin-bottom: 3rem;
+  }
+
+  .faq-item {
+    margin-bottom: 2rem;
+  }
+}
+</style>
