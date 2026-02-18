@@ -1,4 +1,4 @@
-<% content_for :title, "FAQ — Jackpot" %>
+<% content_for :title, "Rules — Jackpot" %>
 
 <div class="faq-page">
   <div class="faq-floating-icons" aria-hidden="true">
@@ -24,109 +24,38 @@
   <%= image_tag "back_button.png", alt: "Back", class: "faq-back-btn-img" %>
 <% end %>
 
-  <%= image_tag "faq_title.png", alt: "FAQ", class: "faq-title" %>
-  <p class="faq-disclaimer"><strong>NOTE:</strong> Day-of logistics (schedules, venue) may change. We'll share details closer to the event.</p>
+  <%= image_tag "rules_title.png", alt: "Rules", class: "faq-title" %>
 
   <section class="faq-section">
-    <h2 class="faq-section-heading">— General</h2>
-
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-1" id="faq-q-1">
-        <span class="faq-q-text">What if I can't (or don't wanna) attend Jackpot in Las Vegas?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-1" role="region" aria-labelledby="faq-q-1" aria-hidden="true">
-        <p class="faq-a">You will be able to redeem the hours you spent making projects in a shop for fun, neat prizes!</p>
-      </div>
-    </article>
-
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-2" id="faq-q-2">
-        <span class="faq-q-text">How Do I Register?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-2" role="region" aria-labelledby="faq-q-2" aria-hidden="true">
-        <p class="faq-a">Signup <a href="#" class="faq-link">here</a>!</p>
-      </div>
-    </article>
-
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-3" id="faq-q-3">
-        <span class="faq-q-text">Can I start?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-3" role="region" aria-labelledby="faq-q-3" aria-hidden="true">
-        <p class="faq-a">Yes, track your hours with Hackatime or use the journaling system.</p>
-      </div>
-    </article>
-
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-4" id="faq-q-4">
-        <span class="faq-q-text">Can I collab with my friends and make a single project?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-4" role="region" aria-labelledby="faq-q-4" aria-hidden="true">
-        <p class="faq-a">Yes BUT:</p>
-        <ul class="faq-list">
-          <li>You can work on the same repo but in different forks</li>
-          <li>Your hours will be obviously counted separately</li>
-        </ul>
-      </div>
-    </article>
-
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-5" id="faq-q-5">
-        <span class="faq-q-text">Can I ship a private (or partially private) project?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-5" role="region" aria-labelledby="faq-q-5" aria-hidden="true">
-        <p class="faq-a">No, your project MUST be open source, otherwise hours will not be counted.</p>
-      </div>
-    </article>
-
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-6" id="faq-q-6">
-        <span class="faq-q-text">Can I work in already started projects?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-6" role="region" aria-labelledby="faq-q-6" aria-hidden="true">
-        <p class="faq-a">As long it's not part of other HC programs, yes you can! We HIGHLY suggest to create a new Github repository — it's not mandatory, but it will increase your chances of being approved, and will make the process much faster.</p>
-      </div>
-    </article>
+    <h2 class="faq-section-heading">— General Rules</h2>
+    <p class="faq-a">If the following rules are not respected, your project may receive hour reductions or be rejected by our team, so please read carefully:</p>
+    <ul class="faq-list">
+      <li>Once you purchase the grant from the shop, you must wait for your <a href="https://hcb.hackclub.com" target="_blank" rel="noopener noreferrer" class="faq-link">HCB</a> grant card to be issued. Refunds are not possible, so do not purchase anything out of pocket (unless explicitly requested by a staff member) before receiving the grant.</li>
+      <li>As with every YSWS program, the project must be properly tracked using <a href="https://hackatime.hackclub.com" target="_blank" rel="noopener noreferrer" class="faq-link">Hackatime</a> or <a href="#tracking-system" class="faq-link">journaling</a>. Any activity logged before the official start of the event will not be counted.</li>
+      <li>No fraud*, no double-dipping with other Hack Club programs, and no excessive use of AI.</li>
+    </ul>
   </section>
 
   <section class="faq-section">
-    <h2 class="faq-section-heading">— In-Person Event</h2>
+    <h2 class="faq-section-heading">— Ship Requirements</h2>
+    <ul class="faq-list">
+      <li><a href="https://github.com" target="_blank" rel="noopener noreferrer" class="faq-link">Github</a> opensource page with frequent commits (every 30min - 1h)</li>
+      <li><a href="#tracking-system" class="faq-link">Tracking system</a> mandatory</li>
+      <li>Live Demo working</li>
+      <li>A final proof (screenshot / short video / whatever) to show the improvement</li>
+    </ul>
+  </section>
 
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-7" id="faq-q-7">
-        <span class="faq-q-text">How do I get invited?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-7" role="region" aria-labelledby="faq-q-7" aria-hidden="true">
-        <p class="faq-a">Log your hours, work on your project for 65 hours and ship it in the website.</p>
-      </div>
-    </article>
-
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-8" id="faq-q-8">
-        <span class="faq-q-text">Who Can Participate?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-8" role="region" aria-labelledby="faq-q-8" aria-hidden="true">
-        <p class="faq-a">Anyone between the ages of 13 and 18 (included) can participate in Jackpot!</p>
-      </div>
-    </article>
-
-    <article class="faq-item">
-      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-9" id="faq-q-9">
-        <span class="faq-q-text">Is it free?</span>
-        <span class="faq-q-icon" aria-hidden="true"></span>
-      </button>
-      <div class="faq-answer" id="faq-answer-9" role="region" aria-labelledby="faq-q-9" aria-hidden="true">
-        <p class="faq-a">Yes! Participation is entirely free once you're invited!</p>
-      </div>
-    </article>
+  <section class="faq-section" id="tracking-system">
+    <h2 class="faq-section-heading">— Info</h2>
+    <p class="faq-a"><strong>Tracking System:</strong></p>
+    <ul class="faq-list">
+      <li><strong>Software</strong> → Track time with <a href="https://hackatime.hackclub.com" target="_blank" rel="noopener noreferrer" class="faq-link">Hackatime</a> (if you have problems setting it up, ask for help in the <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU" target="_blank" rel="noopener noreferrer" class="faq-link">Slack channel</a>)</li>
+      <li><strong>Hardware</strong> → Track time with <a href="#tracking-system" class="faq-link">journaling system</a></li>
+      <li><strong>Art</strong> → Track time with any method you prefer.<br>NOTE: You can work on art for up to 10% of your total hours (e.g., out of 75 project hours, only 7.5 can be labeled as art).</li>
+    </ul>
+    <p class="faq-a" style="margin-top: 1.25rem;"><strong>*Fraud Meaning:</strong></p>
+    <p class="faq-a">Don't cheat the time tracking system. No bots, no fake key presses, no UI manipulation. If you do, you'll be banned from <a href="https://hackatime.hackclub.com" target="_blank" rel="noopener noreferrer" class="faq-link">Hackatime</a> and other participating YSWS / events / programs.</p>
   </section>
 
   <section class="faq-section faq-section--cta">
@@ -306,39 +235,6 @@
   object-fit: contain;
 }
 
-.faq-disclaimer {
-  margin: 0 auto 2rem;
-  max-width: 520px;
-  padding: 0.75rem 1rem;
-  font-size: 1.15rem;
-  line-height: 1.45;
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.88);
-  text-align: center;
-  animation: faq-disclaimer-in 0.6s ease-out, faq-disclaimer-pulse 3s ease-in-out 0.6s infinite;
-}
-
-.faq-disclaimer strong {
-  font-style: normal;
-  color: rgba(255, 220, 140, 0.95);
-}
-
-@keyframes faq-disclaimer-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes faq-disclaimer-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.9; }
-}
-
 .faq-title {
   display: block;
   max-width: 100%;
@@ -361,70 +257,6 @@
   margin: 0 0 1.25rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid rgba(255, 200, 100, 0.25);
-}
-
-.faq-item {
-  margin-bottom: 0.75rem;
-  border: 1px solid rgba(255, 200, 100, 0.25);
-  border-radius: 10px;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.faq-q {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  padding: 1rem 1.25rem;
-  font-family: inherit;
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #fff;
-  line-height: 1.4;
-  text-align: left;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  transition: background 0.2s ease;
-}
-
-.faq-q:hover {
-  background: rgba(255, 200, 100, 0.08);
-}
-
-.faq-q-text {
-  flex: 1;
-}
-
-.faq-q-icon {
-  flex-shrink: 0;
-  width: 1.25rem;
-  height: 1.25rem;
-  border-right: 2px solid rgba(255, 200, 100, 0.9);
-  border-bottom: 2px solid rgba(255, 200, 100, 0.9);
-  transform: rotate(45deg) translateY(-2px);
-  transition: transform 0.35s ease;
-}
-
-.faq-item.is-open .faq-q-icon {
-  transform: rotate(-135deg) translateY(2px);
-}
-
-.faq-answer {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease-out;
-}
-
-.faq-item.is-open .faq-answer {
-  max-height: 800px;
-  padding: 0 1.25rem 1.25rem;
-}
-
-.faq-item.is-open .faq-answer .faq-a:first-child {
-  padding-top: 0.5rem;
 }
 
 .faq-a {
@@ -453,11 +285,6 @@
 .faq-link:hover {
   color: #ffc864;
   border-bottom-color: rgba(255, 200, 100, 0.8);
-}
-
-.faq-link--channel {
-  font-family: ui-monospace, monospace;
-  font-size: 0.98em;
 }
 
 .faq-section--cta {
@@ -504,13 +331,6 @@
     max-height: 112px;
   }
 
-  .faq-disclaimer {
-    max-width: 580px;
-    margin-bottom: 2.5rem;
-    font-size: 1.25rem;
-    padding: 0.85rem 1.25rem;
-  }
-
   .faq-title {
     width: clamp(320px, 45vw, 520px);
     margin-bottom: 3rem;
@@ -519,11 +339,6 @@
   .faq-section-heading {
     font-size: 1.65rem;
     margin-bottom: 1.5rem;
-  }
-
-  .faq-q {
-    font-size: 1.85rem;
-    padding: 1.15rem 1.5rem;
   }
 
   .faq-a {
@@ -541,34 +356,8 @@
     max-width: 380px;
   }
 
-  .faq-link--channel {
-    font-size: 1.05em;
-  }
-
   .faq-section {
     margin-bottom: 3rem;
   }
-
-  .faq-item {
-    margin-bottom: 1rem;
-  }
-
-  .faq-item.is-open .faq-answer {
-    padding: 0 1.5rem 1.5rem;
-  }
 }
 </style>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  document.querySelectorAll(".faq-item .faq-q").forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      var item = this.closest(".faq-item");
-      var answer = document.getElementById(this.getAttribute("aria-controls"));
-      var isOpen = item.classList.toggle("is-open");
-      this.setAttribute("aria-expanded", isOpen);
-      if (answer) answer.setAttribute("aria-hidden", !isOpen);
-    });
-  });
-});
-</script>

@@ -42,6 +42,7 @@ Rails.application.routes.draw do
   end
 
   get "/faq", to: "home#faq", as: :faq
+  get "/rules", to: "home#rules", as: :rules
 
   root "home#index"
   # Defines the root path route ("/")
