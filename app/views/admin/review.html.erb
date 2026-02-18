@@ -242,13 +242,17 @@
               <div>
                 <p class="project-title"><%= project["name"] || "Untitled Project" %></p>
                 <p class="project-meta">
-                  by <%= item[:user]&.display_name || item[:user]&.email || "Unknown" %> 
-                  (<%= item[:user]&.email || "N/A" %>) 
-                  • <%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %> logged 
-                  <% if project["created_at"].present? %>
-                    • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
-                  <% end %>
-                  <% status = project["status"] %>
+                   by <%= item[:user]&.display_name || item[:user]&.email || "Unknown" %> 
+                   (<%= item[:user]&.email || "N/A" %>) 
+                   • <%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %> logged 
+                   <% if project["created_at"].present? %>
+                     <% begin %>
+                       • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
+                     <% rescue => e %>
+                       • submitted (invalid date)
+                     <% end %>
+                   <% end %>
+                   <% status = project["status"] %>
                   <% if status.present? %>
                     <% case status
                        when "approved" %>
@@ -272,13 +276,13 @@
               <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
               <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
               <% if item[:journal_entries].present? %>
-                <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n") %>')">
-                  View Journal (<%= item[:journal_entries].length %> entries)
-                </button>
+                <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n").gsub(/['"]/, '').gsub(/\n/, '\\n') %>')">
+                    View Journal (<%= item[:journal_entries].length %> entries)
+                  </button>
               <% end %>
-            </div>
+              </div>
 
-            <% unless project["reviewed"] %>
+              <% unless project["reviewed"] %>
               <div class="review-inputs">
                 <input type="number" class="review-hours-input" placeholder="Approved Hours" value="<%= item[:hours] %>" step="0.5" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
                 <input type="text" class="review-justification-input" placeholder="Hour Justification (internal)" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
@@ -312,35 +316,39 @@
                   (<%= item[:user]&.email || "N/A" %>) 
                   • <%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %> logged 
                   <% if project["created_at"].present? %>
-                    • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
+                    <% begin %>
+                      • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
+                    <% rescue => e %>
+                      • submitted (invalid date)
+                    <% end %>
                   <% end %>
                   <% status = project["status"] %>
                   <% if status.present? %>
-                    <% case status
-                       when "approved" %>
-                        <br><span style="color: #3cb043; font-weight: bold;">✓ Approved</span>
-                       <% when "rejected" %>
-                        <br><span style="color: #d42b2b; font-weight: bold;">✗ Rejected</span>
-                       <% when "pending" %>
-                        <br><span style="color: #d4a017; font-weight: bold;">⏳ Pending Review</span>
-                       <% end %>
-                  <% end %>
-                </p>
-              </div>
-              <div class="approved-hours">
-                <div class="approved-hours-value"><%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %></div>
-              </div>
-            </div>
+                     <% case status
+                        when "approved" %>
+                         <br><span style="color: #3cb043; font-weight: bold;">✓ Approved</span>
+                        <% when "rejected" %>
+                         <br><span style="color: #d42b2b; font-weight: bold;">✗ Rejected</span>
+                        <% when "pending" %>
+                         <br><span style="color: #d4a017; font-weight: bold;">⏳ Pending Review</span>
+                        <% end %>
+                   <% end %>
+                  </p>
+                  </div>
+                  <div class="approved-hours">
+                  <div class="approved-hours-value"><%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %></div>
+                  </div>
+                  </div>
 
-            <p class="project-description"><%= project["description"] %></p>
+                  <p class="project-description"><%= project["description"] %></p>
 
-            <div class="project-buttons">
-              <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
-              <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
-              <% if item[:journal_entries].present? %>
-                <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n") %>')">
-                  View Journal (<%= item[:journal_entries].length %> entries)
-                </button>
+                  <div class="project-buttons">
+                  <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
+                  <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+                  <% if item[:journal_entries].present? %>
+                  <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n").gsub(/['"]/, '').gsub(/\n/, '\\n') %>')">
+                   View Journal (<%= item[:journal_entries].length %> entries)
+                  </button>
               <% end %>
             </div>
 
