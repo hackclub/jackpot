@@ -18,6 +18,7 @@ class AdminController < ApplicationController
     @all_users.each do |user|
       projects = user.projects || []
       projects.each_with_index do |project, index|
+        next if project.nil?
         # Calculate hours (same as deck_controller)
         total_hours = calculate_project_hours(user, project, index, service, start_date)
         journal_entries = user.journal_entries.for_project(index)
@@ -42,6 +43,8 @@ class AdminController < ApplicationController
   private
   
   def calculate_project_hours(user, project, project_index, service, start_date)
+    return 0.0 if project.nil?
+    
     hackatime_id = user.slack_id || user.hack_club_id
     hackatime_hours = 0
     
