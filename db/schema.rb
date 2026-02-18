@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_17_173238) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_18_195707) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -100,13 +100,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_17_173238) do
   end
 
   create_table "projects", force: :cascade do |t|
+    t.text "admin_feedback"
     t.string "airtable_id"
+    t.decimal "approved_hours", precision: 10, scale: 2
+    t.decimal "chips_earned", precision: 10, scale: 2
+    t.string "code_url"
     t.datetime "created_at", null: false
     t.text "description"
     t.string "hackatime_project"
+    t.json "hackatime_projects", default: [], null: false
+    t.string "hour_justification"
     t.string "name"
+    t.string "playable_url"
     t.integer "position", default: 0
     t.string "project_type"
+    t.boolean "reviewed", default: false, null: false
+    t.datetime "reviewed_at"
+    t.boolean "shipped", default: false, null: false
+    t.datetime "shipped_at"
+    t.string "status", default: "pending"
     t.date "synced_at"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
