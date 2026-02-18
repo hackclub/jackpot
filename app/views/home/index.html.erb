@@ -33,12 +33,18 @@ background-repeat: no-repeat;
 background-size: 100% 400vh;
 background-position: top center;
 background-color: #000;
+width: 100%;
+min-width: 100%;
+box-sizing: border-box;
 }
 
 .main {
 color: white;
 text-align: center;
 position: relative;
+width: 100%;
+min-width: 100%;
+box-sizing: border-box;
 }
 
 .page-section {
@@ -209,9 +215,24 @@ height: auto;
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
+  html, body {
+    width: 100%;
+    min-width: 100vw;
+    overflow-x: hidden;
+  }
   body {
-    background-size: 100% 315vh;
+    background-size: 102% 315vh;
     background-position: top center;
+  }
+  .main {
+    min-width: 100vw;
+    width: 100%;
+  }
+  .page-section {
+    min-width: 100%;
+  }
+  .hero-overlays {
+    transform: translateY(4vh);   /* less upward shift so image + button sit lower */
   }
   .hero-title {
     width: 110vw;                  /* title sz */
@@ -221,12 +242,15 @@ height: auto;
   .hero-center {
     width: 150vw;                /* image sz */
     max-width: none;
-    top: 0;                   
+    top: 22vh;                   /* lower so central image is more centered */
   }
   .hero-logo {
     width: 140px;                /* logo pos */
     top: 0;
     left: 8px;
+  }
+  .page-section--hero #rsvp-container {
+    bottom: 32px;                /* lower button on mobile */
   }
 }
 </style>
