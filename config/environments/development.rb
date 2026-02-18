@@ -64,6 +64,10 @@ Rails.application.configure do
   # Suppress logger output for asset requests.
   config.assets.quiet = true
 
+  # Keep development asset resolution dynamic even when public/assets/.manifest.json exists.
+  # This avoids stale precompiled manifests breaking newly added local assets.
+  config.assets.manifest_path = Rails.root.join("tmp/assets/.manifest.json")
+
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 

@@ -665,6 +665,13 @@
   font-family: 'Georgia', serif;
 }
 
+#projectModalForm {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -709,6 +716,7 @@
 .project-form-body,
 .project-detail-body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 2rem;
   display: flex;
@@ -728,7 +736,7 @@
   font-size: 0.95rem;
 }
 
-.project-form-field input,
+.project-form-field input:not([type="checkbox"]):not([type="radio"]),
 .project-form-field textarea {
   width: 100%;
   box-sizing: border-box;
@@ -745,7 +753,7 @@
   resize: vertical;
 }
 
-.project-form-field input:focus,
+.project-form-field input:not([type="checkbox"]):not([type="radio"]):focus,
 .project-form-field textarea:focus {
   outline: none;
   border-color: #d4a017;
