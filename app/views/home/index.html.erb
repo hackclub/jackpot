@@ -3,7 +3,7 @@
   <div class="hero-overlays">
     <%= image_tag 'title.PNG', alt: 'Jackpot Title', class: 'hero-title' %>
     <%= image_tag 'centralmg.png', alt: 'Center Art', class: 'hero-center' %>
-    <%= image_tag 'HC_logo.png', alt: 'Hack Club Logo', class: 'hero-logo' %>
+    <%= link_to image_tag('HC_logo.png', alt: 'Hack Club Logo', class: 'hero-logo'), 'https://hackclub.com', class: 'hero-logo-link' %>
   </div>
   <%= render "home/rsvp" %>
 </div>
@@ -67,7 +67,7 @@ width: 100%;
 margin-top: 8vh;
 }
 .page-section--steps .steps-image {
-max-width: 70vw;
+max-width: 85vw;
 width: 100%;
 height: auto;
 object-fit: contain;
@@ -162,12 +162,18 @@ filter:
   drop-shadow(0 0 48px rgba(255, 170, 60, 0.22));
 animation: center-glow 2.8s ease-in-out infinite;
 }
-.hero-logo {
+.hero-logo-link {
 position: absolute;
 top: 6vh;
 left: 8px;
+pointer-events: auto;
+display: block;
+line-height: 0;
+}
+.hero-logo {
 width: 180px;
 height: auto;
+display: block;
 }
 @keyframes title-sheen {
   0%   { transform: translateX(-160%); opacity: 0.0; }
@@ -197,6 +203,9 @@ height: auto;
 }
 
 @media (max-width: 600px) {
+  .page-section--steps .steps-content {
+    margin-top: 0;
+  }
   .page-section--steps .steps-cards {
     gap: 3vw;
   }
@@ -237,20 +246,22 @@ height: auto;
   .hero-title {
     width: 110vw;                  /* title sz */
     max-width: none;
-    top: -12vh;                   
+    top: -20vh;                   
   }
   .hero-center {
     width: 150vw;                /* image sz */
     max-width: none;
-    top: 22vh;                   /* lower so central image is more centered */
+    top: 16vh;                   /* lower so central image is more centered */
   }
-  .hero-logo {
-    width: 140px;                /* logo pos */
-    top: 0;
+  .hero-logo-link {
+    top: -10vh;
     left: 8px;
   }
+  .hero-logo {
+    width: 140px;
+  }
   .page-section--hero #rsvp-container {
-    bottom: 32px;                /* lower button on mobile */
+    bottom: 160px;                /* lower button on mobile */
   }
 }
 </style>
