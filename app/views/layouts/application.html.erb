@@ -29,7 +29,7 @@
           <div class="nav-links">
             <%= link_to "Deck", deck_path, class: "nav-item #{'nav-active' if controller_name == 'deck'}" %>
             <%= link_to "Shop", "#", class: "nav-item" %>
-            <%= link_to "FAQ", "#", class: "nav-item" %>
+            <%= link_to "FAQ", faq_path, class: "nav-item #{'nav-active' if controller_name == 'home' && action_name == 'faq'}" %>
             <%= link_to "Status", "#", class: "nav-item" %>
             <%= link_to "Leaderboard", leaderboard_path, class: "nav-item #{'nav-active' if controller_name == 'leaderboard'}" %>
             <% if admin? %>
