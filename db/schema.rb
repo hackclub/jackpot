@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_18_195707) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_18_201000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -90,6 +90,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_18_195707) do
     t.datetime "created_at", null: false
     t.text "description"
     t.decimal "hours_worked", precision: 5, scale: 2
+    t.bigint "project_id"
     t.integer "project_index", null: false
     t.string "project_name", null: false
     t.datetime "time_done"
@@ -278,6 +279,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_18_195707) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "journal_entries", "projects"
   add_foreign_key "journal_entries", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

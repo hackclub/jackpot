@@ -195,16 +195,17 @@ class DeckController < ApplicationController
   def create_journal_entry
     project_index = params[:project_index].to_i
     current_user.reload
-    projects = current_user.projects || []
+    projects = current_user.projects.order(position: :asc).to_a || []
 
     if !project_index.between?(0, projects.size - 1)
       return render json: { error: "Invalid project index" }, status: :unprocessable_entity
     end
 
     project = projects[project_index]
-    project_name = project["name"]
+    project_name = project.name
 
     entry = current_user.journal_entries.create!(
+      project_id: project.id,
       project_name: project_name,
       project_index: project_index,
       time_done: params[:time_done],
