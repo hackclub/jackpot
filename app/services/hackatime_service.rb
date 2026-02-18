@@ -53,6 +53,7 @@ class HackatimeService
 
     projects_data = body.dig("data", "projects") || []
     projects = projects_data.map { |p| p.is_a?(Hash) ? p["name"] : p }.compact
+    projects = projects.reject { |p| p == "Other" }
     Rails.logger.info("Hackatime projects for #{slack_id}: #{projects.inspect}")
     projects
   rescue Faraday::Error => e
