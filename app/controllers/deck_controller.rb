@@ -4,7 +4,7 @@ class DeckController < ApplicationController
 
   def index
     current_user.reload
-    projects = current_user.projects || []
+    projects = current_user.projects.order(position: :asc).to_a || []
 
     service = HackatimeService.new
     start_date = Date.new(2026, 2, 14)
@@ -12,7 +12,7 @@ class DeckController < ApplicationController
     Rails.logger.info("DeckController#index: user=#{current_user.id}, slack_id=#{current_user.slack_id}, hack_club_id=#{current_user.hack_club_id}, hackatime_id=#{hackatime_id}")
 
      @projects = projects.map.with_index do |project, index|
-       linked = project["hackatime_projects"] || []
+       linked = project.hackatime_projects || []
        hackatime_hours = linked.sum do |hp_name|
          hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
          Rails.logger.info("  project[#{index}] #{hp_name}: #{hours}h from hackatime")
@@ -23,7 +23,27 @@ class DeckController < ApplicationController
        total_hours = hackatime_hours + journal_hours
        Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
-       project.merge("hours" => total_hours)
+       project_hash = {
+         "id" => project.id,
+         "name" => project.name,
+         "description" => project.description,
+         "project_type" => project.project_type,
+         "code_url" => project.code_url,
+         "playable_url" => project.playable_url,
+         "hackatime_projects" => project.hackatime_projects || [],
+         "hours" => total_hours,
+         "shipped" => project.shipped,
+         "shipped_at" => project.shipped_at&.iso8601,
+         "status" => project.status,
+         "reviewed" => project.reviewed,
+         "reviewed_at" => project.reviewed_at&.iso8601,
+         "approved_hours" => project.approved_hours,
+         "hour_justification" => project.hour_justification,
+         "admin_feedback" => project.admin_feedback,
+         "chips_earned" => project.chips_earned,
+         "created_at" => project.created_at&.iso8601
+       }
+       project_hash
      end
 
     empty_count = [ 4 - @projects.size, 0 ].max
@@ -36,7 +56,6 @@ class DeckController < ApplicationController
 
   def save_project
     current_user.reload
-    projects = current_user.projects || []
 
     project_name = params[:project_name].to_s.strip
     project_description = params[:project_description].to_s.strip
@@ -52,39 +71,41 @@ class DeckController < ApplicationController
       return render json: { error: "Playable URL is invalid" }, status: :unprocessable_entity
     end
 
-    project_payload = {
-      "name" => project_name.presence || "Project #{projects.size + 1}",
-      "description" => project_description,
-      "project_type" => project_type,
-      "playable_url" => playable_url,
-      "code_url" => code_url,
-      "hackatime_projects" => hackatime_projects
-    }
-
     project_index = params[:project_index].to_i
     is_new = false
-    if params[:project_index].present? && project_index.between?(0, projects.size - 1)
-      existing_project = projects[project_index] || {}
-      projects[project_index] = existing_project.merge(project_payload)
-    else
-      projects << project_payload.merge("created_at" => Time.current.iso8601)
-      project_index = projects.size - 1
+    project = nil
+
+    if params[:project_index].present? && project_index >= 0
+      project = current_user.projects[project_index]
+      if project
+        project.update!(
+          name: project_name.presence || "Project #{current_user.projects.count + 1}",
+          description: project_description,
+          project_type: project_type,
+          playable_url: playable_url,
+          code_url: code_url,
+          hackatime_projects: hackatime_projects
+        )
+      end
+    end
+
+    if project.nil?
+      project = current_user.projects.create!(
+        name: project_name.presence || "Project #{current_user.projects.count + 1}",
+        description: project_description,
+        project_type: project_type,
+        playable_url: playable_url,
+        code_url: code_url,
+        hackatime_projects: hackatime_projects
+      )
+      project_index = project.position
       is_new = true
     end
 
-    if current_user.update!(projects: projects)
-      if request.xhr?
-        render json: { success: true, project_index: project_index, is_new: is_new }
-      else
-        redirect_to deck_path
-      end
+    if request.xhr?
+      render json: { success: true, project_index: project_index, is_new: is_new }
     else
-      if request.xhr?
-        render json: { error: "Failed to save project" }, status: :unprocessable_entity
-      else
-        flash[:alert] = "Failed to save project"
-        redirect_to deck_path
-      end
+      redirect_to deck_path
     end
   rescue => e
     Rails.logger.error("Error saving project: #{e.message}\n#{e.backtrace.join("\n")}")
@@ -98,13 +119,11 @@ class DeckController < ApplicationController
 
   def ship_project
      current_user.reload
-     projects = current_user.projects || []
-
      project_index = params[:project_index].to_i
-     if project_index.between?(0, projects.size - 1)
-       project = projects[project_index]
+     project = current_user.projects[project_index]
 
-       if project["playable_url"].blank? || project["code_url"].blank?
+     if project
+       if project.playable_url.blank? || project.code_url.blank?
          if request.xhr?
            return render json: { error: "Playable URL and Code URL are required to ship" }, status: :unprocessable_entity
          else
@@ -113,10 +132,11 @@ class DeckController < ApplicationController
          end
        end
 
-       project["shipped"] = true
-       project["status"] = "pending"
-       project["shipped_at"] = Time.current.iso8601
-       current_user.update!(projects: projects)
+       project.update!(
+         shipped: true,
+         status: "pending",
+         shipped_at: Time.current
+       )
      end
 
      if request.xhr?
@@ -136,13 +156,11 @@ class DeckController < ApplicationController
 
    def delete_project
      current_user.reload
-     projects = current_user.projects || []
-
      project_index = params[:project_index].to_i
-     if project_index.between?(0, projects.size - 1)
-       project = projects[project_index]
+     project = current_user.projects[project_index]
 
-       if project["shipped"]
+     if project
+       if project.shipped
          if request.xhr?
            return render json: { error: "Cannot delete shipped projects" }, status: :unprocessable_entity
          else
@@ -151,8 +169,7 @@ class DeckController < ApplicationController
          end
        end
 
-       projects.delete_at(project_index)
-       current_user.update!(projects: projects)
+       project.destroy!
      end
 
      if request.xhr?
@@ -220,11 +237,18 @@ class DeckController < ApplicationController
     
     Rails.logger.info "Approving project for user #{user_id}: #{approved_hours} hours = #{chips_earned} chips"
     
-    if user.approve_project(project_index, approved_hours, justification, feedback)
-      Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
-      render json: { success: true, message: "Project approved", chips_earned: chips_earned }
-    else
-      render json: { error: "Could not approve project" }, status: :unprocessable_entity
+    begin
+      if user.approve_project(project_index, approved_hours, justification, feedback)
+        Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
+        render json: { success: true, message: "Project approved", chips_earned: chips_earned }
+      else
+        Rails.logger.error "Failed to approve project"
+        render json: { error: "Could not approve project" }, status: :unprocessable_entity
+      end
+    rescue => e
+      Rails.logger.error "Error approving project: #{e.class} - #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      render json: { error: "Error: #{e.message}" }, status: :unprocessable_entity
     end
   end
 
@@ -234,10 +258,21 @@ class DeckController < ApplicationController
     feedback = params[:feedback]
 
     user = User.find(user_id)
-    if user.reject_project(project_index, feedback)
-      render json: { success: true, message: "Project rejected" }
-    else
-      render json: { error: "Could not reject project" }, status: :unprocessable_entity
+    
+    Rails.logger.info "Rejecting project for user #{user_id}"
+    
+    begin
+      if user.reject_project(project_index, feedback)
+        Rails.logger.info "Project rejected for user #{user_id}"
+        render json: { success: true, message: "Project rejected" }
+      else
+        Rails.logger.error "Failed to reject project"
+        render json: { error: "Could not reject project" }, status: :unprocessable_entity
+      end
+    rescue => e
+      Rails.logger.error "Error rejecting project: #{e.class} - #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      render json: { error: "Error: #{e.message}" }, status: :unprocessable_entity
     end
   end
 

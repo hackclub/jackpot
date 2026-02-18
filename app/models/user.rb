@@ -3,6 +3,7 @@
 class User < ApplicationRecord
   has_encrypted :access_token
   has_many :journal_entries, foreign_key: :user_id, dependent: :destroy
+  has_many :projects, dependent: :destroy
   enum :role, { user: 0, admin: 1 }, prefix: true
 
   validates :hack_club_id, presence: true, uniqueness: true

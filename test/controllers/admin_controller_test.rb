@@ -15,21 +15,19 @@ class AdminControllerTest < ActionDispatch::IntegrationTest
       hack_club_id: "test_user_123",
       email: "user@test.com",
       access_token: "test_token_2",
-      role: :user,
-      projects: [
-        {
-          "name" => "Valid Project",
-          "description" => "A real project",
-          "project_type" => "Web App",
-          "created_at" => Time.current.iso8601
-        },
-        nil, # This nil project should be filtered out
-        {
-          "name" => "Another Project",
-          "description" => "Second project",
-          "shipped" => true
-        }
-      ]
+      role: :user
+    )
+    
+    @user_with_projects.projects.create!(
+      name: "Valid Project",
+      description: "A real project",
+      project_type: "Web App"
+    )
+    
+    @user_with_projects.projects.create!(
+      name: "Another Project",
+      description: "Second project",
+      shipped: true
     )
   end
 
