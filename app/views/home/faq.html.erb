@@ -20,48 +20,78 @@
     <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--16", alt: "" %>
   </div>
   <div class="faq-content">
-  <%= link_to "← Back", root_path, class: "faq-back-btn" %>
-  <div class="faq-notice">
-    <p>Please note, day-of logistics, such as schedules or venue, are subject to change. We will provide more specific instructions to participants closer to the event.</p>
-  </div>
+  <%= link_to root_path, class: "faq-back-btn" do %>
+  <%= image_tag "back_button.png", alt: "Back", class: "faq-back-btn-img" %>
+<% end %>
 
-  <h1 class="faq-title">FAQ</h1>
+  <%= image_tag "faq_title.png", alt: "FAQ", class: "faq-title" %>
+  <p class="faq-disclaimer"><strong>NOTE:</strong> Day-of logistics (schedules, venue) may change. We'll share details closer to the event.</p>
 
   <section class="faq-section">
     <h2 class="faq-section-heading">— General</h2>
 
     <article class="faq-item">
-      <h3 class="faq-q">What if I can't (or don't wanna) attend Jackpot in Las Vegas?</h3>
-      <p class="faq-a">You will be able to redeem the hours you spent making projects in a shop for fun, neat prizes!</p>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-1" id="faq-q-1">
+        <span class="faq-q-text">What if I can't (or don't wanna) attend Jackpot in Las Vegas?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-1" role="region" aria-labelledby="faq-q-1" aria-hidden="true">
+        <p class="faq-a">You will be able to redeem the hours you spent making projects in a shop for fun, neat prizes!</p>
+      </div>
     </article>
 
     <article class="faq-item">
-      <h3 class="faq-q">How Do I Register?</h3>
-      <p class="faq-a">Signup <a href="#" class="faq-link">here</a>!</p>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-2" id="faq-q-2">
+        <span class="faq-q-text">How Do I Register?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-2" role="region" aria-labelledby="faq-q-2" aria-hidden="true">
+        <p class="faq-a">Signup <a href="#" class="faq-link">here</a>!</p>
+      </div>
     </article>
 
     <article class="faq-item">
-      <h3 class="faq-q">Can I start?</h3>
-      <p class="faq-a">Yes, track your hours with Hackatime or use the journaling system.</p>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-3" id="faq-q-3">
+        <span class="faq-q-text">Can I start?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-3" role="region" aria-labelledby="faq-q-3" aria-hidden="true">
+        <p class="faq-a">Yes, track your hours with Hackatime or use the journaling system.</p>
+      </div>
     </article>
 
     <article class="faq-item">
-      <h3 class="faq-q">Can I collab with my friends and make a single project?</h3>
-      <p class="faq-a">Yes BUT:</p>
-      <ul class="faq-list">
-        <li>You can work on the same repo but in different forks</li>
-        <li>Your hours will be obviously counted separately</li>
-      </ul>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-4" id="faq-q-4">
+        <span class="faq-q-text">Can I collab with my friends and make a single project?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-4" role="region" aria-labelledby="faq-q-4" aria-hidden="true">
+        <p class="faq-a">Yes BUT:</p>
+        <ul class="faq-list">
+          <li>You can work on the same repo but in different forks</li>
+          <li>Your hours will be obviously counted separately</li>
+        </ul>
+      </div>
     </article>
 
     <article class="faq-item">
-      <h3 class="faq-q">Can I ship a private (or partially private) project?</h3>
-      <p class="faq-a">No, your project MUST be open source, otherwise hours will not be counted.</p>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-5" id="faq-q-5">
+        <span class="faq-q-text">Can I ship a private (or partially private) project?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-5" role="region" aria-labelledby="faq-q-5" aria-hidden="true">
+        <p class="faq-a">No, your project MUST be open source, otherwise hours will not be counted.</p>
+      </div>
     </article>
 
     <article class="faq-item">
-      <h3 class="faq-q">Can I work in already started projects?</h3>
-      <p class="faq-a">As long it's not part of other HC programs, yes you can! We HIGHLY suggest to create a new Github repository — it's not mandatory, but it will increase your chances of being approved, and will make the process much faster.</p>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-6" id="faq-q-6">
+        <span class="faq-q-text">Can I work in already started projects?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-6" role="region" aria-labelledby="faq-q-6" aria-hidden="true">
+        <p class="faq-a">As long it's not part of other HC programs, yes you can! We HIGHLY suggest to create a new Github repository — it's not mandatory, but it will increase your chances of being approved, and will make the process much faster.</p>
+      </div>
     </article>
   </section>
 
@@ -69,24 +99,40 @@
     <h2 class="faq-section-heading">— In-Person Event</h2>
 
     <article class="faq-item">
-      <h3 class="faq-q">How do I get invited?</h3>
-      <p class="faq-a">Log your hours, work on your project for 65 hours and ship it on Launchpad.</p>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-7" id="faq-q-7">
+        <span class="faq-q-text">How do I get invited?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-7" role="region" aria-labelledby="faq-q-7" aria-hidden="true">
+        <p class="faq-a">Log your hours, work on your project for 65 hours and ship it on Launchpad.</p>
+      </div>
     </article>
 
     <article class="faq-item">
-      <h3 class="faq-q">Who Can Participate?</h3>
-      <p class="faq-a">Anyone between the ages of 13 and 18 (included) can participate in Jackpot!</p>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-8" id="faq-q-8">
+        <span class="faq-q-text">Who Can Participate?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-8" role="region" aria-labelledby="faq-q-8" aria-hidden="true">
+        <p class="faq-a">Anyone between the ages of 13 and 18 (included) can participate in Jackpot!</p>
+      </div>
     </article>
 
     <article class="faq-item">
-      <h3 class="faq-q">Is it free?</h3>
-      <p class="faq-a">Yes! Participation is entirely free once you're invited!</p>
+      <button type="button" class="faq-q" aria-expanded="false" aria-controls="faq-answer-9" id="faq-q-9">
+        <span class="faq-q-text">Is it free?</span>
+        <span class="faq-q-icon" aria-hidden="true"></span>
+      </button>
+      <div class="faq-answer" id="faq-answer-9" role="region" aria-labelledby="faq-q-9" aria-hidden="true">
+        <p class="faq-a">Yes! Participation is entirely free once you're invited!</p>
+      </div>
     </article>
   </section>
 
   <section class="faq-section faq-section--cta">
-    <h2 class="faq-section-heading">— Still Have Questions?</h2>
-    <p class="faq-cta">Ask directly in the HC Slack channel <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU" target="_blank" rel="noopener noreferrer" class="faq-link faq-link--channel">#jackpot-help</a></p>
+    <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU" target="_blank" rel="noopener noreferrer" class="faq-cta-card-link">
+      <%= image_tag "Card_1.png", alt: "Ask a question in #jackpot-help", class: "faq-cta-card" %>
+    </a>
   </section>
   </div>
 </div>
@@ -234,48 +280,72 @@
 .faq-content {
   position: relative;
   z-index: 1;
+  padding-top: 5.25rem;
 }
 
 .faq-back-btn {
+  position: absolute;
+  top: 0.5rem;
+  left: -0.75rem;
   display: inline-block;
-  margin-bottom: 1.5rem;
-  padding: 0.7rem 1.4rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 200, 100, 0.4);
-  border-radius: 8px;
-  color: rgba(255, 220, 150, 0.95);
-  font-size: 1.35rem;
-  font-weight: 500;
+  line-height: 0;
   text-decoration: none;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 .faq-back-btn:hover {
-  background: rgba(255, 200, 100, 0.15);
-  border-color: rgba(255, 200, 100, 0.6);
-  color: #ffd4a0;
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 12px rgba(255, 180, 80, 0.3));
 }
 
-.faq-notice {
-  background: linear-gradient(135deg, rgba(255, 180, 80, 0.12) 0%, rgba(236, 55, 80, 0.08) 100%);
-  border: 1px solid rgba(255, 200, 100, 0.35);
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
-  margin-bottom: 3rem;
-  font-size: 1.4rem;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.92);
+.faq-back-btn-img {
+  display: block;
+  height: auto;
+  max-height: 96px;
+  width: auto;
+  object-fit: contain;
+}
+
+.faq-disclaimer {
+  margin: 0 auto 2rem;
+  max-width: 520px;
+  padding: 0.75rem 1rem;
+  font-size: 1.15rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.88);
+  text-align: center;
+  animation: faq-disclaimer-in 0.6s ease-out, faq-disclaimer-pulse 3s ease-in-out 0.6s infinite;
+}
+
+.faq-disclaimer strong {
+  font-style: normal;
+  color: rgba(255, 220, 140, 0.95);
+}
+
+@keyframes faq-disclaimer-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes faq-disclaimer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.9; }
 }
 
 .faq-title {
-  font-size: clamp(3.5rem, 11vw, 6rem);
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  margin: 0 0 2.5rem;
-  background: linear-gradient(180deg, #fff 0%, rgba(255, 220, 150, 0.9) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  display: block;
+  max-width: 100%;
+  width: clamp(280px, 50vw, 420px);
+  height: auto;
+  margin: 0 auto 2.5rem;
+  object-fit: contain;
 }
 
 .faq-section {
@@ -294,15 +364,67 @@
 }
 
 .faq-item {
-  margin-bottom: 1.75rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(255, 200, 100, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-family: inherit;
   font-size: 1.6rem;
   font-weight: 600;
   color: #fff;
-  margin: 0 0 0.5rem;
   line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.faq-q:hover {
+  background: rgba(255, 200, 100, 0.08);
+}
+
+.faq-q-text {
+  flex: 1;
+}
+
+.faq-q-icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-right: 2px solid rgba(255, 200, 100, 0.9);
+  border-bottom: 2px solid rgba(255, 200, 100, 0.9);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.35s ease;
+}
+
+.faq-item.is-open .faq-q-icon {
+  transform: rotate(-135deg) translateY(2px);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+}
+
+.faq-item.is-open .faq-answer {
+  max-height: 800px;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.faq-item.is-open .faq-answer .faq-a:first-child {
+  padding-top: 0.5rem;
 }
 
 .faq-a {
@@ -342,13 +464,25 @@
   margin-top: 3rem;
   padding-top: 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
 }
 
-.faq-cta {
-  margin: 0;
-  font-size: 1.45rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.9);
+.faq-cta-card-link {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+
+.faq-cta-card-link:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 8px 20px rgba(255, 180, 80, 0.35));
+}
+
+.faq-cta-card {
+  display: block;
+  max-width: 320px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 @media (min-width: 900px) {
@@ -357,19 +491,28 @@
     padding: 3rem 4rem 5rem;
   }
 
-  .faq-back-btn {
-    font-size: 1.45rem;
-    padding: 0.8rem 1.6rem;
+  .faq-content {
+    padding-top: 6.25rem;
   }
 
-  .faq-notice {
-    font-size: 1.55rem;
-    padding: 1.75rem 2.25rem;
-    margin-bottom: 3.5rem;
+  .faq-back-btn {
+    top: 0.75rem;
+    left: -15rem;
+  }
+
+  .faq-back-btn-img {
+    max-height: 112px;
+  }
+
+  .faq-disclaimer {
+    max-width: 580px;
+    margin-bottom: 2.5rem;
+    font-size: 1.25rem;
+    padding: 0.85rem 1.25rem;
   }
 
   .faq-title {
-    font-size: clamp(4rem, 6.5vw, 6.5rem);
+    width: clamp(320px, 45vw, 520px);
     margin-bottom: 3rem;
   }
 
@@ -380,7 +523,7 @@
 
   .faq-q {
     font-size: 1.85rem;
-    margin-bottom: 0.6rem;
+    padding: 1.15rem 1.5rem;
   }
 
   .faq-a {
@@ -394,8 +537,8 @@
     margin-left: 1.75rem;
   }
 
-  .faq-cta {
-    font-size: 1.65rem;
+  .faq-cta-card {
+    max-width: 380px;
   }
 
   .faq-link--channel {
@@ -407,7 +550,25 @@
   }
 
   .faq-item {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .faq-item.is-open .faq-answer {
+    padding: 0 1.5rem 1.5rem;
   }
 }
 </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll(".faq-item .faq-q").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var item = this.closest(".faq-item");
+      var answer = document.getElementById(this.getAttribute("aria-controls"));
+      var isOpen = item.classList.toggle("is-open");
+      this.setAttribute("aria-expanded", isOpen);
+      if (answer) answer.setAttribute("aria-hidden", !isOpen);
+    });
+  });
+});
+</script>
