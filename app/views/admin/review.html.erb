@@ -244,7 +244,7 @@
                 <p class="project-meta">
                    by <%= item[:user]&.display_name || item[:user]&.email || "Unknown" %> 
                    (<%= item[:user]&.email || "N/A" %>) 
-                   • <%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %> logged 
+                   • <%= sprintf("%.4f", (item[:hours] || 0).to_f) %> hours logged
                    <% if project["created_at"].present? %>
                      <% begin %>
                        • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
@@ -266,15 +266,19 @@
                 </p>
               </div>
               <div class="approved-hours">
-                <div class="approved-hours-value"><%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %></div>
-              </div>
+                 <div class="approved-hours-value"><%= sprintf("%.4f", (item[:hours] || 0).to_f) %>h</div>
+               </div>
             </div>
 
-            <p class="project-description"><%= project["description"] %></p>
+            <p class="project-description"><%= project["description"] || "" %></p>
 
             <div class="project-buttons">
-              <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
-              <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+              <% if project["code_url"].present? %>
+                <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
+              <% end %>
+              <% if project["playable_url"].present? %>
+                <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+              <% end %>
               <% if item[:journal_entries].present? %>
                 <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n").gsub(/['"]/, '').gsub(/\n/, '\\n') %>')">
                     View Journal (<%= item[:journal_entries].length %> entries)
@@ -314,37 +318,41 @@
                 <p class="project-meta">
                   by <%= item[:user]&.display_name || item[:user]&.email || "Unknown" %> 
                   (<%= item[:user]&.email || "N/A" %>) 
-                  • <%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %> logged 
-                  <% if project["created_at"].present? %>
-                    <% begin %>
-                      • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
-                    <% rescue => e %>
-                      • submitted (invalid date)
-                    <% end %>
-                  <% end %>
-                  <% status = project["status"] %>
-                  <% if status.present? %>
-                     <% case status
-                        when "approved" %>
-                         <br><span style="color: #3cb043; font-weight: bold;">✓ Approved</span>
-                        <% when "rejected" %>
-                         <br><span style="color: #d42b2b; font-weight: bold;">✗ Rejected</span>
-                        <% when "pending" %>
-                         <br><span style="color: #d4a017; font-weight: bold;">⏳ Pending Review</span>
-                        <% end %>
+                  • <%= sprintf("%.4f", (item[:hours] || 0).to_f) %> hours logged 
+                   <% if project["created_at"].present? %>
+                     <% begin %>
+                       • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
+                     <% rescue => e %>
+                       • submitted (invalid date)
+                     <% end %>
                    <% end %>
-                  </p>
-                  </div>
-                  <div class="approved-hours">
-                  <div class="approved-hours-value"><%= number_to_human(item[:hours] || 0, units: {hour: 'h'}) %></div>
+                   <% status = project["status"] %>
+                   <% if status.present? %>
+                      <% case status
+                         when "approved" %>
+                          <br><span style="color: #3cb043; font-weight: bold;">✓ Approved</span>
+                         <% when "rejected" %>
+                          <br><span style="color: #d42b2b; font-weight: bold;">✗ Rejected</span>
+                         <% when "pending" %>
+                          <br><span style="color: #d4a017; font-weight: bold;">⏳ Pending Review</span>
+                         <% end %>
+                    <% end %>
+                   </p>
+                   </div>
+                   <div class="approved-hours">
+                   <div class="approved-hours-value"><%= sprintf("%.4f", (item[:hours] || 0).to_f) %>h</div>
                   </div>
                   </div>
 
-                  <p class="project-description"><%= project["description"] %></p>
+                  <p class="project-description"><%= project["description"] || "" %></p>
 
                   <div class="project-buttons">
-                  <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
-                  <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+                  <% if project["code_url"].present? %>
+                    <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
+                  <% end %>
+                  <% if project["playable_url"].present? %>
+                    <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+                  <% end %>
                   <% if item[:journal_entries].present? %>
                   <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n").gsub(/['"]/, '').gsub(/\n/, '\\n') %>')">
                    View Journal (<%= item[:journal_entries].length %> entries)

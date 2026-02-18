@@ -125,17 +125,25 @@ class User < ApplicationRecord
   end
 
   def approve_project(project_index, approved_hours, justification = nil, feedback = nil)
-    return false unless projects && projects[project_index.to_i]
+     return false unless projects && projects[project_index.to_i]
 
-    idx = project_index.to_i
-    projects[idx]["reviewed"] = true
-    projects[idx]["status"] = "approved"
-    projects[idx]["approved_hours"] = approved_hours.to_f
-    projects[idx]["hour_justification"] = justification
-    projects[idx]["admin_feedback"] = feedback
-    projects[idx]["reviewed_at"] = Time.current.iso8601
-    update!(projects: projects)
-  end
+     idx = project_index.to_i
+     approved_hours_float = approved_hours.to_f
+     
+     chips_earned = (approved_hours_float * 35).round(2)
+     
+     projects[idx]["reviewed"] = true
+     projects[idx]["status"] = "approved"
+     projects[idx]["approved_hours"] = approved_hours_float
+     projects[idx]["hour_justification"] = justification
+     projects[idx]["admin_feedback"] = feedback
+     projects[idx]["reviewed_at"] = Time.current.iso8601
+     projects[idx]["chips_earned"] = chips_earned
+     
+     self.chip_am = (chip_am || 0) + chips_earned
+     
+     update!(projects: projects, chip_am: chip_am)
+   end
 
   def reject_project(project_index, feedback = nil)
     return false unless projects && projects[project_index.to_i]

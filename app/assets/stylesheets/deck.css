@@ -445,6 +445,22 @@
   filter: brightness(1.1);
 }
 
+.project-delete-btn {
+  border: 1px solid #d42b2b;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 9px 14px;
+  font-family: 'Georgia', serif;
+  font-weight: 600;
+  background: #fff;
+  color: #d42b2b;
+  font-size: 0.95rem;
+}
+
+.project-delete-btn:hover {
+  background: #ffe6e6;
+}
+
 .hackatime-field-hint {
   color: #888;
   font-size: 0.8rem;

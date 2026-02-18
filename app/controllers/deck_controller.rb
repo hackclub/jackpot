@@ -45,6 +45,13 @@ class DeckController < ApplicationController
     code_url = params[:code_url].to_s.strip
     hackatime_projects = Array(params[:hackatime_projects]).map(&:strip).reject(&:blank?)
 
+    if code_url.start_with?('[') || code_url.start_with?('{')
+      return render json: { error: "Code URL is invalid" }, status: :unprocessable_entity
+    end
+    if playable_url.start_with?('[') || playable_url.start_with?('{')
+      return render json: { error: "Playable URL is invalid" }, status: :unprocessable_entity
+    end
+
     project_payload = {
       "name" => project_name.presence || "Project #{projects.size + 1}",
       "description" => project_description,
@@ -90,42 +97,78 @@ class DeckController < ApplicationController
   end
 
   def ship_project
-    current_user.reload
-    projects = current_user.projects || []
+     current_user.reload
+     projects = current_user.projects || []
 
-    project_index = params[:project_index].to_i
-    if project_index.between?(0, projects.size - 1)
-      project = projects[project_index]
+     project_index = params[:project_index].to_i
+     if project_index.between?(0, projects.size - 1)
+       project = projects[project_index]
 
-      if project["playable_url"].blank? || project["code_url"].blank?
-        if request.xhr?
-          return render json: { error: "Playable URL and Code URL are required to ship" }, status: :unprocessable_entity
-        else
-          flash[:alert] = "Playable URL and Code URL are required to ship"
-          return redirect_to deck_path
-        end
-      end
+       if project["playable_url"].blank? || project["code_url"].blank?
+         if request.xhr?
+           return render json: { error: "Playable URL and Code URL are required to ship" }, status: :unprocessable_entity
+         else
+           flash[:alert] = "Playable URL and Code URL are required to ship"
+           return redirect_to deck_path
+         end
+       end
 
-      project["shipped"] = true
-      project["status"] = "pending"
-      project["shipped_at"] = Time.current.iso8601
-      current_user.update!(projects: projects)
-    end
+       project["shipped"] = true
+       project["status"] = "pending"
+       project["shipped_at"] = Time.current.iso8601
+       current_user.update!(projects: projects)
+     end
 
-    if request.xhr?
-      render json: { success: true }
-    else
-      redirect_to deck_path
-    end
-  rescue => e
-    Rails.logger.error("Error shipping project: #{e.message}\n#{e.backtrace.join("\n")}")
-    if request.xhr?
-      render json: { error: "Error shipping project: #{e.message}" }, status: :unprocessable_entity
-    else
-      flash[:alert] = "Error shipping project"
-      redirect_to deck_path
-    end
-  end
+     if request.xhr?
+       render json: { success: true }
+     else
+       redirect_to deck_path
+     end
+   rescue => e
+     Rails.logger.error("Error shipping project: #{e.message}\n#{e.backtrace.join("\n")}")
+     if request.xhr?
+       render json: { error: "Error shipping project: #{e.message}" }, status: :unprocessable_entity
+     else
+       flash[:alert] = "Error shipping project"
+       redirect_to deck_path
+     end
+   end
+
+   def delete_project
+     current_user.reload
+     projects = current_user.projects || []
+
+     project_index = params[:project_index].to_i
+     if project_index.between?(0, projects.size - 1)
+       project = projects[project_index]
+
+       if project["shipped"]
+         if request.xhr?
+           return render json: { error: "Cannot delete shipped projects" }, status: :unprocessable_entity
+         else
+           flash[:alert] = "Cannot delete shipped projects"
+           return redirect_to deck_path
+         end
+       end
+
+       projects.delete_at(project_index)
+       current_user.update!(projects: projects)
+     end
+
+     if request.xhr?
+       render json: { success: true }
+     else
+       redirect_to deck_path
+     end
+   rescue => e
+     Rails.logger.error("Error deleting project: #{e.message}\n#{e.backtrace.join("\n")}")
+     if request.xhr?
+       render json: { error: "Error deleting project: #{e.message}" }, status: :unprocessable_entity
+     else
+       flash[:alert] = "Error deleting project"
+       redirect_to deck_path
+     end
+   end
 
   def complete_tutorial
     current_user.update!(tutorial_completed: true)
@@ -168,13 +211,18 @@ class DeckController < ApplicationController
   def approve_project_admin
     user_id = params[:user_id]
     project_index = params[:project_index].to_i
-    approved_hours = params[:approved_hours]
+    approved_hours = params[:approved_hours].to_f
     justification = params[:hour_justification]
     feedback = params[:feedback]
 
     user = User.find(user_id)
+    chips_earned = (approved_hours * 35).round(2)
+    
+    Rails.logger.info "Approving project for user #{user_id}: #{approved_hours} hours = #{chips_earned} chips"
+    
     if user.approve_project(project_index, approved_hours, justification, feedback)
-      render json: { success: true, message: "Project approved" }
+      Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
+      render json: { success: true, message: "Project approved", chips_earned: chips_earned }
     else
       render json: { error: "Could not approve project" }, status: :unprocessable_entity
     end
