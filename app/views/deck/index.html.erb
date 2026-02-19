@@ -468,6 +468,12 @@ document.addEventListener('DOMContentLoaded', function() {
          return;
        }
        
+       var hasSaveBtn = detailSaveBtn && detailSaveBtn.style.display !== 'none';
+       if (hasSaveBtn) {
+         alert('Please click "Save Changes" before shipping your project');
+         return;
+       }
+       
        var formData = new FormData();
        formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').content);
        formData.append('project_index', currentDetailData.index);

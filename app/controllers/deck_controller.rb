@@ -3,8 +3,11 @@ class DeckController < ApplicationController
    before_action :authenticate_admin!, only: [:approve_project_admin, :reject_project_admin]
 
   def index
-    current_user.reload
-    projects = current_user.projects.order(position: :asc).to_a || []
+    projects = current_user.projects.order(position: :asc).to_a
+    project_ids = projects.map(&:id)
+    
+    all_journal_entries = project_ids.present? ? current_user.journal_entries.where(project_id: project_ids).to_a : []
+    journal_by_project_id = all_journal_entries.group_by(&:project_id)
 
     service = HackatimeService.new
     start_date = Date.new(2026, 2, 14)
@@ -19,7 +22,8 @@ class DeckController < ApplicationController
          hours
        end
 
-       journal_hours = current_user.journal_entries.for_project(index).sum(:hours_worked).to_f
+       project_journals = journal_by_project_id[project.id] || []
+       journal_hours = project_journals.sum(&:hours_worked).to_f
        total_hours = hackatime_hours + journal_hours
        Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
@@ -55,8 +59,6 @@ class DeckController < ApplicationController
   end
 
   def save_project
-    current_user.reload
-
     project_name = params[:project_name].to_s.strip
     project_description = params[:project_description].to_s.strip
     project_type = params[:project_type].to_s.strip
@@ -74,12 +76,13 @@ class DeckController < ApplicationController
     project_index = params[:project_index].to_i
     is_new = false
     project = nil
+    projects_count = current_user.projects.count
 
     if params[:project_index].present? && project_index >= 0
       project = current_user.projects[project_index]
       if project
         project.update!(
-          name: project_name.presence || "Project #{current_user.projects.count + 1}",
+          name: project_name.presence || "Project #{projects_count + 1}",
           description: project_description,
           project_type: project_type,
           playable_url: playable_url,
@@ -91,7 +94,7 @@ class DeckController < ApplicationController
 
     if project.nil?
       project = current_user.projects.create!(
-        name: project_name.presence || "Project #{current_user.projects.count + 1}",
+        name: project_name.presence || "Project #{projects_count + 1}",
         description: project_description,
         project_type: project_type,
         playable_url: playable_url,
@@ -118,44 +121,42 @@ class DeckController < ApplicationController
   end
 
   def ship_project
-     current_user.reload
-     project_index = params[:project_index].to_i
-     project = current_user.projects[project_index]
+    project_index = params[:project_index].to_i
+    project = current_user.projects[project_index]
 
-     if project
-       if project.playable_url.blank? || project.code_url.blank?
-         if request.xhr?
-           return render json: { error: "Playable URL and Code URL are required to ship" }, status: :unprocessable_entity
-         else
-           flash[:alert] = "Playable URL and Code URL are required to ship"
-           return redirect_to deck_path
-         end
-       end
+    if project
+      if project.playable_url.blank? || project.code_url.blank?
+        if request.xhr?
+          return render json: { error: "Playable URL and Code URL are required to ship" }, status: :unprocessable_entity
+        else
+          flash[:alert] = "Playable URL and Code URL are required to ship"
+          return redirect_to deck_path
+        end
+      end
 
-       project.update!(
-         shipped: true,
-         status: "pending",
-         shipped_at: Time.current
-       )
-     end
+      project.update!(
+        shipped: true,
+        status: "pending",
+        shipped_at: Time.current
+      )
+    end
 
-     if request.xhr?
-       render json: { success: true }
-     else
-       redirect_to deck_path
-     end
-   rescue => e
-     Rails.logger.error("Error shipping project: #{e.message}\n#{e.backtrace.join("\n")}")
-     if request.xhr?
-       render json: { error: "Error shipping project: #{e.message}" }, status: :unprocessable_entity
-     else
-       flash[:alert] = "Error shipping project"
-       redirect_to deck_path
-     end
-   end
+    if request.xhr?
+      render json: { success: true }
+    else
+      redirect_to deck_path
+    end
+  rescue => e
+    Rails.logger.error("Error shipping project: #{e.message}\n#{e.backtrace.join("\n")}")
+    if request.xhr?
+      render json: { error: "Error shipping project: #{e.message}" }, status: :unprocessable_entity
+    else
+      flash[:alert] = "Error shipping project"
+      redirect_to deck_path
+    end
+  end
 
    def delete_project
-     current_user.reload
      project_index = params[:project_index].to_i
      project = current_user.projects[project_index]
 
@@ -194,7 +195,6 @@ class DeckController < ApplicationController
 
   def create_journal_entry
     project_index = params[:project_index].to_i
-    current_user.reload
     projects = current_user.projects.order(position: :asc).to_a || []
 
     if !project_index.between?(0, projects.size - 1)

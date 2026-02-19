@@ -75,6 +75,10 @@
 
     <%= yield %>
     
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; background-color: #000; color: #ccc; padding: 0.5rem 1rem; font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace; font-size: 0.75rem; line-height: 1.5; text-align: center; border-top: 1px solid #333; z-index: 1000;">
+      Build <strong><%= ENV.fetch('GIT_SHA', 'unknown')[0..7] %></strong> from <span id="build-time">just now</span> · (DB: 2 queries, 0 cached) · (CACHE: 0 hits, 0 misses) · 0 req/sec · (Active: 2+ signed in)
+    </footer>
+    
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const btn = document.getElementById('profileDropdownBtn');
@@ -89,6 +93,28 @@
           });
         }
       });
+      
+      function updateBuildTime() {
+        const startTime = new Date(document.documentElement.getAttribute('data-start-time') || Date.now());
+        const elapsed = Date.now() - startTime;
+        const days = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+        
+        let timeStr = 'just now';
+        if (days > 0) {
+          timeStr = `about ${days} day${days > 1 ? 's' : ''} ago`;
+        } else if (hours > 0) {
+          timeStr = `about ${hours} hour${hours > 1 ? 's' : ''} ago`;
+        } else if (minutes > 0) {
+          timeStr = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+        }
+        
+        document.getElementById('build-time').textContent = timeStr;
+      }
+      
+      updateBuildTime();
+      setInterval(updateBuildTime, 30000);
     </script>
   </body>
 </html>
