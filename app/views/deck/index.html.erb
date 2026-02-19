@@ -66,6 +66,13 @@
 </div>
 <% end %>
 
+<div id="modalTutorialSpotlight" style="display:none; position:fixed; z-index:3001; border-radius:10px; background:transparent; box-shadow:0 0 0 9999px rgba(0,0,0,0.6); transition:all 0.25s ease; pointer-events:none;"></div>
+<div id="modalTutorialTooltip" style="display:none; position:fixed; z-index:3002; text-align:center; pointer-events:auto;">
+  <p id="modalTutorialText" class="tutorial-text" style="white-space:normal; max-width:280px; font-size:1rem;"></p>
+  <button id="modalTutorialNext" style="display:block; margin:6px auto 0; background:#d4a017; border:none; color:#fff; font-family:'Georgia',serif; font-size:0.9rem; font-weight:700; padding:6px 18px; border-radius:6px; cursor:pointer; pointer-events:auto;">Next →</button>
+  <div class="tutorial-arrow-down"></div>
+</div>
+
 <!-- Create / Edit modal -->
 <div class="modal-overlay" id="projectModal" aria-hidden="true">
   <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
@@ -238,6 +245,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  var isTutorialMode = <%= @show_tutorial ? 'true' : 'false' %>;
+
   var track = document.getElementById('cardsTrack');
   var leftBtn = document.getElementById('scrollLeft');
   var rightBtn = document.getElementById('scrollRight');
@@ -298,18 +307,123 @@ document.addEventListener('DOMContentLoaded', function() {
     projectModal.classList.add('active');
     projectModal.setAttribute('aria-hidden', 'false');
     projectNameInput.focus();
+
+    if (isTutorialMode && data.isNew) {
+      setTimeout(startModalTutorial, 350);
+    }
    }
 
   function closeProjectModal() {
     if (!projectModal) return;
     projectModal.classList.remove('active');
     projectModal.setAttribute('aria-hidden', 'true');
+    stopModalTutorial();
   }
+
+  var modalTutorialSpotlight= document.getElementById('modalTutorialSpotlight');
+  var modalTutorialTooltip  = document.getElementById('modalTutorialTooltip');
+  var modalTutorialText     = document.getElementById('modalTutorialText');
+  var modalTutorialNext     = document.getElementById('modalTutorialNext');
+  var modalTutorialStep     = 0;
+  var modalTutorialResizeTimer = null;
+
+  var modalTutorialSteps = [
+    { getEl: function() { return document.getElementById('projectNameInput'); },
+      text: 'Enter a project name' },
+    { getEl: function() { return document.getElementById('projectDescriptionInput'); },
+      text: 'Add a description' },
+    { getEl: function() { return document.querySelector('.project-type-grid'); },
+      text: 'Choose your type of project' },
+    { getEl: function() { return document.getElementById('playableUrlInput'); },
+      text: 'Playable URL — skip if you don\'t have one yet' },
+    { getEl: function() { return document.getElementById('codeUrlInput'); },
+      text: 'Code URL — paste your repo link' },
+    { getEl: function() { return document.getElementById('hackatimePicker'); },
+      text: 'Link any Hackatime projects to track your hours' },
+    { getEl: function() { return document.getElementById('projectModalSubmit'); },
+      text: 'All set — save your project!', isLast: true }
+  ];
+
+  function positionModalTutorialStep(stepIndex) {
+    var step = modalTutorialSteps[stepIndex];
+    if (!step) return;
+    var el = step.getEl();
+    if (!el) return;
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    setTimeout(function() {
+      var rect = el.getBoundingClientRect();
+      var pad = 12;
+
+      modalTutorialSpotlight.style.left   = (rect.left - pad) + 'px';
+      modalTutorialSpotlight.style.top    = (rect.top  - pad) + 'px';
+      modalTutorialSpotlight.style.width  = (rect.width  + pad * 2) + 'px';
+      modalTutorialSpotlight.style.height = (rect.height + pad * 2) + 'px';
+
+      modalTutorialText.textContent = step.text;
+      modalTutorialNext.textContent = step.isLast ? 'Got it! →' : 'Next →';
+
+      var tipX = rect.left + rect.width / 2;
+      var tooltipHeight = modalTutorialTooltip.offsetHeight || 90;
+      var spaceAbove = rect.top - pad - 8;
+      var belowY = rect.bottom + pad + 8;
+
+      modalTutorialTooltip.classList.remove('tutorial-bounce-up', 'tutorial-bounce-down');
+
+      if (spaceAbove >= tooltipHeight) {
+        modalTutorialTooltip.classList.add('tutorial-bounce-up');
+        modalTutorialTooltip.style.top  = spaceAbove + 'px';
+      } else {
+        modalTutorialTooltip.classList.add('tutorial-bounce-down');
+        modalTutorialTooltip.style.top  = belowY + 'px';
+      }
+      modalTutorialTooltip.style.left = tipX + 'px';
+    }, 200);
+  }
+
+  function startModalTutorial() {
+    if (!modalTutorialSpotlight) return;
+    modalTutorialStep = 0;
+    modalTutorialSpotlight.style.display = 'block';
+    modalTutorialTooltip.style.display = 'block';
+    positionModalTutorialStep(0);
+
+    window.addEventListener('resize', onModalTutorialResize);
+  }
+
+  function stopModalTutorial() {
+    if (!modalTutorialSpotlight) return;
+    modalTutorialSpotlight.style.display = 'none';
+    modalTutorialTooltip.style.display = 'none';
+    window.removeEventListener('resize', onModalTutorialResize);
+  }
+
+  function onModalTutorialResize() {
+    clearTimeout(modalTutorialResizeTimer);
+    modalTutorialResizeTimer = setTimeout(function() {
+      positionModalTutorialStep(modalTutorialStep);
+    }, 80);
+  }
+
+  if (modalTutorialNext) {
+    modalTutorialNext.addEventListener('click', function() {
+      modalTutorialStep++;
+      if (modalTutorialStep >= modalTutorialSteps.length) {
+        stopModalTutorial();
+      } else {
+        positionModalTutorialStep(modalTutorialStep);
+      }
+    });
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   if (projectModalClose) projectModalClose.addEventListener('click', closeProjectModal);
   if (projectModalCancel) projectModalCancel.addEventListener('click', closeProjectModal);
   if (projectModal) {
-    projectModal.addEventListener('click', function(e) { if (e.target === projectModal) closeProjectModal(); });
+    projectModal.addEventListener('click', function(e) {
+      if (e.target === projectModal && !isTutorialMode) closeProjectModal();
+    });
   }
 
   var projectModalSubmit = document.getElementById('projectModalSubmit');
@@ -352,7 +466,20 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(function(data) {
         if (data.success) {
           closeProjectModal();
-          location.reload();
+          stopModalTutorial();
+          if (isTutorialMode) {
+            fetch('<%= complete_tutorial_path %>', {
+              method: 'POST',
+              headers: {
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json'
+              }
+            }).then(function() {
+              window.location.href = '<%= leaderboard_path %>?welcome=1';
+            });
+          } else {
+            location.reload();
+          }
         }
       })
       .catch(function(e) { console.error('Error saving project:', e); });

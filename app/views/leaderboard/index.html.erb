@@ -5,11 +5,11 @@
     <h1 class="leaderboard-title">Leaderboard</h1>
 
     <% if @users.any? %>
-      <table class="leaderboard-table">
+      <table class="leaderboard-table" id="leaderboardTable">
         <thead>
           <tr>
             <th class="col-rank">#</th>
-            <th class="col-player">Player</th>
+            <th class="col-player">User</th>
             <th class="col-chips">Chips</th>
           </tr>
         </thead>
@@ -65,3 +65,73 @@
     <% end %>
   </div>
 </div>
+
+<% if params[:welcome] == "1" %>
+<div id="lbTutorialSpotlight" style="position:fixed; z-index:3001; border-radius:12px; background:transparent; box-shadow:0 0 0 9999px rgba(0,0,0,0.6); transition:all 0.3s ease; pointer-events:none;"></div>
+<div id="lbTutorialTooltip" style="position:fixed; z-index:3002; text-align:center; pointer-events:auto;">
+  <p class="lb-tutorial-text">Here you can see all the other Hack Clubbers participating in Jackpot, and how many Poker Chips they have!</p>
+  <button id="lbTutorialContinue" class="lb-tutorial-btn">Continue</button>
+  <div class="lb-tutorial-arrow"></div>
+</div>
+
+<div id="hackatimeFraudOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:4000; justify-content:center; align-items:center;">
+  <div class="hf-modal">
+    <h2 class="hf-title">Hackatime Fraud</h2>
+    <p class="hf-body">The use of scripts/macros to artificially inflate your time in Hackatime is strictly prohibited, and will result in a Hack Club wide ban.</p>
+    <button id="hackatimeAgreeBtn" class="hf-agree-btn">Agree, Continue</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  var spotlight  = document.getElementById('lbTutorialSpotlight');
+  var tooltip    = document.getElementById('lbTutorialTooltip');
+  var continueBtn = document.getElementById('lbTutorialContinue');
+  var fraudOverlay = document.getElementById('hackatimeFraudOverlay');
+  var agreeBtn   = document.getElementById('hackatimeAgreeBtn');
+  var table      = document.getElementById('leaderboardTable');
+
+  function positionSpotlight() {
+    if (!table || !spotlight || !tooltip) return;
+    var rect = table.getBoundingClientRect();
+    var pad = 14;
+    spotlight.style.left   = (rect.left - pad) + 'px';
+    spotlight.style.top    = (rect.top  - pad) + 'px';
+    spotlight.style.width  = (rect.width  + pad * 2) + 'px';
+    spotlight.style.height = (rect.height + pad * 2) + 'px';
+
+    var tipX = rect.left + rect.width / 2;
+    var tipY = rect.top - pad - 8;
+    var tooltipH = tooltip.offsetHeight || 80;
+
+    tooltip.classList.remove('lb-bounce-up', 'lb-bounce-down');
+    if (tipY >= tooltipH) {
+      tooltip.classList.add('lb-bounce-up');
+      tooltip.style.top = tipY + 'px';
+    } else {
+      tooltip.classList.add('lb-bounce-down');
+      tooltip.style.top = (rect.bottom + pad + 8) + 'px';
+    }
+    tooltip.style.left = tipX + 'px';
+  }
+
+  positionSpotlight();
+  window.addEventListener('resize', positionSpotlight);
+
+  if (continueBtn) {
+    continueBtn.addEventListener('click', function() {
+      spotlight.style.display = 'none';
+      tooltip.style.display   = 'none';
+      window.removeEventListener('resize', positionSpotlight);
+      fraudOverlay.style.display = 'flex';
+    });
+  }
+
+  if (agreeBtn) {
+    agreeBtn.addEventListener('click', function() {
+      fraudOverlay.style.display = 'none';
+    });
+  }
+})();
+</script>
+<% end %>
