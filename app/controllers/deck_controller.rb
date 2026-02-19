@@ -36,6 +36,8 @@ class DeckController < ApplicationController
          "playable_url" => project.playable_url,
          "hackatime_projects" => project.hackatime_projects || [],
          "hours" => total_hours,
+         "hackatime_hours" => hackatime_hours,
+         "journal_hours" => journal_hours,
          "shipped" => project.shipped,
          "shipped_at" => project.shipped_at&.iso8601,
          "status" => project.status,
