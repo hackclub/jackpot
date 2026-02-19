@@ -397,7 +397,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 10px 0;
-  border-bottom: 1px solid #3a3a3a;
+  border-bottom: 1px solid rgba(44, 60, 58, 0.4);
 }
 
 .detail-stat-row:last-child {
@@ -405,14 +405,15 @@
 }
 
 .detail-label {
-  color: #999;
-  font-size: 0.9rem;
+  color: #1a4538;
+  font-size: 1.1rem;
+  font-weight: 800;
   flex-shrink: 0;
   margin-right: 1rem;
 }
 
 .detail-value {
-  color: #f0e6d2;
+  color: #1e1e1e;
   font-size: 0.95rem;
   font-weight: 600;
   text-align: right;
@@ -426,18 +427,18 @@
 }
 
 .detail-shipped-text {
-  color: #3cb043;
+  color: #2c4a3e;
 }
 
 .project-ship-btn {
-  border: 1px solid #3cb043;
+  border: 1px solid #212c2a;
   border-radius: 6px;
   cursor: pointer;
   padding: 9px 14px;
   font-family: 'Georgia', serif;
   font-weight: 600;
-  background: #3cb043;
-  color: #fff;
+  background: #2c4a3e;
+  color: #eae1c8;
   font-size: 0.95rem;
 }
 
@@ -446,23 +447,23 @@
 }
 
 .project-delete-btn {
-  border: 1px solid #d42b2b;
+  border: 1px solid #5c2a2a;
   border-radius: 6px;
   cursor: pointer;
   padding: 9px 14px;
   font-family: 'Georgia', serif;
   font-weight: 600;
-  background: #fff;
-  color: #d42b2b;
+  background: #7c2d2d;
+  color: #eae1c8;
   font-size: 0.95rem;
 }
 
 .project-delete-btn:hover {
-  background: #ffe6e6;
+  filter: brightness(1.15);
 }
 
 .hackatime-field-hint {
-  color: #888;
+  color: #444;
   font-size: 0.8rem;
   margin: 0 0 6px 0;
 }
@@ -470,9 +471,9 @@
 .hackatime-picker {
   max-height: 160px;
   overflow-y: auto;
-  border: 1px solid #8b6914;
+  border: 1px solid #2c3c3a;
   border-radius: 6px;
-  background: rgba(15, 15, 15, 0.75);
+  background: rgba(234, 225, 200, 0.6);
   padding: 6px;
   display: flex;
   flex-wrap: wrap;
@@ -485,7 +486,7 @@
 }
 
 .hackatime-picker::-webkit-scrollbar-thumb {
-  background: #8b6914;
+  background: #2c3c3a;
   border-radius: 3px;
 }
 
@@ -497,31 +498,31 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.15s;
-  background: rgba(139, 105, 20, 0.1);
-  border: 1px solid #8b6914;
+  background: rgba(44, 60, 58, 0.12);
+  border: 1px solid #2c3c3a;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .hackatime-option:hover {
-  background: rgba(139, 105, 20, 0.2);
+  background: rgba(44, 60, 58, 0.2);
 }
 
 .hackatime-checkbox {
-  accent-color: #d4a017;
+  accent-color: #2c3c3a;
   width: 16px;
   height: 16px;
   flex-shrink: 0;
 }
 
 .hackatime-option-name {
-  color: #f0e6d2;
+  color: #1e1e1e;
   font-size: 0.9rem;
   font-family: 'Georgia', serif;
 }
 
 .hackatime-empty {
-  color: #666;
+  color: #555;
   font-size: 0.85rem;
   text-align: center;
   padding: 12px;
@@ -548,24 +549,24 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
-  border: 2px solid #8b6914;
+  border: 2px solid #2c3c3a;
   border-radius: 8px;
   cursor: pointer;
-  background: rgba(15, 15, 15, 0.75);
-  color: #f0e6d2;
+  background: rgba(234, 225, 200, 0.6);
+  color: #1e1e1e;
   font-weight: 600;
   transition: all 0.2s;
   margin: 0;
 }
 
 .project-type-option input[type="radio"]:checked + label {
-  background: #d4a017;
-  color: #1a1a1a;
-  border-color: #d4a017;
+  background: #2c3c3a;
+  color: #eae1c8;
+  border-color: #2c3c3a;
 }
 
 .project-type-option label:hover {
-  border-color: #d4a017;
+  border-color: #242424;
 }
 
 .tutorial-overlay {
@@ -682,18 +683,41 @@
 }
 
 .modal-content {
-  background: #2a2a2a;
+  background: #e2d9bd;
   padding: 0;
   border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
+  width: 92%;
+  max-width: 960px;
+  max-height: 88vh;
+  min-height: 520px;
+  aspect-ratio: 16 / 10;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  color: #1e1e1e;
   position: relative;
   font-family: 'Georgia', serif;
+  overflow: hidden;
+}
+
+.modal-content::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200%;
+  height: 200%;
+  margin-left: -100%;
+  margin-top: -100%;
+  background: url('proj_cardCropped.png') center center no-repeat;
+  background-size: 100% 100%;
+  transform: rotate(90deg);
+  z-index: 0;
+}
+
+.modal-content > * {
+  position: relative;
+  z-index: 1;
 }
 
 #projectModalForm {
@@ -707,21 +731,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid #2c3c3a;
   padding: 1.5rem 2rem;
   flex-shrink: 0;
 }
 
 .modal-title {
-  font-size: 1.5rem;
+  font-size: 1.85rem;
   margin: 0;
-  color: #d4a017;
+  color: #8b2500;
 }
 
 .modal-close {
   background: none;
   border: none;
-  color: #fff;
+  color: #1e1e1e;
   font-size: 1.5rem;
   cursor: pointer;
 }
@@ -763,18 +787,19 @@
 }
 
 .project-form-field label {
-  color: #f0e6d2;
-  font-size: 0.95rem;
+  color: #1a4538;
+  font-size: 1.1rem;
+  font-weight: 800;
 }
 
 .project-form-field input:not([type="checkbox"]):not([type="radio"]),
 .project-form-field textarea {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #8b6914;
+  border: 1px solid #2c3c3a;
   border-radius: 6px;
-  background: rgba(15, 15, 15, 0.75);
-  color: #fff;
+  background: rgba(234, 225, 200, 0.85);
+  color: #1e1e1e;
   padding: 10px 12px;
   font-family: 'Georgia', serif;
   font-size: 0.95rem;
@@ -787,8 +812,8 @@
 .project-form-field input:not([type="checkbox"]):not([type="radio"]):focus,
 .project-form-field textarea:focus {
   outline: none;
-  border-color: #d4a017;
-  box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.2);
+  border-color: #2c3c3a;
+  box-shadow: 0 0 0 2px rgba(44, 60, 58, 0.25);
 }
 
 .project-form-actions {
@@ -796,13 +821,12 @@
   justify-content: flex-end;
   gap: 0.6rem;
   padding: 1.5rem 2rem;
-  border-top: 1px solid #444;
+  border-top: 1px solid #2c3c3a;
   flex-shrink: 0;
 }
 
 .project-cancel-btn,
 .project-save-btn {
-  border: 1px solid #8b6914;
   border-radius: 6px;
   cursor: pointer;
   padding: 9px 14px;
@@ -811,18 +835,20 @@
 }
 
 .project-cancel-btn {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f0e6d2;
+  background: #1e1e1e;
+  color: #eae1c8;
+  border: 1px solid #2c3c3a;
 }
 
 .project-save-btn {
-  background: #d4a017;
-  color: #2a2a2a;
+  background: #2c3c3a;
+  color: #eae1c8;
+  border: 1px solid #212c2a;
 }
 
 .project-cancel-btn:hover,
 .project-save-btn:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.1);
 }
 
 .project-info {
@@ -889,12 +915,12 @@
 /* Detail Modal Editable Fields */
 .modal-title-input {
   font-family: 'Georgia', serif;
-  font-size: 1.4rem;
+  font-size: 1.85rem;
   font-weight: 600;
   background: transparent;
   border: none;
-  border-bottom: 2px solid #d4a017;
-  color: #f0e6d2;
+  border-bottom: 2px solid #8b2500;
+  color: #8b2500;
   padding: 4px 0;
   width: 100%;
   margin-right: 1rem;
@@ -902,15 +928,15 @@
 
 .modal-title-input:focus {
   outline: none;
-  border-bottom-color: #e5b028;
+  border-bottom-color: #6b1d00;
 }
 
 .detail-description-edit,
 .detail-url-input {
-  background: rgba(15, 15, 15, 0.75);
-  border: 1px solid #8b6914;
+  background: rgba(234, 225, 200, 0.85);
+  border: 1px solid #2c3c3a;
   border-radius: 4px;
-  color: #f0e6d2;
+  color: #1e1e1e;
   padding: 8px 10px;
   font-family: 'Georgia', serif;
   font-size: 0.95rem;
@@ -926,63 +952,84 @@
 .detail-description-edit:focus,
 .detail-url-input:focus {
   outline: none;
-  border-color: #d4a017;
-  background: rgba(15, 15, 15, 0.95);
+  border-color: #2c3c3a;
+  background: rgba(234, 225, 200, 0.95);
 }
 
-/* Journal Drawer */
-.journal-drawer {
-  position: fixed;
-  right: -400px;
-  top: 0;
-  width: 400px;
-  height: 100vh;
-  background:#1a1a1a;
-  border-left: 2px solid #8b6914;
-  z-index: 1500;
-  transition: right 0.3s ease;
-  overflow-y: auto;
+/* Journal Modal (centered, same format as project modal) */
+.journal-modal-content {
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  width: 92%;
+  max-width: 960px;
+  max-height: 88vh;
+  min-height: 520px;
+  aspect-ratio: 16 / 10;
   display: flex;
   flex-direction: column;
+  box-shadow: none;
+  color: #1e1e1e;
+  position: relative;
+  font-family: 'Georgia', serif;
+  overflow: visible;
 }
 
-.journal-drawer.active {
-  right: 0;
+.journal-modal-content::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  margin-left: -50%;
+  margin-top: -50%;
+  background: url('paperJournal.png') center center no-repeat;
+  background-size: 100% 100%;
+  transform: scale(1.2) translateY(140px);
+  transform-origin: center center;
+  z-index: 0;
 }
 
-.journal-drawer[aria-hidden="true"] {
-  display: none;
+.journal-modal-content > * {
+  position: relative;
+  z-index: 1;
 }
 
-.journal-drawer-header {
-  padding: 20px;
-  border-bottom: 1px solid #8b6914;
+.journal-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border: none;
+  padding: 1.5rem 2rem;
   flex-shrink: 0;
+  background: transparent;
 }
 
-.journal-drawer-title {
-  color: #f0e6d2;
-  font-family: 'Georgia', serif;
-  font-size: 1.2rem;
+.journal-modal-title {
+  font-size: 1.5rem;
   margin: 0;
+  color: #1a4538;
+  font-family: 'Georgia', serif;
+  font-weight: 800;
 }
 
-.journal-drawer-content {
+.journal-modal-body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 20px;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
+  background: transparent;
 }
 
 .journal-entry-form {
-  background: rgba(139, 105, 20, 0.1);
-  border: 1px solid #8b6914;
-  border-radius: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   padding: 15px;
   flex-shrink: 0;
 }
@@ -999,19 +1046,17 @@
 }
 
 .journal-form-field label {
-  color: #999;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #1a4538;
+  font-size: 1.1rem;
+  font-weight: 800;
 }
 
 .journal-form-field input,
 .journal-form-field textarea {
-  background: rgba(15, 15, 15, 0.75);
-  border: 1px solid #8b6914;
+  background: rgba(234, 225, 200, 0.85);
+  border: 1px solid #2c3c3a;
   border-radius: 4px;
-  color: #f0e6d2;
+  color: #1e1e1e;
   padding: 10px;
   font-family: 'Georgia', serif;
   font-size: 0.95rem;
@@ -1025,8 +1070,8 @@
 .journal-form-field input:focus,
 .journal-form-field textarea:focus {
   outline: none;
-  border-color: #d4a017;
-  background: rgba(15, 15, 15, 0.95);
+  border-color: #2c3c3a;
+  background: rgba(234, 225, 200, 0.95);
 }
 
 .journal-entries-list {
@@ -1038,9 +1083,9 @@
 }
 
 .journal-entry {
-  background: rgba(139, 105, 20, 0.05);
-  border: 1px solid #8b6914;
-  border-radius: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   padding: 12px;
 }
 
@@ -1049,36 +1094,37 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-  border-bottom: 1px solid rgba(212, 160, 23, 0.3);
+  border: none;
   padding-bottom: 8px;
 }
 
 .journal-entry-time {
-  color: #999;
-  font-size: 0.85rem;
+  color: #1a4538;
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .journal-entry-hours {
-  color: #d4a017;
-  font-weight: 600;
+  color: #2c3c3a;
+  font-weight: 800;
   font-size: 0.9rem;
 }
 
 .journal-entry-description {
-  color: #f0e6d2;
+  color: #1e1e1e;
   font-size: 0.9rem;
   margin: 0 0 6px 0;
   line-height: 1.4;
 }
 
 .journal-entry-tools {
-  color: #888;
+  color: #242424;
   font-size: 0.8rem;
   margin: 0;
 }
 
 .journal-empty {
-  color: #666;
+  color: #555;
   text-align: center;
   padding: 20px;
   margin: 0;

@@ -207,14 +207,15 @@
    </div>
  </div>
 
- <div class="journal-drawer" id="journalDrawer" aria-hidden="true">
-   <div class="journal-drawer-header">
-     <h3 class="journal-drawer-title" id="journalProjectTitle">Project Journal</h3>
-     <button type="button" class="modal-close" id="journalDrawerClose" aria-label="Close">&times;</button>
-   </div>
+ <div class="modal-overlay" id="journalDrawer" aria-hidden="true">
+   <div class="journal-modal-content" role="dialog" aria-modal="true" aria-labelledby="journalProjectTitle">
+     <div class="journal-modal-header">
+       <h3 class="journal-modal-title" id="journalProjectTitle">Project Journal</h3>
+       <button type="button" class="modal-close" id="journalDrawerClose" aria-label="Close">&times;</button>
+     </div>
    
-   <div class="journal-drawer-content">
-     <div class="journal-entry-form">
+     <div class="journal-modal-body">
+       <div class="journal-entry-form">
        <div class="journal-form-field">
          <label for="journalTimeDone">Time Done</label>
          <input type="datetime-local" id="journalTimeDone" name="time_done">
@@ -239,6 +240,7 @@
      </div>
      
      <div class="journal-entries-list" id="journalEntriesList">
+     </div>
      </div>
    </div>
  </div>
@@ -755,6 +757,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if (journalDrawerClose) journalDrawerClose.addEventListener('click', closeJournalDrawer);
+  if (journalDrawer) {
+    journalDrawer.addEventListener('click', function(e) {
+      if (e.target === journalDrawer) closeJournalDrawer();
+    });
+  }
   
   if (journalSaveBtn) {
     journalSaveBtn.addEventListener('click', function() {
