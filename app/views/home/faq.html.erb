@@ -559,16 +559,3 @@
 }
 </style>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  document.querySelectorAll(".faq-item .faq-q").forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      var item = this.closest(".faq-item");
-      var answer = document.getElementById(this.getAttribute("aria-controls"));
-      var isOpen = item.classList.toggle("is-open");
-      this.setAttribute("aria-expanded", isOpen);
-      if (answer) answer.setAttribute("aria-hidden", !isOpen);
-    });
-  });
-});
-</script>
