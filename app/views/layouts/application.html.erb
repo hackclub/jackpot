@@ -28,9 +28,15 @@
         <div class="toolbar-content">
           <div class="nav-links">
             <%= link_to "Deck", deck_path, class: "nav-item #{'nav-active' if controller_name == 'deck'}" %>
-            <%= link_to "Shop", "#", class: "nav-item" %>
+            <span class="nav-item nav-item--coming-soon">
+              <%= image_tag "coming_soon.png", alt: "Coming soon", class: "nav-item-coming-soon-badge" %>
+              <span class="nav-item-text">Shop</span>
+            </span>
             <%= link_to "FAQ", faq_path, class: "nav-item #{'nav-active' if controller_name == 'home' && action_name == 'faq'}" %>
-            <%= link_to "Status", "#", class: "nav-item" %>
+            <span class="nav-item nav-item--coming-soon">
+              <%= image_tag "coming_soon.png", alt: "Coming soon", class: "nav-item-coming-soon-badge" %>
+              <span class="nav-item-text">Status</span>
+            </span>
             <%= link_to "Leaderboard", leaderboard_path, class: "nav-item #{'nav-active' if controller_name == 'leaderboard'}" %>
             <% if admin? %>
               <%= link_to "Admin", admin_path, class: "nav-item nav-admin" %>

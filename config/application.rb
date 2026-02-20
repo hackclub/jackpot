@@ -23,5 +23,8 @@ module Jackpot
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Tutorial: true = show on every login; false = only first time (default)
+    config.x.tutorial_on_every_login = true
   end
 end

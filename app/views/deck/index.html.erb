@@ -366,33 +366,35 @@ function initDeck() {
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     setTimeout(function() {
-      var rect = el.getBoundingClientRect();
-      var pad = 12;
+      requestAnimationFrame(function() {
+        var rect = el.getBoundingClientRect();
+        var pad = 12;
 
-      modalTutorialSpotlight.style.left   = (rect.left - pad) + 'px';
-      modalTutorialSpotlight.style.top    = (rect.top  - pad) + 'px';
-      modalTutorialSpotlight.style.width  = (rect.width  + pad * 2) + 'px';
-      modalTutorialSpotlight.style.height = (rect.height + pad * 2) + 'px';
+        modalTutorialSpotlight.style.left   = (rect.left - pad) + 'px';
+        modalTutorialSpotlight.style.top    = (rect.top  - pad) + 'px';
+        modalTutorialSpotlight.style.width  = (rect.width  + pad * 2) + 'px';
+        modalTutorialSpotlight.style.height = (rect.height + pad * 2) + 'px';
 
-      modalTutorialText.textContent = step.text;
-      modalTutorialNext.textContent = step.isLast ? 'Got it! →' : 'Next →';
+        modalTutorialText.textContent = step.text;
+        modalTutorialNext.textContent = step.isLast ? 'Got it! →' : 'Next →';
 
-      var tipX = rect.left + rect.width / 2;
-      var tooltipHeight = modalTutorialTooltip.offsetHeight || 90;
-      var spaceAbove = rect.top - pad - 8;
-      var belowY = rect.bottom + pad + 8;
+        var tipX = rect.left + rect.width / 2;
+        var tooltipHeight = modalTutorialTooltip.offsetHeight || 90;
+        var spaceAbove = rect.top - pad - 8;
+        var belowY = rect.bottom + pad + 8;
 
-      modalTutorialTooltip.classList.remove('tutorial-bounce-up', 'tutorial-bounce-down');
+        modalTutorialTooltip.classList.remove('tutorial-bounce-up', 'tutorial-bounce-down');
 
-      if (spaceAbove >= tooltipHeight) {
-        modalTutorialTooltip.classList.add('tutorial-bounce-up');
-        modalTutorialTooltip.style.top  = spaceAbove + 'px';
-      } else {
-        modalTutorialTooltip.classList.add('tutorial-bounce-down');
-        modalTutorialTooltip.style.top  = belowY + 'px';
-      }
-      modalTutorialTooltip.style.left = tipX + 'px';
-    }, 200);
+        if (spaceAbove >= tooltipHeight) {
+          modalTutorialTooltip.classList.add('tutorial-bounce-up');
+          modalTutorialTooltip.style.top  = spaceAbove + 'px';
+        } else {
+          modalTutorialTooltip.classList.add('tutorial-bounce-down');
+          modalTutorialTooltip.style.top  = belowY + 'px';
+        }
+        modalTutorialTooltip.style.left = tipX + 'px';
+      });
+    }, 350);
   }
 
   function startModalTutorial() {
@@ -872,7 +874,7 @@ function initDeck() {
   if (overlay) {
     var spotlight = document.getElementById('tutorialSpotlight');
     var tooltip = document.getElementById('tutorialTooltip');
-    var tutorialTarget = document.querySelector('.card-slot');
+    var tutorialTarget = document.querySelector('.card-slot-empty') || document.querySelector('.card-slot');
 
     if (tutorialTarget) {
       function positionTutorial() {
@@ -886,23 +888,23 @@ function initDeck() {
         tooltip.style.top = (rect.top - pad - 16) + 'px';
       }
 
-      positionTutorial();
-      window.addEventListener('resize', positionTutorial);
+      function runPositionTutorial() {
+        requestAnimationFrame(function() {
+          requestAnimationFrame(positionTutorial);
+        });
+      }
+      runPositionTutorial();
+      setTimeout(runPositionTutorial, 100);
+      window.addEventListener('resize', runPositionTutorial);
 
       tutorialTarget.addEventListener('click', function handleTutorialClick() {
         overlay.classList.add('tutorial-fade-out');
         document.querySelector('.deck-page').classList.remove('tutorial-active');
-        setTimeout(function() { overlay.remove(); }, 400);
-
-        fetch('<%= complete_tutorial_path %>', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
-          }
-        });
-
         tutorialTarget.removeEventListener('click', handleTutorialClick);
+        setTimeout(function() {
+          overlay.remove();
+          openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', hackatimeProjects: '', isNew: true });
+        }, 400);
       });
     }
   }
