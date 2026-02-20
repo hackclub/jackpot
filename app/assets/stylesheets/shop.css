@@ -1,0 +1,451 @@
+.shop-body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.shop-page {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow-y: auto;
+}
+
+.shop-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('shop_background.png');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+.shop-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 100px 24px 60px;
+}
+
+.shop-title {
+  font-family: 'Georgia', serif;
+  font-size: 2.6rem;
+  color: #f0e6d2;
+  text-shadow: 2px 3px 6px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  margin: 0 0 4px;
+}
+
+.shop-subtitle {
+  font-family: 'Georgia', serif;
+  font-size: 1.05rem;
+  color: #c4b89a;
+  text-align: center;
+  margin: 0 0 32px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+  justify-items: center;
+}
+
+.shop-card {
+  width: 200px;
+  perspective: 600px;
+}
+
+.shop-card-inner {
+  background-image: url('proj_card.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    inset 0 0 0 4px rgba(92, 64, 51, 0.15),
+    inset 0 0 0 8px rgba(92, 64, 51, 0.08),
+    2px 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s, box-shadow 0.25s;
+  cursor: default;
+  position: relative;
+  height: 320px;
+}
+
+.shop-card-inner::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1.5px solid rgba(92, 64, 51, 0.25);
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.shop-card:hover .shop-card-inner {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 0 0 0 4px rgba(92, 64, 51, 0.15),
+    inset 0 0 0 8px rgba(92, 64, 51, 0.08),
+    2px 8px 20px rgba(0, 0, 0, 0.55);
+}
+
+.shop-card-image {
+  width: 100%;
+  height: 130px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 10px 10px 0 0;
+  flex-shrink: 0;
+}
+
+.shop-card-image-default {
+  background-color: rgba(92, 64, 51, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.shop-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px 8px;
+  min-height: 0;
+}
+
+.shop-card-name {
+  font-family: 'Georgia', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #3e2a1c;
+  margin: 0 0 4px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.shop-card-desc {
+  font-family: 'Georgia', serif;
+  font-size: 0.75rem;
+  color: #5c4033;
+  margin: 0 0 8px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
+}
+
+
+.shop-card-price {
+  margin-top: auto;
+}
+
+.shop-price-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shop-chip-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.shop-chip-avatar-lg {
+  width: 36px;
+  height: 36px;
+}
+
+.shop-chip-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.shop-chip-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%);
+  background-image: url('pfp_icon.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.shop-price-amount {
+  font-family: 'Georgia', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #8b6914;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.shop-price-amount-lg {
+  font-size: 1.5rem;
+  color: #d4a017;
+}
+
+.shop-price-chip-lg {
+  gap: 10px;
+}
+
+
+.shop-card-actions {
+  padding: 8px 14px 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.shop-buy-btn {
+  background: linear-gradient(135deg, #d4a017 0%, #8b6914 100%);
+  color: #fff;
+  border: none;
+  padding: 8px 28px;
+  border-radius: 6px;
+  font-family: 'Georgia', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.shop-buy-btn:hover {
+  opacity: 0.88;
+  transform: scale(1.03);
+}
+
+.shop-buy-btn:active {
+  transform: scale(0.97);
+}
+
+.shop-buy-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+.shop-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #c4b89a;
+  font-family: 'Georgia', serif;
+  font-size: 1.2rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.shop-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.shop-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.shop-modal {
+  background: #1e1409;
+  border: 2px solid #8b6914;
+  border-radius: 14px;
+  padding: 0;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+  font-family: 'Georgia', serif;
+  color: #f0e6d2;
+  overflow: hidden;
+}
+
+.shop-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(139, 105, 20, 0.4);
+}
+
+.shop-modal-title {
+  font-size: 1.3rem;
+  color: #d4a017;
+  margin: 0;
+}
+
+.shop-modal-close {
+  background: none;
+  border: none;
+  color: #f0e6d2;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.shop-modal-body {
+  padding: 24px;
+  text-align: center;
+}
+
+.shop-modal-body p {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.shop-modal-cost {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.shop-modal-balance {
+  font-size: 0.9rem;
+  color: #c4b89a;
+}
+
+.shop-modal-actions {
+  padding: 16px 24px 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.shop-modal-cancel {
+  background: none;
+  border: 2px solid rgba(139, 105, 20, 0.5);
+  color: #c4b89a;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-family: 'Georgia', serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.shop-modal-cancel:hover {
+  background: rgba(139, 105, 20, 0.15);
+  border-color: #d4a017;
+  color: #f0e6d2;
+}
+
+.shop-buy-confirm {
+  padding: 10px 24px;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .shop-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .shop-card {
+    width: 100%;
+  }
+
+  .shop-card-inner {
+    height: 280px;
+  }
+
+  .shop-card-image {
+    height: 100px;
+}
+
+
+.purchase-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.purchase-notification[aria-hidden="false"] {
+  pointer-events: auto;
+}
+
+.purchase-notification-content {
+  background: #2d3748;
+  color: #f7fafc;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  opacity: 0;
+  transform: translateX(400px);
+  transition: all 0.3s ease;
+}
+
+.purchase-notification.show .purchase-notification-content {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.purchase-notification-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: #48bb78;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.purchase-notification-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.purchase-notification-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f7fafc;
+}
+
+.purchase-notification-message {
+  font-size: 13px;
+  color: #cbd5e0;
+}
+
+@media (max-width: 768px) {
+  .shop-title {
+    font-size: 2rem;
+  }
+}

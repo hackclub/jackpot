@@ -1,0 +1,189 @@
+<% content_for(:title) { "Admin - Shop" } %>
+
+<div style="padding: 2rem; max-width: 1200px; margin: 0 auto; padding-top: 90px; font-family: 'Georgia', serif; color: #f0e6d2;">
+
+  <h1 style="color: #d4a017; margin-bottom: 2rem;">Shop Admin</h1>
+
+  <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 24px; margin-bottom: 2rem;">
+    <h2 style="color: #d4a017; margin: 0 0 16px;">Add New Item</h2>
+    <form id="addItemForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Name *</label>
+        <input type="text" name="name" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Price (chips) *</label>
+        <input type="number" name="price" step="0.01" min="0" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Item Link</label>
+        <input type="url" name="item_link" placeholder="https://..." style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Image URL</label>
+        <input type="url" name="image_url" placeholder="https://..." style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+      </div>
+      <div style="grid-column: span 2;">
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Description</label>
+        <textarea name="description" rows="2" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif; resize: vertical;"></textarea>
+      </div>
+      <div style="grid-column: span 2;">
+        <button type="submit" style="background: linear-gradient(135deg, #d4a017, #8b6914); color: #fff; border: none; padding: 10px 28px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700; font-size: 1rem;">Add Item</button>
+      </div>
+    </form>
+  </div>
+
+  <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 24px; margin-bottom: 2rem;">
+    <h2 style="color: #d4a017; margin: 0 0 16px;">Shop Items (<%= @items.count %>)</h2>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid #8b6914;">
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">ID</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Name</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Price</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Link</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Active</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @items.each do |item| %>
+            <tr style="border-bottom: 1px solid rgba(139,105,20,0.3);" id="item-row-<%= item.id %>">
+              <td style="padding: 8px;"><%= item.id %></td>
+              <td style="padding: 8px;"><%= item.name %></td>
+              <td style="padding: 8px;"><%= item.price.to_f %></td>
+              <td style="padding: 8px;">
+                <% if item.item_link.present? %>
+                  <a href="<%= item.item_link %>" target="_blank" style="color: #d4a017;">View</a>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td style="padding: 8px;">
+                <span style="color: <%= item.active? ? '#4caf50' : '#ef5350' %>;"><%= item.active? ? "Yes" : "No" %></span>
+              </td>
+              <td style="padding: 8px;">
+                <button onclick="toggleItem(<%= item.id %>, <%= !item.active? %>)" style="background: none; border: 1px solid #8b6914; color: #d4a017; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-family: Georgia, serif; margin-right: 4px;">
+                  <%= item.active? ? "Deactivate" : "Activate" %>
+                </button>
+                <button onclick="deleteItem(<%= item.id %>)" style="background: none; border: 1px solid #ef5350; color: #ef5350; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-family: Georgia, serif;">Delete</button>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 24px;">
+    <h2 style="color: #d4a017; margin: 0 0 16px;">Recent Orders (<%= @orders.count %>)</h2>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid #8b6914;">
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">ID</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">User</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Email</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Slack ID</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Item</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Qty</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Price</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Status</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Date</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @orders.each do |order| %>
+            <tr style="border-bottom: 1px solid rgba(139,105,20,0.3);" id="order-row-<%= order.id %>">
+              <td style="padding: 8px;"><%= order.id %></td>
+              <td style="padding: 8px;"><%= order.user&.leaderboard_name || "Unknown" %></td>
+              <td style="padding: 8px;"><%= order.user_email %></td>
+              <td style="padding: 8px;"><%= order.slack_id %></td>
+              <td style="padding: 8px;"><%= order.item_name %></td>
+              <td style="padding: 8px;"><%= order.quantity %></td>
+              <td style="padding: 8px;"><%= order.price.to_f %></td>
+              <td style="padding: 8px;" id="order-status-<%= order.id %>">
+                <span style="padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700;
+                  background: <%= case order.status; when 'pending' then 'rgba(255,193,7,0.2)'; when 'sent' then 'rgba(76,175,80,0.2)'; when 'refunded' then 'rgba(239,83,80,0.2)'; end %>;
+                  color: <%= case order.status; when 'pending' then '#ffc107'; when 'sent' then '#4caf50'; when 'refunded' then '#ef5350'; end %>;">
+                  <%= order.status.capitalize %>
+                </span>
+              </td>
+              <td style="padding: 8px;"><%= order.created_at.strftime("%b %d, %H:%M") %></td>
+              <td style="padding: 8px; white-space: nowrap;">
+                <% %w[pending sent refunded].each do |st| %>
+                  <% next if order.status == st %>
+                  <button onclick="updateOrderStatus(<%= order.id %>, '<%= st %>')" style="background: none; border: 1px solid #8b6914; color: #d4a017; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-family: Georgia, serif; font-size: 0.75rem; margin-right: 2px;">
+                    <%= st.capitalize %>
+                  </button>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+          <% if @orders.empty? %>
+            <tr><td colspan="10" style="padding: 16px; text-align: center; color: #a89878;">No orders yet.</td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+document.getElementById('addItemForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var form = e.target;
+  var formData = new FormData(form);
+  var data = {};
+  formData.forEach(function(v, k) { data[k] = v; });
+
+  fetch('<%= admin_shop_create_item_path %>', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify(data)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) { location.reload(); }
+    else { alert(d.error || 'Failed to create item.'); }
+  })
+  .catch(function(e) { alert('Error creating item.'); console.error(e); });
+});
+
+function toggleItem(id, active) {
+  fetch('<%= admin_shop_update_item_path(":id") %>'.replace('%3Aid', id).replace(':id', id), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify({ active: active })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) { if (d.success) location.reload(); else alert(d.error); })
+  .catch(function(e) { alert('Error.'); console.error(e); });
+}
+
+function deleteItem(id) {
+  if (!confirm('Delete this item? This cannot be undone.')) return;
+  fetch('<%= admin_shop_delete_item_path(":id") %>'.replace('%3Aid', id).replace(':id', id), {
+    method: 'DELETE',
+    headers: { 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) { if (d.success) location.reload(); else alert(d.error); })
+  .catch(function(e) { alert('Error.'); console.error(e); });
+}
+
+function updateOrderStatus(id, status) {
+  fetch('<%= admin_shop_update_order_path(":id") %>'.replace('%3Aid', id).replace(':id', id), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify({ status: status })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) { if (d.success) location.reload(); else alert(d.error); })
+  .catch(function(e) { alert('Error.'); console.error(e); });
+}
+</script>

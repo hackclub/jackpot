@@ -1,0 +1,198 @@
+<% content_for(:title) { "Shop" } %>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
+
+<div id="purchaseNotification" class="purchase-notification" aria-hidden="true">
+  <div class="purchase-notification-content">
+    <div class="purchase-notification-icon">✓</div>
+    <div class="purchase-notification-text">
+      <div class="purchase-notification-title">Purchase Successful!</div>
+      <div class="purchase-notification-message" id="purchaseNotificationMessage"></div>
+    </div>
+  </div>
+</div>
+
+<div class="shop-page">
+  <div class="shop-container">
+    <h1 class="shop-title">Shop</h1>
+    <p class="shop-subtitle">Spend your Poker Chips on prizes!</p>
+
+    <% if @items.any? %>
+      <div class="shop-grid">
+        <% @items.each do |item| %>
+          <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
+            <div class="shop-card-inner">
+              <% if item.image_url.present? %>
+                <div class="shop-card-image" style="background-image: url('<%= item.image_url %>');"></div>
+              <% else %>
+                <div class="shop-card-image shop-card-image-default"></div>
+              <% end %>
+              <div class="shop-card-body">
+                <h3 class="shop-card-name"><%= item.name %></h3>
+                <% if item.description.present? %>
+                  <p class="shop-card-desc"><%= item.description %></p>
+                <% end %>
+                <div class="shop-card-price">
+                  <div class="shop-price-chip">
+                    <div class="shop-chip-avatar">
+                      <%= image_tag(current_user.profile_photo_url || "https://avatars.githubusercontent.com/u/0", alt: "chip", class: "shop-chip-img") %>
+                      <div class="shop-chip-frame"></div>
+                    </div>
+                    <span class="shop-price-amount"><%= item.price.to_f % 1 == 0 ? item.price.to_i : item.price.to_f %></span>
+                  </div>
+                </div>
+              </div>
+              <div class="shop-card-actions">
+                <button type="button" class="shop-buy-btn" data-item-id="<%= item.id %>">Buy</button>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="shop-empty">
+        <p>No items available yet. Check back soon!</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Purchase confirmation modal -->
+<div class="shop-modal-overlay" id="shopBuyModal" aria-hidden="true">
+  <div class="shop-modal">
+    <div class="shop-modal-header">
+      <h3 class="shop-modal-title">Confirm Purchase</h3>
+      <button type="button" class="shop-modal-close" id="shopModalClose">&times;</button>
+    </div>
+    <div class="shop-modal-body">
+      <p>Are you sure you want to buy <strong id="shopModalItemName"></strong>?</p>
+      <div class="shop-modal-cost">
+        <div class="shop-price-chip shop-price-chip-lg">
+          <div class="shop-chip-avatar shop-chip-avatar-lg">
+            <%= image_tag(current_user.profile_photo_url || "https://avatars.githubusercontent.com/u/0", alt: "chip", class: "shop-chip-img") %>
+            <div class="shop-chip-frame"></div>
+          </div>
+          <span class="shop-price-amount shop-price-amount-lg" id="shopModalPrice"></span>
+        </div>
+      </div>
+      <p class="shop-modal-balance">Your balance: <strong id="shopModalBalance"><%= current_user.chip_am.to_f %></strong> chips</p>
+    </div>
+    <div class="shop-modal-actions">
+      <button type="button" class="shop-modal-cancel" id="shopModalCancel">Cancel</button>
+      <button type="button" class="shop-buy-btn shop-buy-confirm" id="shopModalConfirm">Confirm Purchase</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var modal = document.getElementById('shopBuyModal');
+  var modalClose = document.getElementById('shopModalClose');
+  var modalCancel = document.getElementById('shopModalCancel');
+  var modalConfirm = document.getElementById('shopModalConfirm');
+  var modalItemName = document.getElementById('shopModalItemName');
+  var modalPrice = document.getElementById('shopModalPrice');
+  var modalBalance = document.getElementById('shopModalBalance');
+  var notification = document.getElementById('purchaseNotification');
+  var notificationMessage = document.getElementById('purchaseNotificationMessage');
+  var currentItemId = null;
+  var currentItemName = null;
+
+  function openModal(itemId, itemName, price) {
+    currentItemId = itemId;
+    currentItemName = itemName;
+    modalItemName.textContent = itemName;
+    modalPrice.textContent = price;
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    currentItemId = null;
+  }
+
+  document.querySelectorAll('.shop-buy-btn[data-item-id]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var card = btn.closest('.shop-card');
+      var itemId = btn.dataset.itemId;
+      var itemName = card.querySelector('.shop-card-name').textContent;
+      var price = card.dataset.itemPrice;
+      openModal(itemId, itemName, price);
+    });
+  });
+
+  if (modalClose) modalClose.addEventListener('click', closeModal);
+  if (modalCancel) modalCancel.addEventListener('click', closeModal);
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  if (modalConfirm) {
+    modalConfirm.addEventListener('click', function() {
+      if (!currentItemId) return;
+      modalConfirm.disabled = true;
+      modalConfirm.textContent = 'Processing...';
+
+      fetch('<%= buy_shop_item_path(":id") %>'.replace('%3Aid', currentItemId).replace(':id', currentItemId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ quantity: 1 })
+      })
+      .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+      .then(function(result) {
+        if (result.ok && result.data.success) {
+          // Trigger confetti
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+          
+          closeModal();
+          
+          // Show notification
+          notificationMessage.textContent = 'Your purchase for ' + currentItemName + ' is successful!';
+          notification.classList.add('show');
+          notification.setAttribute('aria-hidden', 'false');
+          
+          // Update balance in toolbar
+          var tokenEl = document.querySelector('.token-count');
+          if (tokenEl) tokenEl.textContent = result.data.new_balance;
+          modalBalance.textContent = result.data.new_balance;
+          
+          // Hide notification and reload after 3 seconds
+          setTimeout(function() {
+            notification.classList.remove('show');
+            notification.setAttribute('aria-hidden', 'true');
+            setTimeout(function() {
+              location.reload();
+            }, 300);
+          }, 3000);
+        } else {
+          alert(result.data.error || 'Purchase failed.');
+          modalConfirm.disabled = false;
+          modalConfirm.textContent = 'Confirm Purchase';
+        }
+      })
+      .catch(function(e) {
+        console.error('Purchase error:', e);
+        alert('Something went wrong. Please try again.');
+        modalConfirm.disabled = false;
+        modalConfirm.textContent = 'Confirm Purchase';
+      });
+    });
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+});
+</script>
