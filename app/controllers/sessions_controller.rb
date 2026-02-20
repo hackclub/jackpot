@@ -14,6 +14,9 @@ class SessionsController < ApplicationController
         return
       end
 
+      return_to = session[:user_return_to]
+      reset_session
+      session[:user_return_to] = return_to
       session[:user_id] = user.id
       flash[:notice] = "Signed in successfully!"
       redirect_to after_sign_in_path
@@ -24,7 +27,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session[:user_id] = nil
+    reset_session
     flash[:notice] = "Signed out successfully!"
     redirect_to root_path
   end
@@ -37,6 +40,7 @@ class SessionsController < ApplicationController
   private
 
   def after_sign_in_path
-    session[:user_return_to] || root_path
+    path = session.delete(:user_return_to)
+    path.present? && path.start_with?("/") && !path.start_with?("//") ? path : root_path
   end
 end

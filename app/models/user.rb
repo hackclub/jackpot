@@ -10,6 +10,7 @@ class User < ApplicationRecord
   validates :hack_club_id, presence: true, uniqueness: true
   validates :email, presence: true
   validates :access_token, presence: true
+  validate :safe_profile_photo_url
 
   scope :active, -> { where("last_sign_in_at > ?", 6.months.ago) }
 
@@ -85,7 +86,7 @@ class User < ApplicationRecord
 
     if response.is_a?(Net::HTTPSuccess)
       data = JSON.parse(response.body)
-      Rails.logger.info "Slack API Response: #{data.inspect}"
+      Rails.logger.info "Slack API Response received for user"
       if data["ok"] && data["profile"]
         username = data.dig("profile", "display_name").presence ||
                    data.dig("profile", "real_name").presence ||
@@ -156,5 +157,14 @@ class User < ApplicationRecord
     projects[idx]["admin_feedback"] = feedback
     projects[idx]["reviewed_at"] = Time.current.iso8601
     update!(projects: projects)
+  end
+
+  private
+
+  def safe_profile_photo_url
+    return if profile_photo_url.blank?
+    unless profile_photo_url.match?(/\Ahttps?:\/\//i)
+      errors.add(:profile_photo_url, "must start with http:// or https://")
+    end
   end
 end

@@ -55,7 +55,7 @@
               <td style="padding: 8px;"><%= item.price.to_f %></td>
               <td style="padding: 8px;">
                 <% if item.item_link.present? %>
-                  <a href="<%= item.item_link %>" target="_blank" style="color: #d4a017;">View</a>
+                  <a href="<%= item.item_link.to_s.match?(/\Ahttps?:\/\//i) ? item.item_link : '#' %>" target="_blank" rel="noopener noreferrer" style="color: #d4a017;">View</a>
                 <% else %>
                   —
                 <% end %>

@@ -10,6 +10,11 @@ class RsvpsController < ApplicationController
       return
     end
 
+    if emails.length > 4
+      render json: { error: "Maximum 4 emails per submission" }, status: :unprocessable_entity
+      return
+    end
+
     created = []
     errors = []
 

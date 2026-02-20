@@ -1,6 +1,6 @@
 <% content_for(:title) { "Shop" } %>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js" crossorigin="anonymous"></script>
 
 <div id="purchaseNotification" class="purchase-notification" aria-hidden="true">
   <div class="purchase-notification-content">
@@ -23,7 +23,7 @@
           <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
             <div class="shop-card-inner">
               <% if item.image_url.present? %>
-                <div class="shop-card-image" style="background-image: url('<%= item.image_url %>');"></div>
+                <div class="shop-card-image" style="background-image: url('<%= item.image_url.to_s.match?(/\Ahttps?:\/\//i) ? item.image_url : '' %>');"></div>
               <% else %>
                 <div class="shop-card-image shop-card-image-default"></div>
               <% end %>

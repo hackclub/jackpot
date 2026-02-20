@@ -25,7 +25,8 @@ class Users::OmniauthCallbacksController < ApplicationController
   private
 
   def after_sign_in_path
-    session[:user_return_to] || root_path
+    path = session.delete(:user_return_to)
+    path.present? && path.start_with?("/") && !path.start_with?("//") ? path : root_path
   end
 
   def failure_message

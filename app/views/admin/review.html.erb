@@ -274,13 +274,13 @@
 
             <div class="project-buttons">
               <% if project["code_url"].present? %>
-                <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
+                <a href="<%= project["code_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["code_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Code</a>
               <% end %>
               <% if project["playable_url"].present? %>
-                <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+                <a href="<%= project["playable_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["playable_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Demo</a>
               <% end %>
               <% if item[:journal_entries].present? %>
-                <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n").gsub(/['"]/, '').gsub(/\n/, '\\n') %>')">
+                <button class="journal-view" data-journal="<%= item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n") %>">
                     View Journal (<%= item[:journal_entries].length %> entries)
                   </button>
               <% end %>
@@ -348,13 +348,13 @@
 
                   <div class="project-buttons">
                   <% if project["code_url"].present? %>
-                    <a href="<%= project["code_url"] %>" target="_blank">View Code</a>
+                    <a href="<%= project["code_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["code_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Code</a>
                   <% end %>
                   <% if project["playable_url"].present? %>
-                    <a href="<%= project["playable_url"] %>" target="_blank">View Demo</a>
+                    <a href="<%= project["playable_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["playable_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Demo</a>
                   <% end %>
                   <% if item[:journal_entries].present? %>
-                  <button class="journal-view" onclick="alert('<%= "Journal entries:\n\n" + item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n").gsub(/['"]/, '').gsub(/\n/, '\\n') %>')">
+                  <button class="journal-view" data-journal="<%= item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n") %>">
                    View Journal (<%= item[:journal_entries].length %> entries)
                   </button>
               <% end %>
@@ -390,6 +390,12 @@
               }
 
               document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.journal-view').forEach(function(btn) {
+                  btn.addEventListener('click', function() {
+                    alert(this.dataset.journal);
+                  });
+                });
+
                 // Approve button handlers
                 document.querySelectorAll('.approve-btn').forEach(btn => {
                   btn.addEventListener('click', function() {

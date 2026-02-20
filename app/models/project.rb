@@ -3,6 +3,7 @@ class Project < ApplicationRecord
   has_many :journal_entries, foreign_key: :user_id, primary_key: :user_id, dependent: :destroy
 
   validates :name, :user_id, presence: true
+  validate :safe_urls
   
   scope :shipped, -> { where(shipped: true) }
   scope :reviewed, -> { where(reviewed: true) }
@@ -64,5 +65,17 @@ class Project < ApplicationRecord
     self.admin_feedback = feedback
     self.reviewed_at = Time.current
     save!
+  end
+
+  private
+
+  def safe_urls
+    %i[code_url playable_url].each do |attr|
+      value = send(attr).to_s.strip
+      next if value.blank?
+      unless value.match?(/\Ahttps?:\/\//i)
+        errors.add(attr, "must start with http:// or https://")
+      end
+    end
   end
 end

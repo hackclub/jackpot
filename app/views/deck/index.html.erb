@@ -258,6 +258,11 @@
 
 <script>
 function initDeck() {
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   var isTutorialMode = <%= @show_tutorial ? 'true' : 'false' %>;
 
   var track = document.getElementById('cardsTrack');
@@ -551,9 +556,9 @@ function initDeck() {
              '<span class="detail-journal-entry-date">' + timeStr + '</span>' +
              '<span class="detail-journal-entry-hours">' + (entry.hours_worked || 0) + ' hrs</span>' +
              '</div>' +
-             '<p class="detail-journal-entry-desc">' + (entry.description || '').replace(/</g, '&lt;') + '</p>';
+             '<p class="detail-journal-entry-desc">' + escapeHtml(entry.description) + '</p>';
            if (entry.tools_used && entry.tools_used.length > 0) {
-             entryEl.innerHTML += '<p class="detail-journal-entry-tools"><strong>Tools:</strong> ' + entry.tools_used.join(', ') + '</p>';
+             entryEl.innerHTML += '<p class="detail-journal-entry-tools"><strong>Tools:</strong> ' + entry.tools_used.map(escapeHtml).join(', ') + '</p>';
            }
            detailJournalEntriesList.appendChild(entryEl);
          });
@@ -814,9 +819,9 @@ function initDeck() {
             '<span class="journal-entry-time">' + timeStr + '</span>' +
             '<span class="journal-entry-hours">' + (entry.hours_worked || 0) + ' hrs</span>' +
             '</div>' +
-            '<p class="journal-entry-description">' + (entry.description || '') + '</p>' +
-            (entry.tools_used && entry.tools_used.length > 0 ? 
-              '<p class="journal-entry-tools"><strong>Tools:</strong> ' + entry.tools_used.join(', ') + '</p>' : '');
+            '<p class="journal-entry-description">' + escapeHtml(entry.description) + '</p>' +
+                         (entry.tools_used && entry.tools_used.length > 0 ? 
+                           '<p class="journal-entry-tools"><strong>Tools:</strong> ' + entry.tools_used.map(escapeHtml).join(', ') + '</p>' : '');
           journalEntriesList.appendChild(entryEl);
         });
       })

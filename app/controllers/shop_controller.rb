@@ -12,16 +12,18 @@ class ShopController < ApplicationController
     quantity = [params[:quantity].to_i, 1].max
     total_cost = item.price * quantity
 
-    if current_user.chip_am.to_f < total_cost
-      if request.xhr?
-        return render json: { error: "Not enough chips! You need #{total_cost} but only have #{current_user.chip_am.to_f}." }, status: :unprocessable_entity
-      else
-        flash[:alert] = "Not enough chips!"
-        return redirect_to shop_path
-      end
-    end
-
     ActiveRecord::Base.transaction do
+      current_user.reload.lock!
+
+      if current_user.chip_am.to_f < total_cost
+        if request.xhr?
+          return render json: { error: "Not enough chips! You need #{total_cost} but only have #{current_user.chip_am.to_f}." }, status: :unprocessable_entity
+        else
+          flash[:alert] = "Not enough chips!"
+          return redirect_to shop_path
+        end
+      end
+
       current_user.update!(chip_am: current_user.chip_am.to_f - total_cost)
 
       current_user.shop_orders.create!(
