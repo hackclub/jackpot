@@ -42,15 +42,31 @@
   position: relative;
 }
 
-.shop-dude {
-  position: absolute;
-  left: 0;
+.shop-character {
+  position: fixed;
+  left: 1px;
   bottom: 0;
-  width: 360px;
-  max-width: 100%;
-  height: auto;
+  width: min(42vw, 560px);
+  max-height: calc(100vh - 84px);
+  z-index: 2;
   pointer-events: none;
   user-select: none;
+}
+
+.shop-dude {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.shop-dialogue {
+  position: absolute;
+  left: 62%;
+  top: 8%;
+  width: 210px;
+  max-width: 45%;
+  height: auto;
 }
 
 .shop-right {
@@ -584,5 +600,12 @@
 
   .shop-grid {
     grid-template-columns: repeat(2, 200px);
+  }
+
+  .shop-character {
+    left: 0;
+    width: 300px;
+    max-width: 70vw;
+    z-index: 1;
   }
 }

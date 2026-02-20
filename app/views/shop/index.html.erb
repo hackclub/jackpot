@@ -16,7 +16,10 @@
   <div class="shop-container">
     <div class="shop-layout">
       <div class="shop-left" aria-hidden="true">
-        <%= image_tag "dude.png", alt: "", class: "shop-dude" %>
+        <div class="shop-character">
+          <%= image_tag "dude.png", alt: "", class: "shop-dude" %>
+          <%= image_tag "dialogue.png", alt: "", class: "shop-dialogue" %>
+        </div>
       </div>
       <div class="shop-right">
         <% if @items.any? %>
