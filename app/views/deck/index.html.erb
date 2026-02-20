@@ -440,8 +440,10 @@ function initDeck() {
   }
 
   var projectModalSubmit = document.getElementById('projectModalSubmit');
+  var projectModalSubmitInProgress = false;
   if (projectModalSubmit) {
     projectModalSubmit.addEventListener('click', function() {
+      if (projectModalSubmitInProgress) return;
       if (!projectNameInput.value.trim()) {
         alert('Project name is required');
         return;
@@ -468,6 +470,8 @@ function initDeck() {
         formData.append('hackatime_projects[]', cb.value);
       });
 
+      projectModalSubmitInProgress = true;
+      projectModalSubmit.disabled = true;
       fetch('<%= save_project_path %>', {
         method: 'POST',
         body: formData,
@@ -495,7 +499,11 @@ function initDeck() {
           }
         }
       })
-      .catch(function(e) { console.error('Error saving project:', e); });
+      .catch(function(e) { console.error('Error saving project:', e); })
+      .finally(function() {
+        projectModalSubmitInProgress = false;
+        projectModalSubmit.disabled = false;
+      });
     });
   }
 
@@ -899,10 +907,19 @@ function initDeck() {
     }
   }
 }
-document.addEventListener('turbo:load', initDeck);
+
+var deckInitialized = false;
+function safeInitDeck() {
+  if (!deckInitialized) {
+    deckInitialized = true;
+    initDeck();
+  }
+}
+
+document.addEventListener('turbo:load', safeInitDeck);
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initDeck);
+  document.addEventListener('DOMContentLoaded', safeInitDeck);
 } else {
-  initDeck();
+  safeInitDeck();
 }
 </script>
