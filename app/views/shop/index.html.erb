@@ -14,12 +14,16 @@
 
 <div class="shop-page">
   <div class="shop-container">
-    <h1 class="shop-title">Shop</h1>
-    <p class="shop-subtitle">Spend your Poker Chips on prizes!</p>
-
-    <% if @items.any? %>
-      <div class="shop-grid">
-        <% @items.each do |item| %>
+    <div class="shop-layout">
+      <div class="shop-left" aria-hidden="true">
+        <%= image_tag "dude.png", alt: "", class: "shop-dude" %>
+      </div>
+      <div class="shop-right">
+        <% if @items.any? %>
+        <% items_for_grid = (1..10).map { |i| @items[(i - 1) % @items.size] } %>
+        <div class="shop-cards-pan" id="shopCardsPan" role="group" aria-label="Shop items" style="position: relative; left: 200px; top: 40px;">
+          <div class="shop-grid">
+        <% items_for_grid.each do |item| %>
           <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
             <div class="shop-card-inner">
               <% if item.image_url.present? %>
@@ -48,12 +52,15 @@
             </div>
           </div>
         <% end %>
+          </div>
+        </div>
+        <% else %>
+        <div class="shop-empty">
+          <p>No items available yet. Check back soon!</p>
+        </div>
+        <% end %>
       </div>
-    <% else %>
-      <div class="shop-empty">
-        <p>No items available yet. Check back soon!</p>
-      </div>
-    <% end %>
+    </div>
   </div>
 </div>
 
@@ -194,5 +201,67 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeModal();
   });
+
+  // Draggable pan: move all cards together (drag threshold so Buy button clicks still work)
+  var pan = document.getElementById('shopCardsPan');
+  if (pan) {
+    var panStartX, panStartY, panTranslateX = 0, panTranslateY = 0, panDragging = false, panHasMoved = false, panDidDrag = false;
+    var DRAG_THRESHOLD = 5;
+
+    function getClientXY(e) {
+      if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    function onPanPointerDown(e) {
+      if (e.target.closest('button') || e.target.closest('a')) return;
+      var p = getClientXY(e);
+      panStartX = p.x; panStartY = p.y;
+      panDragging = false; panHasMoved = false; panDidDrag = false;
+      pan.classList.add('shop-cards-pan--grabbing');
+      document.addEventListener('mousemove', onPanPointerMove);
+      document.addEventListener('mouseup', onPanPointerUp);
+      if (e.type === 'touchstart') {
+        document.addEventListener('touchmove', onPanPointerMove, { passive: false });
+        document.addEventListener('touchend', onPanPointerUp);
+      }
+    }
+
+    function onPanPointerMove(e) {
+      var p = getClientXY(e);
+      var dx = p.x - panStartX, dy = p.y - panStartY;
+      if (!panHasMoved && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
+        panHasMoved = true;
+        panDragging = true;
+      }
+      if (panDragging) {
+        e.preventDefault();
+        panDidDrag = true;
+        panTranslateX += dx; panTranslateY += dy;
+        panStartX = p.x; panStartY = p.y;
+        pan.style.transform = 'translate(' + panTranslateX + 'px, ' + panTranslateY + 'px)';
+      }
+    }
+
+    function onPanPointerUp() {
+      pan.classList.remove('shop-cards-pan--grabbing');
+      document.removeEventListener('mousemove', onPanPointerMove);
+      document.removeEventListener('mouseup', onPanPointerUp);
+      document.removeEventListener('touchmove', onPanPointerMove);
+      document.removeEventListener('touchend', onPanPointerUp);
+      panDragging = false;
+    }
+
+    pan.addEventListener('click', function(e) {
+      if (panDidDrag) {
+        e.preventDefault();
+        e.stopPropagation();
+        panDidDrag = false;
+      }
+    }, true);
+
+    pan.addEventListener('mousedown', onPanPointerDown);
+    pan.addEventListener('touchstart', onPanPointerDown, { passive: true });
+  }
 });
 </script>
