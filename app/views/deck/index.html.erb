@@ -239,7 +239,8 @@
        
        <div class="journal-form-field">
          <label for="journalDescription">Description</label>
-         <textarea id="journalDescription" name="description" rows="3" placeholder="What did you work on?"></textarea>
+         <textarea id="journalDescription" name="description" rows="3" placeholder="What did you work on? Drag & drop or paste images here."></textarea>
+         <p style="margin: 4px 0 0; font-size: 0.75rem; color: #999; font-style: italic;">Attach images by dragging & dropping or pasting from clipboard.</p>
        </div>
        
        <div class="journal-form-field">
@@ -261,6 +262,83 @@ function initDeck() {
   function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function renderDescription(str) {
+    if (!str) return '';
+    var escaped = escapeHtml(str);
+    return escaped.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(match, alt, url) {
+      if (!/^https?:\/\//i.test(url)) return match;
+      return '<img src="' + url + '" alt="' + alt + '" style="max-width:100%;border-radius:6px;margin:6px 0;display:block;">';
+    });
+  }
+
+  function setupImageUpload(textarea) {
+    var uploadUrl = '<%= upload_journal_image_path %>';
+    var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    function handleFiles(files) {
+      Array.from(files).forEach(function(file) {
+        if (!file.type.startsWith('image/')) return;
+
+        var placeholder = '![Uploading ' + file.name + '...]()';
+        var start = textarea.selectionStart;
+        var before = textarea.value.substring(0, start);
+        var after = textarea.value.substring(textarea.selectionEnd);
+        textarea.value = before + placeholder + after;
+        textarea.selectionStart = textarea.selectionEnd = start + placeholder.length;
+
+        var formData = new FormData();
+        formData.append('file', file);
+
+        fetch(uploadUrl, {
+          method: 'POST',
+          headers: { 'X-CSRF-Token': csrfToken },
+          body: formData
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.url) {
+            var md = '![' + file.name + '](' + data.url + ')';
+            textarea.value = textarea.value.replace(placeholder, md);
+          } else {
+            textarea.value = textarea.value.replace(placeholder, '');
+            alert(data.error || 'Upload failed');
+          }
+        })
+        .catch(function() {
+          textarea.value = textarea.value.replace(placeholder, '');
+          alert('Upload failed');
+        });
+      });
+    }
+
+    textarea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      textarea.style.borderColor = '#d4a017';
+    });
+    textarea.addEventListener('dragleave', function() {
+      textarea.style.borderColor = '';
+    });
+    textarea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      textarea.style.borderColor = '';
+      if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
+    });
+    textarea.addEventListener('paste', function(e) {
+      var items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      var imageFiles = [];
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          imageFiles.push(items[i].getAsFile());
+        }
+      }
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        handleFiles(imageFiles);
+      }
+    });
   }
 
   var isTutorialMode = <%= @show_tutorial ? 'true' : 'false' %>;
@@ -556,7 +634,7 @@ function initDeck() {
              '<span class="detail-journal-entry-date">' + timeStr + '</span>' +
              '<span class="detail-journal-entry-hours">' + (entry.hours_worked || 0) + ' hrs</span>' +
              '</div>' +
-             '<p class="detail-journal-entry-desc">' + escapeHtml(entry.description) + '</p>';
+             '<div class="detail-journal-entry-desc">' + renderDescription(entry.description) + '</div>';
            if (entry.tools_used && entry.tools_used.length > 0) {
              entryEl.innerHTML += '<p class="detail-journal-entry-tools"><strong>Tools:</strong> ' + entry.tools_used.map(escapeHtml).join(', ') + '</p>';
            }
@@ -781,6 +859,8 @@ function initDeck() {
   var journalProjectTitle = document.getElementById('journalProjectTitle');
   var currentJournalData = null;
 
+  if (journalDescription) setupImageUpload(journalDescription);
+
   function openJournalDrawer(projectData) {
     if (!journalDrawer) return;
     currentJournalData = projectData;
@@ -819,7 +899,7 @@ function initDeck() {
             '<span class="journal-entry-time">' + timeStr + '</span>' +
             '<span class="journal-entry-hours">' + (entry.hours_worked || 0) + ' hrs</span>' +
             '</div>' +
-            '<p class="journal-entry-description">' + escapeHtml(entry.description) + '</p>' +
+            '<div class="journal-entry-description">' + renderDescription(entry.description) + '</div>' +
                          (entry.tools_used && entry.tools_used.length > 0 ? 
                            '<p class="journal-entry-tools"><strong>Tools:</strong> ' + entry.tools_used.map(escapeHtml).join(', ') + '</p>' : '');
           journalEntriesList.appendChild(entryEl);

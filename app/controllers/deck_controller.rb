@@ -228,6 +228,53 @@ class DeckController < ApplicationController
     render json: entries
   end
 
+  def upload_image
+    file = params[:file]
+    unless file.is_a?(ActionDispatch::Http::UploadedFile)
+      return render json: { error: "No file provided" }, status: :unprocessable_entity
+    end
+
+    unless file.content_type.start_with?("image/")
+      return render json: { error: "Only image files are allowed" }, status: :unprocessable_entity
+    end
+
+    if file.size > 10.megabytes
+      return render json: { error: "File too large (max 10MB)" }, status: :unprocessable_entity
+    end
+
+    cdn = Rails.application.credentials.cdn
+    unless cdn
+      return render json: { error: "Image uploads not configured" }, status: :service_unavailable
+    end
+
+    ext = File.extname(file.original_filename).downcase
+    key = "journal-images/#{current_user.id}/#{SecureRandom.uuid}#{ext}"
+
+    client = Aws::S3::Client.new(
+      access_key_id: cdn[:key_id],
+      secret_access_key: cdn[:secret_key],
+      endpoint: cdn[:endpoint],
+      region: "auto",
+      force_path_style: true
+    )
+
+    client.put_object(
+      bucket: cdn[:bucket],
+      key: key,
+      body: file.read,
+      content_type: file.content_type,
+      acl: "public-read"
+    )
+
+    endpoint = cdn[:endpoint].chomp("/")
+    url = "#{endpoint}/#{cdn[:bucket]}/#{key}"
+
+    render json: { url: url }
+  rescue Aws::S3::Errors::ServiceError => e
+    Rails.logger.error("S3 upload error: #{e.message}")
+    render json: { error: "Upload failed" }, status: :internal_server_error
+  end
+
   def approve_project_admin
     user_id = params[:user_id]
     project_index = params[:project_index].to_i

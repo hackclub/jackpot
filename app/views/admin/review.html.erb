@@ -111,6 +111,21 @@
       font-size: 0.9rem;
     }
 
+    .journal-rendered-desc {
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .journal-rendered-desc img {
+      max-width: 100%;
+      border-radius: 6px;
+      margin: 6px 0;
+      display: block;
+      border: 1px solid #ddd;
+    }
+
     .review-inputs {
       margin-top: 1rem;
       display: flex;
@@ -280,9 +295,23 @@
                 <a href="<%= project["playable_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["playable_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Demo</a>
               <% end %>
               <% if item[:journal_entries].present? %>
-                <button class="journal-view" data-journal="<%= item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n") %>">
+                <button class="journal-toggle" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
                     View Journal (<%= item[:journal_entries].length %> entries)
-                  </button>
+                </button>
+                <div class="journal-inline" style="display:none; margin-top: 10px;">
+                  <% item[:journal_entries].each do |je| %>
+                    <div style="background: white; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #ddd;">
+                      <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; margin-bottom: 4px;">
+                        <span><%= je.time_done %></span>
+                        <span><%= je.hours_worked %>h</span>
+                      </div>
+                      <div class="journal-rendered-desc"><%= render_journal_description(je.description) %></div>
+                      <% if je.tools_used.present? %>
+                        <p style="font-size: 0.8rem; color: #888; margin: 4px 0 0;"><strong>Tools:</strong> <%= Array(je.tools_used).join(", ") %></p>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
               <% end %>
               </div>
 
@@ -354,9 +383,23 @@
                     <a href="<%= project["playable_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["playable_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Demo</a>
                   <% end %>
                   <% if item[:journal_entries].present? %>
-                  <button class="journal-view" data-journal="<%= item[:journal_entries].map { |e| "#{e.time_done}: #{e.description} (#{e.hours_worked}h)" }.join("\n") %>">
+                  <button class="journal-toggle" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
                    View Journal (<%= item[:journal_entries].length %> entries)
                   </button>
+                  <div class="journal-inline" style="display:none; margin-top: 10px;">
+                    <% item[:journal_entries].each do |je| %>
+                      <div style="background: white; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #ddd;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; margin-bottom: 4px;">
+                          <span><%= je.time_done %></span>
+                          <span><%= je.hours_worked %>h</span>
+                        </div>
+                        <div class="journal-rendered-desc"><%= render_journal_description(je.description) %></div>
+                        <% if je.tools_used.present? %>
+                          <p style="font-size: 0.8rem; color: #888; margin: 4px 0 0;"><strong>Tools:</strong> <%= Array(je.tools_used).join(", ") %></p>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
               <% end %>
             </div>
 
