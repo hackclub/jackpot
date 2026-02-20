@@ -22,11 +22,69 @@
 }
 
 .shop-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 100px 24px 60px;
+  padding: 100px 30px 60px;
 }
 
+.shop-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0;
+  min-height: 0;
+  width: 100%;
+}
+
+.shop-left {
+  flex: 0 0 400px;
+  min-height: 320px;
+  position: relative;
+}
+
+.shop-dude {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 360px;
+  max-width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.shop-right {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding-left: 120px;
+}
+
+/* Transparent draggable box: move all cards together */
+.shop-cards-pan {
+  cursor: grab;
+  padding: 16px;
+  margin: -16px -16px -16px 0;
+  border-radius: 12px;
+  display: inline-block;
+  user-select: none;
+  touch-action: none;
+}
+
+.shop-cards-pan:active {
+  cursor: grabbing;
+}
+
+.shop-cards-pan--grabbing {
+  cursor: grabbing;
+}
+
+.shop-cards-pan .shop-grid {
+  pointer-events: auto;
+}
+
+/* Used on shop lock page only */
 .shop-title {
   font-family: 'Georgia', serif;
   font-size: 2.6rem;
@@ -45,9 +103,11 @@
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
+/* 5x2 grid: 5 columns, 2 rows (10 slots); items cycle when fewer than 10 exist */
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(5, 200px);
+  grid-template-rows: repeat(2, auto);
   gap: 24px;
   justify-items: center;
 }
@@ -379,8 +439,8 @@
 
   .shop-card-image {
     height: 100px;
+  }
 }
-
 
 .purchase-notification {
   position: fixed;
@@ -444,8 +504,85 @@
   color: #cbd5e0;
 }
 
+/* Shop lock / password gate */
+.shop-lock-form {
+  max-width: 320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shop-lock-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shop-lock-label {
+  font-family: 'Georgia', serif;
+  font-size: 0.95rem;
+  color: #c4b89a;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.shop-lock-input {
+  padding: 12px 16px;
+  border: 2px solid rgba(148, 130, 100, 0.5);
+  border-radius: 8px;
+  background: rgba(30, 26, 22, 0.6);
+  color: #f0e6d2;
+  font-size: 1rem;
+}
+
+.shop-lock-input::placeholder {
+  color: #8a7f6a;
+}
+
+.shop-lock-input:focus {
+  outline: none;
+  border-color: #d4a017;
+  box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.2);
+}
+
+.shop-lock-submit {
+  padding: 12px 24px;
+  background: linear-gradient(180deg, #c4941a 0%, #9a7512 100%);
+  color: #1a1814;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Georgia', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.shop-lock-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.shop-lock-submit:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 768px) {
   .shop-title {
     font-size: 2rem;
+  }
+
+  .shop-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .shop-left {
+    display: none;
+  }
+
+  .shop-grid {
+    grid-template-columns: repeat(2, 200px);
   }
 }

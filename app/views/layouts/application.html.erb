@@ -18,6 +18,7 @@
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "shop", "data-turbo-track": "reload" if controller_name == "shop" %>
     <%= javascript_importmap_tags %>
   </head>
 
@@ -28,7 +29,10 @@
         <div class="toolbar-content">
           <div class="nav-links">
             <%= link_to "Deck", deck_path, class: "nav-item #{'nav-active' if controller_name == 'deck'}" %>
-            <%= link_to "Shop", shop_path, class: "nav-item #{'nav-active' if controller_name == 'shop'}" %>
+            <span class="nav-item nav-item--coming-soon">
+              <%= image_tag "coming_soon.png", alt: "Coming soon", class: "nav-item-coming-soon-badge" %>
+              <span class="nav-item-text">Shop</span>
+            </span>
             <%= link_to "FAQ", faq_path, class: "nav-item #{'nav-active' if controller_name == 'home' && action_name == 'faq'}" %>
             <span class="nav-item nav-item--coming-soon">
               <%= image_tag "coming_soon.png", alt: "Coming soon", class: "nav-item-coming-soon-badge" %>

@@ -1,0 +1,16 @@
+<% content_for(:title) { "Shop" } %>
+
+<div class="shop-page">
+  <div class="shop-container">
+    <h1 class="shop-title">Shop</h1>
+    <p class="shop-subtitle">Enter the password to continue</p>
+
+    <%= form_with url: shop_unlock_path, method: :post, local: true, class: "shop-lock-form" do |f| %>
+      <div class="shop-lock-field">
+        <label for="shop_password" class="shop-lock-label">Password</label>
+        <input type="password" name="password" id="shop_password" class="shop-lock-input" placeholder="Enter password" autocomplete="current-password" autofocus required>
+      </div>
+      <button type="submit" class="shop-lock-submit">Unlock</button>
+    <% end %>
+  </div>
+</div>
