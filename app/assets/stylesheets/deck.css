@@ -55,6 +55,32 @@
   font-style: italic;
 }
 
+.nav-item--coming-soon {
+  position: relative;
+  display: inline-block;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+
+.nav-item-coming-soon-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 100%;
+  max-height: 1.8em;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  z-index: 1;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.nav-item--coming-soon .nav-item-text {
+  user-select: none;
+}
+
 .toolbar-right {
   display: flex;
   align-items: center;
@@ -1318,4 +1344,3 @@
   padding: 20px;
   margin: 0;
 }
-
