@@ -189,10 +189,6 @@
            <input type="url" class="detail-value detail-url-input" id="detailCodeUrl" placeholder="https://github.com/...">
          </div>
          
-         <div class="detail-stat-row detail-journal-row" id="detailJournalRow">
-           <button type="button" class="project-cancel-btn detail-journal-inline-btn" id="detailJournalBtn">Journal</button>
-         </div>
-         
          <div class="detail-stat-row" id="detailHackatimeRow" style="display: none;">
            <span class="detail-label">Hackatime</span>
            <span class="detail-value" id="detailHackatime">—</span>
@@ -202,44 +198,19 @@
            <span class="detail-label">Status</span>
            <span class="detail-value detail-shipped-text">Shipped ✓</span>
          </div>
-       </div>
 
-       <div class="detail-history-panel" id="detailHistoryPanel" hidden>
-         <div class="history-dropdown" id="historyDropdown">
-           <button type="button" class="history-dropdown-header" id="historyDropdownHeader" aria-expanded="true" aria-controls="historyDropdownBody">
-             <span class="history-dropdown-title">History</span>
-             <span class="history-dropdown-summary" id="historyDropdownSummary">0.0 hrs total</span>
-             <span class="history-dropdown-chevron" aria-hidden="true">▼</span>
-           </button>
-           <div class="history-dropdown-body" id="historyDropdownBody">
-             <div class="history-dropdown-item">
-               <button type="button" class="history-item-header" id="historyHackatimeHeader" aria-expanded="false">
-                 <span class="detail-label">Hackatime</span>
-                 <span class="detail-value" id="detailHackatimeHours">0.0 hrs</span>
-                 <span class="history-item-chevron">›</span>
-               </button>
-               <div class="history-item-body" id="historyHackatimeBody" hidden>
-                 <p class="history-item-note">Hours from linked Hackatime projects.</p>
-               </div>
-             </div>
-             <div class="history-dropdown-item">
-               <button type="button" class="history-item-header" id="historyJournalHeader" aria-expanded="false">
-                 <span class="detail-label">Journal</span>
-                 <span class="detail-value" id="detailJournalHours">0.0 hrs</span>
-                 <span class="history-item-chevron">›</span>
-               </button>
-               <div class="history-item-body" id="historyJournalBody" hidden>
-                 <div class="history-journal-entries" id="historyJournalEntriesList"></div>
-               </div>
-             </div>
-           </div>
+         <div class="detail-journal-entries-section">
+           <span class="detail-label">Journal Entries</span>
+           <div id="detailJournalEntriesList" class="detail-journal-entries-list"></div>
          </div>
-       </div>
+         </div>
+
+
      </div>
 
      <div class="project-form-actions">
        <input type="hidden" id="shipProjectIndex" name="project_index">
-       <button type="button" class="project-cancel-btn project-history-btn" id="detailHistoryBtn">History</button>
+       <button type="button" class="project-cancel-btn" id="detailJournalBtn">Journal</button>
        <button type="button" class="project-cancel-btn" id="detailSaveBtn">Save Changes</button>
        <button type="button" class="project-ship-btn" id="detailShipBtn">Ship It</button>
        <button type="button" class="project-delete-btn" id="detailDeleteBtn">Delete</button>
@@ -536,16 +507,11 @@ function initDeck() {
    var detailDescription = document.getElementById('detailDescription');
    var detailType = document.getElementById('detailType');
    var detailTitle = document.getElementById('projectDetailTitle');
-   var detailHistoryBtn = document.getElementById('detailHistoryBtn');
    var detailSaveBtn = document.getElementById('detailSaveBtn');
    var detailJournalBtn = document.getElementById('detailJournalBtn');
    var detailShipBtn = document.getElementById('detailShipBtn');
    var detailDeleteBtn = document.getElementById('detailDeleteBtn');
-   var historyDropdownHeader = document.getElementById('historyDropdownHeader');
-   var historyDropdownBody = document.getElementById('historyDropdownBody');
-   var historyDropdownSummary = document.getElementById('historyDropdownSummary');
    var detailMainPanel = document.getElementById('detailMainPanel');
-   var detailHistoryPanel = document.getElementById('detailHistoryPanel');
    var detailPlayableUrl = document.getElementById('detailPlayableUrl');
    var detailCodeUrl = document.getElementById('detailCodeUrl');
    var shipProjectIndex = document.getElementById('shipProjectIndex');
@@ -554,7 +520,36 @@ function initDeck() {
    var detailCodeRow = document.getElementById('detailCodeRow');
    var detailHackatime = document.getElementById('detailHackatime');
    var detailHackatimeRow = document.getElementById('detailHackatimeRow');
+   var detailJournalEntriesList = document.getElementById('detailJournalEntriesList');
    var currentDetailData = null;
+
+   function loadDetailJournalEntries(projectIndex) {
+     if (!detailJournalEntriesList) return;
+     fetch('/deck/journal_entries/' + projectIndex)
+       .then(function(r) { return r.json(); })
+       .then(function(entries) {
+         detailJournalEntriesList.innerHTML = '';
+         if (!entries || entries.length === 0) {
+           detailJournalEntriesList.innerHTML = '<p class="detail-journal-empty">No journal entries yet.</p>';
+           return;
+         }
+         entries.forEach(function(entry) {
+           var entryEl = document.createElement('div');
+           entryEl.className = 'detail-journal-entry';
+           var timeStr = entry.time_done ? new Date(entry.time_done).toLocaleDateString() : 'N/A';
+           entryEl.innerHTML = '<div class="detail-journal-entry-header">' +
+             '<span class="detail-journal-entry-date">' + timeStr + '</span>' +
+             '<span class="detail-journal-entry-hours">' + (entry.hours_worked || 0) + ' hrs</span>' +
+             '</div>' +
+             '<p class="detail-journal-entry-desc">' + (entry.description || '').replace(/</g, '&lt;') + '</p>';
+           if (entry.tools_used && entry.tools_used.length > 0) {
+             entryEl.innerHTML += '<p class="detail-journal-entry-tools"><strong>Tools:</strong> ' + entry.tools_used.join(', ') + '</p>';
+           }
+           detailJournalEntriesList.appendChild(entryEl);
+         });
+       })
+       .catch(function(e) { console.error('Failed to load journal entries:', e); });
+   }
 
    function openDetailModal(data) {
      if (!detailModal) return;
@@ -562,9 +557,6 @@ function initDeck() {
      detailTitle.value = data.name;
      var totalHrs = parseFloat(data.hours || 0).toFixed(1);
      detailHours.textContent = totalHrs + ' hrs';
-     if (historyDropdownSummary) historyDropdownSummary.textContent = totalHrs + ' hrs total';
-     if (detailHackatimeHours) detailHackatimeHours.textContent = parseFloat(data.hackatimeHours || 0).toFixed(1) + ' hrs';
-     if (detailJournalHours) detailJournalHours.textContent = parseFloat(data.journalHours || 0).toFixed(1) + ' hrs';
      detailDescription.value = data.description || '';
      detailType.textContent = data.projectType || '—';
      detailPlayableUrl.value = data.playableUrl || '';
@@ -587,24 +579,9 @@ function initDeck() {
        detailTitle.readOnly = isShipped;
        detailTitle.classList.toggle('modal-title-input--readonly', isShipped);
      }
-     var detailJournalRow = document.getElementById('detailJournalRow');
-     if (detailJournalRow) detailJournalRow.style.display = isShipped ? 'none' : 'flex';
-
      if (detailMainPanel) detailMainPanel.hidden = false;
-     if (detailHistoryPanel) detailHistoryPanel.hidden = true;
-     if (detailHistoryBtn) detailHistoryBtn.textContent = 'History';
-     if (historyDropdownBody) {
-       historyDropdownBody.hidden = false;
-       if (historyDropdownHeader) historyDropdownHeader.setAttribute('aria-expanded', 'true');
-     }
-     var hackBody = document.getElementById('historyHackatimeBody');
-     var journalBody = document.getElementById('historyJournalBody');
-     var hackHeader = document.getElementById('historyHackatimeHeader');
-     var journalHeader = document.getElementById('historyJournalHeader');
-     if (hackBody) hackBody.hidden = true;
-     if (journalBody) journalBody.hidden = true;
-     if (hackHeader) hackHeader.setAttribute('aria-expanded', 'false');
-     if (journalHeader) journalHeader.setAttribute('aria-expanded', 'false');
+     
+     loadDetailJournalEntries(data.index);
 
      detailModal.classList.add('active');
      detailModal.setAttribute('aria-hidden', 'false');
@@ -621,84 +598,7 @@ function initDeck() {
      detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
    }
 
-   function toggleHistoryDropdown() {
-     if (!historyDropdownBody || !historyDropdownHeader) return;
-     var open = historyDropdownBody.hidden;
-     historyDropdownBody.hidden = !open;
-     historyDropdownHeader.setAttribute('aria-expanded', open ? 'true' : 'false');
-   }
 
-   function showHistoryPanel() {
-     if (detailMainPanel) detailMainPanel.hidden = true;
-     if (detailHistoryPanel) detailHistoryPanel.hidden = false;
-     if (historyDropdownBody) historyDropdownBody.hidden = false;
-     if (historyDropdownHeader) historyDropdownHeader.setAttribute('aria-expanded', 'true');
-     if (detailHistoryBtn) detailHistoryBtn.textContent = 'New entry';
-   }
-
-   function showMainPanel() {
-     if (detailMainPanel) detailMainPanel.hidden = false;
-     if (detailHistoryPanel) detailHistoryPanel.hidden = true;
-     if (detailHistoryBtn) detailHistoryBtn.textContent = 'History';
-   }
-
-   if (historyDropdownHeader && historyDropdownBody) {
-     historyDropdownHeader.addEventListener('click', toggleHistoryDropdown);
-   }
-
-   if (detailHistoryBtn) {
-     detailHistoryBtn.addEventListener('click', function() {
-       if (detailHistoryPanel && detailHistoryPanel.hidden) {
-         showHistoryPanel();
-       } else {
-         showMainPanel();
-       }
-     });
-   }
-
-   var historyHackatimeHeader = document.getElementById('historyHackatimeHeader');
-   var historyHackatimeBody = document.getElementById('historyHackatimeBody');
-   var historyJournalHeader = document.getElementById('historyJournalHeader');
-   var historyJournalBody = document.getElementById('historyJournalBody');
-   var historyJournalEntriesList = document.getElementById('historyJournalEntriesList');
-
-   if (historyHackatimeHeader && historyHackatimeBody) {
-     historyHackatimeHeader.addEventListener('click', function(e) {
-       e.stopPropagation();
-       var open = historyHackatimeBody.hidden;
-       historyHackatimeBody.hidden = !open;
-       historyHackatimeHeader.setAttribute('aria-expanded', open ? 'true' : 'false');
-     });
-   }
-
-   if (historyJournalHeader && historyJournalBody) {
-     historyJournalHeader.addEventListener('click', function(e) {
-       e.stopPropagation();
-       var open = historyJournalBody.hidden;
-       historyJournalBody.hidden = !open;
-       historyJournalHeader.setAttribute('aria-expanded', open ? 'true' : 'false');
-       if (open && currentDetailData && historyJournalEntriesList) {
-         fetch('/deck/journal_entries/' + currentDetailData.index)
-           .then(function(r) { return r.json(); })
-           .then(function(entries) {
-             historyJournalEntriesList.innerHTML = '';
-             if (!entries || entries.length === 0) {
-               historyJournalEntriesList.innerHTML = '<p class="history-item-note">No journal entries yet.</p>';
-               return;
-             }
-             entries.forEach(function(entry) {
-               var el = document.createElement('div');
-               el.className = 'history-journal-entry';
-               var timeStr = entry.time_done ? new Date(entry.time_done).toLocaleDateString() : '—';
-               el.innerHTML = '<span class="history-entry-time">' + timeStr + '</span><span class="history-entry-hours">' + (entry.hours_worked || 0) + ' hrs</span>';
-               if (entry.description) el.innerHTML += '<p class="history-entry-desc">' + (entry.description || '').replace(/</g, '&lt;') + '</p>';
-               historyJournalEntriesList.appendChild(el);
-             });
-           })
-           .catch(function(e) { console.error('Failed to load journal entries:', e); });
-       }
-     });
-   }
 
    if (detailSaveBtn) {
      detailSaveBtn.addEventListener('click', function() {
