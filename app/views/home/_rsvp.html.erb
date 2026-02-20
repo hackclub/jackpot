@@ -1,8 +1,12 @@
 <div id="rsvp-container">
-  <%# RSVP Button — pure CSS vintage card, horizontal %>
-  <button class="rsvp-button" onclick="document.getElementById('rsvp-overlay').classList.add('rsvp-modal--visible'); document.body.style.overflow='hidden';">
-    <span class="rsvp-button__label">RSVP</span>
-  </button>
+  <%# Join Button — Triggers HCA Login %>
+  <%= button_to "Join", "/auth/hack_club",
+      method: :post,
+      data: { turbo: false },
+      class: "rsvp-button",
+      style: "background: #d9cbab; border-radius: 18px; padding: 24px 80px; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;" do %>
+    <span class="rsvp-button__label">Join</span>
+  <% end %>
 </div>
 
   <%# Modal Overlay %>
@@ -11,7 +15,7 @@
       <div class="rsvp-modal__content">
         <button class="rsvp-modal__close" onclick="document.getElementById('rsvp-overlay').classList.remove('rsvp-modal--visible'); document.body.style.overflow='';">&times;</button>
 
-        <h2 class="rsvp-modal__title">RSVP</h2>
+        <h2 class="rsvp-modal__title">Join</h2>
         <div class="rsvp-modal__divider"></div>
 
         <form id="rsvp-form" onsubmit="submitRsvp(event)">
