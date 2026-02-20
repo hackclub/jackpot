@@ -30,6 +30,16 @@ Rails.application.routes.draw do
      post "/deck/approve_project_admin", to: "deck#approve_project_admin", as: :approve_project_admin
      post "/deck/reject_project_admin", to: "deck#reject_project_admin", as: :reject_project_admin
   get "/leaderboard", to: "leaderboard#index", as: :leaderboard
+
+  get "/shop", to: "shop#index", as: :shop
+  post "/shop/buy/:id", to: "shop#buy", as: :buy_shop_item
+
+  get "/admin/shop", to: "admin_shop#index", as: :admin_shop
+  post "/admin/shop/items", to: "admin_shop#create_item", as: :admin_shop_create_item
+  patch "/admin/shop/items/:id", to: "admin_shop#update_item", as: :admin_shop_update_item
+  delete "/admin/shop/items/:id", to: "admin_shop#delete_item", as: :admin_shop_delete_item
+  patch "/admin/shop/orders/:id", to: "admin_shop#update_order_status", as: :admin_shop_update_order
+
   get "/admin", to: "admin#index", as: :admin
   get "/admin/review", to: "admin#review", as: :admin_review
 
