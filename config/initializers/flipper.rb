@@ -13,6 +13,10 @@ Rails.application.config.after_initialize do
     next unless ActiveRecord::Base.connection.table_exists?(:flipper_features)
 
     Flipper.enable(:access) unless Flipper.exist?(:access)
+
+    # Shop and status page feature flags (disabled by default, enable per-user via Flipper UI)
+    Flipper.add(:shop) unless Flipper.exist?(:shop)
+    Flipper.add(:status) unless Flipper.exist?(:status)
   rescue StandardError => e
     Rails.logger.warn "Could not initialize access flipper: #{e.message}"
   end

@@ -2,6 +2,7 @@
 
 class ShopController < ApplicationController
   before_action :authenticate_user!
+  before_action :require_shop_feature
   before_action :require_shop_unlocked, only: [ :buy ]
 
   def index
@@ -79,6 +80,12 @@ class ShopController < ApplicationController
   end
 
   private
+
+  def require_shop_feature
+    return if Flipper.enabled?(:shop, current_user)
+
+    redirect_to root_path, alert: "The shop is not available yet."
+  end
 
   def shop_locked?
     ENV["SHOP_PW"].present?

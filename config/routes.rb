@@ -53,6 +53,8 @@ Rails.application.routes.draw do
     end
   end
 
+  get "/status", to: "status#index", as: :status
+
   get "/faq", to: "home#faq", as: :faq
   get "/rules", to: "home#rules", as: :rules
 

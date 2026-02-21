@@ -29,15 +29,23 @@
         <div class="toolbar-content">
           <div class="nav-links">
             <%= link_to "Deck", deck_path, class: "nav-item #{'nav-active' if controller_name == 'deck'}" %>
-            <span class="nav-item nav-item--coming-soon">
-              <%= image_tag "coming_soon.png", alt: "Coming soon", class: "nav-item-coming-soon-badge" %>
-              <span class="nav-item-text">Shop</span>
-            </span>
+            <% if Flipper.enabled?(:shop, current_user) %>
+              <%= link_to "Shop", shop_path, class: "nav-item #{'nav-active' if controller_name == 'shop'}" %>
+            <% else %>
+              <span class="nav-item nav-item--coming-soon">
+                <%= image_tag "coming_soon.png", alt: "Coming soon", class: "nav-item-coming-soon-badge" %>
+                <span class="nav-item-text">Shop</span>
+              </span>
+            <% end %>
             <%= link_to "FAQ", faq_path, class: "nav-item #{'nav-active' if controller_name == 'home' && action_name == 'faq'}" %>
-            <span class="nav-item nav-item--coming-soon">
-              <%= image_tag "coming_soon.png", alt: "Coming soon", class: "nav-item-coming-soon-badge" %>
-              <span class="nav-item-text">Status</span>
-            </span>
+            <% if Flipper.enabled?(:status, current_user) %>
+              <%= link_to "Status", status_path, class: "nav-item #{'nav-active' if controller_name == 'status'}" %>
+            <% else %>
+              <span class="nav-item nav-item--coming-soon">
+                <%= image_tag "coming_soon.png", alt: "Coming soon", class: "nav-item-coming-soon-badge" %>
+                <span class="nav-item-text">Status</span>
+              </span>
+            <% end %>
             <%= link_to "Leaderboard", leaderboard_path, class: "nav-item #{'nav-active' if controller_name == 'leaderboard'}" %>
             <% if admin? %>
               <%= link_to "Admin", admin_path, class: "nav-item nav-admin" %>
