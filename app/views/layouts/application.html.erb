@@ -89,7 +89,19 @@
     <% end %>
 
     <%= yield %>
-    
+
+    <footer class="stats-footer">
+      <p>
+        Build <%= Rails.application.config.git_version %>
+        from <%= time_ago_in_words(Rails.application.config.server_start_time) %> ago.
+        (DB: <%= pluralize(db_stats[:queries], "query") %>, <%= db_stats[:cached] %> cached)
+        (CACHE: <%= cache_stats[:hits] %> hits, <%= cache_stats[:misses] %> misses)
+        (<%= RequestCounter.requests_per_second %> req/sec)
+        <% stats = active_user_stats %>
+        (Active: <%= stats[:signed_in] %> signed in, <%= stats[:visitors] %> visitors)
+      </p>
+    </footer>
+
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const btn = document.getElementById('profileDropdownBtn');

@@ -8,6 +8,7 @@ class ApplicationController < ActionController::Base
   helper_method :current_user, :user_signed_in?, :admin?
 
   before_action :check_access_flipper
+  before_action :initialize_request_counters
 
   private
 
@@ -44,5 +45,14 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path
     path = session.delete(:user_return_to)
     path.present? && path.start_with?("/") && !path.start_with?("//") ? path : root_path
+  end
+
+  # Resets all per-request counters in thread-local storage
+  def initialize_request_counters
+    Thread.current[:cache_hits] = 0
+    Thread.current[:cache_misses] = 0
+    Thread.current[:db_query_count] = 0
+    Thread.current[:db_cached_count] = 0
+    RequestCounter.record!
   end
 end
