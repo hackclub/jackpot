@@ -15,13 +15,17 @@ class Airtable::UserSyncJob < Airtable::BaseSyncJob
   # @param user [User] the user to map
   # @return [Hash] Airtable field values
   def field_mapping(user)
-    project_names = (user.projects || []).map { |p| p["name"] }.compact.join(", ")
 
     {
       "Email" => user.email,
       "Name" => user.display_name,
+      "Slack ID" => user.slack_id,
+      "Slack Username" => user.slack_username,
+      "Role" => user.role,
       "chip_am" => user.chip_am.to_f,
-      "Projects" => project_names
+      "tut" => user.tutorial_completed,
+      "Last Sign In" => user.last_sign_in_at&.iso8601,
+      "Created At" => user.created_at&.iso8601
     }
   end
 end
