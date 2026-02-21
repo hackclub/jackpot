@@ -96,3 +96,152 @@
   color: #8b6914;
   font-style: italic;
 }
+
+/* Ruby console */
+.console-container {
+  background: rgba(10, 8, 5, 0.9);
+  border: 2px solid #8b6914;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.console-input-area {
+  display: flex;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(139, 105, 20, 0.4);
+}
+
+.console-prompt {
+  padding: 1rem 0 1rem 1rem;
+  color: #d4a017;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  user-select: none;
+}
+
+.console-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f0e6d2;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  padding: 1rem 1rem 1rem 0.5rem;
+  resize: vertical;
+  line-height: 1.5;
+  min-height: 60px;
+}
+
+.console-input::placeholder {
+  color: rgba(196, 184, 154, 0.4);
+}
+
+.console-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(139, 105, 20, 0.4);
+  background: rgba(20, 14, 8, 0.6);
+}
+
+.console-run-btn {
+  background: linear-gradient(135deg, #d4a017, #8b6914);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.console-run-btn:hover {
+  opacity: 0.85;
+}
+
+.console-run-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.console-clear-btn {
+  background: transparent;
+  color: #c4b89a;
+  border: 1px solid rgba(139, 105, 20, 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: 'Georgia', serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.console-clear-btn:hover {
+  border-color: #d4a017;
+  color: #d4a017;
+}
+
+.console-status {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.console-status-running { color: #d4a017; }
+.console-status-done { color: #3cb043; }
+.console-status-error { color: #d42b2b; }
+
+.console-output {
+  padding: 1rem;
+  max-height: 500px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.console-welcome {
+  color: rgba(196, 184, 154, 0.5);
+  font-style: italic;
+  margin: 0;
+}
+
+.console-entry {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(139, 105, 20, 0.15);
+  padding-bottom: 0.8rem;
+}
+
+.console-entry-cmd {
+  color: #d4a017;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.console-entry-stdout {
+  color: #c4b89a;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 0.3rem;
+}
+
+.console-entry-result {
+  color: #3cb043;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 0.3rem;
+}
+
+.console-entry-error {
+  color: #d42b2b;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 0.3rem;
+}
+

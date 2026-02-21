@@ -8,6 +8,43 @@ class AdminController < ApplicationController
     cleanup_corrupted_projects
   end
 
+  def console
+  end
+
+  # Executes Ruby code submitted from the admin console.
+  # Captures stdout and the return value, with a 30-second timeout.
+  def execute_console
+    code = params[:code].to_s
+
+    if code.blank?
+      return render json: { output: "", result: "No code provided." }
+    end
+
+    output = StringIO.new
+    result = nil
+
+    begin
+      Timeout.timeout(30) do
+        old_stdout = $stdout
+        $stdout = output
+
+        # rubocop:disable Security/Eval
+        result = eval(code, TOPLEVEL_BINDING, "admin_console", 1)
+        # rubocop:enable Security/Eval
+
+        $stdout = old_stdout
+      end
+    rescue Timeout::Error
+      $stdout = STDOUT
+      return render json: { output: output.string, result: "Error: Execution timed out after 30 seconds." }
+    rescue Exception => e
+      $stdout = STDOUT
+      return render json: { output: output.string, result: "#{e.class}: #{e.message}\n#{e.backtrace&.first(10)&.join("\n")}" }
+    end
+
+    render json: { output: output.string, result: result.inspect }
+  end
+
   def review
     begin
       Rails.logger.info "=== AdminController#review START ==="

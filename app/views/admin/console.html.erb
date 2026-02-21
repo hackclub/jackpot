@@ -1,0 +1,147 @@
+<% content_for(:title) { "Admin Console" } %>
+
+<div class="admin-page">
+  <div class="admin-content" style="max-width: 1100px;">
+    <h1>Ruby Console</h1>
+
+    <div class="console-container">
+      <div class="console-input-area">
+        <div class="console-prompt">&gt;&gt;</div>
+        <textarea id="consoleInput" class="console-input" placeholder="User.count" rows="4" spellcheck="false" autofocus></textarea>
+      </div>
+      <div class="console-actions">
+        <button id="consoleRun" class="console-run-btn">Run (Ctrl+Enter)</button>
+        <button id="consoleClear" class="console-clear-btn">Clear</button>
+        <span id="consoleStatus" class="console-status"></span>
+      </div>
+      <div id="consoleOutput" class="console-output">
+        <p class="console-welcome">Welcome to the Jackpot admin console. Be careful in here.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <%= link_to "← Back to Admin", admin_path, style: "color: #d4a017; font-family: Georgia, serif; text-decoration: none;" %>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('consoleInput');
+    const output = document.getElementById('consoleOutput');
+    const runBtn = document.getElementById('consoleRun');
+    const clearBtn = document.getElementById('consoleClear');
+    const status = document.getElementById('consoleStatus');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    // Stores command history for up/down arrow navigation
+    const commandHistory = [];
+    let historyIndex = -1;
+
+    /**
+     * Executes the code in the input textarea and appends results to the output.
+     * Sends a POST request to the admin console endpoint.
+     */
+    function executeCode() {
+      const code = input.value.trim();
+      if (!code) return;
+
+      commandHistory.unshift(code);
+      historyIndex = -1;
+
+      // Display the input command in the output area
+      const inputBlock = document.createElement('div');
+      inputBlock.className = 'console-entry';
+      inputBlock.innerHTML = '<div class="console-entry-cmd">>> ' + escapeHtml(code) + '</div>';
+      output.appendChild(inputBlock);
+
+      status.textContent = 'Running...';
+      status.className = 'console-status console-status-running';
+      runBtn.disabled = true;
+
+      fetch('<%= admin_console_execute_path %>', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({ code: code })
+      })
+      .then(r => r.json())
+      .then(data => {
+        // Show stdout output if any was captured
+        if (data.output && data.output.trim()) {
+          const stdoutEl = document.createElement('div');
+          stdoutEl.className = 'console-entry-stdout';
+          stdoutEl.textContent = data.output;
+          inputBlock.appendChild(stdoutEl);
+        }
+
+        // Show the return value or error
+        const resultEl = document.createElement('div');
+        const isError = data.result && (data.result.startsWith('Error:') || data.result.includes('Error:'));
+        resultEl.className = isError ? 'console-entry-error' : 'console-entry-result';
+        resultEl.textContent = '=> ' + (data.result || 'nil');
+        inputBlock.appendChild(resultEl);
+
+        status.textContent = 'Done';
+        status.className = 'console-status console-status-done';
+      })
+      .catch(e => {
+        const errEl = document.createElement('div');
+        errEl.className = 'console-entry-error';
+        errEl.textContent = 'Request failed: ' + e.message;
+        inputBlock.appendChild(errEl);
+
+        status.textContent = 'Error';
+        status.className = 'console-status console-status-error';
+      })
+      .finally(() => {
+        runBtn.disabled = false;
+        input.value = '';
+        output.scrollTop = output.scrollHeight;
+      });
+    }
+
+    /**
+     * Escapes HTML special characters to prevent XSS in console output.
+     * @param {string} text - The raw text to escape
+     * @returns {string} HTML-safe string
+     */
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    runBtn.addEventListener('click', executeCode);
+
+    clearBtn.addEventListener('click', function() {
+      output.innerHTML = '';
+      status.textContent = '';
+    });
+
+    // Ctrl+Enter to run, Up/Down for command history
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        executeCode();
+      } else if (e.key === 'ArrowUp' && input.selectionStart === 0) {
+        e.preventDefault();
+        if (historyIndex < commandHistory.length - 1) {
+          historyIndex++;
+          input.value = commandHistory[historyIndex];
+        }
+      } else if (e.key === 'ArrowDown' && input.selectionEnd === input.value.length) {
+        e.preventDefault();
+        if (historyIndex > 0) {
+          historyIndex--;
+          input.value = commandHistory[historyIndex];
+        } else {
+          historyIndex = -1;
+          input.value = '';
+        }
+      }
+    });
+  });
+</script>
