@@ -3,27 +3,8 @@
 class ShopController < ApplicationController
   before_action :authenticate_user!
   before_action :require_shop_feature
-  before_action :require_shop_unlocked, only: [ :buy ]
-
   def index
-    if shop_locked? && !shop_unlocked?
-      render :lock, status: :unauthorized
-      return
-    end
     @items = ShopItem.active.order(created_at: :desc)
-  end
-
-  def unlock
-    unless shop_locked?
-      redirect_to shop_path
-      return
-    end
-    if ActiveSupport::SecurityUtils.secure_compare(ENV["SHOP_PW"], params[:password].to_s)
-      session[:shop_unlocked] = true
-      redirect_to shop_path, notice: "Welcome to the shop!"
-    else
-      redirect_to shop_path, alert: "Invalid password."
-    end
   end
 
   def buy
@@ -87,22 +68,5 @@ class ShopController < ApplicationController
     redirect_to root_path, alert: "The shop is not available yet."
   end
 
-  def shop_locked?
-    ENV["SHOP_PW"].present?
-  end
 
-  def shop_unlocked?
-    session[:shop_unlocked]
-  end
-
-  def require_shop_unlocked
-    return unless shop_locked?
-    return if shop_unlocked?
-
-    if request.xhr?
-      render json: { error: "Please enter the shop password first." }, status: :forbidden
-    else
-      redirect_to shop_path, alert: "Please enter the shop password first."
-    end
-  end
 end

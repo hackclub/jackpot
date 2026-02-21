@@ -33,7 +33,6 @@ Rails.application.routes.draw do
   get "/leaderboard", to: "leaderboard#index", as: :leaderboard
 
   get "/shop", to: "shop#index", as: :shop
-  post "/shop/unlock", to: "shop#unlock", as: :shop_unlock
   post "/shop/buy/:id", to: "shop#buy", as: :buy_shop_item
 
   get "/admin/shop", to: "admin_shop#index", as: :admin_shop
