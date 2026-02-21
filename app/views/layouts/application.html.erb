@@ -19,6 +19,7 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "shop", "data-turbo-track": "reload" if controller_name == "shop" %>
+    <%= stylesheet_link_tag "admin", "data-turbo-track": "reload" if controller_name == "admin" %>
     <%= javascript_importmap_tags %>
   </head>
 

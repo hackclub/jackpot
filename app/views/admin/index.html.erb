@@ -1,31 +1,59 @@
-<div style="padding: 2rem;">
-  <h1>Admin Panel</h1>
-  
-  <div style="margin: 2rem 0;">
-    <marquee behavior="alternate" scrollamount="20">
-      <span style="font-size: 3rem;">🎉 ✨ 🔥 WELCOME TO THE ADMIN ZONE 🔥 ✨ 🎉</span>
-    </marquee>
-  </div>
+<% content_for(:title) { "Admin Panel" } %>
 
-  <div style="display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0;">
-    <%= link_to "Project Review (Shipped Projects)", admin_review_path, style: "font-size: 1.5rem; color: #d4a017; text-decoration: none; font-weight: bold;" %>
-    <%= link_to "Shop Admin (Items & Orders)", admin_shop_path, style: "font-size: 1.5rem; color: #d4a017; text-decoration: none; font-weight: bold;" %>
-    <%= link_to "Blazer (Database Queries)", "/admin/blazer", style: "font-size: 1.5rem; color: #ff0066; text-decoration: none;" %>
-    <%= link_to "Flipper (Feature Flags)", "/admin/flipper", style: "font-size: 1.5rem; color: #00ff66; text-decoration: none;" %>
-    <%= link_to "Solid Queue (Job Queue)", "/admin/jobs", style: "font-size: 1.5rem; color: #0066ff; text-decoration: none;" %>
-  </div>
+<div class="admin-page">
+  <div class="admin-content">
+    <h1>Admin Panel</h1>
 
-  <div style="margin-top: 3rem; text-align: center;">
-    <pre style="font-size: 0.8rem; line-height: 1;">
-    (\_/)  
-    (o.o)  
-    (> <)  
-    </pre>
-    <p style="font-family: monospace; font-size: 1.2rem;">
-      🦄🌈🔮💎🎪🎭🎨🎬🎤🎧🎼🎹🥁🎷🎺🎸🪕🎻🎲🎯🎳🎮🎰🎱🔮💎🌈🦄
-    </p>
-    <p style="font-family: Comic Sans MS, cursive; font-size: 2rem; color: purple;">
-      sillies be upon ye
-    </p>
+    <div class="admin-links">
+      <%= link_to admin_review_path, class: "admin-link" do %>
+        <span class="admin-link-icon">📋</span>
+        <div>
+          Project Review
+          <span class="admin-link-desc">Review shipped projects and approve hours</span>
+        </div>
+      <% end %>
+
+      <%= link_to admin_shop_path, class: "admin-link" do %>
+        <span class="admin-link-icon">🛒</span>
+        <div>
+          Shop Admin
+          <span class="admin-link-desc">Manage items and orders</span>
+        </div>
+      <% end %>
+
+      <%= link_to "/admin/blazer", class: "admin-link" do %>
+        <span class="admin-link-icon">📊</span>
+        <div>
+          Blazer
+          <span class="admin-link-desc">Database queries and dashboards</span>
+        </div>
+      <% end %>
+
+      <%= link_to "/admin/flipper", class: "admin-link" do %>
+        <span class="admin-link-icon">🚩</span>
+        <div>
+          Flipper
+          <span class="admin-link-desc">Feature flags</span>
+        </div>
+      <% end %>
+
+      <%= link_to "/admin/jobs", class: "admin-link" do %>
+        <span class="admin-link-icon">⚙️</span>
+        <div>
+          Solid Queue
+          <span class="admin-link-desc">Background job queue</span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="admin-silly">
+      <pre>
+(\_/)
+(o.o)
+(> <)
+      </pre>
+      <p class="admin-emojis">🦄🌈🔮💎🎪🎭🎨🎬🎤🎧🎼🎹🥁🎷🎺🎸🪕🎻🎲🎯🎳🎮🎰🎱🔮💎🌈🦄</p>
+      <p class="admin-tagline">sillies be upon ye</p>
+    </div>
   </div>
 </div>
