@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 class ShopController < ApplicationController
+  ADMIN_ONLY = true
+
   before_action :authenticate_user!
   before_action :require_shop_feature
+  before_action :require_admin_for_shop, if: -> { ADMIN_ONLY }
+
   def index
     @items = ShopItem.active.order(created_at: :desc)
   end
@@ -61,6 +65,16 @@ class ShopController < ApplicationController
   end
 
   private
+
+  def require_admin_for_shop
+    return if admin?
+
+    respond_to do |format|
+      format.html { render plain: "very, very, very soon...", status: :ok }
+      format.json { render json: { error: "very, very, very soon..." }, status: :forbidden }
+      format.any { render plain: "very, very, very soon...", status: :forbidden }
+    end
+  end
 
   def require_shop_feature
     return if Flipper.enabled?(:shop, current_user)
