@@ -24,33 +24,33 @@
       <div class="shop-right">
         <% if @items.any? %>
         <% items_for_grid = (1..10).map { |i| @items[(i - 1) % @items.size] } %>
-        <div class="shop-cards-pan" id="shopCardsPan" role="group" aria-label="Shop items" style="position: relative; left: 200px; top: 40px;">
+        <div class="shop-cards-pan" id="shopCardsPan" role="group" aria-label="Shop items">
           <div class="shop-grid">
         <% items_for_grid.each do |item| %>
           <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
             <div class="shop-card-inner">
-              <% if item.image_url.present? %>
-                <div class="shop-card-image" style="background-image: url('<%= item.image_url.to_s.match?(/\Ahttps?:\/\//i) ? item.image_url : '' %>');"></div>
-              <% else %>
-                <div class="shop-card-image shop-card-image-default"></div>
-              <% end %>
+              <div class="shop-card-image shop-card-image-default"></div>
               <div class="shop-card-body">
                 <h3 class="shop-card-name"><%= item.name %></h3>
                 <% if item.description.present? %>
                   <p class="shop-card-desc"><%= item.description %></p>
                 <% end %>
-                <div class="shop-card-price">
-                  <div class="shop-price-chip">
-                    <div class="shop-chip-avatar">
-                      <%= image_tag(current_user.profile_photo_url || "https://avatars.githubusercontent.com/u/0", alt: "chip", class: "shop-chip-img") %>
-                      <div class="shop-chip-frame"></div>
-                    </div>
-                    <span class="shop-price-amount"><%= item.price.to_f % 1 == 0 ? item.price.to_i : item.price.to_f %></span>
-                  </div>
-                </div>
               </div>
               <div class="shop-card-actions">
-                <button type="button" class="shop-buy-btn" data-item-id="<%= item.id %>">Buy</button>
+                <button
+                  type="button"
+                  class="shop-buy-btn"
+                  data-action="open-item-modal"
+                  data-item-id="<%= item.id %>"
+                  data-item-name="<%= item.name %>"
+                  data-item-desc="<%= item.description.to_s %>"
+                  data-item-link="<%= item.item_link.to_s %>"
+                  data-item-price="0"
+                >Buy</button>
+              </div>
+              <div class="shop-price-badge" aria-hidden="true">
+                <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
+                <span class="shop-price-badge-amount">0</span>
               </div>
             </div>
           </div>
@@ -58,10 +58,94 @@
           </div>
         </div>
         <% else %>
-        <div class="shop-empty">
-          <p>No items available yet. Check back soon!</p>
+        <div class="shop-cards-pan" role="group" aria-label="Shop items">
+          <div class="shop-grid">
+            <% 10.times do %>
+              <div class="shop-card" aria-hidden="true">
+                <div class="shop-card-inner">
+                  <div class="shop-card-image shop-card-image-default"></div>
+                  <div class="shop-card-body">
+                    <h3 class="shop-card-name">Item Name</h3>
+                    <p class="shop-card-desc">Item description loooolololol.</p>
+                  </div>
+                  <div class="shop-card-actions">
+                    <button
+                      type="button"
+                      class="shop-buy-btn"
+                      data-action="open-item-modal"
+                      data-item-id=""
+                      data-item-name="Item Name"
+                      data-item-desc="Item description loooolololol."
+                      data-item-link=""
+                      data-item-price="0"
+                    >Buy</button>
+                  </div>
+                  <div class="shop-price-badge" aria-hidden="true">
+                    <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
+                    <span class="shop-price-badge-amount">0</span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
         </div>
         <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Item modal (same template as /deck modals) -->
+<div class="modal-overlay" id="shopItemModal" aria-hidden="true">
+  <div class="modal-content shop-item-modal-content" role="dialog" aria-modal="true" aria-labelledby="shopItemModalTitle">
+    <div class="modal-header">
+      <h3 class="modal-title" id="shopItemModalTitle">Item</h3>
+      <button type="button" class="modal-close" id="shopItemModalClose" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="shop-item-modal-body">
+      <div class="shop-item-hero">
+        <div class="shop-item-hero-frame">
+          <%= image_tag "coming_soon.png", alt: "", class: "shop-item-hero-img" %>
+        </div>
+      </div>
+
+      <div class="shop-item-modal-scroll">
+        <p class="shop-item-modal-desc" id="shopItemModalDesc"></p>
+
+        <div class="shop-item-modal-bottom">
+          <div class="shop-item-form">
+            <div class="shop-item-form-row">
+              <label class="shop-item-label" for="shopItemModalQty">Quantity</label>
+              <input class="shop-item-input" id="shopItemModalQty" type="number" min="1" value="1">
+            </div>
+
+            <div class="shop-item-divider"></div>
+
+            <div class="shop-item-form-row shop-item-form-row--shipping">
+              <label class="shop-item-label shop-item-label--stacked" for="shopItemModalShipping">
+                <span>Shipping/Tax</span>
+                <span class="shop-item-label-sub">(Optional)</span>
+              </label>
+              <div class="shop-item-shipping">
+                <span class="shop-item-currency">+</span>
+                <input class="shop-item-input shop-item-input--shipping" id="shopItemModalShipping" type="number" min="0" value="0">
+                <span class="shop-item-hint">(50 Chips = $4.5)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="shop-item-price-row">
+            <div class="shop-item-price-pill" aria-hidden="true">
+              <span class="shop-item-price-amount" id="shopItemModalTotal">0</span>
+              <%= image_tag "chips_price.png", alt: "", class: "shop-item-price-chip" %>
+            </div>
+          </div>
+
+          <div class="shop-item-error" id="shopItemModalError" hidden></div>
+
+          <button type="button" class="shop-item-purchase-btn" id="shopItemModalPurchase">Purchase</button>
+        </div>
       </div>
     </div>
   </div>
@@ -79,7 +163,12 @@
       <div class="shop-modal-cost">
         <div class="shop-price-chip shop-price-chip-lg">
           <div class="shop-chip-avatar shop-chip-avatar-lg">
-            <%= image_tag(current_user.profile_photo_url || "https://avatars.githubusercontent.com/u/0", alt: "chip", class: "shop-chip-img") %>
+            <%= image_tag(
+                  current_user.profile_photo_url || "https://avatars.githubusercontent.com/u/0",
+                  alt: "chip",
+                  class: "shop-chip-img",
+                  loading: "eager"
+                ) %>
             <div class="shop-chip-frame"></div>
           </div>
           <span class="shop-price-amount shop-price-amount-lg" id="shopModalPrice"></span>
@@ -123,15 +212,139 @@ document.addEventListener('DOMContentLoaded', function() {
     currentItemId = null;
   }
 
-  document.querySelectorAll('.shop-buy-btn[data-item-id]').forEach(function(btn) {
+  var itemModal = document.getElementById('shopItemModal');
+  var itemModalClose = document.getElementById('shopItemModalClose');
+  var itemModalTitle = document.getElementById('shopItemModalTitle');
+  var itemModalDesc = document.getElementById('shopItemModalDesc');
+  var itemModalQty = document.getElementById('shopItemModalQty');
+  var itemModalShipping = document.getElementById('shopItemModalShipping');
+  var itemModalTotal = document.getElementById('shopItemModalTotal');
+  var itemModalError = document.getElementById('shopItemModalError');
+  var itemModalPurchase = document.getElementById('shopItemModalPurchase');
+
+  var itemModalCurrent = { id: null, name: null, link: null, basePrice: 0 };
+
+  function toNumber(v) {
+    var n = parseFloat(String(v || '').replace(/,/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function updateItemModalTotals() {
+    if (!itemModalTotal) return;
+    var qty = Math.max(1, parseInt(itemModalQty && itemModalQty.value, 10) || 1);
+    if (itemModalQty) itemModalQty.value = String(qty);
+    var shipping = Math.max(0, toNumber(itemModalShipping && itemModalShipping.value));
+    if (itemModalShipping) itemModalShipping.value = String(shipping);
+    var total = (itemModalCurrent.basePrice * qty) + shipping;
+    itemModalTotal.textContent = (total % 1 === 0) ? String(Math.round(total)) : String(total.toFixed(1));
+  }
+
+  function openItemModal(data) {
+    if (!itemModal) return;
+    itemModalTitle.textContent = data.name || 'Item';
+    itemModalDesc.textContent = data.desc || '';
+    itemModalCurrent.id = data.id || null;
+    itemModalCurrent.name = data.name || '';
+    itemModalCurrent.link = data.link || '';
+    itemModalCurrent.basePrice = toNumber(data.price);
+
+    if (itemModalQty) itemModalQty.value = '1';
+    if (itemModalShipping) itemModalShipping.value = '0';
+    if (itemModalError) itemModalError.hidden = true;
+    updateItemModalTotals();
+
+    if (itemModalPurchase) itemModalPurchase.disabled = !data.id;
+
+    itemModal.classList.add('active');
+    itemModal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeItemModal() {
+    if (!itemModal) return;
+    itemModal.classList.remove('active');
+    itemModal.setAttribute('aria-hidden', 'true');
+  }
+
+  document.querySelectorAll('[data-action="open-item-modal"]').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var card = btn.closest('.shop-card');
-      var itemId = btn.dataset.itemId;
-      var itemName = card.querySelector('.shop-card-name').textContent;
-      var price = card.dataset.itemPrice;
-      openModal(itemId, itemName, price);
+      if (btn.disabled) return;
+      openItemModal({
+        id: btn.dataset.itemId,
+        name: btn.dataset.itemName,
+        desc: btn.dataset.itemDesc,
+        link: btn.dataset.itemLink,
+        price: btn.dataset.itemPrice || '0'
+      });
     });
   });
+
+  if (itemModalQty) itemModalQty.addEventListener('input', updateItemModalTotals);
+  if (itemModalShipping) itemModalShipping.addEventListener('input', updateItemModalTotals);
+
+  if (itemModalPurchase) {
+    itemModalPurchase.addEventListener('click', function() {
+      if (!itemModalCurrent.id) return;
+      var qty = Math.max(1, parseInt(itemModalQty && itemModalQty.value, 10) || 1);
+      itemModalPurchase.disabled = true;
+      itemModalPurchase.textContent = 'Processing...';
+      if (itemModalError) itemModalError.hidden = true;
+
+      fetch('<%= buy_shop_item_path(":id") %>'.replace('%3Aid', itemModalCurrent.id).replace(':id', itemModalCurrent.id), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ quantity: qty })
+      })
+      .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+      .then(function(result) {
+        if (result.ok && result.data.success) {
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          closeItemModal();
+          notificationMessage.textContent = 'Your purchase for ' + (itemModalCurrent.name || 'item') + ' is successful!';
+          notification.classList.add('show');
+          notification.setAttribute('aria-hidden', 'false');
+          var tokenEl = document.querySelector('.token-count');
+          if (tokenEl) tokenEl.textContent = result.data.new_balance;
+          modalBalance.textContent = result.data.new_balance;
+          setTimeout(function() {
+            notification.classList.remove('show');
+            notification.setAttribute('aria-hidden', 'true');
+            setTimeout(function() { location.reload(); }, 300);
+          }, 3000);
+        } else {
+          if (itemModalError) {
+            itemModalError.textContent = result.data.error || 'Purchase failed.';
+            itemModalError.hidden = false;
+          } else {
+            alert(result.data.error || 'Purchase failed.');
+          }
+        }
+      })
+      .catch(function(e) {
+        console.error('Purchase error:', e);
+        if (itemModalError) {
+          itemModalError.textContent = 'Something went wrong. Please try again.';
+          itemModalError.hidden = false;
+        } else {
+          alert('Something went wrong. Please try again.');
+        }
+      })
+      .finally(function() {
+        itemModalPurchase.disabled = !itemModalCurrent.id;
+        itemModalPurchase.textContent = 'Purchase';
+      });
+    });
+  }
+
+  if (itemModalClose) itemModalClose.addEventListener('click', closeItemModal);
+  if (itemModal) {
+    itemModal.addEventListener('click', function(e) {
+      if (e.target === itemModal) closeItemModal();
+    });
+  }
 
   if (modalClose) modalClose.addEventListener('click', closeModal);
   if (modalCancel) modalCancel.addEventListener('click', closeModal);
@@ -202,7 +415,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') {
+      closeItemModal();
+      closeModal();
+    }
   });
 
   // Draggable pan: move all cards together (drag threshold so Buy button clicks still work)
@@ -211,13 +427,18 @@ document.addEventListener('DOMContentLoaded', function() {
     var panStartX, panStartY, panTranslateX = 0, panTranslateY = 0, panDragging = false, panHasMoved = false, panDidDrag = false;
     var DRAG_THRESHOLD = 5;
 
+    function isInteractiveTarget(target) {
+      var el = (target && target.nodeType === 1) ? target : (target && target.parentElement);
+      return !!(el && (el.closest('button') || el.closest('a')));
+    }
+
     function getClientXY(e) {
       if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
       return { x: e.clientX, y: e.clientY };
     }
 
     function onPanPointerDown(e) {
-      if (e.target.closest('button') || e.target.closest('a')) return;
+      if (isInteractiveTarget(e.target)) return;
       var p = getClientXY(e);
       panStartX = p.x; panStartY = p.y;
       panDragging = false; panHasMoved = false; panDidDrag = false;
@@ -256,6 +477,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     pan.addEventListener('click', function(e) {
+      // Never block real button/link clicks.
+      if (isInteractiveTarget(e.target)) {
+        panDidDrag = false;
+        return;
+      }
+      // Only suppress clicks that were actually a drag.
       if (panDidDrag) {
         e.preventDefault();
         e.stopPropagation();
