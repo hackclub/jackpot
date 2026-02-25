@@ -29,78 +29,114 @@
         </div>
       </div>
       <div class="shop-right">
-        <% if @items.any? %>
-        <div class="shop-cards-pan" id="shopCardsPan" role="group" aria-label="Shop items">
-          <div class="shop-grid">
-        <% @items.each do |item| %>
-          <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
-            <div class="shop-card-inner">
-              <% if item.image_url.present? %>
-                <div class="shop-card-image" style="background-image: url('<%= item.image_url %>');"></div>
-              <% else %>
-                <div class="shop-card-image shop-card-image-default"></div>
-              <% end %>
-              <div class="shop-card-body">
-                <h3 class="shop-card-name"><%= item.name %></h3>
-                <% if item.description.present? %>
-                  <p class="shop-card-desc"><%= item.description %></p>
+        <div class="shop-category-selector" id="shopCategorySelector" aria-label="Shop categories">
+          <button type="button" class="shop-category-tile" data-shop-category="generic">Generic</button>
+          <button type="button" class="shop-category-tile" data-shop-category="setup">Setup</button>
+          <button type="button" class="shop-category-tile" data-shop-category="hardware">Hardware</button>
+        </div>
+
+        <div class="shop-category-view" id="shopCategoryView" hidden aria-hidden="true">
+          <div class="shop-category-view-header">
+            <button type="button" class="shop-category-back" id="shopCategoryBack">← Categories</button>
+            <div class="shop-breadcrumb" aria-label="Current path">
+              <button type="button" class="shop-breadcrumb-seg" id="shopBreadcrumbCategory"></button>
+              <span class="shop-breadcrumb-sep" id="shopBreadcrumbSep" aria-hidden="true">/</span>
+              <span class="shop-breadcrumb-current" id="shopBreadcrumbGrant"></span>
+            </div>
+          </div>
+
+          <div class="shop-category-panel" data-shop-category-panel="generic" hidden>
+            <div class="shop-grant-selector" data-shop-grant-selector>
+              <button type="button" class="shop-grant-tile" data-shop-grant-type="ipad_tablet">iPad / Tablet</button>
+              <button type="button" class="shop-grant-tile" data-shop-grant-type="phones">Phones</button>
+            </div>
+
+            <div class="shop-grant-view" data-shop-grant-view hidden aria-hidden="true">
+              <div class="shop-grant-panel" data-shop-grant-panel="ipad_tablet" hidden>
+                <% if @items.any? %>
+                  <div class="shop-cards-pan" id="shopCardsPan" role="group" aria-label="Generic iPad/Tablet items">
+                    <div class="shop-grid">
+                      <% @items.each do |item| %>
+                        <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
+                          <div class="shop-card-inner">
+                            <% if item.image_url.present? %>
+                              <div class="shop-card-image" style="background-image: url('<%= item.image_url %>');"></div>
+                            <% else %>
+                              <div class="shop-card-image shop-card-image-default"></div>
+                            <% end %>
+                            <div class="shop-card-body">
+                              <h3 class="shop-card-name"><%= item.name %></h3>
+                              <% if item.description.present? %>
+                                <p class="shop-card-desc"><%= item.description %></p>
+                              <% end %>
+                            </div>
+                            <div class="shop-card-actions">
+                              <button
+                                type="button"
+                                class="shop-buy-btn"
+                                data-action="open-item-modal"
+                                data-item-id="<%= item.id %>"
+                                data-item-name="<%= item.name %>"
+                                data-item-desc="<%= item.description.to_s %>"
+                                data-item-link="<%= item.item_link.to_s %>"
+                                data-item-price="<%= item.price.to_f %>"
+                                data-item-image="<%= item.image_url.to_s %>"
+                              >Buy</button>
+                            </div>
+                            <div class="shop-price-badge" aria-hidden="true">
+                              <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
+                              <span class="shop-price-badge-amount"><%= item.price.to_f %></span>
+                            </div>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                <% else %>
+                  <div class="shop-category-empty">No items yet.</div>
                 <% end %>
               </div>
-              <div class="shop-card-actions">
-                <button
-                  type="button"
-                  class="shop-buy-btn"
-                  data-action="open-item-modal"
-                  data-item-id="<%= item.id %>"
-                  data-item-name="<%= item.name %>"
-                  data-item-desc="<%= item.description.to_s %>"
-                  data-item-link="<%= item.item_link.to_s %>"
-                  data-item-price="<%= item.price.to_f %>"
-                  data-item-image="<%= item.image_url.to_s %>"
-                >Buy</button>
-              </div>
-              <div class="shop-price-badge" aria-hidden="true">
-                <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
-                <span class="shop-price-badge-amount"><%= item.price.to_f %></span>
+
+              <div class="shop-grant-panel" data-shop-grant-panel="phones" hidden>
+                <div class="shop-category-empty">No items yet.</div>
               </div>
             </div>
           </div>
-        <% end %>
-          </div>
-        </div>
-        <% else %>
-        <div class="shop-cards-pan" role="group" aria-label="Shop items">
-          <div class="shop-grid">
-            <% 10.times do %>
-              <div class="shop-card" aria-hidden="true">
-                <div class="shop-card-inner">
-                  <div class="shop-card-image shop-card-image-default"></div>
-                  <div class="shop-card-body">
-                    <h3 class="shop-card-name">Item Name</h3>
-                    <p class="shop-card-desc">Item description loooolololol.</p>
-                  </div>
-                  <div class="shop-card-actions">
-                    <button
-                      type="button"
-                      class="shop-buy-btn"
-                      data-action="open-item-modal"
-                      data-item-id=""
-                      data-item-name="Item Name"
-                      data-item-desc="Item description loooolololol."
-                      data-item-link=""
-                      data-item-price="0"
-                    >Buy</button>
-                  </div>
-                  <div class="shop-price-badge" aria-hidden="true">
-                    <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
-                    <span class="shop-price-badge-amount">0</span>
-                  </div>
-                </div>
+
+          <div class="shop-category-panel" data-shop-category-panel="setup" hidden>
+            <div class="shop-grant-selector" data-shop-grant-selector>
+              <button type="button" class="shop-grant-tile" data-shop-grant-type="gaming_chair">Gaming Chair</button>
+              <button type="button" class="shop-grant-tile" data-shop-grant-type="webcam">Webcam</button>
+            </div>
+
+            <div class="shop-grant-view" data-shop-grant-view hidden aria-hidden="true">
+              <div class="shop-grant-panel" data-shop-grant-panel="gaming_chair" hidden>
+                <div class="shop-category-empty">No items yet.</div>
               </div>
-            <% end %>
+
+              <div class="shop-grant-panel" data-shop-grant-panel="webcam" hidden>
+                <div class="shop-category-empty">No items yet.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="shop-category-panel" data-shop-category-panel="hardware" hidden>
+            <div class="shop-grant-selector" data-shop-grant-selector>
+              <button type="button" class="shop-grant-tile" data-shop-grant-type="print_3d">3D Print</button>
+              <button type="button" class="shop-grant-tile" data-shop-grant-type="drones">Drones</button>
+            </div>
+
+            <div class="shop-grant-view" data-shop-grant-view hidden aria-hidden="true">
+              <div class="shop-grant-panel" data-shop-grant-panel="print_3d" hidden>
+                <div class="shop-category-empty">No items yet.</div>
+              </div>
+
+              <div class="shop-grant-panel" data-shop-grant-panel="drones" hidden>
+                <div class="shop-category-empty">No items yet.</div>
+              </div>
+            </div>
           </div>
         </div>
-        <% end %>
       </div>
     </div>
   </div>
@@ -237,6 +273,13 @@
 
   document.addEventListener('turbo:load', function() {
   if (!document.querySelector('.shop-page')) return;
+  var categorySelector = document.getElementById('shopCategorySelector');
+  var categoryView = document.getElementById('shopCategoryView');
+  var categoryBack = document.getElementById('shopCategoryBack');
+  var breadcrumbCategory = document.getElementById('shopBreadcrumbCategory');
+  var breadcrumbSep = document.getElementById('shopBreadcrumbSep');
+  var breadcrumbGrant = document.getElementById('shopBreadcrumbGrant');
+  var categoryPanels = document.querySelectorAll('[data-shop-category-panel]');
   var shopRulesBtn = document.getElementById('shopRulesBtn');
   var shopRulesModal = document.getElementById('shopRulesModal');
   var shopRulesModalClose = document.getElementById('shopRulesModalClose');
@@ -277,6 +320,76 @@
     if (!shopRulesModal) return;
     shopRulesModal.classList.remove('active');
     shopRulesModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function setHidden(el, isHidden) {
+    if (!el) return;
+    el.hidden = !!isHidden;
+    el.setAttribute('aria-hidden', isHidden ? 'true' : 'false');
+    // Extra hardening: if some CSS overrides [hidden], enforce display.
+    el.style.display = isHidden ? 'none' : '';
+  }
+
+  function showCategorySelector() {
+    setHidden(categorySelector, false);
+    setHidden(categoryView, true);
+    categoryPanels.forEach(function(p) { setHidden(p, true); });
+    if (breadcrumbCategory) breadcrumbCategory.textContent = '';
+    if (breadcrumbSep) setHidden(breadcrumbSep, true);
+    if (breadcrumbGrant) setHidden(breadcrumbGrant, true);
+  }
+
+  function showCategory(categoryKey, label) {
+    setHidden(categorySelector, true);
+    setHidden(categoryView, false);
+    if (breadcrumbCategory) breadcrumbCategory.textContent = label || 'Category';
+    if (breadcrumbSep) setHidden(breadcrumbSep, true);
+    if (breadcrumbGrant) setHidden(breadcrumbGrant, true);
+    categoryPanels.forEach(function(p) {
+      setHidden(p, p.getAttribute('data-shop-category-panel') !== categoryKey);
+    });
+
+    // Reset 2nd layer (Grant Type) when entering a category.
+    var activePanel = Array.prototype.find.call(categoryPanels, function(p) {
+      return p.getAttribute('data-shop-category-panel') === categoryKey;
+    });
+    if (activePanel) {
+      var grantSelector = activePanel.querySelector('[data-shop-grant-selector]');
+      var grantView = activePanel.querySelector('[data-shop-grant-view]');
+      var grantPanels = activePanel.querySelectorAll('[data-shop-grant-panel]');
+      setHidden(grantSelector, false);
+      setHidden(grantView, true);
+      grantPanels.forEach(function(gp) { setHidden(gp, true); });
+    }
+  }
+
+  function showGrantType(categoryPanel, grantKey, label) {
+    if (!categoryPanel) return;
+    var grantSelector = categoryPanel.querySelector('[data-shop-grant-selector]');
+    var grantView = categoryPanel.querySelector('[data-shop-grant-view]');
+    var grantPanels = categoryPanel.querySelectorAll('[data-shop-grant-panel]');
+    setHidden(grantSelector, true);
+    setHidden(grantView, false);
+    if (breadcrumbSep) setHidden(breadcrumbSep, false);
+    if (breadcrumbGrant) {
+      breadcrumbGrant.textContent = label || 'Grant Type';
+      setHidden(breadcrumbGrant, false);
+    }
+    grantPanels.forEach(function(gp) {
+      setHidden(gp, gp.getAttribute('data-shop-grant-panel') !== grantKey);
+    });
+  }
+
+  function showGrantTypeSelector(categoryPanel) {
+    if (!categoryPanel) return;
+    var grantSelector = categoryPanel.querySelector('[data-shop-grant-selector]');
+    var grantView = categoryPanel.querySelector('[data-shop-grant-view]');
+    var grantPanels = categoryPanel.querySelectorAll('[data-shop-grant-panel]');
+    setHidden(grantSelector, false);
+    setHidden(grantView, true);
+    grantPanels.forEach(function(gp) { setHidden(gp, true); });
+    if (breadcrumbSep) setHidden(breadcrumbSep, true);
+    if (breadcrumbGrant) setHidden(breadcrumbGrant, true);
   }
 
   var itemModal = document.getElementById('shopItemModal');
@@ -358,6 +471,41 @@
       if (e.target === shopRulesModal) closeShopRulesModal();
     });
   }
+
+  // Category picker → show cards for that category
+  if (categorySelector) {
+    categorySelector.onclick = function(e) {
+      var btn = e.target && e.target.closest && e.target.closest('[data-shop-category]');
+      if (!btn) return;
+      showCategory(btn.getAttribute('data-shop-category'), (btn.textContent || '').trim());
+    };
+  }
+  if (categoryBack) categoryBack.onclick = showCategorySelector;
+
+  // Grant type picker (inside a category) → show models for that grant type
+  if (categoryView) {
+    categoryView.onclick = function(e) {
+      var grantTile = e.target && e.target.closest && e.target.closest('[data-shop-grant-type]');
+      if (grantTile) {
+        var catPanel = grantTile.closest('[data-shop-category-panel]');
+        showGrantType(catPanel, grantTile.getAttribute('data-shop-grant-type'), (grantTile.textContent || '').trim());
+        return;
+      }
+    };
+  }
+
+  // Breadcrumb: clicking the category part returns to Grant Types (inside the current category).
+  if (breadcrumbCategory) {
+    breadcrumbCategory.onclick = function() {
+      if (!categoryView || categoryView.hidden) return;
+      var activeCategoryPanel = Array.prototype.find.call(categoryPanels, function(p) { return !p.hidden; });
+      if (!activeCategoryPanel) return;
+      showGrantTypeSelector(activeCategoryPanel);
+    };
+  }
+
+  // Default state: show only categories until one is chosen.
+  showCategorySelector();
 
   if (itemModalQty) itemModalQty.addEventListener('input', updateItemModalTotals);
   if (itemModalShipping) itemModalShipping.addEventListener('input', updateItemModalTotals);
