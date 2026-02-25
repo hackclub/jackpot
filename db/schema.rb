@@ -143,6 +143,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_25_170000) do
   create_table "shop_categories", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "key", null: false
+    t.string "logo_url"
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_shop_categories_on_key", unique: true
@@ -152,6 +153,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_25_170000) do
   create_table "shop_grant_types", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "key", null: false
+    t.string "logo_url"
     t.string "name", null: false
     t.bigint "shop_category_id", null: false
     t.datetime "updated_at", null: false

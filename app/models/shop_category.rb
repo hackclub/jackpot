@@ -5,6 +5,7 @@ class ShopCategory < ApplicationRecord
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   validates :key, presence: true, uniqueness: { case_sensitive: false }
+  validate :safe_logo_url
 
   before_validation :ensure_key
 
@@ -12,6 +13,13 @@ class ShopCategory < ApplicationRecord
 
   def ensure_key
     self.key = name.to_s.parameterize(separator: "_") if key.blank? && name.present?
+  end
+
+  def safe_logo_url
+    return if logo_url.to_s.strip.blank?
+    return if logo_url.to_s.match?(/\Ahttps?:\/\//i)
+
+    errors.add(:logo_url, "must start with http:// or https://")
   end
 end
 

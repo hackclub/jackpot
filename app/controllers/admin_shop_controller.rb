@@ -31,7 +31,7 @@ class AdminShopController < ApplicationController
   def create_category
     category = ShopCategory.new(category_params)
     if category.save
-      render json: { success: true, category: category.as_json(only: %i[id name key]) }
+      render json: { success: true, category: category.as_json(only: %i[id name key logo_url]) }
     else
       render json: { error: category.errors.full_messages.join(", ") }, status: :unprocessable_entity
     end
@@ -42,7 +42,28 @@ class AdminShopController < ApplicationController
     if grant_type.save
       render json: {
         success: true,
-        grant_type: grant_type.as_json(only: %i[id name key shop_category_id])
+        grant_type: grant_type.as_json(only: %i[id name key logo_url shop_category_id])
+      }
+    else
+      render json: { error: grant_type.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    end
+  end
+
+  def update_category
+    category = ShopCategory.find(params[:id])
+    if category.update(category_params)
+      render json: { success: true, category: category.as_json(only: %i[id name key logo_url]) }
+    else
+      render json: { error: category.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    end
+  end
+
+  def update_grant_type
+    grant_type = ShopGrantType.find(params[:id])
+    if grant_type.update(grant_type_params)
+      render json: {
+        success: true,
+        grant_type: grant_type.as_json(only: %i[id name key logo_url shop_category_id])
       }
     else
       render json: { error: grant_type.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -118,15 +139,18 @@ class AdminShopController < ApplicationController
   private
 
   def item_params
-    params.permit(:name, :price, :item_link, :image_url, :description, :active, :shop_grant_type_id)
+    source = params[:admin_shop].presence || params
+    source.permit(:name, :price, :item_link, :image_url, :description, :active, :shop_grant_type_id)
   end
 
   def category_params
-    params.permit(:name, :key)
+    source = params[:admin_shop].presence || params
+    source.permit(:name, :key, :logo_url)
   end
 
   def grant_type_params
-    params.permit(:shop_category_id, :name, :key)
+    source = params[:admin_shop].presence || params
+    source.permit(:shop_category_id, :name, :key, :logo_url)
   end
 
   def authenticate_admin!
