@@ -1,0 +1,23 @@
+current directory: /Users/emmaborghi/Desktop/Hack_Club/Jackpot/jackpot/vendor/bundle/ruby/3.4.0/gems/bootsnap-1.22.0/ext/bootsnap
+/Users/emmaborghi/.rbenv/versions/3.4.8/bin/ruby extconf.rb
+checking for fdatasync() in unistd.h... yes
+checking for fstatat() in sys/stat.h... yes
+checking for whether -D_GNU_SOURCE is accepted as CPPFLAGS... yes
+checking for whether -O3 is accepted as CFLAGS... yes
+checking for whether -std=c99 is accepted as CFLAGS... yes
+creating Makefile
+
+current directory: /Users/emmaborghi/Desktop/Hack_Club/Jackpot/jackpot/vendor/bundle/ruby/3.4.0/gems/bootsnap-1.22.0/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20260225-12885-eb1mb8 sitelibdir\=./.gem.20260225-12885-eb1mb8 clean
+
+current directory: /Users/emmaborghi/Desktop/Hack_Club/Jackpot/jackpot/vendor/bundle/ruby/3.4.0/gems/bootsnap-1.22.0/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20260225-12885-eb1mb8 sitelibdir\=./.gem.20260225-12885-eb1mb8
+compiling bootsnap.c
+linking shared-object bootsnap/bootsnap.bundle
+
+current directory: /Users/emmaborghi/Desktop/Hack_Club/Jackpot/jackpot/vendor/bundle/ruby/3.4.0/gems/bootsnap-1.22.0/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20260225-12885-eb1mb8 sitelibdir\=./.gem.20260225-12885-eb1mb8 install
+/usr/bin/install -c -m 0755 bootsnap.bundle ./.gem.20260225-12885-eb1mb8/bootsnap
+
+current directory: /Users/emmaborghi/Desktop/Hack_Club/Jackpot/jackpot/vendor/bundle/ruby/3.4.0/gems/bootsnap-1.22.0/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20260225-12885-eb1mb8 sitelibdir\=./.gem.20260225-12885-eb1mb8 clean

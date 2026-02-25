@@ -38,6 +38,7 @@
                 <span class="nav-item-text">Shop</span>
               </span>
             <% end %>
+            <%= link_to "Rules", rules_path, class: "nav-item #{'nav-active' if controller_name == 'home' && action_name == 'rules'}" %>
             <%= link_to "FAQ", faq_path, class: "nav-item #{'nav-active' if controller_name == 'home' && action_name == 'faq'}" %>
             <% if Flipper.enabled?(:status, current_user) %>
               <%= link_to "Status", status_path, class: "nav-item #{'nav-active' if controller_name == 'status'}" %>
@@ -104,17 +105,24 @@
     </footer>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
+      // Use Turbo lifecycle so this keeps working after navigation.
+      document.addEventListener('turbo:load', function() {
         const btn = document.getElementById('profileDropdownBtn');
         const dropdown = document.getElementById('profileDropdown');
         if (btn && dropdown) {
-          btn.addEventListener('click', function(e) {
+          // Overwrite the handler each visit to avoid duplicates.
+          btn.onclick = function(e) {
             e.stopPropagation();
             dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-          });
-          document.addEventListener('click', function() {
+          };
+
+          if (window.__profileDropdownDocClick) {
+            document.removeEventListener('click', window.__profileDropdownDocClick);
+          }
+          window.__profileDropdownDocClick = function() {
             dropdown.style.display = 'none';
-          });
+          };
+          document.addEventListener('click', window.__profileDropdownDocClick);
         }
       });
     </script>

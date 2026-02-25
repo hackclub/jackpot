@@ -1,8 +1,11 @@
 class ShopItem < ApplicationRecord
   has_many :shop_orders, dependent: :nullify
+  belongs_to :shop_grant_type
+  has_one :shop_category, through: :shop_grant_type
 
   validates :name, presence: true
   validates :price, presence: true, numericality: { greater_than: 0 }
+  validates :shop_grant_type, presence: true
   validate :safe_urls
 
   scope :active, -> { where(active: true) }

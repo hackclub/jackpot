@@ -4,8 +4,9 @@ class AdminShopController < ApplicationController
   before_action :authenticate_admin!
 
   def index
-    @items = ShopItem.order(created_at: :desc)
+    @items = ShopItem.includes(shop_grant_type: :shop_category).order(created_at: :desc)
     @orders = ShopOrder.includes(:user, :shop_item).order(created_at: :desc).limit(100)
+    @categories = ShopCategory.includes(:shop_grant_types).order(:name)
   end
 
   def create_item
@@ -24,6 +25,27 @@ class AdminShopController < ApplicationController
         flash[:alert] = item.errors.full_messages.join(", ")
         redirect_to admin_shop_path
       end
+    end
+  end
+
+  def create_category
+    category = ShopCategory.new(category_params)
+    if category.save
+      render json: { success: true, category: category.as_json(only: %i[id name key]) }
+    else
+      render json: { error: category.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    end
+  end
+
+  def create_grant_type
+    grant_type = ShopGrantType.new(grant_type_params)
+    if grant_type.save
+      render json: {
+        success: true,
+        grant_type: grant_type.as_json(only: %i[id name key shop_category_id])
+      }
+    else
+      render json: { error: grant_type.errors.full_messages.join(", ") }, status: :unprocessable_entity
     end
   end
 
@@ -96,7 +118,15 @@ class AdminShopController < ApplicationController
   private
 
   def item_params
-    params.permit(:name, :price, :item_link, :image_url, :description, :active)
+    params.permit(:name, :price, :item_link, :image_url, :description, :active, :shop_grant_type_id)
+  end
+
+  def category_params
+    params.permit(:name, :key)
+  end
+
+  def grant_type_params
+    params.permit(:shop_category_id, :name, :key)
   end
 
   def authenticate_admin!
