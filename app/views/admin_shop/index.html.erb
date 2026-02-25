@@ -16,6 +16,26 @@
         <input type="number" name="price" step="0.01" min="0" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
       </div>
       <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Category *</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select id="adminShopCategorySelect" name="shop_category_id" style="flex: 1; width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+            <% @categories.each do |cat| %>
+              <option value="<%= cat.id %>"><%= cat.name %></option>
+            <% end %>
+          </select>
+          <button type="button" id="adminShopAddCategoryBtn" style="white-space: nowrap; background: none; border: 1px solid #8b6914; color: #d4a017; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">+ New</button>
+        </div>
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Grant Type *</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select id="adminShopGrantTypeSelect" name="shop_grant_type_id" required style="flex: 1; width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+            <option value="" disabled selected>Select…</option>
+          </select>
+          <button type="button" id="adminShopAddGrantTypeBtn" style="white-space: nowrap; background: none; border: 1px solid #8b6914; color: #d4a017; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">+ New</button>
+        </div>
+      </div>
+      <div>
         <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Item Link</label>
         <input type="url" name="item_link" placeholder="https://..." style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
       </div>
@@ -41,6 +61,8 @@
           <tr style="border-bottom: 2px solid #8b6914;">
             <th style="text-align: left; padding: 8px; color: #c4b89a;">ID</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Name</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Category</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Grant Type</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Price</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Link</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Active</th>
@@ -52,6 +74,8 @@
             <tr style="border-bottom: 1px solid rgba(139,105,20,0.3);" id="item-row-<%= item.id %>">
               <td style="padding: 8px;"><%= item.id %></td>
               <td style="padding: 8px;"><%= item.name %></td>
+              <td style="padding: 8px;"><%= item.shop_category&.name || "—" %></td>
+              <td style="padding: 8px;"><%= item.shop_grant_type&.name || "—" %></td>
               <td style="padding: 8px;"><%= item.price.to_f %></td>
               <td style="padding: 8px;">
                 <% if item.item_link.present? %>
@@ -133,26 +157,130 @@
 
 <script>
 var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+// Turbo-safe binding (prevents duplicate submissions creating duplicate items)
+(function() {
+  if (window.__adminShopInitBound) return;
+  window.__adminShopInitBound = true;
 
-document.getElementById('addItemForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  var form = e.target;
-  var formData = new FormData(form);
-  var data = {};
-  formData.forEach(function(v, k) { data[k] = v; });
+  var SHOP_CATEGORIES = <%= raw(
+    @categories.map { |c|
+      {
+        id: c.id,
+        name: c.name,
+        grant_types: c.shop_grant_types.order(:name).map { |gt| { id: gt.id, name: gt.name } }
+      }
+    }.to_json
+  ) %>;
 
-  fetch('<%= admin_shop_create_item_path %>', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
-    body: JSON.stringify(data)
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d.success) { location.reload(); }
-    else { alert(d.error || 'Failed to create item.'); }
-  })
-  .catch(function(e) { alert('Error creating item.'); console.error(e); });
-});
+  function renderGrantTypeOptions(categoryId, selectedGrantTypeId) {
+    var grantSelect = document.getElementById('adminShopGrantTypeSelect');
+    if (!grantSelect) return;
+    var cat = SHOP_CATEGORIES.find(function(c) { return String(c.id) === String(categoryId); });
+
+    grantSelect.innerHTML = "";
+    var placeholder = document.createElement('option');
+    placeholder.value = "";
+    placeholder.textContent = "Select…";
+    placeholder.disabled = true;
+    placeholder.selected = !selectedGrantTypeId;
+    grantSelect.appendChild(placeholder);
+
+    ((cat && cat.grant_types) ? cat.grant_types : []).forEach(function(o) {
+      var opt = document.createElement('option');
+      opt.value = String(o.id);
+      opt.textContent = o.name;
+      if (selectedGrantTypeId && String(o.id) === String(selectedGrantTypeId)) opt.selected = true;
+      grantSelect.appendChild(opt);
+    });
+  }
+
+  document.addEventListener('turbo:load', function() {
+    var form = document.getElementById('addItemForm');
+    if (!form) return; // not on this page
+
+    var categorySelectEl = document.getElementById('adminShopCategorySelect');
+    var addCategoryBtn = document.getElementById('adminShopAddCategoryBtn');
+    var addGrantTypeBtn = document.getElementById('adminShopAddGrantTypeBtn');
+
+    if (categorySelectEl) {
+      renderGrantTypeOptions(categorySelectEl.value);
+      categorySelectEl.onchange = function() {
+        renderGrantTypeOptions(categorySelectEl.value);
+      };
+    }
+
+    form.onsubmit = function(e) {
+      e.preventDefault();
+      var formData = new FormData(form);
+      var data = {};
+      formData.forEach(function(v, k) { data[k] = v; });
+      delete data.shop_category_id;
+
+      fetch('<%= admin_shop_create_item_path %>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify(data)
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.success) { location.reload(); }
+        else { alert(d.error || 'Failed to create item.'); }
+      })
+      .catch(function(err) { alert('Error creating item.'); console.error(err); });
+    };
+
+    if (addCategoryBtn) {
+      addCategoryBtn.onclick = function() {
+        var name = prompt("New category name:");
+        if (!name) return;
+        fetch('<%= admin_shop_create_category_path %>', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify({ name: name })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(result) {
+          if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create category.");
+          var cat = result.data.category;
+          SHOP_CATEGORIES.push({ id: cat.id, name: cat.name, grant_types: [] });
+          if (categorySelectEl) {
+            var opt = document.createElement('option');
+            opt.value = String(cat.id);
+            opt.textContent = cat.name;
+            categorySelectEl.appendChild(opt);
+            categorySelectEl.value = String(cat.id);
+            renderGrantTypeOptions(categorySelectEl.value);
+          } else {
+            location.reload();
+          }
+        })
+        .catch(function(err) { alert("Error creating category."); console.error(err); });
+      };
+    }
+
+    if (addGrantTypeBtn) {
+      addGrantTypeBtn.onclick = function() {
+        if (!categorySelectEl || !categorySelectEl.value) return alert("Pick a category first.");
+        var name = prompt("New grant type name:");
+        if (!name) return;
+        fetch('<%= admin_shop_create_grant_type_path %>', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify({ shop_category_id: categorySelectEl.value, name: name })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(result) {
+          if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create grant type.");
+          var gt = result.data.grant_type;
+          var cat = SHOP_CATEGORIES.find(function(c) { return String(c.id) === String(gt.shop_category_id); });
+          if (cat) cat.grant_types.push({ id: gt.id, name: gt.name });
+          renderGrantTypeOptions(categorySelectEl.value, gt.id);
+        })
+        .catch(function(err) { alert("Error creating grant type."); console.error(err); });
+      };
+    }
+  });
+})();
 
 function toggleItem(id, active) {
   fetch('<%= admin_shop_update_item_path(":id") %>'.replace('%3Aid', id).replace(':id', id), {

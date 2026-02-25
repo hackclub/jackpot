@@ -30,9 +30,10 @@
       </div>
       <div class="shop-right">
         <div class="shop-category-selector" id="shopCategorySelector" aria-label="Shop categories">
-          <button type="button" class="shop-category-tile" data-shop-category="generic">Generic</button>
-          <button type="button" class="shop-category-tile" data-shop-category="setup">Setup</button>
-          <button type="button" class="shop-category-tile" data-shop-category="hardware">Hardware</button>
+          <% @shop_categories.each do |entry| %>
+            <% cat = entry[:category] %>
+            <button type="button" class="shop-category-tile" data-shop-category="<%= cat.key %>"><%= cat.name %></button>
+          <% end %>
         </div>
 
         <div class="shop-category-view" id="shopCategoryView" hidden aria-hidden="true">
@@ -45,97 +46,65 @@
             </div>
           </div>
 
-          <div class="shop-category-panel" data-shop-category-panel="generic" hidden>
-            <div class="shop-grant-selector" data-shop-grant-selector>
-              <button type="button" class="shop-grant-tile" data-shop-grant-type="ipad_tablet">iPad / Tablet</button>
-              <button type="button" class="shop-grant-tile" data-shop-grant-type="phones">Phones</button>
-            </div>
-
-            <div class="shop-grant-view" data-shop-grant-view hidden aria-hidden="true">
-              <div class="shop-grant-panel" data-shop-grant-panel="ipad_tablet" hidden>
-                <% if @items.any? %>
-                  <div class="shop-cards-pan" id="shopCardsPan" role="group" aria-label="Generic iPad/Tablet items">
-                    <div class="shop-grid">
-                      <% @items.each do |item| %>
-                        <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
-                          <div class="shop-card-inner">
-                            <% if item.image_url.present? %>
-                              <div class="shop-card-image" style="background-image: url('<%= item.image_url %>');"></div>
-                            <% else %>
-                              <div class="shop-card-image shop-card-image-default"></div>
-                            <% end %>
-                            <div class="shop-card-body">
-                              <h3 class="shop-card-name"><%= item.name %></h3>
-                              <% if item.description.present? %>
-                                <p class="shop-card-desc"><%= item.description %></p>
-                              <% end %>
-                            </div>
-                            <div class="shop-card-actions">
-                              <button
-                                type="button"
-                                class="shop-buy-btn"
-                                data-action="open-item-modal"
-                                data-item-id="<%= item.id %>"
-                                data-item-name="<%= item.name %>"
-                                data-item-desc="<%= item.description.to_s %>"
-                                data-item-link="<%= item.item_link.to_s %>"
-                                data-item-price="<%= item.price.to_f %>"
-                                data-item-image="<%= item.image_url.to_s %>"
-                              >Buy</button>
-                            </div>
-                            <div class="shop-price-badge" aria-hidden="true">
-                              <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
-                              <span class="shop-price-badge-amount"><%= item.price.to_f %></span>
-                            </div>
-                          </div>
-                        </div>
-                      <% end %>
-                    </div>
-                  </div>
-                <% else %>
-                  <div class="shop-category-empty">No items yet.</div>
+          <% @shop_categories.each do |entry| %>
+            <% cat = entry[:category] %>
+            <% grant_types = entry[:grant_types] %>
+            <div class="shop-category-panel" data-shop-category-panel="<%= cat.key %>" hidden>
+              <div class="shop-grant-selector" data-shop-grant-selector>
+                <% grant_types.each do |gt_entry| %>
+                  <% gt = gt_entry[:grant_type] %>
+                  <button type="button" class="shop-grant-tile" data-shop-grant-type="<%= gt.key %>"><%= gt.name %></button>
                 <% end %>
               </div>
 
-              <div class="shop-grant-panel" data-shop-grant-panel="phones" hidden>
-                <div class="shop-category-empty">No items yet.</div>
+              <div class="shop-grant-view" data-shop-grant-view hidden aria-hidden="true">
+                <% grant_types.each do |gt_entry| %>
+                  <% gt = gt_entry[:grant_type] %>
+                  <% items = gt_entry[:items] %>
+                  <div class="shop-grant-panel" data-shop-grant-panel="<%= gt.key %>" hidden>
+                    <div class="shop-cards-pan" role="group" aria-label="<%= cat.name %> <%= gt.name %> items">
+                      <div class="shop-grid">
+                        <% items.each do |item| %>
+                          <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
+                            <div class="shop-card-inner">
+                              <% if item.image_url.present? %>
+                                <div class="shop-card-image" style="background-image: url('<%= item.image_url %>');"></div>
+                              <% else %>
+                                <div class="shop-card-image shop-card-image-default"></div>
+                              <% end %>
+                              <div class="shop-card-body">
+                                <h3 class="shop-card-name"><%= item.name %></h3>
+                                <% if item.description.present? %>
+                                  <p class="shop-card-desc"><%= item.description %></p>
+                                <% end %>
+                              </div>
+                              <div class="shop-card-actions">
+                                <button
+                                  type="button"
+                                  class="shop-buy-btn"
+                                  data-action="open-item-modal"
+                                  data-item-id="<%= item.id %>"
+                                  data-item-name="<%= item.name %>"
+                                  data-item-desc="<%= item.description.to_s %>"
+                                  data-item-link="<%= item.item_link.to_s %>"
+                                  data-item-price="<%= item.price.to_f %>"
+                                  data-item-image="<%= item.image_url.to_s %>"
+                                >Buy</button>
+                              </div>
+                              <div class="shop-price-badge" aria-hidden="true">
+                                <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
+                                <span class="shop-price-badge-amount"><%= item.price.to_f %></span>
+                              </div>
+                            </div>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
               </div>
             </div>
-          </div>
-
-          <div class="shop-category-panel" data-shop-category-panel="setup" hidden>
-            <div class="shop-grant-selector" data-shop-grant-selector>
-              <button type="button" class="shop-grant-tile" data-shop-grant-type="gaming_chair">Gaming Chair</button>
-              <button type="button" class="shop-grant-tile" data-shop-grant-type="webcam">Webcam</button>
-            </div>
-
-            <div class="shop-grant-view" data-shop-grant-view hidden aria-hidden="true">
-              <div class="shop-grant-panel" data-shop-grant-panel="gaming_chair" hidden>
-                <div class="shop-category-empty">No items yet.</div>
-              </div>
-
-              <div class="shop-grant-panel" data-shop-grant-panel="webcam" hidden>
-                <div class="shop-category-empty">No items yet.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="shop-category-panel" data-shop-category-panel="hardware" hidden>
-            <div class="shop-grant-selector" data-shop-grant-selector>
-              <button type="button" class="shop-grant-tile" data-shop-grant-type="print_3d">3D Print</button>
-              <button type="button" class="shop-grant-tile" data-shop-grant-type="drones">Drones</button>
-            </div>
-
-            <div class="shop-grant-view" data-shop-grant-view hidden aria-hidden="true">
-              <div class="shop-grant-panel" data-shop-grant-panel="print_3d" hidden>
-                <div class="shop-category-empty">No items yet.</div>
-              </div>
-
-              <div class="shop-grant-panel" data-shop-grant-panel="drones" hidden>
-                <div class="shop-category-empty">No items yet.</div>
-              </div>
-            </div>
-          </div>
+          <% end %>
         </div>
       </div>
     </div>
@@ -378,6 +347,9 @@
     grantPanels.forEach(function(gp) {
       setHidden(gp, gp.getAttribute('data-shop-grant-panel') !== grantKey);
     });
+
+    // If the selected grant type has a draggable pan grid, initialize it.
+    setTimeout(initVisiblePan, 0);
   }
 
   function showGrantTypeSelector(categoryPanel) {
@@ -657,8 +629,10 @@
   document.addEventListener('keydown', window.__shopKeydownHandler);
 
   // Draggable pan: move all cards together (drag threshold so Buy button clicks still work)
-  var pan = document.getElementById('shopCardsPan');
-  if (pan) {
+  function initPan(pan) {
+    if (!pan || pan.dataset.shopPanBound === '1') return;
+    pan.dataset.shopPanBound = '1';
+
     var panStartX, panStartY, panTranslateX = 0, panTranslateY = 0, panDragging = false, panHasMoved = false, panDidDrag = false;
     var DRAG_THRESHOLD = 5;
 
@@ -727,6 +701,13 @@
 
     pan.addEventListener('mousedown', onPanPointerDown);
     pan.addEventListener('touchstart', onPanPointerDown, { passive: true });
+  }
+
+  function initVisiblePan() {
+    var visiblePan = document.querySelector(
+      '.shop-category-view:not([hidden]) .shop-category-panel:not([hidden]) .shop-grant-view:not([hidden]) .shop-grant-panel:not([hidden]) .shop-cards-pan'
+    );
+    initPan(visiblePan);
   }
   });
 })();

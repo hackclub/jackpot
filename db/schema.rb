@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_25_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -108,8 +108,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_180000) do
     t.string "code_url"
     t.datetime "created_at", null: false
     t.text "description"
+    t.float "hackatime_hours", default: 0.0, null: false
     t.string "hackatime_project"
     t.json "hackatime_projects", default: [], null: false
+    t.datetime "hackatime_synced_at"
     t.string "hour_justification"
     t.string "name"
     t.string "playable_url"
@@ -138,6 +140,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_180000) do
     t.string "user_agent"
   end
 
+  create_table "shop_categories", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_shop_categories_on_key", unique: true
+    t.index ["name"], name: "index_shop_categories_on_name", unique: true
+  end
+
+  create_table "shop_grant_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.string "name", null: false
+    t.bigint "shop_category_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_category_id", "key"], name: "index_shop_grant_types_on_shop_category_id_and_key", unique: true
+    t.index ["shop_category_id", "name"], name: "index_shop_grant_types_on_shop_category_id_and_name", unique: true
+    t.index ["shop_category_id"], name: "index_shop_grant_types_on_shop_category_id"
+  end
+
   create_table "shop_items", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
@@ -148,7 +170,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_180000) do
     t.string "name", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
     t.integer "shipping_tax_cents", default: 0, null: false
+    t.bigint "shop_grant_type_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["shop_grant_type_id"], name: "index_shop_items_on_shop_grant_type_id"
   end
 
   create_table "shop_orders", force: :cascade do |t|
@@ -295,6 +319,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_180000) do
     t.string "display_name"
     t.string "email"
     t.string "hack_club_id"
+    t.float "hackatime_hours"
     t.datetime "last_sign_in_at"
     t.string "profile_photo_url"
     t.jsonb "projects", default: []
@@ -310,6 +335,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_180000) do
   add_foreign_key "journal_entries", "projects"
   add_foreign_key "journal_entries", "users"
   add_foreign_key "projects", "users"
+  add_foreign_key "shop_grant_types", "shop_categories"
+  add_foreign_key "shop_items", "shop_grant_types"
   add_foreign_key "shop_orders", "shop_items"
   add_foreign_key "shop_orders", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

@@ -5,7 +5,19 @@ class ShopController < ApplicationController
   before_action :require_shop_feature
 
   def index
-    @items = ShopItem.active.order(created_at: :desc)
+    raw_categories = ShopCategory.includes(shop_grant_types: :shop_items).order(:id)
+
+    # Only show categories/grant types that have at least one ACTIVE item.
+    @shop_categories = raw_categories.map do |cat|
+      grant_types = cat.shop_grant_types.sort_by { |gt| gt.name.to_s.downcase }.map do |gt|
+        active_items = gt.shop_items.select(&:active?).sort_by(&:created_at).reverse
+        next if active_items.empty?
+        { grant_type: gt, items: active_items }
+      end.compact
+
+      next if grant_types.empty?
+      { category: cat, grant_types: grant_types }
+    end.compact
   end
 
   def buy

@@ -37,6 +37,8 @@ Rails.application.routes.draw do
 
   get "/admin/shop", to: "admin_shop#index", as: :admin_shop
   post "/admin/shop/items", to: "admin_shop#create_item", as: :admin_shop_create_item
+  post "/admin/shop/categories", to: "admin_shop#create_category", as: :admin_shop_create_category
+  post "/admin/shop/grant_types", to: "admin_shop#create_grant_type", as: :admin_shop_create_grant_type
   patch "/admin/shop/items/:id", to: "admin_shop#update_item", as: :admin_shop_update_item
   delete "/admin/shop/items/:id", to: "admin_shop#delete_item", as: :admin_shop_delete_item
   patch "/admin/shop/orders/:id", to: "admin_shop#update_order_status", as: :admin_shop_update_order
