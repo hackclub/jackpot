@@ -62,20 +62,29 @@ class AdminShopController < ApplicationController
       return render json: { error: "Invalid status" }, status: :unprocessable_entity
     end
 
-    # If refunding, give chips back
-    if new_status == "refunded" && order.status != "refunded"
-      order.user.update!(chip_am: order.user.chip_am.to_f + order.price.to_f)
-    end
+    ActiveRecord::Base.transaction do
+      order.lock!
+      order.user.reload.lock!
 
-    # If un-refunding (changing from refunded to something else), deduct chips again
-    if order.status == "refunded" && new_status != "refunded"
-      if order.user.chip_am.to_f < order.price.to_f
-        return render json: { error: "User doesn't have enough chips to un-refund." }, status: :unprocessable_entity
+      # If refunding, give chips back
+      if new_status == "refunded" && order.status != "refunded"
+        order.user.update!(chip_am: order.user.chip_am.to_f + order.price.to_f)
       end
-      order.user.update!(chip_am: order.user.chip_am.to_f - order.price.to_f)
+
+      # If un-refunding (changing from refunded to something else), deduct chips again
+      if order.status == "refunded" && new_status != "refunded"
+        if order.user.chip_am.to_f < order.price.to_f
+          raise ActiveRecord::Rollback
+        end
+        order.user.update!(chip_am: order.user.chip_am.to_f - order.price.to_f)
+      end
+
+      order.update!(status: new_status)
     end
 
-    order.update!(status: new_status)
+    unless order.status == new_status
+      return render json: { error: "User doesn't have enough chips to un-refund." }, status: :unprocessable_entity
+    end
 
     if request.xhr?
       render json: { success: true }

@@ -23,13 +23,16 @@
       </div>
       <div class="shop-right">
         <% if @items.any? %>
-        <% items_for_grid = (1..10).map { |i| @items[(i - 1) % @items.size] } %>
         <div class="shop-cards-pan" id="shopCardsPan" role="group" aria-label="Shop items">
           <div class="shop-grid">
-        <% items_for_grid.each do |item| %>
+        <% @items.each do |item| %>
           <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
             <div class="shop-card-inner">
-              <div class="shop-card-image shop-card-image-default"></div>
+              <% if item.image_url.present? %>
+                <div class="shop-card-image" style="background-image: url('<%= item.image_url %>');"></div>
+              <% else %>
+                <div class="shop-card-image shop-card-image-default"></div>
+              <% end %>
               <div class="shop-card-body">
                 <h3 class="shop-card-name"><%= item.name %></h3>
                 <% if item.description.present? %>
@@ -45,12 +48,13 @@
                   data-item-name="<%= item.name %>"
                   data-item-desc="<%= item.description.to_s %>"
                   data-item-link="<%= item.item_link.to_s %>"
-                  data-item-price="0"
+                  data-item-price="<%= item.price.to_f %>"
+                  data-item-image="<%= item.image_url.to_s %>"
                 >Buy</button>
               </div>
               <div class="shop-price-badge" aria-hidden="true">
                 <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
-                <span class="shop-price-badge-amount">0</span>
+                <span class="shop-price-badge-amount"><%= item.price.to_f %></span>
               </div>
             </div>
           </div>
@@ -106,7 +110,7 @@
     <div class="shop-item-modal-body">
       <div class="shop-item-hero">
         <div class="shop-item-hero-frame">
-          <%= image_tag "coming_soon.png", alt: "", class: "shop-item-hero-img" %>
+          <img id="shopItemModalImage" src="<%= image_path("coming_soon.png") %>" alt="" class="shop-item-hero-img">
         </div>
       </div>
 
@@ -240,24 +244,29 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function openItemModal(data) {
-    if (!itemModal) return;
-    itemModalTitle.textContent = data.name || 'Item';
-    itemModalDesc.textContent = data.desc || '';
-    itemModalCurrent.id = data.id || null;
-    itemModalCurrent.name = data.name || '';
-    itemModalCurrent.link = data.link || '';
-    itemModalCurrent.basePrice = toNumber(data.price);
+     if (!itemModal) return;
+     itemModalTitle.textContent = data.name || 'Item';
+     itemModalDesc.textContent = data.desc || '';
+     itemModalCurrent.id = data.id || null;
+     itemModalCurrent.name = data.name || '';
+     itemModalCurrent.link = data.link || '';
+     itemModalCurrent.basePrice = toNumber(data.price);
 
-    if (itemModalQty) itemModalQty.value = '1';
-    if (itemModalShipping) itemModalShipping.value = '0';
-    if (itemModalError) itemModalError.hidden = true;
-    updateItemModalTotals();
+     var imgEl = document.getElementById('shopItemModalImage');
+     if (imgEl && data.image) {
+       imgEl.src = data.image;
+     }
 
-    if (itemModalPurchase) itemModalPurchase.disabled = !data.id;
+     if (itemModalQty) itemModalQty.value = '1';
+     if (itemModalShipping) itemModalShipping.value = '0';
+     if (itemModalError) itemModalError.hidden = true;
+     updateItemModalTotals();
 
-    itemModal.classList.add('active');
-    itemModal.setAttribute('aria-hidden', 'false');
-  }
+     if (itemModalPurchase) itemModalPurchase.disabled = !data.id;
+
+     itemModal.classList.add('active');
+     itemModal.setAttribute('aria-hidden', 'false');
+   }
 
   function closeItemModal() {
     if (!itemModal) return;
@@ -273,7 +282,8 @@ document.addEventListener('DOMContentLoaded', function() {
         name: btn.dataset.itemName,
         desc: btn.dataset.itemDesc,
         link: btn.dataset.itemLink,
-        price: btn.dataset.itemPrice || '0'
+        price: btn.dataset.itemPrice || '0',
+        image: btn.dataset.itemImage
       });
     });
   });

@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
 class ShopController < ApplicationController
-  ADMIN_ONLY = true
-
   before_action :authenticate_user!
   before_action :require_shop_feature
-  before_action :require_admin_for_shop, if: -> { ADMIN_ONLY }
 
   def index
     @items = ShopItem.active.order(created_at: :desc)
@@ -13,8 +10,9 @@ class ShopController < ApplicationController
 
   def buy
     item = ShopItem.active.find(params[:id])
-    quantity = [params[:quantity].to_i, 1].max
-    total_cost = item.price * quantity
+    quantity = params[:quantity].to_i
+    quantity = 1 if quantity < 1
+    total_cost = item.price.to_f * quantity.to_f
 
     ActiveRecord::Base.transaction do
       current_user.reload.lock!
@@ -66,17 +64,8 @@ class ShopController < ApplicationController
 
   private
 
-  def require_admin_for_shop
-    return if admin?
-
-    respond_to do |format|
-      format.html { render plain: "very, very, very soon...", status: :ok }
-      format.json { render json: { error: "very, very, very soon..." }, status: :forbidden }
-      format.any { render plain: "very, very, very soon...", status: :forbidden }
-    end
-  end
-
   def require_shop_feature
+    return if admin?
     return if Flipper.enabled?(:shop, current_user)
 
     redirect_to root_path, alert: "The shop is not available yet."
