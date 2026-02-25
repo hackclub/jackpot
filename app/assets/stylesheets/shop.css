@@ -53,6 +53,95 @@
   user-select: none;
 }
 
+.shop-rules-btn {
+  position: fixed;
+  left: 15%;
+  top: 240px;
+  z-index: 6;
+  pointer-events: auto;
+  width: 260px;
+  height: 78px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transform: translate(-50%, 0) perspective(1000px) rotateX(0deg);
+  transition: transform 1.4s;
+}
+
+.shop-rules-btn:hover {
+  transform: translate(-50%, 0) perspective(1000px) rotateX(360deg);
+}
+
+.shop-rules-btn:active {
+  transform: translate(-50%, 0) perspective(1000px) rotateX(360deg) scale(0.98);
+}
+
+.shop-rules-btn:focus-visible {
+  outline: 3px solid rgba(240, 230, 210, 0.75);
+  outline-offset: 4px;
+}
+
+.shop-rules-btn-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.shop-rules-btn-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border: 2px solid rgba(240, 230, 210, 0.85);
+  background: rgba(20, 16, 12, 0.75);
+  color: #f0e6d2;
+  font-family: 'Georgia', serif;
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: 0.2px;
+  box-sizing: border-box;
+  box-shadow:
+    inset 0 14px 26px rgba(0, 0, 0, 0.22),
+    0 10px 24px rgba(0, 0, 0, 0.35);
+  backface-visibility: hidden;
+  transition: background 0.5s, color 0.5s;
+  user-select: none;
+}
+
+.shop-rules-btn:hover .shop-rules-btn-face {
+  color: #fff;
+  background: rgba(236, 55, 80, 0.85);
+}
+
+/* 4 faces of the "cube" (child 1 is the SR-only span) */
+.shop-rules-btn-face:nth-child(2) { transform: rotateX(0deg) translateZ(26px); }
+.shop-rules-btn-face:nth-child(3) { transform: rotateX(90deg) translateZ(26px); }
+.shop-rules-btn-face:nth-child(4) { transform: rotateX(180deg) translateZ(26px); }
+.shop-rules-btn-face:nth-child(5) { transform: rotateX(270deg) translateZ(26px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-rules-btn {
+    transition: none;
+    transform: translate(-50%, 0);
+  }
+  .shop-rules-btn:hover {
+    transform: translate(-50%, 0);
+  }
+  .shop-rules-btn-face {
+    transition: none;
+  }
+}
+
 .shop-dude {
   position: relative;
   width: 100%;
@@ -480,6 +569,59 @@
   aspect-ratio: auto;
   height: calc(100vh - 200px);
   max-height: calc(100vh - 200px);
+}
+
+.shop-rules-modal-content {
+  max-width: 640px;
+  min-height: 0;
+  aspect-ratio: auto;
+  height: auto;
+  max-height: 80vh;
+}
+
+.shop-rules-modal-body {
+  padding: 1.25rem 2rem 1.75rem;
+  overflow: auto;
+}
+
+.shop-rules-intro {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(139, 37, 0, 0.08);
+  color: #8b2500;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.shop-rules-list {
+  margin: 0;
+  list-style: none;
+  padding-left: 0;
+  color: #2c3c3a;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.shop-rules-list li {
+  margin: 0;
+  position: relative;
+  padding-left: 1.35rem;
+}
+
+/* More breathing room between bullet points (dots) */
+.shop-rules-list li + li {
+  margin-top: 14px;
+}
+
+.shop-rules-list li::before {
+  content: "♣";
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  color: rgba(139, 37, 0, 0.95);
 }
 
 .shop-item-modal-content .modal-header {
