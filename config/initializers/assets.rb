@@ -4,3 +4,6 @@
 # Rails.application.config.assets.paths << Emoji.images_path
 Rails.application.config.assets.paths << Rails.root.join("app/assets/Fonts")
 Rails.application.config.assets.paths << Rails.root.join("app/assets/images")
+
+# Precompile specific stylesheets for Propshaft
+Rails.application.config.assets.precompile += %w[admin.css shop.css]
