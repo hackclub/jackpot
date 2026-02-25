@@ -48,9 +48,86 @@
         <textarea name="description" rows="2" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif; resize: vertical;"></textarea>
       </div>
       <div style="grid-column: span 2;">
-        <button type="submit" style="background: linear-gradient(135deg, #d4a017, #8b6914); color: #fff; border: none; padding: 10px 28px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700; font-size: 1rem;">Add Item</button>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button type="submit" style="background: linear-gradient(135deg, #d4a017, #8b6914); color: #fff; border: none; padding: 10px 28px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700; font-size: 1rem;">Add Item</button>
+          <button type="button" id="adminShopManageGroupsBtn" style="background: none; border: 1px solid rgba(240,230,210,0.35); color: rgba(240,230,210,0.95); padding: 10px 18px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">Manage Groups</button>
+        </div>
       </div>
     </form>
+  </div>
+
+  <!-- Manage groups modal -->
+  <div id="adminManageGroupsOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 5200; padding: 24px;">
+    <div style="width: 100%; max-width: 980px; background: rgba(30, 20, 10, 0.95); border: 2px solid #8b6914; border-radius: 12px; padding: 18px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px;">
+        <h2 style="color: #d4a017; margin: 0;">Manage Groups</h2>
+        <button type="button" id="adminManageGroupsClose" style="background: none; border: 1px solid rgba(240,230,210,0.35); color: rgba(240,230,210,0.95); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-family: Georgia, serif;">✕</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 280px 1fr; gap: 16px;">
+        <div style="border: 1px solid rgba(139,105,20,0.5); border-radius: 10px; padding: 12px; background: rgba(15,15,15,0.45);">
+          <div style="display:flex; align-items:center; justify-content: space-between; gap: 10px; margin-bottom: 10px;">
+            <div style="color:#c4b89a; font-weight: 700;">Categories</div>
+            <button type="button" id="adminManageAddCategory" style="background: none; border: 1px solid #8b6914; color: #d4a017; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">+ New</button>
+          </div>
+          <div id="adminManageCategoryList" style="display:flex; flex-direction: column; gap: 6px; max-height: 55vh; overflow:auto;"></div>
+        </div>
+
+        <div style="border: 1px solid rgba(139,105,20,0.5); border-radius: 10px; padding: 12px; background: rgba(15,15,15,0.35);">
+          <div style="display:flex; align-items:center; justify-content: space-between; gap: 10px; margin-bottom: 10px;">
+            <div style="color:#c4b89a; font-weight: 700;">Details</div>
+          </div>
+
+          <div id="adminManageCategoryDetails" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+            <input type="hidden" id="adminManageCategoryId">
+            <div style="grid-column: span 2;">
+              <label style="display:block; margin-bottom: 4px; color:#c4b89a; font-size: 0.85rem;">Category name</label>
+              <input type="text" id="adminManageCategoryName" style="width:100%; box-sizing:border-box; padding:8px 12px; border-radius:6px; border:1px solid #8b6914; background: rgba(15,15,15,0.75); color:#fff; font-family: Georgia, serif;">
+            </div>
+            <div>
+              <label style="display:block; margin-bottom: 4px; color:#c4b89a; font-size: 0.85rem;">Category key</label>
+              <input type="text" id="adminManageCategoryKey" placeholder="generic" style="width:100%; box-sizing:border-box; padding:8px 12px; border-radius:6px; border:1px solid #8b6914; background: rgba(15,15,15,0.75); color:#fff; font-family: Georgia, serif;">
+            </div>
+            <div>
+              <label style="display:block; margin-bottom: 4px; color:#c4b89a; font-size: 0.85rem;">Logo URL</label>
+              <input type="url" id="adminManageCategoryLogo" placeholder="https://..." style="width:100%; box-sizing:border-box; padding:8px 12px; border-radius:6px; border:1px solid #8b6914; background: rgba(15,15,15,0.75); color:#fff; font-family: Georgia, serif;">
+              <img id="adminManageCategoryLogoPreview" alt="" style="display:none; margin-top: 10px; width: 190px; height: 120px; object-fit: contain; background: transparent; border-radius: 10px; border: 0; box-shadow: 0 14px 22px rgba(0,0,0,0.45);">
+            </div>
+            <div style="grid-column: span 2; display:flex; gap: 10px; align-items:center;">
+              <button type="button" id="adminManageSaveCategory" style="background: linear-gradient(135deg, #d4a017, #8b6914); color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">Save Category</button>
+              <span id="adminManageCategoryStatus" style="color:#a89878; font-size: 0.85rem;"></span>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content: space-between; gap: 10px; margin: 12px 0 8px;">
+            <div style="color:#c4b89a; font-weight: 700;">Grant Types</div>
+            <button type="button" id="adminManageAddGrantType" style="background: none; border: 1px solid #8b6914; color: #d4a017; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">+ New</button>
+          </div>
+          <div id="adminManageGrantTypeList" style="display:flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+
+          <div id="adminManageGrantTypeDetails" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <input type="hidden" id="adminManageGrantTypeId">
+            <div style="grid-column: span 2;">
+              <label style="display:block; margin-bottom: 4px; color:#c4b89a; font-size: 0.85rem;">Grant type name</label>
+              <input type="text" id="adminManageGrantTypeName" style="width:100%; box-sizing:border-box; padding:8px 12px; border-radius:6px; border:1px solid #8b6914; background: rgba(15,15,15,0.75); color:#fff; font-family: Georgia, serif;">
+            </div>
+            <div>
+              <label style="display:block; margin-bottom: 4px; color:#c4b89a; font-size: 0.85rem;">Grant type key</label>
+              <input type="text" id="adminManageGrantTypeKey" placeholder="ipad_tablet" style="width:100%; box-sizing:border-box; padding:8px 12px; border-radius:6px; border:1px solid #8b6914; background: rgba(15,15,15,0.75); color:#fff; font-family: Georgia, serif;">
+            </div>
+            <div>
+              <label style="display:block; margin-bottom: 4px; color:#c4b89a; font-size: 0.85rem;">Logo URL</label>
+              <input type="url" id="adminManageGrantTypeLogo" placeholder="https://..." style="width:100%; box-sizing:border-box; padding:8px 12px; border-radius:6px; border:1px solid #8b6914; background: rgba(15,15,15,0.75); color:#fff; font-family: Georgia, serif;">
+              <img id="adminManageGrantTypeLogoPreview" alt="" style="display:none; margin-top: 10px; width: 190px; height: 120px; object-fit: contain; background: transparent; border-radius: 10px; border: 0; box-shadow: 0 14px 22px rgba(0,0,0,0.45);">
+            </div>
+            <div style="grid-column: span 2; display:flex; gap: 10px; align-items:center;">
+              <button type="button" id="adminManageSaveGrantType" style="background: linear-gradient(135deg, #d4a017, #8b6914); color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">Save Grant Type</button>
+              <span id="adminManageGrantTypeStatus" style="color:#a89878; font-size: 0.85rem;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 24px; margin-bottom: 2rem;">
@@ -71,7 +148,19 @@
         </thead>
         <tbody>
           <% @items.each do |item| %>
-            <tr style="border-bottom: 1px solid rgba(139,105,20,0.3);" id="item-row-<%= item.id %>">
+            <tr
+              style="border-bottom: 1px solid rgba(139,105,20,0.3);"
+              id="item-row-<%= item.id %>"
+              data-item-id="<%= item.id %>"
+              data-item-name="<%= h(item.name.to_s) %>"
+              data-item-price="<%= item.price.to_f %>"
+              data-item-link="<%= h(item.item_link.to_s) %>"
+              data-item-image-url="<%= h(item.image_url.to_s) %>"
+              data-item-description="<%= h(item.description.to_s) %>"
+              data-item-active="<%= item.active? ? 1 : 0 %>"
+              data-item-category-id="<%= item.shop_category&.id %>"
+              data-item-grant-type-id="<%= item.shop_grant_type_id %>"
+            >
               <td style="padding: 8px;"><%= item.id %></td>
               <td style="padding: 8px;"><%= item.name %></td>
               <td style="padding: 8px;"><%= item.shop_category&.name || "—" %></td>
@@ -88,6 +177,9 @@
                 <span style="color: <%= item.active? ? '#4caf50' : '#ef5350' %>;"><%= item.active? ? "Yes" : "No" %></span>
               </td>
               <td style="padding: 8px;">
+                <button type="button" class="adminShopModifyBtn" data-item-id="<%= item.id %>" style="background: none; border: 1px solid #8b6914; color: #d4a017; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-family: Georgia, serif; margin-right: 4px;">
+                  Modify
+                </button>
                 <button onclick="toggleItem(<%= item.id %>, <%= !item.active? %>)" style="background: none; border: 1px solid #8b6914; color: #d4a017; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-family: Georgia, serif; margin-right: 4px;">
                   <%= item.active? ? "Deactivate" : "Activate" %>
                 </button>
@@ -97,6 +189,62 @@
           <% end %>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Modify item modal -->
+  <div id="adminEditItemOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 5000; padding: 24px;">
+    <div style="width: 100%; max-width: 820px; background: rgba(30, 20, 10, 0.95); border: 2px solid #8b6914; border-radius: 12px; padding: 18px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px;">
+        <h2 style="color: #d4a017; margin: 0;">Modify Item</h2>
+        <button type="button" id="adminEditItemClose" style="background: none; border: 1px solid rgba(240,230,210,0.35); color: rgba(240,230,210,0.95); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-family: Georgia, serif;">✕</button>
+      </div>
+
+      <form id="adminEditItemForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <input type="hidden" name="id" id="adminEditItemId">
+        <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Name *</label>
+          <input type="text" name="name" id="adminEditItemName" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Price (chips) *</label>
+          <input type="number" name="price" id="adminEditItemPrice" step="0.01" min="0" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Category *</label>
+          <select id="adminEditCategorySelect" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+            <% @categories.each do |cat| %>
+              <option value="<%= cat.id %>"><%= cat.name %></option>
+            <% end %>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Grant Type *</label>
+          <select id="adminEditGrantTypeSelect" name="shop_grant_type_id" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+            <option value="" disabled selected>Select…</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Item Link</label>
+          <input type="url" name="item_link" id="adminEditItemLink" placeholder="https://..." style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Image URL</label>
+          <input type="url" name="image_url" id="adminEditItemImageUrl" placeholder="https://..." style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+        </div>
+        <div style="grid-column: span 2;">
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Description</label>
+          <textarea name="description" id="adminEditItemDescription" rows="3" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif; resize: vertical;"></textarea>
+        </div>
+        <div style="grid-column: span 2; display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="adminEditItemActive" style="accent-color: #d4a017;">
+          <label for="adminEditItemActive" style="color: #c4b89a; font-size: 0.9rem;">Active</label>
+        </div>
+        <div style="grid-column: span 2; display: flex; gap: 10px;">
+          <button type="button" id="adminEditItemCancel" style="background: none; border: 1px solid rgba(240,230,210,0.35); color: rgba(240,230,210,0.95); padding: 10px 18px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">Cancel</button>
+          <button type="submit" id="adminEditItemSave" style="background: linear-gradient(135deg, #d4a017, #8b6914); color: #fff; border: none; padding: 10px 28px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700; font-size: 1rem;">Save changes</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -167,13 +315,36 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       {
         id: c.id,
         name: c.name,
-        grant_types: c.shop_grant_types.order(:name).map { |gt| { id: gt.id, name: gt.name } }
+        key: c.key,
+        logo_url: c.logo_url,
+        grant_types: c.shop_grant_types.order(:name).map { |gt| { id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url } }
       }
     }.to_json
   ) %>;
 
   function renderGrantTypeOptions(categoryId, selectedGrantTypeId) {
     var grantSelect = document.getElementById('adminShopGrantTypeSelect');
+    if (!grantSelect) return;
+    var cat = SHOP_CATEGORIES.find(function(c) { return String(c.id) === String(categoryId); });
+
+    grantSelect.innerHTML = "";
+    var placeholder = document.createElement('option');
+    placeholder.value = "";
+    placeholder.textContent = "Select…";
+    placeholder.disabled = true;
+    placeholder.selected = !selectedGrantTypeId;
+    grantSelect.appendChild(placeholder);
+
+    ((cat && cat.grant_types) ? cat.grant_types : []).forEach(function(o) {
+      var opt = document.createElement('option');
+      opt.value = String(o.id);
+      opt.textContent = o.name;
+      if (selectedGrantTypeId && String(o.id) === String(selectedGrantTypeId)) opt.selected = true;
+      grantSelect.appendChild(opt);
+    });
+  }
+
+  function renderGrantTypeOptionsInto(categoryId, grantSelect, selectedGrantTypeId) {
     if (!grantSelect) return;
     var cat = SHOP_CATEGORIES.find(function(c) { return String(c.id) === String(categoryId); });
 
@@ -202,6 +373,320 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     var addCategoryBtn = document.getElementById('adminShopAddCategoryBtn');
     var addGrantTypeBtn = document.getElementById('adminShopAddGrantTypeBtn');
 
+    // Manage groups modal
+    var manageBtn = document.getElementById('adminShopManageGroupsBtn');
+    var manageOverlay = document.getElementById('adminManageGroupsOverlay');
+    var manageClose = document.getElementById('adminManageGroupsClose');
+    var manageAddCategory = document.getElementById('adminManageAddCategory');
+    var manageCategoryList = document.getElementById('adminManageCategoryList');
+    var manageCategoryId = document.getElementById('adminManageCategoryId');
+    var manageCategoryName = document.getElementById('adminManageCategoryName');
+    var manageCategoryKey = document.getElementById('adminManageCategoryKey');
+    var manageCategoryLogo = document.getElementById('adminManageCategoryLogo');
+    var manageCategoryLogoPreview = document.getElementById('adminManageCategoryLogoPreview');
+    var manageCategorySave = document.getElementById('adminManageSaveCategory');
+    var manageCategoryStatus = document.getElementById('adminManageCategoryStatus');
+
+    var manageAddGrantType = document.getElementById('adminManageAddGrantType');
+    var manageGrantTypeList = document.getElementById('adminManageGrantTypeList');
+    var manageGrantTypeId = document.getElementById('adminManageGrantTypeId');
+    var manageGrantTypeName = document.getElementById('adminManageGrantTypeName');
+    var manageGrantTypeKey = document.getElementById('adminManageGrantTypeKey');
+    var manageGrantTypeLogo = document.getElementById('adminManageGrantTypeLogo');
+    var manageGrantTypeLogoPreview = document.getElementById('adminManageGrantTypeLogoPreview');
+    var manageGrantTypeSave = document.getElementById('adminManageSaveGrantType');
+    var manageGrantTypeStatus = document.getElementById('adminManageGrantTypeStatus');
+
+    var selectedCategoryId = null;
+    var selectedGrantTypeId = null;
+
+    function findCategoryById(id) {
+      return SHOP_CATEGORIES.find(function(c) { return String(c.id) === String(id); });
+    }
+
+    function findGrantTypeById(cat, id) {
+      if (!cat) return null;
+      return (cat.grant_types || []).find(function(gt) { return String(gt.id) === String(id); });
+    }
+
+    function setStatus(el, msg, isError) {
+      if (!el) return;
+      el.textContent = msg || '';
+      el.style.color = isError ? '#ef5350' : '#a89878';
+    }
+
+    function setLogoPreview(imgEl, url) {
+      if (!imgEl) return;
+      var u = (url || '').trim();
+      if (!u) {
+        imgEl.style.display = 'none';
+        imgEl.removeAttribute('src');
+        return;
+      }
+      imgEl.style.display = 'block';
+      imgEl.src = u;
+    }
+
+    function renderCategoryList(activeId) {
+      if (!manageCategoryList) return;
+      manageCategoryList.innerHTML = '';
+      SHOP_CATEGORIES.slice().sort(function(a, b) {
+        return (a.name || '').localeCompare((b.name || ''));
+      }).forEach(function(cat) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = cat.name;
+        btn.style.cssText = 'text-align:left; width:100%; background:' + (String(cat.id) === String(activeId) ? 'rgba(212,160,23,0.18)' : 'rgba(20,16,12,0.25)') + '; border: 1px solid rgba(139,105,20,0.45); color: #f0e6d2; padding: 8px 10px; border-radius: 8px; cursor:pointer; font-family: Georgia, serif;';
+        btn.onclick = function() { selectCategory(cat.id); };
+        manageCategoryList.appendChild(btn);
+      });
+    }
+
+    function renderGrantTypeList(cat, activeId) {
+      if (!manageGrantTypeList) return;
+      manageGrantTypeList.innerHTML = '';
+      (cat && cat.grant_types ? cat.grant_types.slice().sort(function(a, b) { return (a.name || '').localeCompare((b.name || '')); }) : []).forEach(function(gt) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = gt.name;
+        btn.style.cssText = 'background:' + (String(gt.id) === String(activeId) ? 'rgba(212,160,23,0.18)' : 'rgba(20,16,12,0.25)') + '; border: 1px solid rgba(139,105,20,0.45); color: #f0e6d2; padding: 6px 10px; border-radius: 999px; cursor:pointer; font-family: Georgia, serif;';
+        btn.onclick = function() { selectGrantType(gt.id); };
+        manageGrantTypeList.appendChild(btn);
+      });
+    }
+
+    function selectCategory(id) {
+      selectedCategoryId = id;
+      selectedGrantTypeId = null;
+      var cat = findCategoryById(id);
+      if (!cat) return;
+      if (manageCategoryId) manageCategoryId.value = String(cat.id);
+      if (manageCategoryName) manageCategoryName.value = cat.name || '';
+      if (manageCategoryKey) manageCategoryKey.value = cat.key || '';
+      if (manageCategoryLogo) manageCategoryLogo.value = cat.logo_url || '';
+      setLogoPreview(manageCategoryLogoPreview, cat.logo_url);
+      if (manageGrantTypeId) manageGrantTypeId.value = '';
+      if (manageGrantTypeName) manageGrantTypeName.value = '';
+      if (manageGrantTypeKey) manageGrantTypeKey.value = '';
+      if (manageGrantTypeLogo) manageGrantTypeLogo.value = '';
+      setLogoPreview(manageGrantTypeLogoPreview, '');
+      setStatus(manageCategoryStatus, '');
+      setStatus(manageGrantTypeStatus, '');
+      renderCategoryList(id);
+      renderGrantTypeList(cat, null);
+    }
+
+    function selectGrantType(id) {
+      selectedGrantTypeId = id;
+      var cat = findCategoryById(selectedCategoryId);
+      var gt = findGrantTypeById(cat, id);
+      if (!gt) return;
+      if (manageGrantTypeId) manageGrantTypeId.value = String(gt.id);
+      if (manageGrantTypeName) manageGrantTypeName.value = gt.name || '';
+      if (manageGrantTypeKey) manageGrantTypeKey.value = gt.key || '';
+      if (manageGrantTypeLogo) manageGrantTypeLogo.value = gt.logo_url || '';
+      setLogoPreview(manageGrantTypeLogoPreview, gt.logo_url);
+      setStatus(manageGrantTypeStatus, '');
+      renderGrantTypeList(cat, id);
+    }
+
+    function openManageGroups() {
+      if (!manageOverlay) return;
+      manageOverlay.style.display = 'flex';
+      if (!selectedCategoryId && SHOP_CATEGORIES.length) selectCategory(SHOP_CATEGORIES[0].id);
+      renderCategoryList(selectedCategoryId);
+    }
+
+    function closeManageGroups() {
+      if (!manageOverlay) return;
+      manageOverlay.style.display = 'none';
+    }
+
+    if (manageBtn) manageBtn.onclick = openManageGroups;
+    if (manageClose) manageClose.onclick = closeManageGroups;
+    if (manageOverlay) {
+      manageOverlay.onclick = function(e) {
+        if (e.target === manageOverlay) closeManageGroups();
+      };
+    }
+
+    if (manageCategoryLogo) {
+      manageCategoryLogo.oninput = function() {
+        setLogoPreview(manageCategoryLogoPreview, manageCategoryLogo.value);
+      };
+    }
+    if (manageGrantTypeLogo) {
+      manageGrantTypeLogo.oninput = function() {
+        setLogoPreview(manageGrantTypeLogoPreview, manageGrantTypeLogo.value);
+      };
+    }
+
+    if (manageAddCategory) {
+      manageAddCategory.onclick = function() {
+        var name = prompt("New category name:");
+        if (!name) return;
+        fetch('<%= admin_shop_create_category_path %>', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify({ name: name })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(result) {
+          if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create category.");
+          var cat = result.data.category;
+          SHOP_CATEGORIES.push({ id: cat.id, name: cat.name, key: cat.key, logo_url: cat.logo_url, grant_types: [] });
+          selectCategory(cat.id);
+        })
+        .catch(function(err) { alert("Error creating category."); console.error(err); });
+      };
+    }
+
+    if (manageCategorySave) {
+      manageCategorySave.onclick = function() {
+        if (!selectedCategoryId) return;
+        setStatus(manageCategoryStatus, 'Saving...');
+        fetch('<%= admin_shop_update_category_path(":id") %>'.replace('%3Aid', selectedCategoryId).replace(':id', selectedCategoryId), {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify({
+            name: manageCategoryName ? manageCategoryName.value : '',
+            key: manageCategoryKey ? manageCategoryKey.value : '',
+            logo_url: manageCategoryLogo ? manageCategoryLogo.value : ''
+          })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(result) {
+          if (!result.ok || !result.data.success) {
+            setStatus(manageCategoryStatus, (result.data && result.data.error) || 'Failed.', true);
+            return;
+          }
+          var updated = result.data.category;
+          var cat = findCategoryById(updated.id);
+          if (cat) {
+            cat.name = updated.name;
+            cat.key = updated.key;
+            cat.logo_url = updated.logo_url;
+          }
+          setStatus(manageCategoryStatus, 'Saved.');
+          setLogoPreview(manageCategoryLogoPreview, updated.logo_url);
+          renderCategoryList(selectedCategoryId);
+          // Keep dropdown in sync on next reload
+        })
+        .catch(function(err) {
+          setStatus(manageCategoryStatus, 'Error.', true);
+          console.error(err);
+        });
+      };
+    }
+
+    if (manageAddGrantType) {
+      manageAddGrantType.onclick = function() {
+        if (!selectedCategoryId) return alert("Pick a category first.");
+        var name = prompt("New grant type name:");
+        if (!name) return;
+        fetch('<%= admin_shop_create_grant_type_path %>', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify({ shop_category_id: selectedCategoryId, name: name })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(result) {
+          if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create grant type.");
+          var gt = result.data.grant_type;
+          var cat = findCategoryById(gt.shop_category_id);
+          if (cat) cat.grant_types.push({ id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url });
+          renderGrantTypeList(cat, gt.id);
+          selectGrantType(gt.id);
+        })
+        .catch(function(err) { alert("Error creating grant type."); console.error(err); });
+      };
+    }
+
+    if (manageGrantTypeSave) {
+      manageGrantTypeSave.onclick = function() {
+        if (!selectedCategoryId || !selectedGrantTypeId) return;
+        setStatus(manageGrantTypeStatus, 'Saving...');
+        fetch('<%= admin_shop_update_grant_type_path(":id") %>'.replace('%3Aid', selectedGrantTypeId).replace(':id', selectedGrantTypeId), {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify({
+            shop_category_id: selectedCategoryId,
+            name: manageGrantTypeName ? manageGrantTypeName.value : '',
+            key: manageGrantTypeKey ? manageGrantTypeKey.value : '',
+            logo_url: manageGrantTypeLogo ? manageGrantTypeLogo.value : ''
+          })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(result) {
+          if (!result.ok || !result.data.success) {
+            setStatus(manageGrantTypeStatus, (result.data && result.data.error) || 'Failed.', true);
+            return;
+          }
+          var updated = result.data.grant_type;
+          var cat = findCategoryById(updated.shop_category_id);
+          var gt = findGrantTypeById(cat, updated.id);
+          if (gt) {
+            gt.name = updated.name;
+            gt.key = updated.key;
+            gt.logo_url = updated.logo_url;
+          }
+          setStatus(manageGrantTypeStatus, 'Saved.');
+          setLogoPreview(manageGrantTypeLogoPreview, updated.logo_url);
+          renderGrantTypeList(cat, selectedGrantTypeId);
+        })
+        .catch(function(err) {
+          setStatus(manageGrantTypeStatus, 'Error.', true);
+          console.error(err);
+        });
+      };
+    }
+
+    var editOverlay = document.getElementById('adminEditItemOverlay');
+    var editClose = document.getElementById('adminEditItemClose');
+    var editCancel = document.getElementById('adminEditItemCancel');
+    var editForm = document.getElementById('adminEditItemForm');
+    var editId = document.getElementById('adminEditItemId');
+    var editName = document.getElementById('adminEditItemName');
+    var editPrice = document.getElementById('adminEditItemPrice');
+    var editCategory = document.getElementById('adminEditCategorySelect');
+    var editGrantType = document.getElementById('adminEditGrantTypeSelect');
+    var editLink = document.getElementById('adminEditItemLink');
+    var editImageUrl = document.getElementById('adminEditItemImageUrl');
+    var editDescription = document.getElementById('adminEditItemDescription');
+    var editActive = document.getElementById('adminEditItemActive');
+
+    function openEditFromRow(row) {
+      if (!row || !editOverlay) return;
+
+      var itemId = row.dataset.itemId;
+      var name = row.dataset.itemName || "";
+      var price = row.dataset.itemPrice || "";
+      var link = row.dataset.itemLink || "";
+      var imageUrl = row.dataset.itemImageUrl || "";
+      var description = row.dataset.itemDescription || "";
+      var active = row.dataset.itemActive === "1";
+      var categoryId = row.dataset.itemCategoryId || "";
+      var grantTypeId = row.dataset.itemGrantTypeId || "";
+
+      if (editId) editId.value = itemId;
+      if (editName) editName.value = name;
+      if (editPrice) editPrice.value = price;
+      if (editLink) editLink.value = link;
+      if (editImageUrl) editImageUrl.value = imageUrl;
+      if (editDescription) editDescription.value = description;
+      if (editActive) editActive.checked = active;
+
+      if (editCategory && categoryId) editCategory.value = categoryId;
+      renderGrantTypeOptionsInto((editCategory && editCategory.value) || categoryId, editGrantType, grantTypeId);
+
+      editOverlay.style.display = "flex";
+    }
+
+    function closeEditModal() {
+      if (!editOverlay) return;
+      editOverlay.style.display = "none";
+    }
+
     if (categorySelectEl) {
       renderGrantTypeOptions(categorySelectEl.value);
       categorySelectEl.onchange = function() {
@@ -229,6 +714,77 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       .catch(function(err) { alert('Error creating item.'); console.error(err); });
     };
 
+    if (editCategory) {
+      editCategory.onchange = function() {
+        renderGrantTypeOptionsInto(editCategory.value, editGrantType);
+      };
+    }
+
+    if (editClose) editClose.onclick = closeEditModal;
+    if (editCancel) editCancel.onclick = closeEditModal;
+    if (editOverlay) {
+      editOverlay.onclick = function(e) {
+        if (e.target === editOverlay) closeEditModal();
+      };
+    }
+
+    if (editForm) {
+      editForm.onsubmit = function(e) {
+        e.preventDefault();
+        if (!editId || !editId.value) return;
+        var id = editId.value;
+
+        var payload = {
+          name: editName ? editName.value : "",
+          price: editPrice ? editPrice.value : "",
+          item_link: editLink ? editLink.value : "",
+          image_url: editImageUrl ? editImageUrl.value : "",
+          description: editDescription ? editDescription.value : "",
+          active: !!(editActive && editActive.checked),
+          shop_grant_type_id: editGrantType ? editGrantType.value : ""
+        };
+
+        var saveBtn = document.getElementById('adminEditItemSave');
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.textContent = "Saving...";
+        }
+
+        fetch('<%= admin_shop_update_item_path(":id") %>'.replace('%3Aid', id).replace(':id', id), {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify(payload)
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(result) {
+          if (result.ok && result.data.success) {
+            closeEditModal();
+            location.reload();
+          } else {
+            alert((result.data && result.data.error) || "Failed to update item.");
+          }
+        })
+        .catch(function(err) {
+          alert("Error updating item.");
+          console.error(err);
+        })
+        .finally(function() {
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Save changes";
+          }
+        });
+      };
+    }
+
+    document.querySelectorAll('.adminShopModifyBtn').forEach(function(btn) {
+      btn.onclick = function() {
+        var id = btn.getAttribute('data-item-id');
+        var row = document.getElementById('item-row-' + id);
+        openEditFromRow(row);
+      };
+    });
+
     if (addCategoryBtn) {
       addCategoryBtn.onclick = function() {
         var name = prompt("New category name:");
@@ -242,7 +798,7 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         .then(function(result) {
           if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create category.");
           var cat = result.data.category;
-          SHOP_CATEGORIES.push({ id: cat.id, name: cat.name, grant_types: [] });
+          SHOP_CATEGORIES.push({ id: cat.id, name: cat.name, key: cat.key, logo_url: cat.logo_url, grant_types: [] });
           if (categorySelectEl) {
             var opt = document.createElement('option');
             opt.value = String(cat.id);
@@ -273,7 +829,7 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
           if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create grant type.");
           var gt = result.data.grant_type;
           var cat = SHOP_CATEGORIES.find(function(c) { return String(c.id) === String(gt.shop_category_id); });
-          if (cat) cat.grant_types.push({ id: gt.id, name: gt.name });
+          if (cat) cat.grant_types.push({ id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url });
           renderGrantTypeOptions(categorySelectEl.value, gt.id);
         })
         .catch(function(err) { alert("Error creating grant type."); console.error(err); });

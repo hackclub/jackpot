@@ -14,6 +14,13 @@ body {
   padding: 0;
 }
 
+/* Admin shop page background */
+body.admin_shop-body,
+body.admin-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #120b05 0%, #231608 50%, #120b05 100%);
+}
+
 /* Stats footer — pinned to the bottom of the viewport */
 .stats-footer {
   position: fixed;

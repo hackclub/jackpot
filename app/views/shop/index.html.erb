@@ -32,7 +32,12 @@
         <div class="shop-category-selector" id="shopCategorySelector" aria-label="Shop categories">
           <% @shop_categories.each do |entry| %>
             <% cat = entry[:category] %>
-            <button type="button" class="shop-category-tile" data-shop-category="<%= cat.key %>"><%= cat.name %></button>
+            <button type="button" class="shop-category-tile" data-shop-category="<%= cat.key %>">
+              <span class="shop-tile-title"><%= cat.name %></span>
+              <% if cat.logo_url.present? %>
+                <img class="shop-tile-logo" src="<%= cat.logo_url %>" alt="" loading="lazy">
+              <% end %>
+            </button>
           <% end %>
         </div>
 
@@ -53,7 +58,12 @@
               <div class="shop-grant-selector" data-shop-grant-selector>
                 <% grant_types.each do |gt_entry| %>
                   <% gt = gt_entry[:grant_type] %>
-                  <button type="button" class="shop-grant-tile" data-shop-grant-type="<%= gt.key %>"><%= gt.name %></button>
+                  <button type="button" class="shop-grant-tile" data-shop-grant-type="<%= gt.key %>">
+                    <span class="shop-tile-title"><%= gt.name %></span>
+                    <% if gt.logo_url.present? %>
+                      <img class="shop-tile-logo" src="<%= gt.logo_url %>" alt="" loading="lazy">
+                    <% end %>
+                  </button>
                 <% end %>
               </div>
 
