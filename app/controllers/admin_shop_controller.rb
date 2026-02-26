@@ -6,7 +6,13 @@ class AdminShopController < ApplicationController
   def index
     @items = ShopItem.includes(shop_grant_type: :shop_category).order(created_at: :desc)
     @orders = ShopOrder.includes(:user, :shop_item).order(created_at: :desc).limit(100)
-    @categories = ShopCategory.includes(:shop_grant_types).order(:name)
+    # Only show categories/types that actually have items in them, so the
+    # admin UI doesn't list empty groups.
+    @categories = ShopCategory
+      .joins(shop_grant_types: :shop_items)
+      .distinct
+      .includes(:shop_grant_types)
+      .order(:name)
   end
 
   def create_item

@@ -1,5 +1,17 @@
 class AddColumnsToProjects < ActiveRecord::Migration[8.1]
   def change
+    unless table_exists?(:projects)
+      create_table :projects do |t|
+        t.references :user, null: false, foreign_key: true
+        t.string :name, null: false
+        t.text :description
+        t.string :project_type
+        t.timestamps
+      end
+
+      add_index :projects, %i[user_id name] unless index_exists?(:projects, %i[user_id name])
+    end
+
     add_column :projects, :code_url, :string unless column_exists?(:projects, :code_url)
     add_column :projects, :playable_url, :string unless column_exists?(:projects, :playable_url)
     add_column :projects, :hackatime_projects, :json, default: [], null: false unless column_exists?(:projects, :hackatime_projects)
