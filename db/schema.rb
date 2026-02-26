@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_25_133000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_26_113000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -159,14 +159,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_25_133000) do
 
   create_table "shop_items", force: :cascade do |t|
     t.boolean "active", default: true, null: false
+    t.string "category"
     t.datetime "created_at", null: false
     t.text "description"
+    t.string "grant_type"
     t.string "image_url"
     t.string "item_link"
+    t.integer "max_per_person"
     t.string "name", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
-    t.bigint "shop_grant_type_id", null: false
+    t.bigint "shop_grant_type_id"
     t.datetime "updated_at", null: false
+    t.index ["max_per_person"], name: "index_shop_items_on_max_per_person"
     t.index ["shop_grant_type_id"], name: "index_shop_items_on_shop_grant_type_id"
   end
 

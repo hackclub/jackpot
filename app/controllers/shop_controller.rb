@@ -2,18 +2,30 @@
 
 class ShopController < ApplicationController
   ADMIN_ONLY = true
+  PINNED_ITEM_NAME = ShopItem::PINNED_INVITATION_NAME
 
   before_action :authenticate_user!
   before_action :require_admin_for_shop, if: -> { ADMIN_ONLY }
   before_action :require_shop_feature
 
   def index
+    @pinned_item = ShopItem.active.find_by(name: PINNED_ITEM_NAME)
+    @purchased_qty_by_item_id = current_user.shop_orders
+      .where(status: %w[pending sent])
+      .where.not(shop_item_id: nil)
+      .group(:shop_item_id)
+      .sum(:quantity)
+
     raw_categories = ShopCategory.includes(shop_grant_types: :shop_items).order(:id)
 
     # Only show categories/grant types that have at least one ACTIVE item.
     @shop_categories = raw_categories.map do |cat|
       grant_types = cat.shop_grant_types.sort_by { |gt| gt.name.to_s.downcase }.map do |gt|
-        active_items = gt.shop_items.select(&:active?).sort_by(&:created_at).reverse
+        active_items = gt.shop_items
+          .select(&:active?)
+          .reject { |it| it.name.to_s.strip.casecmp?(PINNED_ITEM_NAME) }
+          .sort_by(&:created_at)
+          .reverse
         next if active_items.empty?
         { grant_type: gt, items: active_items }
       end.compact
@@ -28,6 +40,17 @@ class ShopController < ApplicationController
     quantity = params[:quantity].to_i
     quantity = 1 if quantity < 1
     total_cost = item.price.to_f * quantity.to_f
+    already = current_user.shop_orders.where(shop_item_id: item.id, status: %w[pending sent]).sum(:quantity).to_i
+    if item.max_per_person.present? && (already + quantity) > item.max_per_person.to_i
+      remaining = [item.max_per_person.to_i - already, 0].max
+      msg = remaining.zero? ? "Purchase limit reached for this item." : "You can only purchase #{remaining} more of this item."
+      if request.xhr?
+        return render json: { error: msg }, status: :unprocessable_entity
+      else
+        flash[:alert] = msg
+        return redirect_to shop_path
+      end
+    end
 
     ActiveRecord::Base.transaction do
       current_user.reload.lock!

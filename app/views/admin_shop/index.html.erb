@@ -16,6 +16,10 @@
         <input type="number" name="price" step="0.01" min="0" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
       </div>
       <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Max purchases per person (optional)</label>
+        <input type="number" name="max_per_person" min="1" placeholder="e.g. 1" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+      </div>
+      <div>
         <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Category *</label>
         <div style="display: flex; gap: 8px; align-items: center;">
           <select id="adminShopCategorySelect" name="shop_category_id" style="flex: 1; width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
@@ -27,9 +31,9 @@
         </div>
       </div>
       <div>
-        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Grant Type *</label>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Grant Type</label>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <select id="adminShopGrantTypeSelect" name="shop_grant_type_id" required style="flex: 1; width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+          <select id="adminShopGrantTypeSelect" name="shop_grant_type_id" style="flex: 1; width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
             <option value="" disabled selected>Select…</option>
           </select>
           <button type="button" id="adminShopAddGrantTypeBtn" style="white-space: nowrap; background: none; border: 1px solid #8b6914; color: #d4a017; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-weight: 700;">+ New</button>
@@ -140,6 +144,7 @@
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Name</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Category</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Grant Type</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Max / person</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Price</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Link</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Active</th>
@@ -160,11 +165,13 @@
               data-item-active="<%= item.active? ? 1 : 0 %>"
               data-item-category-id="<%= item.shop_category&.id %>"
               data-item-grant-type-id="<%= item.shop_grant_type_id %>"
+              data-item-max-per-person="<%= item.max_per_person.to_i if item.max_per_person.present? %>"
             >
               <td style="padding: 8px;"><%= item.id %></td>
               <td style="padding: 8px;"><%= item.name %></td>
               <td style="padding: 8px;"><%= item.shop_category&.name || "—" %></td>
               <td style="padding: 8px;"><%= item.shop_grant_type&.name || "—" %></td>
+              <td style="padding: 8px;"><%= item.max_per_person.present? ? item.max_per_person.to_i : "None" %></td>
               <td style="padding: 8px;"><%= item.price.to_f %></td>
               <td style="padding: 8px;">
                 <% if item.item_link.present? %>
@@ -211,6 +218,10 @@
           <input type="number" name="price" id="adminEditItemPrice" step="0.01" min="0" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
         </div>
         <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Max purchases per person (optional)</label>
+          <input type="number" name="max_per_person" id="adminEditItemMaxPerPerson" min="1" placeholder="e.g. 1" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+        </div>
+        <div>
           <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Category *</label>
           <select id="adminEditCategorySelect" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
             <% @categories.each do |cat| %>
@@ -219,8 +230,8 @@
           </select>
         </div>
         <div>
-          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Grant Type *</label>
-          <select id="adminEditGrantTypeSelect" name="shop_grant_type_id" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Grant Type</label>
+          <select id="adminEditGrantTypeSelect" name="shop_grant_type_id" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
             <option value="" disabled selected>Select…</option>
           </select>
         </div>
@@ -321,6 +332,11 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       }
     }.to_json
   ) %>;
+
+  var PINNED_ITEM_NAME = <%= ShopItem::PINNED_INVITATION_NAME.to_json.html_safe %>;
+  function isPinnedItemName(name) {
+    return String(name || '').trim().toLowerCase() === String(PINNED_ITEM_NAME || '').trim().toLowerCase();
+  }
 
   function renderGrantTypeOptions(categoryId, selectedGrantTypeId) {
     var grantSelect = document.getElementById('adminShopGrantTypeSelect');
@@ -648,6 +664,7 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     var editId = document.getElementById('adminEditItemId');
     var editName = document.getElementById('adminEditItemName');
     var editPrice = document.getElementById('adminEditItemPrice');
+    var editMaxPerPerson = document.getElementById('adminEditItemMaxPerPerson');
     var editCategory = document.getElementById('adminEditCategorySelect');
     var editGrantType = document.getElementById('adminEditGrantTypeSelect');
     var editLink = document.getElementById('adminEditItemLink');
@@ -661,6 +678,7 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       var itemId = row.dataset.itemId;
       var name = row.dataset.itemName || "";
       var price = row.dataset.itemPrice || "";
+      var maxPerPerson = row.dataset.itemMaxPerPerson || "";
       var link = row.dataset.itemLink || "";
       var imageUrl = row.dataset.itemImageUrl || "";
       var description = row.dataset.itemDescription || "";
@@ -671,6 +689,7 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       if (editId) editId.value = itemId;
       if (editName) editName.value = name;
       if (editPrice) editPrice.value = price;
+      if (editMaxPerPerson) editMaxPerPerson.value = maxPerPerson;
       if (editLink) editLink.value = link;
       if (editImageUrl) editImageUrl.value = imageUrl;
       if (editDescription) editDescription.value = description;
@@ -700,6 +719,11 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       var data = {};
       formData.forEach(function(v, k) { data[k] = v; });
       delete data.shop_category_id;
+
+      // Require grant type for all items EXCEPT the pinned invitation.
+      if (!isPinnedItemName(data.name) && (!data.shop_grant_type_id || String(data.shop_grant_type_id).trim() === "")) {
+        return alert("Pick a grant type (unless this is the pinned invitation item).");
+      }
 
       fetch('<%= admin_shop_create_item_path %>', {
         method: 'POST',
@@ -737,12 +761,17 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         var payload = {
           name: editName ? editName.value : "",
           price: editPrice ? editPrice.value : "",
+          max_per_person: editMaxPerPerson ? editMaxPerPerson.value : "",
           item_link: editLink ? editLink.value : "",
           image_url: editImageUrl ? editImageUrl.value : "",
           description: editDescription ? editDescription.value : "",
           active: !!(editActive && editActive.checked),
           shop_grant_type_id: editGrantType ? editGrantType.value : ""
         };
+
+        if (!isPinnedItemName(payload.name) && (!payload.shop_grant_type_id || String(payload.shop_grant_type_id).trim() === "")) {
+          return alert("Pick a grant type (unless this is the pinned invitation item).");
+        }
 
         var saveBtn = document.getElementById('adminEditItemSave');
         if (saveBtn) {
