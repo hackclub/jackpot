@@ -13,6 +13,13 @@
 </div>
 
 <div class="shop-page">
+  <button type="button" class="shop-rules-btn shop-addprize-btn shop-rules-btn--cube" id="addPrizeBtn" aria-label="Add Prize">
+    <span class="shop-rules-btn-sr">Add Prize</span>
+    <span class="shop-rules-btn-face" aria-hidden="true">Add Prize</span>
+    <span class="shop-rules-btn-face" aria-hidden="true">Add Prize</span>
+    <span class="shop-rules-btn-face" aria-hidden="true">Add Prize</span>
+    <span class="shop-rules-btn-face" aria-hidden="true">Add Prize</span>
+  </button>
   <button type="button" class="shop-rules-btn shop-rules-btn--cube" id="shopRulesBtn" aria-label="Shop Rules">
     <span class="shop-rules-btn-sr">Shop Rules</span>
     <span class="shop-rules-btn-face" aria-hidden="true">Shop Rules</span>
@@ -29,6 +36,9 @@
         </div>
       </div>
       <div class="shop-right">
+        <div class="shop-upgrade-countdown" aria-live="polite">
+          Next shop upgrade: <span id="shopUpgradeCountdown">--:--:--</span>
+        </div>
         <div class="shop-category-selector" id="shopCategorySelector" aria-label="Shop categories">
           <% if @pinned_item.present? %>
             <div class="shop-card shop-card--pinned" data-item-id="<%= @pinned_item.id %>" data-item-price="<%= @pinned_item.price.to_f %>" style="justify-self: center;">
@@ -166,6 +176,29 @@
           <% end %>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add prize modal -->
+<div class="modal-overlay" id="addPrizeModal" aria-hidden="true">
+  <div class="modal-content shop-rules-modal-content" role="dialog" aria-modal="true" aria-labelledby="addPrizeModalTitle">
+    <div class="modal-header">
+      <h3 class="modal-title" id="addPrizeModalTitle">Add Prize</h3>
+      <button type="button" class="modal-close" id="addPrizeModalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="shop-rules-modal-body">
+      <p class="shop-rules-intro"><strong>HOW DOES THE DYNAMIC SHOP WORK?</strong></p>
+      <p class="shop-rules-intro" style="margin-top: 10px;">
+        Welcome! Did you know that all the rewards you see are dynamic, and new ones are added every week based on your requests? Here’s how it works!
+      </p>
+      <p class="shop-rules-intro" style="margin-top: 10px;">
+        Submit your request in this document
+        <a href="<%= req_item_path %>"><strong>HERE</strong></a>.
+      </p>
+      <p class="shop-rules-intro" style="margin-top: 10px;">
+        <strong>NOTE:</strong> Choose carefully! You can request only one item every two weeks...but in return, we’ll make sure to add it ;)
+      </p>
     </div>
   </div>
 </div>
@@ -311,9 +344,13 @@
   var breadcrumbSep = document.getElementById('shopBreadcrumbSep');
   var breadcrumbGrant = document.getElementById('shopBreadcrumbGrant');
   var categoryPanels = document.querySelectorAll('[data-shop-category-panel]');
+  var addPrizeBtn = document.getElementById('addPrizeBtn');
+  var addPrizeModal = document.getElementById('addPrizeModal');
+  var addPrizeModalClose = document.getElementById('addPrizeModalClose');
   var shopRulesBtn = document.getElementById('shopRulesBtn');
   var shopRulesModal = document.getElementById('shopRulesModal');
   var shopRulesModalClose = document.getElementById('shopRulesModalClose');
+  var shopUpgradeCountdown = document.getElementById('shopUpgradeCountdown');
   var modal = document.getElementById('shopBuyModal');
   var modalClose = document.getElementById('shopModalClose');
   var modalCancel = document.getElementById('shopModalCancel');
@@ -341,6 +378,18 @@
     currentItemId = null;
   }
 
+  function openAddPrizeModal() {
+    if (!addPrizeModal) return;
+    addPrizeModal.classList.add('active');
+    addPrizeModal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeAddPrizeModal() {
+    if (!addPrizeModal) return;
+    addPrizeModal.classList.remove('active');
+    addPrizeModal.setAttribute('aria-hidden', 'true');
+  }
+
   function openShopRulesModal() {
     if (!shopRulesModal) return;
     shopRulesModal.classList.add('active');
@@ -352,6 +401,100 @@
     shopRulesModal.classList.remove('active');
     shopRulesModal.setAttribute('aria-hidden', 'true');
   }
+
+  // Countdown to next Friday 00:00 in America/New_York (EST/EDT), loops weekly.
+  function tzParts(date, timeZone) {
+    var dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: timeZone,
+      hour12: false,
+      weekday: 'short',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    var parts = dtf.formatToParts(date);
+    var out = {};
+    parts.forEach(function(p) { if (p.type !== 'literal') out[p.type] = p.value; });
+    return out;
+  }
+
+  function tzOffsetMs(date, timeZone) {
+    var p = tzParts(date, timeZone);
+    var asUtc = Date.UTC(
+      parseInt(p.year, 10),
+      parseInt(p.month, 10) - 1,
+      parseInt(p.day, 10),
+      parseInt(p.hour, 10),
+      parseInt(p.minute, 10),
+      parseInt(p.second, 10)
+    );
+    return asUtc - date.getTime();
+  }
+
+  function zonedTimeToUtcMs(ymdhms, timeZone) {
+    var utcGuess = Date.UTC(ymdhms.year, ymdhms.month - 1, ymdhms.day, ymdhms.hour, ymdhms.minute, ymdhms.second);
+    var d1 = new Date(utcGuess);
+    var off1 = tzOffsetMs(d1, timeZone);
+    var utc1 = utcGuess - off1;
+    var d2 = new Date(utc1);
+    var off2 = tzOffsetMs(d2, timeZone);
+    return utcGuess - off2;
+  }
+
+  function nextFridayMidnightUtcMs(now) {
+    var tz = 'America/New_York';
+    var p = tzParts(now, tz);
+    var weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    var dow = weekdayMap[p.weekday] == null ? 0 : weekdayMap[p.weekday];
+    var hour = parseInt(p.hour, 10);
+    var minute = parseInt(p.minute, 10);
+    var second = parseInt(p.second, 10);
+
+    var days = (5 - dow + 7) % 7; // 5 = Friday
+    if (days === 0 && (hour > 0 || minute > 0 || second > 0)) days = 7;
+
+    // Use "today at noon" in NY to safely add days across months/DST.
+    var baseNoonUtc = zonedTimeToUtcMs({
+      year: parseInt(p.year, 10),
+      month: parseInt(p.month, 10),
+      day: parseInt(p.day, 10),
+      hour: 12, minute: 0, second: 0
+    }, tz);
+    var fridayNoonUtc = baseNoonUtc + (days * 86400000);
+    var fri = tzParts(new Date(fridayNoonUtc), tz);
+
+    return zonedTimeToUtcMs({
+      year: parseInt(fri.year, 10),
+      month: parseInt(fri.month, 10),
+      day: parseInt(fri.day, 10),
+      hour: 0, minute: 0, second: 0
+    }, tz);
+  }
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function renderCountdown() {
+    if (!shopUpgradeCountdown) return;
+    var now = new Date();
+    var target = nextFridayMidnightUtcMs(now);
+    var ms = target - now.getTime();
+    if (ms < 0) ms = 0;
+
+    var totalSeconds = Math.floor(ms / 1000);
+    var hours = Math.floor(totalSeconds / 3600);
+    var minutes = Math.floor((totalSeconds % 3600) / 60);
+    var seconds = totalSeconds % 60;
+    shopUpgradeCountdown.textContent = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
+  }
+
+  if (window.__shopUpgradeCountdownInterval) {
+    clearInterval(window.__shopUpgradeCountdownInterval);
+    window.__shopUpgradeCountdownInterval = null;
+  }
+  renderCountdown();
+  window.__shopUpgradeCountdownInterval = setInterval(renderCountdown, 1000);
 
   function setHidden(el, isHidden) {
     if (!el) return;
@@ -515,6 +658,13 @@
     });
   });
 
+  if (addPrizeBtn) addPrizeBtn.onclick = openAddPrizeModal;
+  if (addPrizeModalClose) addPrizeModalClose.onclick = closeAddPrizeModal;
+  if (addPrizeModal) {
+    addPrizeModal.addEventListener('click', function(e) {
+      if (e.target === addPrizeModal) closeAddPrizeModal();
+    });
+  }
   if (shopRulesBtn) shopRulesBtn.onclick = openShopRulesModal;
   if (shopRulesModalClose) shopRulesModalClose.onclick = closeShopRulesModal;
   if (shopRulesModal) {
@@ -701,6 +851,7 @@
   window.__shopKeydownHandler = function(e) {
     if (e.key === 'Escape') {
       closeItemModal();
+      closeAddPrizeModal();
       closeShopRulesModal();
       closeModal();
     }
