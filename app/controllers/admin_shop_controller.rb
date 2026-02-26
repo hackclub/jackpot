@@ -35,8 +35,18 @@ class AdminShopController < ApplicationController
   end
 
   def create_category
-    category = ShopCategory.new(category_params)
-    if category.save
+    attrs = category_params.to_h.symbolize_keys
+    name = attrs[:name].to_s.strip
+    key = attrs[:key].to_s.strip
+    key = name.parameterize(separator: "_") if key.blank? && name.present?
+
+    category = nil
+    if key.present? || name.present?
+      category = ShopCategory.where("lower(key) = ? OR lower(name) = ?", key.downcase, name.downcase).first
+    end
+    category ||= ShopCategory.new
+
+    if category.update(attrs)
       render json: { success: true, category: category.as_json(only: %i[id name key logo_url]) }
     else
       render json: { error: category.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -44,8 +54,22 @@ class AdminShopController < ApplicationController
   end
 
   def create_grant_type
-    grant_type = ShopGrantType.new(grant_type_params)
-    if grant_type.save
+    attrs = grant_type_params.to_h.symbolize_keys
+    shop_category_id = attrs[:shop_category_id]
+    name = attrs[:name].to_s.strip
+    key = attrs[:key].to_s.strip
+    key = name.parameterize(separator: "_") if key.blank? && name.present?
+
+    grant_type = nil
+    if shop_category_id.present? && (key.present? || name.present?)
+      grant_type = ShopGrantType
+        .where(shop_category_id: shop_category_id)
+        .where("lower(key) = ? OR lower(name) = ?", key.downcase, name.downcase)
+        .first
+    end
+    grant_type ||= ShopGrantType.new
+
+    if grant_type.update(attrs)
       render json: {
         success: true,
         grant_type: grant_type.as_json(only: %i[id name key logo_url shop_category_id])

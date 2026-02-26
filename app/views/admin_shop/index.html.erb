@@ -190,7 +190,6 @@
                 <button onclick="toggleItem(<%= item.id %>, <%= !item.active? %>)" style="background: none; border: 1px solid #8b6914; color: #d4a017; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-family: Georgia, serif; margin-right: 4px;">
                   <%= item.active? ? "Deactivate" : "Activate" %>
                 </button>
-                <button onclick="deleteItem(<%= item.id %>)" style="background: none; border: 1px solid #ef5350; color: #ef5350; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-family: Georgia, serif;">Delete</button>
               </td>
             </tr>
           <% end %>
@@ -550,7 +549,9 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         .then(function(result) {
           if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create category.");
           var cat = result.data.category;
-          SHOP_CATEGORIES.push({ id: cat.id, name: cat.name, key: cat.key, logo_url: cat.logo_url, grant_types: [] });
+          if (!SHOP_CATEGORIES.some(function(c) { return String(c.id) === String(cat.id); })) {
+            SHOP_CATEGORIES.push({ id: cat.id, name: cat.name, key: cat.key, logo_url: cat.logo_url, grant_types: [] });
+          }
           selectCategory(cat.id);
         })
         .catch(function(err) { alert("Error creating category."); console.error(err); });
@@ -610,7 +611,9 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
           if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create grant type.");
           var gt = result.data.grant_type;
           var cat = findCategoryById(gt.shop_category_id);
-          if (cat) cat.grant_types.push({ id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url });
+          if (cat && !(cat.grant_types || []).some(function(x) { return String(x.id) === String(gt.id); })) {
+            cat.grant_types.push({ id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url });
+          }
           renderGrantTypeList(cat, gt.id);
           selectGrantType(gt.id);
         })
@@ -827,7 +830,9 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         .then(function(result) {
           if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create category.");
           var cat = result.data.category;
-          SHOP_CATEGORIES.push({ id: cat.id, name: cat.name, key: cat.key, logo_url: cat.logo_url, grant_types: [] });
+          if (!SHOP_CATEGORIES.some(function(c) { return String(c.id) === String(cat.id); })) {
+            SHOP_CATEGORIES.push({ id: cat.id, name: cat.name, key: cat.key, logo_url: cat.logo_url, grant_types: [] });
+          }
           if (categorySelectEl) {
             var opt = document.createElement('option');
             opt.value = String(cat.id);
@@ -858,7 +863,9 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
           if (!result.ok || !result.data.success) return alert(result.data.error || "Failed to create grant type.");
           var gt = result.data.grant_type;
           var cat = SHOP_CATEGORIES.find(function(c) { return String(c.id) === String(gt.shop_category_id); });
-          if (cat) cat.grant_types.push({ id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url });
+          if (cat && !(cat.grant_types || []).some(function(x) { return String(x.id) === String(gt.id); })) {
+            cat.grant_types.push({ id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url });
+          }
           renderGrantTypeOptions(categorySelectEl.value, gt.id);
         })
         .catch(function(err) { alert("Error creating grant type."); console.error(err); });
@@ -872,17 +879,6 @@ function toggleItem(id, active) {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
     body: JSON.stringify({ active: active })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) { if (d.success) location.reload(); else alert(d.error); })
-  .catch(function(e) { alert('Error.'); console.error(e); });
-}
-
-function deleteItem(id) {
-  if (!confirm('Delete this item? This cannot be undone.')) return;
-  fetch('<%= admin_shop_delete_item_path(":id") %>'.replace('%3Aid', id).replace(':id', id), {
-    method: 'DELETE',
-    headers: { 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
   })
   .then(function(r) { return r.json(); })
   .then(function(d) { if (d.success) location.reload(); else alert(d.error); })

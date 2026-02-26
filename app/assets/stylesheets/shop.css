@@ -191,9 +191,20 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
-  align-items: stretch;
+  /* Prevent the first row (with pinned item) from stretching differently than other rows */
+  align-items: start;
   max-width: 980px;
   margin-top: 110px;
+}
+
+.shop-category-selector .shop-card--pinned {
+  width: 100%;
+}
+
+.shop-category-selector .shop-card--pinned .shop-card-inner {
+  height: auto;
+  aspect-ratio: 1 / 1;
+  min-height: 210px;
 }
 
 .shop-category-tile {
@@ -565,6 +576,7 @@
   background: transparent;
   box-shadow: none;
   animation: pinnedGlow 2.2s ease-in-out infinite;
+  overflow: visible;
 }
 
 .shop-card--pinned .shop-card-inner::before {
@@ -578,6 +590,26 @@
 
 .shop-card--pinned .shop-buy-btn {
   animation: pinnedButtonGlow 2.2s ease-in-out infinite;
+}
+
+.shop-card--pinned {
+  overflow: visible;
+}
+
+.shop-card--pinned .shop-card-image {
+  transform: scale(1.04);
+  transform-origin: center;
+}
+
+.shop-card--pinned .shop-price-badge {
+  right: 6px;
+  bottom: 6px;
+  width: 92px;
+  height: 92px;
+}
+
+.shop-card--pinned .shop-price-badge-amount {
+  font-size: 1.25rem;
 }
 
 @keyframes pinnedGlow {
