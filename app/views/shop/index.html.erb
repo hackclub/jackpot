@@ -38,7 +38,7 @@
                   style="
                     height: 100%;
                     background-image: url('<%= image_path("ticket Background Removed.png") %>');
-                    background-size: 130% auto;
+                    background-size: contain;
                     background-position: center;
                     background-repeat: no-repeat;
                     border-radius: 10px;
@@ -47,7 +47,7 @@
 
                 <% pinned_qty = @purchased_qty_by_item_id[@pinned_item.id].to_i %>
                 <% pinned_limit_reached = @pinned_item.max_per_person.present? && pinned_qty >= @pinned_item.max_per_person.to_i %>
-                <div class="shop-card-actions" style="position: absolute; left: 0; right: 0; bottom: -40px; z-index: 3;">
+                <div class="shop-card-actions" style="position: absolute; left: 0; right: 0; bottom: 6px; z-index: 3; padding: 0;">
                   <button
                     type="button"
                     class="shop-buy-btn"
