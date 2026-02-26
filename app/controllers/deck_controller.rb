@@ -57,7 +57,13 @@ class DeckController < ApplicationController
 
     @hackatime_projects = service.get_user_projects(hackatime_id)
 
-    @show_tutorial = Rails.application.config.x.tutorial_on_every_login || !current_user.tutorial_completed?
+    if Rails.env.development? && request.local?
+      # Localhost convenience: skip tutorial entirely.
+      current_user.update!(tutorial_completed: true) unless current_user.tutorial_completed?
+      @show_tutorial = false
+    else
+      @show_tutorial = Rails.application.config.x.tutorial_on_every_login || !current_user.tutorial_completed?
+    end
   end
 
   def save_project

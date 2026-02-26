@@ -317,7 +317,7 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         name: c.name,
         key: c.key,
         logo_url: c.logo_url,
-        grant_types: c.shop_grant_types.order(:name).map { |gt| { id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url } }
+        grant_types: c.shop_grant_types.joins(:shop_items).distinct.order(:name).map { |gt| { id: gt.id, name: gt.name, key: gt.key, logo_url: gt.logo_url } }
       }
     }.to_json
   ) %>;

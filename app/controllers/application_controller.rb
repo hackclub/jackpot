@@ -28,7 +28,13 @@ class ApplicationController < ActionController::Base
   end
 
   def admin?
-    user_signed_in? && current_user.role_admin?
+    return false unless user_signed_in?
+
+    # Localhost convenience: treat any signed-in user as admin when running
+    # locally in development. This does not affect production.
+    return true if Rails.env.development? && request.local?
+
+    current_user.role_admin?
   end
 
   def authenticate_user!
