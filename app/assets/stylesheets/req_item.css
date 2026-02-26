@@ -1,0 +1,52 @@
+.req_item-body {
+  min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    url('faq_bkg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.req-item-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 120px 24px 80px;
+  box-sizing: border-box;
+}
+
+.req-item-coming-soon {
+  font-family: 'Georgia', serif;
+  font-weight: 900;
+  text-align: center;
+  font-size: clamp(3rem, 8vw, 7rem);
+  letter-spacing: 0.06em;
+  color: rgba(255, 245, 235, 0.98);
+  text-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.55),
+    0 0 30px rgba(212, 160, 23, 0.35);
+  animation: reqItemPulse 1.9s ease-in-out infinite;
+  user-select: none;
+}
+
+@keyframes reqItemPulse {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 0 rgba(212, 160, 23, 0.0));
+    opacity: 0.92;
+  }
+  50% {
+    transform: translateY(-10px) scale(1.03);
+    filter: drop-shadow(0 0 22px rgba(212, 160, 23, 0.55));
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .req-item-coming-soon {
+    animation: none;
+  }
+}
+

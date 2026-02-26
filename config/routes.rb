@@ -35,6 +35,8 @@ Rails.application.routes.draw do
   get "/shop", to: "shop#index", as: :shop
   post "/shop/buy/:id", to: "shop#buy", as: :buy_shop_item
 
+  get "/req_item", to: "req_item#index", as: :req_item
+
   get "/admin/shop", to: "admin_shop#index", as: :admin_shop
   post "/admin/shop/items", to: "admin_shop#create_item", as: :admin_shop_create_item
   post "/admin/shop/categories", to: "admin_shop#create_category", as: :admin_shop_create_category
