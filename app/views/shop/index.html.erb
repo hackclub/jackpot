@@ -30,6 +30,47 @@
       </div>
       <div class="shop-right">
         <div class="shop-category-selector" id="shopCategorySelector" aria-label="Shop categories">
+          <% if @pinned_item.present? %>
+            <div class="shop-card shop-card--pinned" data-item-id="<%= @pinned_item.id %>" data-item-price="<%= @pinned_item.price.to_f %>" style="justify-self: center;">
+              <div class="shop-card-inner" style="padding: 0;">
+                <div
+                  class="shop-card-image"
+                  style="
+                    height: 100%;
+                    background-image: url('<%= image_path("ticket Background Removed.png") %>');
+                    background-size: 130% auto;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    border-radius: 10px;
+                  "
+                ></div>
+
+                <% pinned_qty = @purchased_qty_by_item_id[@pinned_item.id].to_i %>
+                <% pinned_limit_reached = @pinned_item.max_per_person.present? && pinned_qty >= @pinned_item.max_per_person.to_i %>
+                <div class="shop-card-actions" style="position: absolute; left: 0; right: 0; bottom: -40px; z-index: 3;">
+                  <button
+                    type="button"
+                    class="shop-buy-btn"
+                    data-action="open-item-modal"
+                    data-item-id="<%= @pinned_item.id %>"
+                    data-item-name="<%= @pinned_item.name %>"
+                    data-item-desc="<%= @pinned_item.description.to_s %>"
+                    data-item-link="<%= @pinned_item.item_link.to_s %>"
+                    data-item-price="<%= @pinned_item.price.to_f %>"
+                    data-item-image="<%= image_path("ticket Background Removed.png") %>"
+                    data-item-max-per-person="<%= @pinned_item.max_per_person.to_i if @pinned_item.max_per_person.present? %>"
+                    data-item-purchased-qty="<%= pinned_qty %>"
+                    <%= "disabled" if pinned_limit_reached %>
+                  >Buy</button>
+                </div>
+                <div class="shop-price-badge" aria-hidden="true" style="z-index: 3;">
+                  <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
+                  <span class="shop-price-badge-amount"><%= @pinned_item.display_price %></span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
           <% @shop_categories.each do |entry| %>
             <% cat = entry[:category] %>
             <button type="button" class="shop-category-tile" data-shop-category="<%= cat.key %>">
@@ -75,6 +116,8 @@
                     <div class="shop-cards-pan" role="group" aria-label="<%= cat.name %> <%= gt.name %> items">
                       <div class="shop-grid">
                         <% items.each do |item| %>
+                          <% purchased_qty = @purchased_qty_by_item_id[item.id].to_i %>
+                          <% limit_reached = item.max_per_person.present? && purchased_qty >= item.max_per_person.to_i %>
                           <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
                             <div class="shop-card-inner">
                               <% if item.image_url.present? %>
@@ -99,11 +142,17 @@
                                   data-item-link="<%= item.item_link.to_s %>"
                                   data-item-price="<%= item.price.to_f %>"
                                   data-item-image="<%= item.image_url.to_s %>"
+                                  data-item-max-per-person="<%= item.max_per_person.to_i if item.max_per_person.present? %>"
+                                  data-item-purchased-qty="<%= purchased_qty %>"
+                                  <%= "disabled" if limit_reached %>
                                 >Buy</button>
                               </div>
+                              <% if limit_reached %>
+                                <div class="shop-limit-warning">Limit reached</div>
+                              <% end %>
                               <div class="shop-price-badge" aria-hidden="true">
                                 <%= image_tag "chips_price.png", alt: "", class: "shop-price-badge-img" %>
-                                <span class="shop-price-badge-amount"><%= item.price.to_f %></span>
+                                <span class="shop-price-badge-amount"><%= item.display_price %></span>
                               </div>
                             </div>
                           </div>
@@ -176,7 +225,10 @@
         <div class="shop-item-modal-bottom">
           <div class="shop-item-form">
             <div class="shop-item-form-row">
-              <label class="shop-item-label" for="shopItemModalQty">Quantity</label>
+              <label class="shop-item-label shop-item-label--qty" for="shopItemModalQty">
+                <span>Quantity</span>
+                <span class="shop-item-limit" id="shopItemModalLimit" hidden></span>
+              </label>
               <input class="shop-item-input" id="shopItemModalQty" type="number" min="1" value="1">
             </div>
 
@@ -379,6 +431,7 @@
   var itemModalTitle = document.getElementById('shopItemModalTitle');
   var itemModalDesc = document.getElementById('shopItemModalDesc');
   var itemModalQty = document.getElementById('shopItemModalQty');
+  var itemModalLimit = document.getElementById('shopItemModalLimit');
   var itemModalShipping = document.getElementById('shopItemModalShipping');
   var itemModalTotal = document.getElementById('shopItemModalTotal');
   var itemModalError = document.getElementById('shopItemModalError');
@@ -409,6 +462,20 @@
      itemModalCurrent.name = data.name || '';
      itemModalCurrent.link = data.link || '';
      itemModalCurrent.basePrice = toNumber(data.price);
+
+     if (itemModalLimit) {
+       var maxPerPerson = parseInt(data.maxPerPerson || "", 10);
+       var purchasedQty = parseInt(data.purchasedQty || "0", 10);
+       if (Number.isFinite(maxPerPerson) && maxPerPerson > 0) {
+         var msg = 'Limit: ' + maxPerPerson + '/person';
+         if (Number.isFinite(purchasedQty) && purchasedQty > 0) msg += ' (' + purchasedQty + ' bought)';
+         itemModalLimit.textContent = msg;
+         itemModalLimit.hidden = false;
+       } else {
+         itemModalLimit.textContent = '';
+         itemModalLimit.hidden = true;
+       }
+     }
 
      var imgEl = document.getElementById('shopItemModalImage');
      if (imgEl && data.image) {
@@ -441,7 +508,9 @@
         desc: btn.dataset.itemDesc,
         link: btn.dataset.itemLink,
         price: btn.dataset.itemPrice || '0',
-        image: btn.dataset.itemImage
+        image: btn.dataset.itemImage,
+        maxPerPerson: btn.dataset.itemMaxPerPerson,
+        purchasedQty: btn.dataset.itemPurchasedQty
       });
     });
   });

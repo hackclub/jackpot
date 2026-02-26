@@ -146,7 +146,7 @@ class AdminShopController < ApplicationController
 
   def item_params
     source = params[:admin_shop].presence || params
-    source.permit(:name, :price, :item_link, :image_url, :description, :active, :shop_grant_type_id)
+    source.permit(:name, :price, :item_link, :image_url, :description, :active, :shop_grant_type_id, :max_per_person)
   end
 
   def category_params
