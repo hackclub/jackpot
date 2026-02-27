@@ -12,8 +12,16 @@
         <input type="text" name="name" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
       </div>
       <div>
-        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Price (chips) *</label>
-        <input type="number" name="price" step="0.01" min="0" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">$ price *</label>
+        <input type="number" name="price_usd" id="adminShopPriceUsd" step="0.01" min="0" required placeholder="e.g. 50" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">$/h *</label>
+        <input type="number" name="dollar_per_hour" id="adminShopDollarPerHour" step="0.01" min="0.01" required value="4" placeholder="e.g. 4" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Chips (calculated)</label>
+        <div id="adminShopChipsCalculated" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(139,105,20,0.5); background: rgba(15,15,15,0.5); color: #a89878; font-family: Georgia, serif;">—</div>
       </div>
       <div>
         <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Max purchases per person (optional)</label>
@@ -49,7 +57,7 @@
       </div>
       <div style="grid-column: span 2;">
         <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Description</label>
-        <textarea name="description" rows="2" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif; resize: vertical;"></textarea>
+        <textarea name="description" id="adminShopDescription" rows="2" placeholder="Leave empty for default: By purchasing this, you will receive a $X HCB grant." style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif; resize: vertical;"></textarea>
       </div>
       <div style="grid-column: span 2;">
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -135,25 +143,38 @@
   </div>
 
   <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 24px; margin-bottom: 2rem;">
-    <h2 style="color: #d4a017; margin: 0 0 16px;">Shop Items (<%= @items.count %>)</h2>
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+      <h2 style="color: #d4a017; margin: 0;">Shop Items (<span id="adminShopItemsCount"><%= @items.count %></span>)</h2>
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <input type="text" id="adminShopItemsSearch" placeholder="Search items…" style="width: 220px; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif; font-size: 0.9rem;">
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #c4b89a; font-size: 0.9rem;">
+          <input type="checkbox" id="adminShopShowDeactivated" style="accent-color: #d4a017;">
+          <span>Show deactivated items</span>
+        </label>
+      </div>
+    </div>
     <div style="overflow-x: auto;">
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;" id="adminShopItemsTable">
         <thead>
           <tr style="border-bottom: 2px solid #8b6914;">
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">ID</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Name</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Category</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Grant Type</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Max / person</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Price</th>
+            <th class="admin-shop-sortable-th" data-sort-key="id" style="text-align: left; padding: 8px; color: #c4b89a; cursor: pointer; user-select: none; white-space: nowrap;">ID <span class="admin-shop-sort-arrow"></span></th>
+            <th class="admin-shop-sortable-th" data-sort-key="name" style="text-align: left; padding: 8px; color: #c4b89a; cursor: pointer; user-select: none; white-space: nowrap;">Name <span class="admin-shop-sort-arrow"></span></th>
+            <th class="admin-shop-sortable-th" data-sort-key="category" style="text-align: left; padding: 8px; color: #c4b89a; cursor: pointer; user-select: none; white-space: nowrap;">Category <span class="admin-shop-sort-arrow"></span></th>
+            <th class="admin-shop-sortable-th" data-sort-key="grant_type" style="text-align: left; padding: 8px; color: #c4b89a; cursor: pointer; user-select: none; white-space: nowrap;">Grant Type <span class="admin-shop-sort-arrow"></span></th>
+            <th class="admin-shop-sortable-th" data-sort-key="max_per_person" style="text-align: left; padding: 8px; color: #c4b89a; cursor: pointer; user-select: none; white-space: nowrap;">Max / person <span class="admin-shop-sort-arrow"></span></th>
+            <th class="admin-shop-sortable-th" data-sort-key="price" style="text-align: left; padding: 8px; color: #c4b89a; cursor: pointer; user-select: none; white-space: nowrap;">Price <span class="admin-shop-sort-arrow"></span></th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">$ price</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">$/h</th>
+            <th style="text-align: left; padding: 8px; color: #c4b89a;">Hours req.</th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Link</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Active</th>
+            <th class="admin-shop-sortable-th" data-sort-key="active" style="text-align: left; padding: 8px; color: #c4b89a; cursor: pointer; user-select: none; white-space: nowrap;">Active <span class="admin-shop-sort-arrow"></span></th>
             <th style="text-align: left; padding: 8px; color: #c4b89a;">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="adminShopItemsTbody">
           <% @items.each do |item| %>
             <tr
+              class="admin-shop-item-row"
               style="border-bottom: 1px solid rgba(139,105,20,0.3);"
               id="item-row-<%= item.id %>"
               data-item-id="<%= item.id %>"
@@ -164,8 +185,14 @@
               data-item-description="<%= h(item.description.to_s) %>"
               data-item-active="<%= item.active? ? 1 : 0 %>"
               data-item-category-id="<%= item.shop_category&.id %>"
+              data-item-category-name="<%= h((item.shop_category&.name || '').to_s) %>"
               data-item-grant-type-id="<%= item.shop_grant_type_id %>"
-              data-item-max-per-person="<%= item.max_per_person.to_i if item.max_per_person.present? %>"
+              data-item-grant-type-name="<%= h((item.shop_grant_type&.name || '').to_s) %>"
+              data-item-max-per-person="<%= item.max_per_person.present? ? item.max_per_person.to_i : '' %>"
+              data-item-max-num="<%= item.max_per_person.present? ? item.max_per_person.to_i : -1 %>"
+              data-item-price-usd="<%= item.price_usd.to_f if item.price_usd.present? %>"
+              data-item-dollar-per-hour="<%= item.dollar_per_hour.to_f if item.dollar_per_hour.present? %>"
+              data-item-hours="<%= item.hours_needed if item.hours_needed.present? %>"
             >
               <td style="padding: 8px;"><%= item.id %></td>
               <td style="padding: 8px;"><%= item.name %></td>
@@ -173,6 +200,9 @@
               <td style="padding: 8px;"><%= item.shop_grant_type&.name || "—" %></td>
               <td style="padding: 8px;"><%= item.max_per_person.present? ? item.max_per_person.to_i : "None" %></td>
               <td style="padding: 8px;"><%= item.price.to_f %></td>
+              <td style="padding: 8px;"><%= item.price_usd.present? ? item.price_usd.to_f : "—" %></td>
+              <td style="padding: 8px;"><%= item.dollar_per_hour.present? ? item.dollar_per_hour.to_f : "—" %></td>
+              <td style="padding: 8px;"><%= item.hours_needed.present? ? item.hours_needed : "—" %></td>
               <td style="padding: 8px;">
                 <% if item.item_link.present? %>
                   <a href="<%= item.item_link.to_s.match?(/\Ahttps?:\/\//i) ? item.item_link : '#' %>" target="_blank" rel="noopener noreferrer" style="color: #d4a017;">View</a>
@@ -213,8 +243,16 @@
           <input type="text" name="name" id="adminEditItemName" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
         </div>
         <div>
-          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Price (chips) *</label>
-          <input type="number" name="price" id="adminEditItemPrice" step="0.01" min="0" required style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">$ price</label>
+          <input type="number" name="price_usd" id="adminEditItemPriceUsd" step="0.01" min="0" placeholder="e.g. 50" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">$/h</label>
+          <input type="number" name="dollar_per_hour" id="adminEditItemDollarPerHour" step="0.01" min="0.01" placeholder="e.g. 4" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 6px; border: 1px solid #8b6914; background: rgba(15,15,15,0.75); color: #fff; font-family: Georgia, serif;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Chips (calculated)</label>
+          <div id="adminEditItemChipsCalculated" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(139,105,20,0.5); background: rgba(15,15,15,0.5); color: #a89878; font-family: Georgia, serif;">—</div>
         </div>
         <div>
           <label style="display: block; margin-bottom: 4px; color: #c4b89a; font-size: 0.85rem;">Max purchases per person (optional)</label>
@@ -666,7 +704,9 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     var editForm = document.getElementById('adminEditItemForm');
     var editId = document.getElementById('adminEditItemId');
     var editName = document.getElementById('adminEditItemName');
-    var editPrice = document.getElementById('adminEditItemPrice');
+    var editPriceUsd = document.getElementById('adminEditItemPriceUsd');
+    var editDollarPerHour = document.getElementById('adminEditItemDollarPerHour');
+    var editChipsCalculated = document.getElementById('adminEditItemChipsCalculated');
     var editMaxPerPerson = document.getElementById('adminEditItemMaxPerPerson');
     var editCategory = document.getElementById('adminEditCategorySelect');
     var editGrantType = document.getElementById('adminEditGrantTypeSelect');
@@ -675,12 +715,37 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     var editDescription = document.getElementById('adminEditItemDescription');
     var editActive = document.getElementById('adminEditItemActive');
 
+    function chipsFromUsd(priceUsd, dollarPerHour) {
+      var usd = parseFloat(priceUsd, 10);
+      var dph = parseFloat(dollarPerHour, 10);
+      if (!Number.isFinite(usd) || !Number.isFinite(dph) || dph <= 0) return null;
+      return Math.round((usd / dph) * 50 * 100) / 100;
+    }
+
+    function updateAddFormChips() {
+      var el = document.getElementById('adminShopChipsCalculated');
+      if (!el) return;
+      var usd = document.getElementById('adminShopPriceUsd') && document.getElementById('adminShopPriceUsd').value;
+      var dph = document.getElementById('adminShopDollarPerHour') && document.getElementById('adminShopDollarPerHour').value;
+      var chips = chipsFromUsd(usd, dph);
+      el.textContent = chips != null ? chips : '—';
+    }
+
+    function updateEditFormChips() {
+      if (!editChipsCalculated) return;
+      var usd = editPriceUsd && editPriceUsd.value;
+      var dph = editDollarPerHour && editDollarPerHour.value;
+      var chips = chipsFromUsd(usd, dph);
+      editChipsCalculated.textContent = chips != null ? chips : '—';
+    }
+
     function openEditFromRow(row) {
       if (!row || !editOverlay) return;
 
       var itemId = row.dataset.itemId;
       var name = row.dataset.itemName || "";
-      var price = row.dataset.itemPrice || "";
+      var priceUsd = row.dataset.itemPriceUsd || "";
+      var dollarPerHour = row.dataset.itemDollarPerHour || "";
       var maxPerPerson = row.dataset.itemMaxPerPerson || "";
       var link = row.dataset.itemLink || "";
       var imageUrl = row.dataset.itemImageUrl || "";
@@ -691,7 +756,8 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
       if (editId) editId.value = itemId;
       if (editName) editName.value = name;
-      if (editPrice) editPrice.value = price;
+      if (editPriceUsd) editPriceUsd.value = priceUsd;
+      if (editDollarPerHour) editDollarPerHour.value = dollarPerHour;
       if (editMaxPerPerson) editMaxPerPerson.value = maxPerPerson;
       if (editLink) editLink.value = link;
       if (editImageUrl) editImageUrl.value = imageUrl;
@@ -701,6 +767,7 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       if (editCategory && categoryId) editCategory.value = categoryId;
       renderGrantTypeOptionsInto((editCategory && editCategory.value) || categoryId, editGrantType, grantTypeId);
 
+      updateEditFormChips();
       editOverlay.style.display = "flex";
     }
 
@@ -715,6 +782,14 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         renderGrantTypeOptions(categorySelectEl.value);
       };
     }
+
+    var addPriceUsd = document.getElementById('adminShopPriceUsd');
+    var addDollarPerHour = document.getElementById('adminShopDollarPerHour');
+    if (addPriceUsd) addPriceUsd.addEventListener('input', updateAddFormChips);
+    if (addDollarPerHour) addDollarPerHour.addEventListener('input', updateAddFormChips);
+
+    if (editPriceUsd) editPriceUsd.addEventListener('input', updateEditFormChips);
+    if (editDollarPerHour) editDollarPerHour.addEventListener('input', updateEditFormChips);
 
     form.onsubmit = function(e) {
       e.preventDefault();
@@ -763,7 +838,8 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
         var payload = {
           name: editName ? editName.value : "",
-          price: editPrice ? editPrice.value : "",
+          price_usd: editPriceUsd ? editPriceUsd.value : "",
+          dollar_per_hour: editDollarPerHour ? editDollarPerHour.value : "",
           max_per_person: editMaxPerPerson ? editMaxPerPerson.value : "",
           item_link: editLink ? editLink.value : "",
           image_url: editImageUrl ? editImageUrl.value : "",
@@ -871,6 +947,95 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         .catch(function(err) { alert("Error creating grant type."); console.error(err); });
       };
     }
+
+    // Items table: show/hide deactivated + sorting
+    var itemsTbody = document.getElementById('adminShopItemsTbody');
+    var showDeactivatedCheckbox = document.getElementById('adminShopShowDeactivated');
+    var itemsSearchInput = document.getElementById('adminShopItemsSearch');
+    var itemsCountEl = document.getElementById('adminShopItemsCount');
+    var itemSortKey = 'id';
+    var itemSortDir = 'desc';
+    var numericKeys = { id: true, price: true, max_per_person: true, active: true };
+
+    function getItemSortValue(row, key) {
+      var val;
+      if (key === 'max_per_person') val = row.getAttribute('data-item-max-num');
+      else val = row.getAttribute('data-item-' + key);
+      if (numericKeys[key]) {
+        var n = parseFloat(val, 10);
+        return Number.isFinite(n) ? n : (key === 'id' ? 0 : -1);
+      }
+      return (val || '').toString().toLowerCase();
+    }
+
+    function applyItemsSort() {
+      if (!itemsTbody) return;
+      var rows = Array.prototype.slice.call(itemsTbody.querySelectorAll('tr.admin-shop-item-row'));
+      var isNum = numericKeys[itemSortKey];
+      rows.sort(function(a, b) {
+        var va = getItemSortValue(a, itemSortKey);
+        var vb = getItemSortValue(b, itemSortKey);
+        var cmp = 0;
+        if (isNum) cmp = va < vb ? -1 : (va > vb ? 1 : 0);
+        else cmp = (va || '').localeCompare(vb || '');
+        return itemSortDir === 'asc' ? cmp : -cmp;
+      });
+      rows.forEach(function(r) { itemsTbody.appendChild(r); });
+      document.querySelectorAll('#adminShopItemsTable .admin-shop-sort-arrow').forEach(function(span) { span.textContent = ''; });
+      var activeTh = document.querySelector('#adminShopItemsTable .admin-shop-sortable-th[data-sort-key="' + itemSortKey + '"]');
+      if (activeTh) {
+        var arrow = activeTh.querySelector('.admin-shop-sort-arrow');
+        if (arrow) arrow.textContent = itemSortDir === 'asc' ? ' ▲' : ' ▼';
+      }
+    }
+
+    function rowMatchesSearch(row, q) {
+      if (!q || (q = q.trim().toLowerCase()) === '') return true;
+      var name = (row.getAttribute('data-item-name') || '').toLowerCase();
+      var category = (row.getAttribute('data-item-category-name') || '').toLowerCase();
+      var grantType = (row.getAttribute('data-item-grant-type-name') || '').toLowerCase();
+      var description = (row.getAttribute('data-item-description') || '').toLowerCase();
+      var id = (row.getAttribute('data-item-id') || '').toString();
+      return name.indexOf(q) !== -1 || category.indexOf(q) !== -1 || grantType.indexOf(q) !== -1 || description.indexOf(q) !== -1 || id.indexOf(q) !== -1;
+    }
+
+    function applyItemsFilters() {
+      if (!itemsTbody || !showDeactivatedCheckbox) return;
+      var showDeactivated = showDeactivatedCheckbox.checked;
+      var searchQ = itemsSearchInput ? itemsSearchInput.value : '';
+      var visible = 0;
+      itemsTbody.querySelectorAll('tr.admin-shop-item-row').forEach(function(row) {
+        var active = row.getAttribute('data-item-active') === '1';
+        var matchesSearch = rowMatchesSearch(row, searchQ);
+        var hideByDeactivated = !active && !showDeactivated;
+        if (!matchesSearch || hideByDeactivated) {
+          row.style.display = 'none';
+        } else {
+          row.style.display = '';
+          visible++;
+        }
+      });
+      if (itemsCountEl) itemsCountEl.textContent = visible;
+    }
+
+    if (showDeactivatedCheckbox) {
+      showDeactivatedCheckbox.addEventListener('change', applyItemsFilters);
+    }
+    if (itemsSearchInput) {
+      itemsSearchInput.addEventListener('input', applyItemsFilters);
+    }
+    applyItemsFilters();
+
+    document.querySelectorAll('#adminShopItemsTable .admin-shop-sortable-th').forEach(function(th) {
+      th.addEventListener('click', function() {
+        var key = th.getAttribute('data-sort-key');
+        if (!key) return;
+        if (itemSortKey === key) itemSortDir = itemSortDir === 'asc' ? 'desc' : 'asc';
+        else { itemSortKey = key; itemSortDir = 'asc'; }
+        applyItemsSort();
+      });
+    });
+    applyItemsSort();
   });
 })();
 

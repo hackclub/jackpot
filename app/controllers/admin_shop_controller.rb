@@ -17,6 +17,10 @@ class AdminShopController < ApplicationController
 
   def create_item
     item = ShopItem.new(item_params)
+    if item.description.blank? && item.price_usd.present?
+      dollar_value = item.price_usd.to_f == item.price_usd.to_f.to_i ? item.price_usd.to_i : format("%.2f", item.price_usd)
+      item.description = "By purchasing this, you will receive a $#{dollar_value} HCB grant."
+    end
     if item.save
       if request.xhr?
         render json: { success: true, item: item.as_json }
@@ -170,7 +174,7 @@ class AdminShopController < ApplicationController
 
   def item_params
     source = params[:admin_shop].presence || params
-    source.permit(:name, :price, :item_link, :image_url, :description, :active, :shop_grant_type_id, :max_per_person)
+    source.permit(:name, :price, :price_usd, :dollar_per_hour, :item_link, :image_url, :description, :active, :shop_grant_type_id, :max_per_person)
   end
 
   def category_params
