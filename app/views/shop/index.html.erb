@@ -36,8 +36,16 @@
         </div>
       </div>
       <div class="shop-right">
-        <div class="shop-upgrade-countdown" aria-live="polite">
-          Next shop upgrade: <span id="shopUpgradeCountdown">--:--:--</span>
+        <div class="shop-top-bar">
+          <div class="shop-upgrade-countdown" aria-live="polite">
+            Next shop upgrade: <span id="shopUpgradeCountdown">--:--:--</span>
+          </div>
+          <% if admin? %>
+            <label class="shop-reorder-toggle" for="shopReorderItems">
+              <input type="checkbox" id="shopReorderItems" style="accent-color: #d4a017;">
+              <span>Reorder items</span>
+            </label>
+          <% end %>
         </div>
         <div class="shop-category-selector" id="shopCategorySelector" aria-label="Shop categories">
           <% if @pinned_item.present? %>
@@ -122,7 +130,7 @@
                 <% grant_types.each do |gt_entry| %>
                   <% gt = gt_entry[:grant_type] %>
                   <% items = gt_entry[:items] %>
-                  <div class="shop-grant-panel" data-shop-grant-panel="<%= gt.key %>" hidden>
+                  <div class="shop-grant-panel" data-shop-grant-panel="<%= gt.key %>" data-shop-grant-type-id="<%= gt.id %>" hidden>
                     <div class="shop-cards-pan" role="group" aria-label="<%= cat.name %> <%= gt.name %> items">
                       <div class="shop-grid">
                         <% items.each do |item| %>
@@ -708,6 +716,164 @@
   // Default state: show only categories until one is chosen.
   showCategorySelector();
 
+  // Reorder items (admin only): toggle and drag-and-drop
+  var shopReorderCheckbox = document.getElementById('shopReorderItems');
+  var shopReorderDraggedCard = null;
+
+  function getVisibleGridAndPanel() {
+    var categoryView = document.getElementById('shopCategoryView');
+    if (!categoryView || categoryView.hidden) return null;
+    var panels = categoryView.querySelectorAll('.shop-grant-panel');
+    for (var i = 0; i < panels.length; i++) {
+      if (!panels[i].hidden) {
+        var grid = panels[i].querySelector('.shop-grid');
+        if (grid) return { grid: grid, panel: panels[i] };
+        return null;
+      }
+    }
+    return null;
+  }
+
+  function applyReorderModeToPanel(panel) {
+    if (!panel) return;
+    var grid = panel.querySelector('.shop-grid');
+    if (!grid) return;
+    var pan = panel.querySelector('.shop-cards-pan');
+    if (pan) pan.classList.add('shop-cards-pan--reorder');
+    var cards = grid.querySelectorAll('.shop-card[data-item-id]');
+    cards.forEach(function(card) {
+      card.draggable = true;
+      card.setAttribute('draggable', 'true');
+    });
+  }
+
+  function removeReorderMode() {
+    document.querySelectorAll('.shop-cards-pan--reorder').forEach(function(pan) {
+      pan.classList.remove('shop-cards-pan--reorder');
+    });
+    document.querySelectorAll('.shop-cards-pan--no-pan').forEach(function(pan) {
+      pan.classList.remove('shop-cards-pan--no-pan');
+    });
+    document.querySelectorAll('.shop-category-view .shop-grid .shop-card[data-item-id]').forEach(function(card) {
+      card.draggable = false;
+      card.removeAttribute('draggable');
+    });
+  }
+
+  function applyNoPanToVisiblePanel() {
+    var v = getVisibleGridAndPanel();
+    if (!v || !v.panel) return;
+    var pan = v.panel.querySelector('.shop-cards-pan');
+    if (pan) pan.classList.add('shop-cards-pan--no-pan');
+  }
+
+  function setupReorderDragDrop(grid, panel) {
+    var grantTypeId = panel.getAttribute('data-shop-grant-type-id');
+    if (!grantTypeId) return;
+
+    function handleDragStart(e) {
+      shopReorderDraggedCard = e.currentTarget;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', shopReorderDraggedCard.getAttribute('data-item-id'));
+      e.dataTransfer.setData('application/json', JSON.stringify({ id: shopReorderDraggedCard.getAttribute('data-item-id') }));
+      shopReorderDraggedCard.classList.add('shop-card--dragging');
+      if (e.dataTransfer.setDragImage) {
+        e.dataTransfer.setDragImage(shopReorderDraggedCard, 0, 0);
+      }
+    }
+
+    function handleDragEnd(e) {
+      if (shopReorderDraggedCard) shopReorderDraggedCard.classList.remove('shop-card--dragging');
+      shopReorderDraggedCard = null;
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var card = e.target.closest('.shop-card[data-item-id]');
+      var gridEl = e.target.closest('.shop-grid');
+      if (!shopReorderDraggedCard || !gridEl || gridEl !== grid) return;
+      var after = card || null;
+      if (after === shopReorderDraggedCard) return;
+      if (after) {
+        if (after.nextSibling === shopReorderDraggedCard) return;
+        grid.insertBefore(shopReorderDraggedCard, after);
+      } else {
+        grid.appendChild(shopReorderDraggedCard);
+      }
+      var itemIds = Array.prototype.slice.call(grid.querySelectorAll('.shop-card[data-item-id]')).map(function(c) { return c.getAttribute('data-item-id'); });
+      fetch('<%= admin_shop_reorder_items_path %>', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ grant_type_id: grantTypeId, item_ids: itemIds })
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (!data.success) alert(data.error || 'Failed to save order');
+      }).catch(function(err) { console.error(err); alert('Failed to save order'); });
+    }
+
+    var cards = grid.querySelectorAll('.shop-card[data-item-id]');
+    cards.forEach(function(card) {
+      card.addEventListener('dragstart', handleDragStart);
+      card.addEventListener('dragend', handleDragEnd);
+    });
+    grid.addEventListener('dragover', handleDragOver);
+    grid.addEventListener('drop', handleDrop);
+    grid.addEventListener('dragenter', function(e) { e.preventDefault(); });
+  }
+
+  function initReorderMode(visiblePanel) {
+    removeReorderMode();
+    if (!shopReorderCheckbox || !shopReorderCheckbox.checked) return;
+    var v = visiblePanel ? { panel: visiblePanel, grid: visiblePanel.querySelector('.shop-grid') } : getVisibleGridAndPanel();
+    if (!v || !v.grid || !v.panel) return;
+    applyReorderModeToPanel(v.panel);
+    if (!v.grid.dataset.shopReorderBound) {
+      setupReorderDragDrop(v.grid, v.panel);
+      v.grid.dataset.shopReorderBound = '1';
+    }
+  }
+
+  if (shopReorderCheckbox) {
+    shopReorderCheckbox.addEventListener('change', function() {
+      if (shopReorderCheckbox.checked) {
+        initReorderMode();
+      } else {
+        removeReorderMode();
+        applyNoPanToVisiblePanel();
+      }
+    });
+  }
+
+  var origShowGrantType = showGrantType;
+  showGrantType = function(categoryPanel, grantKey, label) {
+    origShowGrantType(categoryPanel, grantKey, label);
+    setTimeout(function() {
+      var grantPanels = categoryPanel.querySelectorAll('[data-shop-grant-panel]');
+      var visiblePanel = null;
+      for (var i = 0; i < grantPanels.length; i++) {
+        if (grantPanels[i].getAttribute('data-shop-grant-panel') === grantKey) {
+          visiblePanel = grantPanels[i];
+          break;
+        }
+      }
+      if (shopReorderCheckbox && shopReorderCheckbox.checked) {
+        initReorderMode(visiblePanel);
+      } else if (shopReorderCheckbox) {
+        applyNoPanToVisiblePanel();
+      }
+    }, 50);
+  };
+
   if (itemModalQty) itemModalQty.addEventListener('input', updateItemModalTotals);
   if (itemModalShipping) itemModalShipping.addEventListener('input', updateItemModalTotals);
 
@@ -877,6 +1043,7 @@
     }
 
     function onPanPointerDown(e) {
+      if (pan.classList.contains('shop-cards-pan--reorder') || pan.classList.contains('shop-cards-pan--no-pan')) return;
       if (isInteractiveTarget(e.target)) return;
       var p = getClientXY(e);
       panStartX = p.x; panStartY = p.y;

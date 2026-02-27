@@ -189,11 +189,27 @@
   padding-left: 0;
 }
 
-.shop-upgrade-countdown {
+.shop-top-bar {
   position: fixed;
   top: 110px;
   right: 600px;
   z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shop-top-bar .shop-reorder-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #c4b89a;
+  font-size: 0.9rem;
+  font-family: 'Georgia', serif;
+}
+
+.shop-upgrade-countdown {
   padding: 10px 14px;
   border-radius: 12px;
   border: 2px solid rgba(232, 220, 200, 0.65);
@@ -616,6 +632,11 @@
 .shop-card {
   width: 200px;
   perspective: 600px;
+}
+
+.shop-card--dragging {
+  opacity: 0.6;
+  cursor: grabbing;
 }
 
 .shop-card-inner {

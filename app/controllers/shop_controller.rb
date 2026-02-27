@@ -24,8 +24,7 @@ class ShopController < ApplicationController
         active_items = gt.shop_items
           .select(&:active?)
           .reject { |it| it.name.to_s.strip.casecmp?(PINNED_ITEM_NAME) }
-          .sort_by(&:created_at)
-          .reverse
+          .sort_by { |it| [ it.position.to_i, -(it.created_at.to_i) ] }
         next if active_items.empty?
         { grant_type: gt, items: active_items }
       end.compact

@@ -131,6 +131,28 @@ class AdminShopController < ApplicationController
     end
   end
 
+  def reorder_items
+    grant_type_id = params[:grant_type_id].presence
+    item_ids = params[:item_ids]
+    item_ids = Array(item_ids).map(&:to_s).reject(&:blank?) if item_ids.present?
+
+    unless grant_type_id.present? && item_ids.present?
+      return render json: { error: "grant_type_id and item_ids required" }, status: :unprocessable_entity
+    end
+
+    grant_type = ShopGrantType.find_by(id: grant_type_id)
+    unless grant_type
+      return render json: { error: "Grant type not found" }, status: :unprocessable_entity
+    end
+
+    items = ShopItem.where(shop_grant_type_id: grant_type_id, id: item_ids)
+    item_ids.each_with_index do |id, position|
+      items.find { |it| it.id.to_s == id.to_s }&.update_column(:position, position)
+    end
+
+    render json: { success: true }
+  end
+
   def update_order_status
     order = ShopOrder.find(params[:id])
     new_status = params[:status]
