@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  SHOP_PURCHASES_LOCKED_KEY = "shop_purchases_locked"
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
@@ -11,6 +13,14 @@ class ApplicationController < ActionController::Base
   before_action :initialize_request_counters
 
   private
+
+  def shop_purchases_locked?
+    value = Rails.cache.read(SHOP_PURCHASES_LOCKED_KEY)
+    ActiveModel::Type::Boolean.new.cast(value)
+  rescue => e
+    Rails.logger.warn("Shop purchases lock cache read failed: #{e.message}")
+    false
+  end
 
   def check_access_flipper
     if user_signed_in? && !Flipper.enabled?(:access, current_user)

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class AdminShopController < ApplicationController
-  SHOP_PURCHASES_LOCKED_KEY = "shop_purchases_locked"
-
   before_action :authenticate_admin!
 
   def index
@@ -138,6 +136,9 @@ class AdminShopController < ApplicationController
     locked = ActiveModel::Type::Boolean.new.cast(params[:locked])
     Rails.cache.write(SHOP_PURCHASES_LOCKED_KEY, locked)
     render json: { success: true, locked: shop_purchases_locked? }
+  rescue => e
+    Rails.logger.error("Shop purchases lock cache write failed: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+    render json: { error: "Failed to update setting. Please try again." }, status: :internal_server_error
   end
 
   def reorder_items
@@ -222,9 +223,5 @@ class AdminShopController < ApplicationController
     unless admin?
       redirect_to root_path, alert: "Access denied. Admin only."
     end
-  end
-
-  def shop_purchases_locked?
-    ActiveModel::Type::Boolean.new.cast(Rails.cache.read(SHOP_PURCHASES_LOCKED_KEY))
   end
 end

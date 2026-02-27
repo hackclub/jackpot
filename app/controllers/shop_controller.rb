@@ -129,9 +129,4 @@ class ShopController < ApplicationController
     redirect_to root_path, alert: "The shop is not available yet."
   end
 
-  def shop_purchases_locked?
-    ActiveModel::Type::Boolean.new.cast(
-      Rails.cache.read(AdminShopController::SHOP_PURCHASES_LOCKED_KEY)
-    )
-  end
 end
