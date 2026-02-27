@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class AdminShopController < ApplicationController
+  SHOP_PURCHASES_LOCKED_KEY = "shop_purchases_locked"
+
   before_action :authenticate_admin!
 
   def index
     @items = ShopItem.includes(shop_grant_type: :shop_category).order(created_at: :desc)
+    @shop_purchases_locked = shop_purchases_locked?
     @orders = ShopOrder.includes(:user, :shop_item).order(created_at: :desc).limit(100)
     # Only show categories/types that actually have items in them, so the
     # admin UI doesn't list empty groups.
@@ -17,6 +20,10 @@ class AdminShopController < ApplicationController
 
   def create_item
     item = ShopItem.new(item_params)
+    if item.description.blank? && item.price_usd.present?
+      dollar_value = item.price_usd.to_f == item.price_usd.to_f.to_i ? item.price_usd.to_i : format("%.2f", item.price_usd)
+      item.description = "By purchasing this, you will receive a $#{dollar_value} HCB grant."
+    end
     if item.save
       if request.xhr?
         render json: { success: true, item: item.as_json }
@@ -127,6 +134,34 @@ class AdminShopController < ApplicationController
     end
   end
 
+  def update_purchases_lock
+    locked = ActiveModel::Type::Boolean.new.cast(params[:locked])
+    Rails.cache.write(SHOP_PURCHASES_LOCKED_KEY, locked)
+    render json: { success: true, locked: shop_purchases_locked? }
+  end
+
+  def reorder_items
+    grant_type_id = params[:grant_type_id].presence
+    item_ids = params[:item_ids]
+    item_ids = Array(item_ids).map(&:to_s).reject(&:blank?) if item_ids.present?
+
+    unless grant_type_id.present? && item_ids.present?
+      return render json: { error: "grant_type_id and item_ids required" }, status: :unprocessable_entity
+    end
+
+    grant_type = ShopGrantType.find_by(id: grant_type_id)
+    unless grant_type
+      return render json: { error: "Grant type not found" }, status: :unprocessable_entity
+    end
+
+    items = ShopItem.where(shop_grant_type_id: grant_type_id, id: item_ids)
+    item_ids.each_with_index do |id, position|
+      items.find { |it| it.id.to_s == id.to_s }&.update_column(:position, position)
+    end
+
+    render json: { success: true }
+  end
+
   def update_order_status
     order = ShopOrder.find(params[:id])
     new_status = params[:status]
@@ -170,7 +205,7 @@ class AdminShopController < ApplicationController
 
   def item_params
     source = params[:admin_shop].presence || params
-    source.permit(:name, :price, :item_link, :image_url, :description, :active, :shop_grant_type_id, :max_per_person)
+    source.permit(:name, :price, :price_usd, :dollar_per_hour, :item_link, :image_url, :description, :active, :shop_grant_type_id, :max_per_person)
   end
 
   def category_params
@@ -187,5 +222,9 @@ class AdminShopController < ApplicationController
     unless admin?
       redirect_to root_path, alert: "Access denied. Admin only."
     end
+  end
+
+  def shop_purchases_locked?
+    ActiveModel::Type::Boolean.new.cast(Rails.cache.read(SHOP_PURCHASES_LOCKED_KEY))
   end
 end

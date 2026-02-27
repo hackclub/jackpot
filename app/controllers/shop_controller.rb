@@ -9,6 +9,7 @@ class ShopController < ApplicationController
   before_action :require_shop_feature
 
   def index
+    @shop_purchases_locked = shop_purchases_locked?
     @pinned_item = ShopItem.active.find_by(name: PINNED_ITEM_NAME)
     @purchased_qty_by_item_id = current_user.shop_orders
       .where(status: %w[pending sent])
@@ -24,8 +25,7 @@ class ShopController < ApplicationController
         active_items = gt.shop_items
           .select(&:active?)
           .reject { |it| it.name.to_s.strip.casecmp?(PINNED_ITEM_NAME) }
-          .sort_by(&:created_at)
-          .reverse
+          .sort_by { |it| [ it.position.to_i, -(it.created_at.to_i) ] }
         next if active_items.empty?
         { grant_type: gt, items: active_items }
       end.compact
@@ -36,6 +36,16 @@ class ShopController < ApplicationController
   end
 
   def buy
+    if shop_purchases_locked?
+      msg = "Hey! It looks like you're trying to purchase something, well... this function is now under maintenance. It will be available again soon!"
+      if request.xhr?
+        return render json: { error: msg }, status: :service_unavailable
+      else
+        flash[:alert] = msg
+        return redirect_to shop_path
+      end
+    end
+
     item = ShopItem.active.find(params[:id])
     quantity = params[:quantity].to_i
     quantity = 1 if quantity < 1
@@ -119,5 +129,9 @@ class ShopController < ApplicationController
     redirect_to root_path, alert: "The shop is not available yet."
   end
 
-
+  def shop_purchases_locked?
+    ActiveModel::Type::Boolean.new.cast(
+      Rails.cache.read(AdminShopController::SHOP_PURCHASES_LOCKED_KEY)
+    )
+  end
 end

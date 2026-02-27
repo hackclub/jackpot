@@ -289,7 +289,7 @@ class DeckController < ApplicationController
     feedback = params[:feedback]
 
     user = User.find(user_id)
-    chips_earned = (approved_hours * 35).round(2)
+    chips_earned = (approved_hours * 50).round(2)
     
     Rails.logger.info "Approving project for user #{user_id}: #{approved_hours} hours = #{chips_earned} chips"
     

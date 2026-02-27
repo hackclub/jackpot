@@ -49,7 +49,7 @@ class Project < ApplicationRecord
     self.hour_justification = justification
     self.admin_feedback = feedback
     self.reviewed_at = Time.current
-    self.chips_earned = (approved_hours.to_f * 35).round(2)
+    self.chips_earned = (approved_hours.to_f * 50).round(2)
     
     user.chip_am = (user.chip_am || 0) + chips_earned
     

@@ -189,11 +189,27 @@
   padding-left: 0;
 }
 
-.shop-upgrade-countdown {
+.shop-top-bar {
   position: fixed;
   top: 110px;
   right: 600px;
   z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shop-top-bar .shop-reorder-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #c4b89a;
+  font-size: 0.9rem;
+  font-family: 'Georgia', serif;
+}
+
+.shop-upgrade-countdown {
   padding: 10px 14px;
   border-radius: 12px;
   border: 2px solid rgba(232, 220, 200, 0.65);
@@ -283,6 +299,25 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+
+/* Category tile with image: title at top, larger image */
+.shop-category-tile:has(.shop-tile-logo) {
+  justify-content: flex-start;
+  padding-top: 14px;
+}
+
+.shop-category-tile:has(.shop-tile-logo) .shop-tile-title {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.shop-category-tile:has(.shop-tile-logo) .shop-tile-logo {
+  width: 140px;
+  height: 140px;
+  flex: 1;
+  min-height: 0;
+  object-fit: contain;
 }
 
 .shop-category-tile:hover {
@@ -424,6 +459,25 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+
+/* Grant tile with image: title at top, larger image */
+.shop-grant-tile:has(.shop-tile-logo) {
+  justify-content: flex-start;
+  padding-top: 12px;
+}
+
+.shop-grant-tile:has(.shop-tile-logo) .shop-tile-title {
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.shop-grant-tile:has(.shop-tile-logo) .shop-tile-logo {
+  width: 140px;
+  height: 140px;
+  flex: 1;
+  min-height: 0;
+  object-fit: contain;
 }
 
 .shop-tile-title {
@@ -580,6 +634,11 @@
   perspective: 600px;
 }
 
+.shop-card--dragging {
+  opacity: 0.6;
+  cursor: grabbing;
+}
+
 .shop-card-inner {
   background: rgba(240, 230, 210, 0.92);
   border-radius: 10px;
@@ -713,7 +772,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 12px 14px 8px;
+  padding: 14px 14px 4px;
   min-height: 0;
 }
 
@@ -722,15 +781,16 @@
   font-size: 1rem;
   font-weight: 700;
   color: #6b2c2c;
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   line-height: 1.25;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  min-height: 2.5em;
 }
 
 .shop-card-desc {
@@ -839,7 +899,8 @@
 
 
 .shop-card-actions {
-  padding: 8px 14px 100px;
+  padding: 16px 14px 100px;
+  margin-top: 4px;
   display: flex;
   justify-content: center;
   gap: 12px;
