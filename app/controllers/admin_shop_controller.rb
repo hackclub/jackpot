@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 class AdminShopController < ApplicationController
+  SHOP_PURCHASES_LOCKED_KEY = "shop_purchases_locked"
+
   before_action :authenticate_admin!
 
   def index
     @items = ShopItem.includes(shop_grant_type: :shop_category).order(created_at: :desc)
+    @shop_purchases_locked = shop_purchases_locked?
     @orders = ShopOrder.includes(:user, :shop_item).order(created_at: :desc).limit(100)
     # Only show categories/types that actually have items in them, so the
     # admin UI doesn't list empty groups.
@@ -131,6 +134,12 @@ class AdminShopController < ApplicationController
     end
   end
 
+  def update_purchases_lock
+    locked = ActiveModel::Type::Boolean.new.cast(params[:locked])
+    Rails.cache.write(SHOP_PURCHASES_LOCKED_KEY, locked)
+    render json: { success: true, locked: shop_purchases_locked? }
+  end
+
   def reorder_items
     grant_type_id = params[:grant_type_id].presence
     item_ids = params[:item_ids]
@@ -213,5 +222,9 @@ class AdminShopController < ApplicationController
     unless admin?
       redirect_to root_path, alert: "Access denied. Admin only."
     end
+  end
+
+  def shop_purchases_locked?
+    ActiveModel::Type::Boolean.new.cast(Rails.cache.read(SHOP_PURCHASES_LOCKED_KEY))
   end
 end

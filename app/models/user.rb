@@ -133,7 +133,7 @@ class User < ApplicationRecord
      idx = project_index.to_i
      approved_hours_float = approved_hours.to_f
      
-     chips_earned = (approved_hours_float * 35).round(2)
+     chips_earned = (approved_hours_float * 50).round(2)
      
      projects[idx]["reviewed"] = true
      projects[idx]["status"] = "approved"

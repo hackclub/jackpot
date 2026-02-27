@@ -12,7 +12,7 @@
   </div>
 </div>
 
-<div class="shop-page">
+<div class="shop-page" data-shop-purchases-locked="<%= @shop_purchases_locked ? 'true' : 'false' %>">
   <button type="button" class="shop-rules-btn shop-addprize-btn shop-rules-btn--cube" id="addPrizeBtn" aria-label="Add Prize">
     <span class="shop-rules-btn-sr">Add Prize</span>
     <span class="shop-rules-btn-face" aria-hidden="true">Add Prize</span>
@@ -304,6 +304,43 @@
   </div>
 </div>
 
+<!-- Shop rules acceptance popup (before purchase) -->
+<div class="shop-modal-overlay" id="shopRulesAcceptOverlay" aria-hidden="true">
+  <div class="shop-modal">
+    <div class="shop-modal-header">
+      <h3 class="shop-modal-title">Shop Rules</h3>
+      <button type="button" class="shop-modal-close" id="shopRulesAcceptClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="shop-modal-body">
+      <p>Have you read the Shop Rules and do you understand and accept the conditions provided?</p>
+      <label class="shop-rules-accept-label" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin-top: 14px;">
+        <input type="checkbox" id="shopRulesAcceptCheckbox" style="accent-color: #d4a017; margin-top: 3px;">
+        <span>I have read the Shop Rules and understand and accept the conditions.</span>
+      </label>
+    </div>
+    <div class="shop-modal-actions">
+      <button type="button" class="shop-modal-cancel" id="shopRulesAcceptCancel">Cancel</button>
+      <button type="button" class="shop-buy-btn shop-buy-confirm" id="shopRulesAcceptConfirm" disabled>Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Maintenance popup (when purchases are locked) -->
+<div class="shop-modal-overlay" id="shopMaintenanceOverlay" aria-hidden="true">
+  <div class="shop-modal">
+    <div class="shop-modal-header">
+      <h3 class="shop-modal-title">Under maintenance</h3>
+      <button type="button" class="shop-modal-close" id="shopMaintenanceClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="shop-modal-body">
+      <p>Hey! It looks like you're trying to purchase something, well... this function is now under maintenance. It will be available again soon!</p>
+    </div>
+    <div class="shop-modal-actions">
+      <button type="button" class="shop-buy-btn shop-buy-confirm" id="shopMaintenanceOk">OK</button>
+    </div>
+  </div>
+</div>
+
 <!-- Purchase confirmation modal -->
 <div class="shop-modal-overlay" id="shopBuyModal" aria-hidden="true">
   <div class="shop-modal">
@@ -345,6 +382,33 @@
 
   document.addEventListener('turbo:load', function() {
   if (!document.querySelector('.shop-page')) return;
+  var shopPageEl = document.querySelector('.shop-page');
+  var shopPurchasesLocked = shopPageEl && shopPageEl.getAttribute('data-shop-purchases-locked') === 'true';
+
+  var shopMaintenanceOverlay = document.getElementById('shopMaintenanceOverlay');
+  var shopMaintenanceClose = document.getElementById('shopMaintenanceClose');
+  var shopMaintenanceOk = document.getElementById('shopMaintenanceOk');
+
+  function openShopMaintenance() {
+    if (!shopMaintenanceOverlay) return;
+    shopMaintenanceOverlay.classList.add('active');
+    shopMaintenanceOverlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeShopMaintenance() {
+    if (!shopMaintenanceOverlay) return;
+    shopMaintenanceOverlay.classList.remove('active');
+    shopMaintenanceOverlay.setAttribute('aria-hidden', 'true');
+  }
+
+  if (shopMaintenanceClose) shopMaintenanceClose.addEventListener('click', closeShopMaintenance);
+  if (shopMaintenanceOk) shopMaintenanceOk.addEventListener('click', closeShopMaintenance);
+  if (shopMaintenanceOverlay) {
+    shopMaintenanceOverlay.addEventListener('click', function(e) {
+      if (e.target === shopMaintenanceOverlay) closeShopMaintenance();
+    });
+  }
+
   var categorySelector = document.getElementById('shopCategorySelector');
   var categoryView = document.getElementById('shopCategoryView');
   var categoryBack = document.getElementById('shopCategoryBack');
@@ -877,61 +941,112 @@
   if (itemModalQty) itemModalQty.addEventListener('input', updateItemModalTotals);
   if (itemModalShipping) itemModalShipping.addEventListener('input', updateItemModalTotals);
 
+  var shopRulesAcceptOverlay = document.getElementById('shopRulesAcceptOverlay');
+  var shopRulesAcceptCheckbox = document.getElementById('shopRulesAcceptCheckbox');
+  var shopRulesAcceptConfirm = document.getElementById('shopRulesAcceptConfirm');
+  var shopRulesAcceptCancel = document.getElementById('shopRulesAcceptCancel');
+  var shopRulesAcceptClose = document.getElementById('shopRulesAcceptClose');
+
+  function openShopRulesAccept() {
+    if (!shopRulesAcceptOverlay) return;
+    if (shopRulesAcceptCheckbox) shopRulesAcceptCheckbox.checked = false;
+    if (shopRulesAcceptConfirm) shopRulesAcceptConfirm.disabled = true;
+    shopRulesAcceptOverlay.classList.add('active');
+    shopRulesAcceptOverlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeShopRulesAccept() {
+    if (!shopRulesAcceptOverlay) return;
+    shopRulesAcceptOverlay.classList.remove('active');
+    shopRulesAcceptOverlay.setAttribute('aria-hidden', 'true');
+  }
+
+  if (shopRulesAcceptCheckbox) {
+    shopRulesAcceptCheckbox.addEventListener('change', function() {
+      if (shopRulesAcceptConfirm) shopRulesAcceptConfirm.disabled = !shopRulesAcceptCheckbox.checked;
+    });
+  }
+  if (shopRulesAcceptCancel) shopRulesAcceptCancel.addEventListener('click', closeShopRulesAccept);
+  if (shopRulesAcceptClose) shopRulesAcceptClose.addEventListener('click', closeShopRulesAccept);
+  if (shopRulesAcceptOverlay) {
+    shopRulesAcceptOverlay.addEventListener('click', function(e) {
+      if (e.target === shopRulesAcceptOverlay) closeShopRulesAccept();
+    });
+  }
+
+  function doItemModalPurchase() {
+    if (!itemModalCurrent.id) return;
+    var qty = Math.max(1, parseInt(itemModalQty && itemModalQty.value, 10) || 1);
+    itemModalPurchase.disabled = true;
+    itemModalPurchase.textContent = 'Processing...';
+    if (itemModalError) itemModalError.hidden = true;
+
+    fetch('<%= buy_shop_item_path(":id") %>'.replace('%3Aid', itemModalCurrent.id).replace(':id', itemModalCurrent.id), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ quantity: qty })
+    })
+    .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+    .then(function(result) {
+      if (result.ok && result.data.success) {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        closeItemModal();
+        closeShopRulesAccept();
+        notificationMessage.textContent = 'Your purchase for ' + (itemModalCurrent.name || 'item') + ' is successful!';
+        notification.classList.add('show');
+        notification.setAttribute('aria-hidden', 'false');
+        var tokenEl = document.querySelector('.token-count');
+        if (tokenEl) tokenEl.textContent = result.data.new_balance;
+        modalBalance.textContent = result.data.new_balance;
+        setTimeout(function() {
+          notification.classList.remove('show');
+          notification.setAttribute('aria-hidden', 'true');
+          setTimeout(function() { location.reload(); }, 300);
+        }, 3000);
+      } else {
+        if (itemModalError) {
+          itemModalError.textContent = result.data.error || 'Purchase failed.';
+          itemModalError.hidden = false;
+        } else {
+          alert(result.data.error || 'Purchase failed.');
+        }
+      }
+    })
+    .catch(function(e) {
+      console.error('Purchase error:', e);
+      if (itemModalError) {
+        itemModalError.textContent = 'Something went wrong. Please try again.';
+        itemModalError.hidden = false;
+      } else {
+        alert('Something went wrong. Please try again.');
+      }
+    })
+    .finally(function() {
+      itemModalPurchase.disabled = !itemModalCurrent.id;
+      itemModalPurchase.textContent = 'Purchase';
+    });
+  }
+
   if (itemModalPurchase) {
     itemModalPurchase.addEventListener('click', function() {
       if (!itemModalCurrent.id) return;
-      var qty = Math.max(1, parseInt(itemModalQty && itemModalQty.value, 10) || 1);
-      itemModalPurchase.disabled = true;
-      itemModalPurchase.textContent = 'Processing...';
-      if (itemModalError) itemModalError.hidden = true;
+      if (shopPurchasesLocked) {
+        openShopMaintenance();
+        return;
+      }
+      openShopRulesAccept();
+    });
+  }
 
-      fetch('<%= buy_shop_item_path(":id") %>'.replace('%3Aid', itemModalCurrent.id).replace(':id', itemModalCurrent.id), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({ quantity: qty })
-      })
-      .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
-      .then(function(result) {
-        if (result.ok && result.data.success) {
-          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-          closeItemModal();
-          notificationMessage.textContent = 'Your purchase for ' + (itemModalCurrent.name || 'item') + ' is successful!';
-          notification.classList.add('show');
-          notification.setAttribute('aria-hidden', 'false');
-          var tokenEl = document.querySelector('.token-count');
-          if (tokenEl) tokenEl.textContent = result.data.new_balance;
-          modalBalance.textContent = result.data.new_balance;
-          setTimeout(function() {
-            notification.classList.remove('show');
-            notification.setAttribute('aria-hidden', 'true');
-            setTimeout(function() { location.reload(); }, 300);
-          }, 3000);
-        } else {
-          if (itemModalError) {
-            itemModalError.textContent = result.data.error || 'Purchase failed.';
-            itemModalError.hidden = false;
-          } else {
-            alert(result.data.error || 'Purchase failed.');
-          }
-        }
-      })
-      .catch(function(e) {
-        console.error('Purchase error:', e);
-        if (itemModalError) {
-          itemModalError.textContent = 'Something went wrong. Please try again.';
-          itemModalError.hidden = false;
-        } else {
-          alert('Something went wrong. Please try again.');
-        }
-      })
-      .finally(function() {
-        itemModalPurchase.disabled = !itemModalCurrent.id;
-        itemModalPurchase.textContent = 'Purchase';
-      });
+  if (shopRulesAcceptConfirm) {
+    shopRulesAcceptConfirm.addEventListener('click', function() {
+      if (!shopRulesAcceptCheckbox || !shopRulesAcceptCheckbox.checked) return;
+      closeShopRulesAccept();
+      doItemModalPurchase();
     });
   }
 
@@ -1016,6 +1131,14 @@
   }
   window.__shopKeydownHandler = function(e) {
     if (e.key === 'Escape') {
+      if (shopMaintenanceOverlay && shopMaintenanceOverlay.classList.contains('active')) {
+        closeShopMaintenance();
+        return;
+      }
+      if (shopRulesAcceptOverlay && shopRulesAcceptOverlay.classList.contains('active')) {
+        closeShopRulesAccept();
+        return;
+      }
       closeItemModal();
       closeAddPrizeModal();
       closeShopRulesModal();

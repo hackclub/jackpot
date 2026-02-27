@@ -4,6 +4,14 @@
 
   <h1 style="color: #d4a017; margin-bottom: 2rem;">Shop Admin</h1>
 
+  <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 16px 24px; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <label class="admin-shop-lock-toggle-label" for="adminShopPurchasesLockToggle" style="color: #c4b89a; font-weight: 700; cursor: pointer;">Lock purchases</label>
+      <input type="checkbox" id="adminShopPurchasesLockToggle" <%= @shop_purchases_locked ? 'checked' : '' %> aria-describedby="adminShopPurchasesLockHint" style="accent-color: #d4a017; width: 20px; height: 20px; cursor: pointer;">
+    </div>
+    <span id="adminShopPurchasesLockHint" style="color: #a89878; font-size: 0.9rem;">When locked, users see a maintenance message when they try to purchase.</span>
+  </div>
+
   <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 24px; margin-bottom: 2rem;">
     <h2 style="color: #d4a017; margin: 0 0 16px;">Add New Item</h2>
     <form id="addItemForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -421,6 +429,29 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
   document.addEventListener('turbo:load', function() {
     var form = document.getElementById('addItemForm');
     if (!form) return; // not on this page
+
+    var lockToggle = document.getElementById('adminShopPurchasesLockToggle');
+    if (lockToggle) {
+      lockToggle.addEventListener('change', function() {
+        var locked = lockToggle.checked;
+        lockToggle.disabled = true;
+        fetch('<%= admin_shop_purchases_lock_path %>', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({ locked: locked })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) lockToggle.checked = data.locked;
+        })
+        .catch(function() { lockToggle.checked = !locked; })
+        .finally(function() { lockToggle.disabled = false; });
+      });
+    }
 
     var categorySelectEl = document.getElementById('adminShopCategorySelect');
     var addCategoryBtn = document.getElementById('adminShopAddCategoryBtn');
