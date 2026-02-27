@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ShopController < ApplicationController
-  ADMIN_ONLY = true
+  ADMIN_ONLY = false
   PINNED_ITEM_NAME = ShopItem::PINNED_INVITATION_NAME
 
   before_action :authenticate_user!
