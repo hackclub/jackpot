@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_27_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_01_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -160,6 +160,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_27_140000) do
     t.index ["shop_category_id", "key"], name: "index_shop_grant_types_on_shop_category_id_and_key", unique: true
     t.index ["shop_category_id", "name"], name: "index_shop_grant_types_on_shop_category_id_and_name", unique: true
     t.index ["shop_category_id"], name: "index_shop_grant_types_on_shop_category_id"
+  end
+
+  create_table "shop_item_requests", force: :cascade do |t|
+    t.boolean "approved", default: false, null: false
+    t.datetime "created_at", null: false
+    t.string "item_name", null: false
+    t.decimal "price", precision: 10, scale: 2, null: false
+    t.string "reference_link"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "created_at"], name: "index_shop_item_requests_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_shop_item_requests_on_user_id"
   end
 
   create_table "shop_items", force: :cascade do |t|
@@ -345,6 +357,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_27_140000) do
   add_foreign_key "journal_entries", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "shop_grant_types", "shop_categories"
+  add_foreign_key "shop_item_requests", "users"
   add_foreign_key "shop_items", "shop_grant_types"
   add_foreign_key "shop_orders", "shop_items"
   add_foreign_key "shop_orders", "users"

@@ -45,6 +45,31 @@ class AdminController < ApplicationController
     render json: { output: output.string, result: result.inspect }
   end
 
+  def items_request
+    week_start = Time.current.beginning_of_week
+    week_end = Time.current.end_of_week
+    @this_week_requests = ShopItemRequest.includes(:user)
+      .where(created_at: week_start..week_end)
+      .order(created_at: :asc)
+
+    past_requests = ShopItemRequest.includes(:user)
+      .where(ShopItemRequest.arel_table[:created_at].lt(week_start))
+      .order(created_at: :desc)
+    grouped = past_requests.group_by { |r| r.created_at.to_date.beginning_of_week }
+    @past_requests_by_week = grouped.sort_by { |week_date, _| -week_date.to_time.to_i }.map do |week_date, requests|
+      end_date = week_date + 7.days
+      label = "#{week_date.strftime('%B %e').strip}-#{end_date.strftime('%e').strip}".gsub(/\s+/, " ")
+      { label: label, week_start: week_date, requests: requests }
+    end
+  end
+
+  def update_item_request
+    request = ShopItemRequest.find(params[:id])
+    approved = params[:approved].to_s.in?(%w[1 true yes])
+    request.update!(approved: approved)
+    redirect_to admin_items_request_path, notice: approved ? "Request marked as approved." : "Request unmarked."
+  end
+
   def review
     begin
       Rails.logger.info "=== AdminController#review START ==="
