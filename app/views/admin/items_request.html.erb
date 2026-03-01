@@ -1,0 +1,91 @@
+<% content_for(:title) { "Items Request - Admin" } %>
+
+<div class="admin-page">
+  <div class="admin-content">
+    <h1>Items Request</h1>
+    <p class="admin-items-request-desc">Exchange Desk requests: this week and past weeks. Check the box when an item is approved.</p>
+
+    <% if flash[:notice].present? %>
+      <p class="admin-items-request-flash"><%= flash[:notice] %></p>
+    <% end %>
+
+    <section class="admin-items-request-section">
+      <h2 class="admin-items-request-section-heading">This week's requests</h2>
+      <% if @this_week_requests.any? %>
+        <div class="admin-items-request-table-wrap">
+          <table class="admin-items-request-table">
+            <thead>
+              <tr>
+                <th>Submitted</th>
+                <th>User</th>
+                <th>Item name</th>
+                <th>Price ($)</th>
+                <th>Reference link</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @this_week_requests.each do |req| %>
+                <tr>
+                  <td><%= l(req.created_at, format: :long) %></td>
+                  <td>
+                    <%= req.user.display_name.presence || req.user.email %>
+                    <span class="admin-items-request-email">(<%= req.user.email %>)</span>
+                  </td>
+                  <td><%= req.item_name %></td>
+                  <td><%= number_to_currency(req.price, unit: "$") %></td>
+                  <td>
+                    <% if req.reference_link.present? %>
+                      <%= link_to "Link", req.reference_link, target: "_blank", rel: "noopener noreferrer" %>
+                    <% else %>
+                      —
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="admin-items-request-empty">No requests this week.</p>
+      <% end %>
+    </section>
+
+    <section class="admin-items-request-section">
+      <h2 class="admin-items-request-section-heading">Past requests</h2>
+      <% if @past_requests_by_week.any? %>
+        <div class="admin-items-request-past">
+          <% @past_requests_by_week.each do |week| %>
+            <details class="admin-items-request-week-details">
+              <summary class="admin-items-request-week-summary"><%= week[:label] %></summary>
+              <ul class="admin-items-request-week-list">
+                <% week[:requests].each do |req| %>
+                  <li class="admin-items-request-week-item">
+                    <%= form_with url: admin_update_item_request_path(req), method: :patch, local: true, class: "admin-items-request-approve-form" do %>
+                      <%= hidden_field_tag :approved, "0" %>
+                      <label class="admin-items-request-checkbox-label">
+                        <%= check_box_tag :approved, "1", req.approved, onchange: "this.form.submit()" %>
+                        <span class="admin-items-request-item-name"><%= req.item_name %></span>
+                      </label>
+                    <% end %>
+                    <span class="admin-items-request-item-meta">
+                      <%= number_to_currency(req.price, unit: "$") %>
+                      <% if req.reference_link.present? %>
+                        · <%= link_to "Link", req.reference_link, target: "_blank", rel: "noopener noreferrer" %>
+                      <% end %>
+                    </span>
+                  </li>
+                <% end %>
+              </ul>
+            </details>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="admin-items-request-empty">No past requests.</p>
+      <% end %>
+    </section>
+
+    <p style="margin-top: 24px;">
+      <%= link_to "← Back to Admin", admin_path, class: "admin-link-inline" %>
+    </p>
+  </div>
+</div>

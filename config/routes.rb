@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   post "/shop/buy/:id", to: "shop#buy", as: :buy_shop_item
 
   get "/req_item", to: "req_item#index", as: :req_item
+  post "/req_item", to: "req_item#create"
 
   get "/admin/shop", to: "admin_shop#index", as: :admin_shop
   post "/admin/shop/items", to: "admin_shop#create_item", as: :admin_shop_create_item
@@ -50,6 +51,8 @@ Rails.application.routes.draw do
   patch "/admin/shop/orders/:id", to: "admin_shop#update_order_status", as: :admin_shop_update_order
 
   get "/admin", to: "admin#index", as: :admin
+  get "/admin/items_request", to: "admin#items_request", as: :admin_items_request
+  patch "/admin/items_request/:id", to: "admin#update_item_request", as: :admin_update_item_request
   get "/admin/review", to: "admin#review", as: :admin_review
   get "/admin/console", to: "admin#console", as: :admin_console
   post "/admin/console", to: "admin#execute_console", as: :admin_console_execute
