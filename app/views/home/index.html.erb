@@ -1,72 +1,191 @@
 <div class="main">
-<div class="page-section page-section--hero">
-  <div class="hero-overlays">
-    <%= image_tag 'title.PNG', alt: 'Jackpot Title', class: 'hero-title' %>
-    <%= image_tag 'centralmg.png', alt: 'Center Art', class: 'hero-center' %>
-    <%= link_to image_tag('HC_logo.png', alt: 'Hack Club Logo', class: 'hero-logo'), 'https://hackclub.com', class: 'hero-logo-link' %>
+  <section class="page-section page-section--hero">
+    <div class="hero-overlays">
+      <%= image_tag "title.PNG", alt: "Jackpot Title", class: "hero-title" %>
+      <%= image_tag "centralmg.png", alt: "Center Art", class: "hero-center" %>
+      <%= link_to image_tag("HC_logo.png", alt: "Hack Club Logo", class: "hero-logo"), "https://hackclub.com", class: "hero-logo-link" %>
+    </div>
+    <%= render "home/rsvp" %>
+  </section>
+
+  <div id="steps" class="ext-content">
+    <div class="ext-bkg-section ext-bkg-section--1">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_1.png", alt: "", class: "ext-bkg-section__img", aria: { hidden: true } %>
+      <div class="ext-bkg-section__content ext-bkg-section__content--flow">
+        <%= image_tag "RSVP_comp/first_section/join_button.png", alt: "Join", class: "flow-asset flow-asset--join" %>
+        <%= image_tag "RSVP_comp/first_section/poker_chip.png", alt: "Hack Club chip", class: "flow-asset flow-asset--chip" %>
+        <%= image_tag "RSVP_comp/first_section/steps_graph.png", alt: "Sign up flow", class: "flow-asset flow-asset--steps" %>
+        <%= image_tag "RSVP_comp/first_section/card_draw.png", alt: "Jackpot card", class: "flow-asset flow-asset--card" %>
+      </div>
+    </div>
+
+    <div class="ext-bkg-section ext-bkg-section--2">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_2.png", alt: "", class: "ext-bkg-section__img", aria: { hidden: true } %>
+      <div class="ext-bkg-section__content">
+    <section class="rsvp-section rsvp-section--work">
+      <h2 class="section-title">How does it work?</h2>
+      <div class="work-card">
+        <%= image_tag "RSVP_comp/second_section/yellow_box.png", alt: "", class: "work-card-bg", aria: { hidden: true } %>
+        <div class="work-card-overlay">
+          <div class="work-step">
+            <%= image_tag "RSVP_comp/second_section/icon1_box.png", alt: "", class: "work-step-icon", aria: { hidden: true } %>
+            <p class="work-step-text">
+              Work on a <span class="work-step-text--accent">software sanctuary</span> project and track your time.
+            </p>
+          </div>
+          <div class="work-step">
+            <%= image_tag "RSVP_comp/second_section/icon2_box.png", alt: "", class: "work-step-icon", aria: { hidden: true } %>
+            <p class="work-step-text">
+              Post your project on <span class="work-step-text--accent">Slack</span> to earn themed prizes and chips.
+            </p>
+          </div>
+          <div class="work-step">
+            <%= image_tag "RSVP_comp/second_section/icon3_box.png", alt: "", class: "work-step-icon", aria: { hidden: true } %>
+            <p class="work-step-text">
+              Wait for a <span class="work-step-text--accent">raffle</span> for every one of your completed project drops.
+            </p>
+          </div>
+          <div class="work-step">
+            <%= image_tag "RSVP_comp/second_section/icon4_box.png", alt: "", class: "work-step-icon", aria: { hidden: true } %>
+            <p class="work-step-text">
+              Spend your points to <span class="work-step-text--accent">win gear</span> or get an official invitation to Las Vegas.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+      </div>
+    </div>
+
+    <div class="ext-bkg-section ext-bkg-section--3">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_3.png", alt: "", class: "ext-bkg-section__img", aria: { hidden: true } %>
+      <div class="ext-bkg-section__content">
+    <section class="rsvp-section rsvp-section--about">
+      <%= image_tag "RSVP_comp/third_section/hackclub_box.png", alt: "About Hack Club", class: "content-box content-box--large" %>
+    </section>
+    <section class="rsvp-section rsvp-section--trailer">
+      <%= image_tag "RSVP_comp/third_section/jackpottrailer_box.png", alt: "Jackpot Trailer", class: "content-box content-box--large" %>
+    </section>
+      </div>
+    </div>
+
+    <div class="ext-bkg-section ext-bkg-section--4">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_4.png", alt: "", class: "ext-bkg-section__img", aria: { hidden: true } %>
+      <div class="ext-bkg-section__content">
+    <section class="rsvp-section rsvp-section--info">
+      <h2 class="section-title section-title--info">info</h2>
+      <%= image_tag "RSVP_comp/fourth_section/joinComm_box.png", alt: "Join the Community", class: "content-box content-box--wide" %>
+      <%= image_tag "RSVP_comp/fourth_section/questions_box.png", alt: "Questions FAQ Rules", class: "content-box content-box--wide" %>
+    </section>
+
+    <footer class="rsvp-footer">
+      <div class="rsvp-footer__divider"></div>
+      <div class="rsvp-footer__links">
+        <p>Questions? <a href="mailto:highschoolhackathons@hackclub.com">highschoolhackathons@hackclub.com</a></p>
+        <p>Slack: <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4" target="_blank" rel="noopener noreferrer">Join the community</a></p>
+        <p>More from Hack Club: <a href="https://hackclub.com" target="_blank" rel="noopener noreferrer">hackclub.com</a></p>
+      </div>
+    </footer>
+      </div>
+    </div>
   </div>
-  <%= render "home/rsvp" %>
-</div>
 </div>
 
 <style>
-/* --- First section height: hero shows full first_bkg; ext_bkg starts right below (no overlap) --- */
+@font-face {
+  font-family: "Katibeh";
+  src: url(<%= asset_path "Katibeh/Katibeh-Regular.ttf" %>) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --first-section-height: 56.25vw; /* 16:9; change to e.g. 100vw for 1:1, 62.5vw for 16:10 */
+  --first-section-height: 56.25vw;
+  --content-width: min(92vw, 1024px);
+  --content-width-narrow: min(88vw, 760px);
+  --cream: #efe394;
+  --cream-soft: #f1dfc5;
+  --brown: #6b2218;
+  --brown-dark: #43110e;
 }
+
 @media (max-aspect-ratio: 1/1) {
-  :root { --first-section-height: 100vw; }
+  :root {
+    --first-section-height: 100vw;
+  }
 }
-/* --- Base: works for all screens --- */
+
+/* Flow section + text: portrait / square screens – resize only */
+@media (max-aspect-ratio: 4/3) {
+  .flow-asset--join { width: clamp(120px, 22vw, 380px); }
+  .flow-asset--chip { width: clamp(36px, 7vw, 100px); }
+  .flow-asset--steps { width: clamp(260px, 70vw, 900px); }
+  .flow-asset--card { width: clamp(55px, 11vw, 130px); }
+  .section-title { font-size: clamp(1.8rem, 4.5vw, 3.6rem); }
+  .work-step-text { font-size: clamp(0.85rem, 1.4vw, 1.08rem); }
+  .rsvp-footer__links p { font-size: clamp(0.72rem, 1.15vw, 0.88rem); }
+}
+
+/* Flow section + text: narrow portrait – resize only */
+@media (max-aspect-ratio: 3/4) {
+  .flow-asset--join { width: clamp(90px, 24vw, 280px); }
+  .flow-asset--chip { width: clamp(28px, 7vw, 70px); }
+  .flow-asset--steps { width: clamp(260px, 85vw, 700px); }
+  .flow-asset--card { width: clamp(40px, 12vw, 95px); }
+  .section-title { font-size: clamp(1.6rem, 4vw, 3.2rem); }
+  .work-step-text { font-size: clamp(0.8rem, 1.3vw, 1rem); }
+  .rsvp-footer__links p { font-size: clamp(0.68rem, 1.05vw, 0.82rem); }
+}
+
+/* Flow section + text: very wide / short viewport – resize only */
+@media (min-aspect-ratio: 2/1) {
+  .flow-asset--join { width: clamp(120px, 18vw, 320px); }
+  .flow-asset--chip { width: clamp(36px, 5vw, 90px); }
+  .flow-asset--steps { width: clamp(300px, 65vw, 900px); }
+  .flow-asset--card { width: clamp(50px, 8vw, 120px); }
+  .section-title { font-size: clamp(1.7rem, 4vw, 3.4rem); }
+  .work-step-text { font-size: clamp(0.82rem, 1.25vw, 1.02rem); }
+  .rsvp-footer__links p { font-size: clamp(0.7rem, 1.1vw, 0.86rem); }
+}
+
 html {
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
+
 body {
-  background: url(<%= image_path 'ext_bkg.png' %>) no-repeat left top #000;
-  background-size: 100% auto;
-  background-position: 0 var(--first-section-height);
-  min-height: max(100vh, 500vw);
-  min-height: max(100dvh, 500vw);
   margin: 0;
   padding: 0;
+  min-height: max(100vh, 500vw);
+  min-height: max(100dvh, 500vw);
   width: 100%;
-  min-width: 100%;
   max-width: 100vw;
   box-sizing: border-box;
   overflow-x: hidden;
+  background: #000;
+  color: #fff8ec;
 }
+
+.main,
+.main * {
+  box-sizing: border-box;
+}
+
 .main {
-  color: white;
-  text-align: center;
   position: relative;
-  width: 100%;
-  min-width: 100%;
-  max-width: 100vw;
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
-.page-section {
-  min-height: 100vh;
-  min-height: 100dvh;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   max-width: 100vw;
 }
+
 .page-section--hero {
   position: relative;
-  min-height: var(--first-section-height);
   height: var(--first-section-height);
-  background: url(<%= image_path 'first_bkg.jpg' %>) no-repeat top center #000;
+  min-height: var(--first-section-height);
+  background: url(<%= image_path "first_bkg.jpg" %>) no-repeat top center #000;
   background-size: 100% auto;
-  background-position: top center;
 }
-</style>
 
-<style>
 .hero-overlays {
   position: absolute;
   inset: 0;
@@ -75,6 +194,7 @@ body {
   max-width: 100vw;
   overflow: hidden;
 }
+
 .hero-title {
   position: absolute;
   left: 50%;
@@ -83,19 +203,21 @@ body {
   max-width: min(90vw, 520px);
   width: clamp(280px, 42vw, 520px);
   height: auto;
-  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35));
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35));
   animation: title-flicker 4.5s infinite steps(1, end);
 }
+
 .hero-title::after {
   content: "";
   position: absolute;
   inset: -8px;
   pointer-events: none;
-  background: linear-gradient(75deg, rgba(255,240,180,0) 0%, rgba(255,240,180,0.0) 35%, rgba(255,240,180,0.45) 50%, rgba(255,240,180,0.0) 65%, rgba(255,240,180,0) 100%);
+  background: linear-gradient(75deg, rgba(255, 240, 180, 0) 0%, rgba(255, 240, 180, 0) 35%, rgba(255, 240, 180, 0.45) 50%, rgba(255, 240, 180, 0) 65%, rgba(255, 240, 180, 0) 100%);
   mix-blend-mode: screen;
   transform: translateX(-160%);
   animation: title-sheen 5.75s infinite;
 }
+
 .hero-center {
   position: absolute;
   left: 50%;
@@ -109,6 +231,7 @@ body {
     drop-shadow(0 0 48px rgba(255, 170, 60, 0.22));
   animation: center-glow 2.8s ease-in-out infinite;
 }
+
 .hero-logo-link {
   position: absolute;
   top: clamp(8px, 10vh, 12vh);
@@ -117,72 +240,337 @@ body {
   display: block;
   line-height: 0;
 }
+
 .hero-logo {
   width: clamp(100px, 22vw, 180px);
   height: auto;
   display: block;
 }
-@keyframes title-sheen {
-  0%   { transform: translateX(-160%); opacity: 0.0; }
-  12%  { transform: translateX(160%);  opacity: 1.0; }
-  100% { transform: translateX(160%);  opacity: 0.0; }
-}
-@keyframes title-flicker {
-  0%, 87%, 100%   { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.35)) brightness(1) }
-  88%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.35)) brightness(0.8) }
-  89%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.55)) brightness(1.2) }
-  90%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.30)) brightness(0.9) }
-  92%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.60)) brightness(1.25) }
-}
-@keyframes center-glow {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 16px rgba(255, 230, 170, 0.28))
-      drop-shadow(0 0 40px rgba(255, 170, 60, 0.15))
-      brightness(1);
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 32px rgba(255, 240, 190, 0.55))
-      drop-shadow(0 0 80px rgba(255, 180, 70, 0.35))
-      brightness(1.08);
-  }
+
+.ext-content {
+  width: 100%;
+  max-width: 100vw;
+  margin: 0;
+  min-height: calc(500vw - var(--first-section-height));
+  display: flex;
+  flex-direction: column;
 }
 
-/* --- Tablet (768px - 1023px) --- */
+.ext-bkg-section {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.ext-bkg-section__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: bottom;
+}
+
+.ext-bkg-section__content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(48px, 6vw, 88px) 0;
+}
+
+.ext-bkg-section .rsvp-section,
+.ext-bkg-section .rsvp-footer {
+  width: var(--content-width);
+  max-width: 92vw;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ext-bkg-section__content--flow {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  min-height: 100%;
+}
+
+.flow-asset {
+  position: absolute;
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Join top-center, chip top-right, steps center, card bottom-left */
+.flow-asset--join {
+  width: clamp(140px, 25vw, 460px);
+  top: clamp(2%, 2.5vw, 12%);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.flow-asset--chip {
+  width: clamp(40px, 8vw, 120px);
+  top: clamp(2%, 2.5vw, 8%);
+  right: clamp(3%, 4vw, 8%);
+}
+
+.flow-asset--steps {
+  width: clamp(280px, 75vw, 1100px);
+  max-width: 96%;
+  max-height: 85%;
+  object-fit: contain;
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, -50%);
+}
+
+.flow-asset--card {
+  width: clamp(60px, 12vw, 150px);
+  left: clamp(2%, 3vw, 6%);
+  bottom: clamp(6%, 8vw, 14%);
+  transform: rotate(-14deg);
+}
+
+.rsvp-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-title {
+  margin: 0 0 clamp(12px, 2vw, 20px);
+  color: var(--cream);
+  font-family: "Katibeh", "Georgia", serif;
+  font-size: clamp(2.2rem, 5.6vw, 4.3rem);
+  font-weight: 400;
+  line-height: 0.9;
+  text-shadow:
+    -2px -2px 0 var(--brown-dark),
+     2px -2px 0 var(--brown-dark),
+    -2px  2px 0 var(--brown-dark),
+     2px  2px 0 var(--brown-dark),
+     0 6px 12px rgba(0, 0, 0, 0.6);
+}
+
+.section-title--info {
+  margin-bottom: clamp(16px, 2.8vw, 28px);
+}
+
+.work-card {
+  position: relative;
+  width: var(--content-width-narrow);
+  min-height: clamp(220px, 30vw, 330px);
+}
+
+.work-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  object-fit: cover;
+  opacity: 0.28;
+}
+
+.work-card-overlay {
+  position: relative;
+  display: grid;
+  gap: clamp(12px, 1.8vw, 18px);
+  width: 100%;
+  padding: clamp(18px, 3vw, 28px);
+  border-radius: 16px;
+  background: rgba(54, 38, 33, 0.8);
+  border: 2px solid rgba(255, 237, 187, 0.18);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
+}
+
+.work-step {
+  display: grid;
+  grid-template-columns: clamp(36px, 6vw, 56px) 1fr;
+  gap: clamp(10px, 1.6vw, 16px);
+  align-items: center;
+}
+
+.work-step-icon {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.work-step-text {
+  margin: 0;
+  color: var(--cream-soft);
+  font-family: "Georgia", serif;
+  font-size: clamp(0.92rem, 1.55vw, 1.16rem);
+  line-height: 1.45;
+  text-align: left;
+}
+
+.work-step-text--accent {
+  color: #d83d5b;
+  font-weight: 700;
+}
+
+.content-box {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.content-box--large {
+  width: min(100%, 980px);
+}
+
+.content-box--wide {
+  width: min(100%, 1024px);
+}
+
+.rsvp-section--info .content-box + .content-box {
+  margin-top: clamp(20px, 2.8vw, 32px);
+}
+
+.rsvp-footer {
+  position: relative;
+  width: 100%;
+  margin-top: 0;
+  padding-top: clamp(28px, 4vw, 40px);
+}
+
+.rsvp-footer__divider {
+  width: min(88%, 760px);
+  height: 2px;
+  margin: 0 auto clamp(20px, 3vw, 28px);
+  background: rgba(255, 240, 210, 0.72);
+  box-shadow: 0 0 12px rgba(255, 245, 214, 0.42);
+}
+
+.rsvp-footer__links {
+  display: grid;
+  gap: 8px;
+  width: min(88%, 720px);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.rsvp-footer__links p {
+  margin: 0;
+  color: rgba(255, 243, 224, 0.94);
+  font-family: "Georgia", serif;
+  font-size: clamp(0.78rem, 1.25vw, 0.94rem);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.rsvp-footer__links a {
+  color: var(--cream);
+  text-decoration: none;
+}
+
+.rsvp-footer__links a:hover {
+  text-decoration: underline;
+}
+
+.rsvp-footer__art {
+  display: block;
+  width: min(100%, 1024px);
+  height: auto;
+  margin: clamp(20px, 3vw, 30px) auto 0;
+}
+
 @media (max-width: 1023px) {
   .hero-title { width: clamp(240px, 50vw, 420px); }
   .hero-center { width: clamp(260px, 90vw, 600px); }
   .hero-logo { width: clamp(100px, 18vw, 160px); }
 }
 
-/* --- Small tablet / large phone (600px - 767px) --- */
 @media (max-width: 767px) {
+  :root {
+    --first-section-height: 168vw;
+  }
+
+  .page-section--hero {
+    background-size: cover;
+    background-position: top center;
+  }
+
   .hero-overlays { transform: translateY(2vh); }
   .hero-title { top: -18vh; width: clamp(220px, 55vw, 380px); }
   .hero-center { top: 14vh; width: clamp(240px, 95vw, 500px); }
   .hero-logo-link { top: 8vh; }
   .hero-logo { width: 130px; }
+
+  .ext-content {
+    width: min(94vw, 640px);
+    padding-top: clamp(80px, 12vw, 120px);
+  }
+
+  .work-step {
+    grid-template-columns: 40px 1fr;
+    align-items: flex-start;
+  }
+
+  /* Flow section + text: tablet – resize only */
+  .flow-asset--join { width: clamp(90px, 20vw, 200px); }
+  .flow-asset--chip { width: clamp(28px, 6vw, 65px); }
+  .flow-asset--steps { width: clamp(260px, 88vw, 580px); }
+  .flow-asset--card { width: clamp(45px, 10vw, 85px); }
+  .section-title { font-size: clamp(1.75rem, 4.2vw, 3.2rem); }
+  .work-step-text { font-size: clamp(0.82rem, 1.35vw, 1.05rem); }
+  .rsvp-footer__links p { font-size: clamp(0.7rem, 1.1vw, 0.85rem); }
 }
 
-/* --- Mobile (480px - 599px) --- */
-@media (max-width: 599px) {
-  html, body { width: 100%; min-width: 100%; overflow-x: hidden; }
-  .main { min-width: 100%; width: 100%; }
-  .page-section { min-width: 100%; }
-  .hero-overlays { transform: translateY(4vh); }
-  .hero-title { top: -20vh; width: 85vw; max-width: 320px; }
-  .hero-center { top: 14vh; width: 120vw; max-width: 420px; }
-  .hero-logo-link { top: 6vh; left: max(8px, env(safe-area-inset-left)); }
-  .hero-logo { width: 120px; }
-  .scroll-down-v { bottom: 140px; }
-}
-
-/* --- Small mobile (< 480px) --- */
 @media (max-width: 479px) {
+  :root {
+    --first-section-height: 182vw;
+  }
+
   .hero-title { top: -18vh; width: 95vw; }
   .hero-center { top: 12vh; width: 130vw; max-width: 380px; }
   .hero-logo { width: 100px; }
-  .scroll-down-v { bottom: 120px; }
+
+  .section-title {
+    font-size: clamp(1.6rem, 4.5vw, 2.7rem);
+  }
+
+  .work-step-text {
+    font-size: clamp(0.78rem, 1.25vw, 0.98rem);
+  }
+
+  .rsvp-footer__links p {
+    font-size: clamp(0.66rem, 1vw, 0.8rem);
+  }
+
+  .work-card-overlay {
+    padding: 16px 14px;
+  }
+
+  .rsvp-footer__links {
+    width: 92%;
+  }
+
+  .ext-content {
+    padding-top: 64px;
+    padding-bottom: 24px;
+  }
+
+  /* Flow section: mobile – resize only */
+  .flow-asset--join { width: clamp(80px, 24vw, 150px); }
+  .flow-asset--chip { width: clamp(24px, 7vw, 50px); }
+  .flow-asset--steps { width: clamp(220px, 88vw, 360px); }
+  .flow-asset--card { width: clamp(36px, 11vw, 70px); }
+}
+
+/* Flow section + text: very narrow – resize only */
+@media (max-width: 360px) {
+  .flow-asset--join { width: clamp(70px, 22vw, 130px); }
+  .flow-asset--chip { width: clamp(22px, 6vw, 45px); }
+  .flow-asset--steps { width: clamp(200px, 85vw, 320px); }
+  .flow-asset--card { width: clamp(32px, 10vw, 60px); }
+  .section-title { font-size: clamp(1.45rem, 4vw, 2.4rem); }
+  .work-step-text { font-size: clamp(0.74rem, 1.2vw, 0.92rem); }
+  .rsvp-footer__links p { font-size: clamp(0.62rem, 0.95vw, 0.76rem); }
 }
 </style>
