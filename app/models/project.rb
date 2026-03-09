@@ -45,7 +45,7 @@ class Project < ApplicationRecord
   private
 
   def safe_urls
-    %i[code_url playable_url].each do |attr|
+    %i[code_url playable_url banner_url].each do |attr|
       value = send(attr).to_s.strip
       next if value.blank?
       unless value.match?(/\Ahttps?:\/\//i)

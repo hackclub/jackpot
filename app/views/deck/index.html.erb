@@ -31,6 +31,7 @@
                data-project-shipped="<%= project["shipped"] ? "true" : "false" %>"
                data-playable-url="<%= project["playable_url"] %>"
                data-code-url="<%= project["code_url"] %>"
+               data-banner-url="<%= project["banner_url"] %>"
                data-hackatime-projects="<%= (project["hackatime_projects"] || []).join(",") %>"
              >
               <span class="card-project-name"><%= project["name"] %></span>
@@ -189,10 +190,24 @@
            <input type="url" class="detail-value detail-url-input" id="detailCodeUrl" placeholder="https://github.com/...">
          </div>
          
-         <div class="detail-stat-row" id="detailHackatimeRow" style="display: none;">
-           <span class="detail-label">Hackatime</span>
-           <span class="detail-value" id="detailHackatime">—</span>
-         </div>
+         <div class="detail-stat-row" id="detailBannerRow">
+            <span class="detail-label">Banner Photo <span style="color:#c0392b;">*</span></span>
+            <div class="detail-value" id="detailBannerValue">
+              <div class="banner-upload-area" id="bannerUploadArea">
+                <img id="bannerPreview" class="banner-preview" style="display:none;">
+                <div id="bannerPlaceholder" class="banner-placeholder">
+                  <span class="banner-placeholder-icon">📷</span>
+                  <span class="banner-placeholder-text">Click or drag & drop a screenshot</span>
+                </div>
+                <input type="file" id="bannerFileInput" accept="image/*" style="display:none;">
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-stat-row" id="detailHackatimeRow" style="display: none;">
+            <span class="detail-label">Hackatime</span>
+            <span class="detail-value" id="detailHackatime">—</span>
+          </div>
          
          <div class="detail-stat-row" id="detailShippedRow" style="display: none;">
            <span class="detail-label">Status</span>
@@ -614,6 +629,12 @@ function initDeck() {
    var detailHackatime = document.getElementById('detailHackatime');
    var detailHackatimeRow = document.getElementById('detailHackatimeRow');
    var detailJournalEntriesList = document.getElementById('detailJournalEntriesList');
+   var bannerUploadArea = document.getElementById('bannerUploadArea');
+   var bannerPreview = document.getElementById('bannerPreview');
+   var bannerPlaceholder = document.getElementById('bannerPlaceholder');
+   var bannerFileInput = document.getElementById('bannerFileInput');
+   var detailBannerRow = document.getElementById('detailBannerRow');
+   var currentBannerUrl = '';
    var currentDetailData = null;
 
    function loadDetailJournalEntries(projectIndex) {
@@ -664,11 +685,22 @@ function initDeck() {
        detailHackatimeRow.style.display = 'none';
      }
 
+     currentBannerUrl = data.bannerUrl || '';
+     if (currentBannerUrl) {
+       bannerPreview.src = currentBannerUrl;
+       bannerPreview.style.display = 'block';
+       bannerPlaceholder.style.display = 'none';
+     } else {
+       bannerPreview.style.display = 'none';
+       bannerPlaceholder.style.display = 'flex';
+     }
+
      var isShipped = data.shipped === 'true';
      detailShippedRow.style.display = isShipped ? 'flex' : 'none';
      detailShipBtn.style.display = isShipped ? 'none' : 'inline-block';
      detailDeleteBtn.style.display = isShipped ? 'none' : 'inline-block';
      detailSaveBtn.style.display = 'none';
+     if (detailBannerRow) detailBannerRow.style.display = isShipped ? 'none' : 'flex';
      if (detailTitle) {
        detailTitle.readOnly = isShipped;
        detailTitle.classList.toggle('modal-title-input--readonly', isShipped);
@@ -702,6 +734,65 @@ function initDeck() {
    if (detailPlayableUrl) detailPlayableUrl.addEventListener('input', showSaveBtn);
    if (detailCodeUrl) detailCodeUrl.addEventListener('input', showSaveBtn);
 
+   function uploadBannerFile(file) {
+     if (!file || !file.type.startsWith('image/')) {
+       alert('Please select an image file');
+       return;
+     }
+     if (file.size > 10 * 1024 * 1024) {
+       alert('File too large (max 10MB)');
+       return;
+     }
+     bannerPlaceholder.innerHTML = '<span class="banner-placeholder-text">Uploading...</span>';
+     var formData = new FormData();
+     formData.append('file', file);
+     fetch('<%= upload_journal_image_path %>', {
+       method: 'POST',
+       headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+       body: formData
+     })
+     .then(function(r) { return r.json(); })
+     .then(function(data) {
+       if (data.url) {
+         currentBannerUrl = data.url;
+         bannerPreview.src = data.url;
+         bannerPreview.style.display = 'block';
+         bannerPlaceholder.style.display = 'none';
+         showSaveBtn();
+       } else {
+         alert(data.error || 'Upload failed');
+         bannerPlaceholder.innerHTML = '<span class="banner-placeholder-icon">📷</span><span class="banner-placeholder-text">Click or drag & drop a screenshot</span>';
+       }
+     })
+     .catch(function() {
+       alert('Upload failed');
+       bannerPlaceholder.innerHTML = '<span class="banner-placeholder-icon">📷</span><span class="banner-placeholder-text">Click or drag & drop a screenshot</span>';
+     });
+   }
+
+   if (bannerUploadArea) {
+     bannerUploadArea.addEventListener('click', function() {
+       if (currentDetailData && currentDetailData.shipped !== 'true') bannerFileInput.click();
+     });
+     bannerUploadArea.addEventListener('dragover', function(e) {
+       e.preventDefault();
+       bannerUploadArea.style.borderColor = '#d4a017';
+     });
+     bannerUploadArea.addEventListener('dragleave', function() {
+       bannerUploadArea.style.borderColor = '';
+     });
+     bannerUploadArea.addEventListener('drop', function(e) {
+       e.preventDefault();
+       bannerUploadArea.style.borderColor = '';
+       if (e.dataTransfer.files.length > 0) uploadBannerFile(e.dataTransfer.files[0]);
+     });
+   }
+   if (bannerFileInput) {
+     bannerFileInput.addEventListener('change', function() {
+       if (bannerFileInput.files.length > 0) uploadBannerFile(bannerFileInput.files[0]);
+     });
+   }
+
    if (detailSaveBtn) {
      detailSaveBtn.addEventListener('click', function() {
        if (!currentDetailData) return;
@@ -715,6 +806,7 @@ function initDeck() {
        formData.append('project_type', currentDetailData.projectType || '');
        formData.append('playable_url', detailPlayableUrl.value);
        formData.append('code_url', detailCodeUrl.value);
+       formData.append('banner_url', currentBannerUrl);
        
        var hackatimeProjects = (currentDetailData.hackatimeProjects || '').split(',').filter(function(s) { return s.length > 0; });
        hackatimeProjects.forEach(function(project) {
@@ -752,11 +844,15 @@ function initDeck() {
          return;
        }
        if (!detailCodeUrl.value.trim()) {
-         alert('Code URL is required to ship');
-         return;
-       }
-       
-       var hasSaveBtn = detailSaveBtn && detailSaveBtn.style.display !== 'none';
+          alert('Code URL is required to ship');
+          return;
+        }
+        if (!currentBannerUrl) {
+          alert('Banner photo is required to ship');
+          return;
+        }
+        
+        var hasSaveBtn = detailSaveBtn && detailSaveBtn.style.display !== 'none';
        if (hasSaveBtn) {
          alert('Please click "Save Changes" before shipping your project');
          return;
@@ -847,6 +943,7 @@ function initDeck() {
         shipped: card.dataset.projectShipped,
         playableUrl: card.dataset.playableUrl,
         codeUrl: card.dataset.codeUrl,
+        bannerUrl: card.dataset.bannerUrl,
         hackatimeProjects: card.dataset.hackatimeProjects
       });
     });

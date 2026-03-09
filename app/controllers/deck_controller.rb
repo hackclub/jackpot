@@ -47,6 +47,7 @@ class DeckController < ApplicationController
          "hour_justification" => project.hour_justification,
          "admin_feedback" => project.admin_feedback,
          "chips_earned" => project.chips_earned,
+         "banner_url" => project.banner_url,
          "created_at" => project.created_at&.iso8601
        }
        project_hash
@@ -72,6 +73,7 @@ class DeckController < ApplicationController
     project_type = params[:project_type].to_s.strip
     playable_url = params[:playable_url].to_s.strip
     code_url = params[:code_url].to_s.strip
+    banner_url = params[:banner_url].to_s.strip
     hackatime_projects = Array(params[:hackatime_projects]).map(&:strip).reject(&:blank?)
 
     if code_url.start_with?('[') || code_url.start_with?('{')
@@ -95,6 +97,7 @@ class DeckController < ApplicationController
           project_type: project_type,
           playable_url: playable_url,
           code_url: code_url,
+          banner_url: banner_url,
           hackatime_projects: hackatime_projects
         )
       end
@@ -107,6 +110,7 @@ class DeckController < ApplicationController
         project_type: project_type,
         playable_url: playable_url,
         code_url: code_url,
+        banner_url: banner_url,
         hackatime_projects: hackatime_projects
       )
       project_index = project.position
@@ -133,11 +137,11 @@ class DeckController < ApplicationController
     project = current_user.projects.order(position: :asc)[project_index]
 
     if project
-      if project.playable_url.blank? || project.code_url.blank?
+      if project.playable_url.blank? || project.code_url.blank? || project.banner_url.blank?
         if request.xhr?
-          return render json: { error: "Playable URL and Code URL are required to ship" }, status: :unprocessable_entity
+          return render json: { error: "Playable URL, Code URL, and Banner image are required to ship" }, status: :unprocessable_entity
         else
-          flash[:alert] = "Playable URL and Code URL are required to ship"
+          flash[:alert] = "Playable URL, Code URL, and Banner image are required to ship"
           return redirect_to deck_path
         end
       end
