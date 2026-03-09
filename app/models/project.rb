@@ -9,7 +9,7 @@ class Project < ApplicationRecord
   scope :reviewed, -> { where(reviewed: true) }
   scope :pending_review, -> { where(shipped: true, reviewed: false) }
   
-  before_save :set_position, if: :position.nil?
+  before_create :set_position
   
   def set_position
     self.position = user.projects.count
@@ -42,31 +42,6 @@ class Project < ApplicationRecord
     end
   end
   
-  def approve(approved_hours, justification = nil, feedback = nil)
-    self.reviewed = true
-    self.status = "approved"
-    self.approved_hours = approved_hours.to_f
-    self.hour_justification = justification
-    self.admin_feedback = feedback
-    self.reviewed_at = Time.current
-    self.chips_earned = (approved_hours.to_f * 50).round(2)
-    
-    user.chip_am = (user.chip_am || 0) + chips_earned
-    
-    transaction do
-      save!
-      user.save!
-    end
-  end
-  
-  def reject(feedback = nil)
-    self.reviewed = true
-    self.status = "rejected"
-    self.admin_feedback = feedback
-    self.reviewed_at = Time.current
-    save!
-  end
-
   private
 
   def safe_urls

@@ -87,7 +87,7 @@ class DeckController < ApplicationController
     projects_count = current_user.projects.count
 
     if params[:project_index].present? && project_index >= 0
-      project = current_user.projects[project_index]
+      project = current_user.projects.order(position: :asc)[project_index]
       if project
         project.update!(
           name: project_name.presence || "Project #{projects_count + 1}",
@@ -130,7 +130,7 @@ class DeckController < ApplicationController
 
   def ship_project
     project_index = params[:project_index].to_i
-    project = current_user.projects[project_index]
+    project = current_user.projects.order(position: :asc)[project_index]
 
     if project
       if project.playable_url.blank? || project.code_url.blank?
@@ -166,7 +166,7 @@ class DeckController < ApplicationController
 
    def delete_project
      project_index = params[:project_index].to_i
-     project = current_user.projects[project_index]
+     project = current_user.projects.order(position: :asc)[project_index]
 
      if project
        if project.shipped
@@ -290,9 +290,9 @@ class DeckController < ApplicationController
 
     user = User.find(user_id)
     chips_earned = (approved_hours * 50).round(2)
-    
+
     Rails.logger.info "Approving project for user #{user_id}: #{approved_hours} hours = #{chips_earned} chips"
-    
+
     begin
       if user.approve_project(project_index, approved_hours, justification, feedback)
         Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
@@ -314,9 +314,9 @@ class DeckController < ApplicationController
     feedback = params[:feedback]
 
     user = User.find(user_id)
-    
+
     Rails.logger.info "Rejecting project for user #{user_id}"
-    
+
     begin
       if user.reject_project(project_index, feedback)
         Rails.logger.info "Project rejected for user #{user_id}"

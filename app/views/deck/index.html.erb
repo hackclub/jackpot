@@ -668,6 +668,7 @@ function initDeck() {
      detailShippedRow.style.display = isShipped ? 'flex' : 'none';
      detailShipBtn.style.display = isShipped ? 'none' : 'inline-block';
      detailDeleteBtn.style.display = isShipped ? 'none' : 'inline-block';
+     detailSaveBtn.style.display = 'none';
      if (detailTitle) {
        detailTitle.readOnly = isShipped;
        detailTitle.classList.toggle('modal-title-input--readonly', isShipped);
@@ -691,7 +692,15 @@ function initDeck() {
      detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeDetailModal(); });
    }
 
-
+   function showSaveBtn() {
+     if (detailSaveBtn && currentDetailData && currentDetailData.shipped !== 'true') {
+       detailSaveBtn.style.display = 'inline-block';
+     }
+   }
+   if (detailTitle) detailTitle.addEventListener('input', showSaveBtn);
+   if (detailDescription) detailDescription.addEventListener('input', showSaveBtn);
+   if (detailPlayableUrl) detailPlayableUrl.addEventListener('input', showSaveBtn);
+   if (detailCodeUrl) detailCodeUrl.addEventListener('input', showSaveBtn);
 
    if (detailSaveBtn) {
      detailSaveBtn.addEventListener('click', function() {
@@ -723,9 +732,11 @@ function initDeck() {
        .then(function(data) {
          if (data.success) {
            var btn = detailSaveBtn;
-           var origText = btn.textContent;
            btn.textContent = 'Saved!';
-           setTimeout(function() { btn.textContent = origText; }, 2000);
+           setTimeout(function() {
+             btn.textContent = 'Save Changes';
+             btn.style.display = 'none';
+           }, 1500);
          }
        })
        .catch(function(e) { console.error('Error saving project:', e); });
@@ -767,9 +778,11 @@ function initDeck() {
          if (data.success) {
            closeDetailModal();
            location.reload();
+         } else {
+           alert('Error: ' + (data.error || 'Unknown error'));
          }
        })
-       .catch(function(e) { console.error('Error shipping project:', e); });
+       .catch(function(e) { console.error('Error shipping project:', e); alert('Failed to ship project'); });
      });
    }
 
