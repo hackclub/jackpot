@@ -9,85 +9,153 @@
   </section>
 
   <div id="steps" class="ext-content">
-    <div class="ext-bkg-section ext-bkg-section--1">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_1.png", alt: "", class: "ext-bkg-section__img", aria: { hidden: true } %>
-      <div class="ext-bkg-section__content ext-bkg-section__content--flow">
-        <%= image_tag "RSVP_comp/first_section/join_button.png", alt: "Join", class: "flow-asset flow-asset--join" %>
-        <%= image_tag "RSVP_comp/first_section/poker_chip.png", alt: "Hack Club chip", class: "flow-asset flow-asset--chip" %>
-        <%= image_tag "RSVP_comp/first_section/steps_graph.png", alt: "Sign up flow", class: "flow-asset flow-asset--steps" %>
-        <%= image_tag "RSVP_comp/first_section/card_draw.png", alt: "Jackpot card", class: "flow-asset flow-asset--card" %>
-      </div>
-    </div>
-
-    <div class="ext-bkg-section ext-bkg-section--2">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_2.png", alt: "", class: "ext-bkg-section__img", aria: { hidden: true } %>
-      <div class="ext-bkg-section__content">
-    <section class="rsvp-section rsvp-section--work">
-      <h2 class="section-title">How does it work?</h2>
-      <div class="work-card">
-        <%= image_tag "RSVP_comp/second_section/yellow_box.png", alt: "", class: "work-card-bg", aria: { hidden: true } %>
-        <div class="work-card-overlay">
-          <div class="work-step">
-            <%= image_tag "RSVP_comp/second_section/icon1_box.png", alt: "", class: "work-step-icon", aria: { hidden: true } %>
-            <p class="work-step-text">
-              Work on a <span class="work-step-text--accent">software sanctuary</span> project and track your time.
-            </p>
-          </div>
-          <div class="work-step">
-            <%= image_tag "RSVP_comp/second_section/icon2_box.png", alt: "", class: "work-step-icon", aria: { hidden: true } %>
-            <p class="work-step-text">
-              Post your project on <span class="work-step-text--accent">Slack</span> to earn themed prizes and chips.
-            </p>
-          </div>
-          <div class="work-step">
-            <%= image_tag "RSVP_comp/second_section/icon3_box.png", alt: "", class: "work-step-icon", aria: { hidden: true } %>
-            <p class="work-step-text">
-              Wait for a <span class="work-step-text--accent">raffle</span> for every one of your completed project drops.
-            </p>
-          </div>
-          <div class="work-step">
-            <%= image_tag "RSVP_comp/second_section/icon4_box.png", alt: "", class: "work-step-icon", aria: { hidden: true } %>
-            <p class="work-step-text">
-              Spend your points to <span class="work-step-text--accent">win gear</span> or get an official invitation to Las Vegas.
-            </p>
+    <div class="ext-content__lighty-line--top"></div>
+    <%# Section 1: How does it work %>
+    <section class="ext-section ext-section--1">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_1.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--1">
+        <h2 class="section-title section-title--center">How does it work</h2>
+        <div class="section-1__panel">
+          <%= image_tag "RSVP_comp/first_section/yellow_box.png", alt: "", class: "section-1__panel-bg", aria: { hidden: true } %>
+          <div class="section-1__panel-content">
+            <div class="section-1__step">
+              <%= image_tag "RSVP_comp/first_section/icon1_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <p class="section-1__step-text">The first thing that you need is to get your dream project.</p>
+            </div>
+            <div class="section-1__step">
+              <%= image_tag "RSVP_comp/first_section/icon2_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <p class="section-1__step-text">The game system will allow you to earn rewards with incredible opportunities.</p>
+            </div>
+            <div class="section-1__step">
+              <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <p class="section-1__step-text">But to do it, first you need to take a look at your project.</p>
+            </div>
+            <div class="section-1__step">
+              <%= image_tag "RSVP_comp/first_section/icon4_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <p class="section-1__step-text">Spend your gains on the platform and show support for your favorite projects, or take part in hackathons.</p>
+            </div>
           </div>
         </div>
+        <div class="section-1__join-wrap">
+          <%= button_to "/auth/hack_club", method: :post, data: { turbo: false }, class: "section-1__join-link" do %>
+            <%= image_tag "RSVP_comp/first_section/join_button.png", alt: "Join", class: "section-1__join-btn" %>
+          <% end %>
+          <%= image_tag "RSVP_comp/second_section/poker_chip.png", alt: "", class: "section-1__poker-chip", aria: { hidden: true } %>
+        </div>
+        <p class="section-1__tagline">next jackpot</p>
+        <div class="section-1__carousel">
+          <%= image_tag "RSVP_comp/first_section/shop_items_carousel/cloud Background Removed.png", alt: "", class: "section-1__carousel-item", aria: { hidden: true } %>
+          <%= image_tag "RSVP_comp/first_section/shop_items_carousel/monitor Background Removed.png", alt: "", class: "section-1__carousel-item", aria: { hidden: true } %>
+          <%= image_tag "RSVP_comp/first_section/shop_items_carousel/console.png", alt: "", class: "section-1__carousel-item", aria: { hidden: true } %>
+          <%= image_tag "RSVP_comp/first_section/shop_items_carousel/rasp.png", alt: "", class: "section-1__carousel-item", aria: { hidden: true } %>
+          <%= image_tag "RSVP_comp/first_section/shop_items_carousel/gpu.png", alt: "", class: "section-1__carousel-item", aria: { hidden: true } %>
+        </div>
       </div>
-    </section>
-      </div>
-    </div>
-
-    <div class="ext-bkg-section ext-bkg-section--3">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_3.png", alt: "", class: "ext-bkg-section__img", aria: { hidden: true } %>
-      <div class="ext-bkg-section__content">
-    <section class="rsvp-section rsvp-section--about">
-      <%= image_tag "RSVP_comp/third_section/hackclub_box.png", alt: "About Hack Club", class: "content-box content-box--large" %>
-    </section>
-    <section class="rsvp-section rsvp-section--trailer">
-      <%= image_tag "RSVP_comp/third_section/jackpottrailer_box.png", alt: "Jackpot Trailer", class: "content-box content-box--large" %>
-    </section>
-      </div>
-    </div>
-
-    <div class="ext-bkg-section ext-bkg-section--4">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_4.png", alt: "", class: "ext-bkg-section__img", aria: { hidden: true } %>
-      <div class="ext-bkg-section__content">
-    <section class="rsvp-section rsvp-section--info">
-      <h2 class="section-title section-title--info">info</h2>
-      <%= image_tag "RSVP_comp/fourth_section/joinComm_box.png", alt: "Join the Community", class: "content-box content-box--wide" %>
-      <%= image_tag "RSVP_comp/fourth_section/questions_box.png", alt: "Questions FAQ Rules", class: "content-box content-box--wide" %>
+      <div class="ext-section__lighty-line"></div>
     </section>
 
-    <footer class="rsvp-footer">
-      <div class="rsvp-footer__divider"></div>
-      <div class="rsvp-footer__links">
-        <p>Questions? <a href="mailto:highschoolhackathons@hackclub.com">highschoolhackathons@hackclub.com</a></p>
-        <p>Slack: <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4" target="_blank" rel="noopener noreferrer">Join the community</a></p>
-        <p>More from Hack Club: <a href="https://hackclub.com" target="_blank" rel="noopener noreferrer">hackclub.com</a></p>
+    <%# Section 2: About Hack Club / Jackpot Trailer %>
+    <section class="ext-section ext-section--2">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_2.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--2">
+        <div class="section-2__about">
+          <h2 class="section-title">About Hack Club</h2>
+          <%= image_tag "RSVP_comp/second_section/hackclub_box.png", alt: "About Hack Club", class: "section-2__hackclub-box" %>
+        </div>
+        <div class="section-2__trailer">
+          <h2 class="section-title section-title--center">Jackpot Trailer</h2>
+          <%= image_tag "RSVP_comp/second_section/jackpottrailer_box.png", alt: "Jackpot Trailer", class: "section-2__trailer-box" %>
+        </div>
       </div>
-    </footer>
+      <div class="ext-section__lighty-line"></div>
+    </section>
+
+    <%# Section 3: You can create EVERYTHING! %>
+    <section class="ext-section ext-section--3">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_3.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--3">
+        <div class="section-3__header">
+          <%= image_tag "RSVP_comp/third_section/card_draw.png", alt: "", class: "section-3__card-icon", aria: { hidden: true } %>
+          <h2 class="section-title section-3__title">
+            You can create <span class="section-3__title-accent">EVERYTHING!</span>
+          </h2>
+        </div>
+        <div class="section-3__cards">
+          <%= image_tag "RSVP_comp/third_section/prj_card_1.png", alt: "Project card", class: "section-3__prj-card" %>
+          <%= image_tag "RSVP_comp/third_section/prj_card_2.png", alt: "Project card", class: "section-3__prj-card" %>
+          <%= image_tag "RSVP_comp/third_section/prj_card_3.png", alt: "Project card", class: "section-3__prj-card" %>
+        </div>
+        <%= link_to image_tag("RSVP_comp/third_section/seeMoreButton.png", alt: "See your projects", class: "section-3__see-more"), "#", class: "section-3__see-more-link" %>
       </div>
-    </div>
+      <div class="ext-section__lighty-line"></div>
+    </section>
+
+    <%# Section 4: Don't know where to start? %>
+    <section class="ext-section ext-section--4">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_4.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--4">
+        <h2 class="section-title section-title--center">Don't know where to start?</h2>
+        <div class="section-4__content">
+          <%= image_tag "RSVP_comp/third_section/where_to_start_box.png", alt: "Get started", class: "section-4__box" %>
+          <%= image_tag "RSVP_comp/second_section/poker_chip.png", alt: "", class: "section-4__poker-chip", aria: { hidden: true } %>
+        </div>
+      </div>
+      <div class="ext-section__lighty-line"></div>
+    </section>
+
+    <%# Section 5: Past Events %>
+    <section class="ext-section ext-section--5">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_5.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--5">
+        <h2 class="section-title section-title--center">Past Events</h2>
+        <p class="section-5__subtitle">and projects organized by us!</p>
+        <div class="section-5__intro">
+          <%= image_tag "RSVP_comp/fourth_section/emma_box.png", alt: "Past events intro", class: "section-5__emma-box" %>
+        </div>
+        <div class="section-5__events">
+          <div class="section-5__event section-5__event--juice">
+            <%= image_tag "RSVP_comp/fourth_section/juice_img.png", alt: "Juice event", class: "section-5__event-img" %>
+            <%= image_tag "RSVP_comp/fourth_section/juice_txt.png", alt: "Juice", class: "section-5__event-txt" %>
+          </div>
+          <div class="section-5__event section-5__event--moonshot">
+            <%= image_tag "RSVP_comp/fourth_section/moonshot_txt.png", alt: "Moonshot", class: "section-5__event-txt" %>
+            <%= image_tag "RSVP_comp/fourth_section/moonshot_img.png", alt: "Moonshot event", class: "section-5__event-img" %>
+          </div>
+          <div class="section-5__event section-5__event--overglade">
+            <%= image_tag "RSVP_comp/fourth_section/overglade_img.png", alt: "Overglade event", class: "section-5__event-img" %>
+            <%= image_tag "RSVP_comp/fourth_section/overglade_txt.png", alt: "Overglade", class: "section-5__event-txt" %>
+          </div>
+        </div>
+        <%= link_to image_tag("RSVP_comp/fourth_section/seeMoreHackathonsButton.png", alt: "See more hackathons", class: "section-5__see-more"), "#", class: "section-5__see-more-link" %>
+        <h2 class="section-title section-title--center section-title--info">info</h2>
+        <p class="section-6__subtitle">Join the community</p>
+        <div class="section-6__cards">
+          <%= image_tag "RSVP_comp/fifth_section/joinComm_box.png", alt: "Ask a question, Updates and News, Join the community", class: "section-6__comm-box" %>
+        </div>
+        <div class="section-6__questions">
+          <%= image_tag "RSVP_comp/fifth_section/questions_box.png", alt: "Questions FAQ Rules", class: "section-6__questions-box" %>
+        </div>
+        <footer class="section-6__footer">
+          <div class="section-6__footer-links">
+            <div class="section-6__footer-col">
+              <a href="mailto:highschoolhackathons@hackclub.com">Email</a>
+              <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4" target="_blank" rel="noopener noreferrer">Slack</a>
+              <a href="https://discord.gg/hackclub" target="_blank" rel="noopener noreferrer">Discord</a>
+              <a href="https://twitter.com/hackclub" target="_blank" rel="noopener noreferrer">Twitter</a>
+              <a href="https://www.patreon.com/hackclub" target="_blank" rel="noopener noreferrer">Patreon</a>
+            </div>
+            <div class="section-6__footer-col">
+              <a href="/contact">Contact Us</a>
+              <a href="/terms">Terms of Use</a>
+              <a href="/privacy">Privacy Policy</a>
+              <a href="/sitemap">Sitemap</a>
+            </div>
+          </div>
+          <p class="section-6__copyright">© <%= Date.current.year %> Hack Club. All rights reserved.</p>
+        </footer>
+      </div>
+      <div class="ext-section__lighty-line"></div>
+    </section>
   </div>
 </div>
 
@@ -114,39 +182,6 @@
   :root {
     --first-section-height: 100vw;
   }
-}
-
-/* Flow section + text: portrait / square screens – resize only */
-@media (max-aspect-ratio: 4/3) {
-  .flow-asset--join { width: clamp(120px, 22vw, 380px); }
-  .flow-asset--chip { width: clamp(36px, 7vw, 100px); }
-  .flow-asset--steps { width: clamp(260px, 70vw, 900px); }
-  .flow-asset--card { width: clamp(55px, 11vw, 130px); }
-  .section-title { font-size: clamp(1.8rem, 4.5vw, 3.6rem); }
-  .work-step-text { font-size: clamp(0.85rem, 1.4vw, 1.08rem); }
-  .rsvp-footer__links p { font-size: clamp(0.72rem, 1.15vw, 0.88rem); }
-}
-
-/* Flow section + text: narrow portrait – resize only */
-@media (max-aspect-ratio: 3/4) {
-  .flow-asset--join { width: clamp(90px, 24vw, 280px); }
-  .flow-asset--chip { width: clamp(28px, 7vw, 70px); }
-  .flow-asset--steps { width: clamp(260px, 85vw, 700px); }
-  .flow-asset--card { width: clamp(40px, 12vw, 95px); }
-  .section-title { font-size: clamp(1.6rem, 4vw, 3.2rem); }
-  .work-step-text { font-size: clamp(0.8rem, 1.3vw, 1rem); }
-  .rsvp-footer__links p { font-size: clamp(0.68rem, 1.05vw, 0.82rem); }
-}
-
-/* Flow section + text: very wide / short viewport – resize only */
-@media (min-aspect-ratio: 2/1) {
-  .flow-asset--join { width: clamp(120px, 18vw, 320px); }
-  .flow-asset--chip { width: clamp(36px, 5vw, 90px); }
-  .flow-asset--steps { width: clamp(300px, 65vw, 900px); }
-  .flow-asset--card { width: clamp(50px, 8vw, 120px); }
-  .section-title { font-size: clamp(1.7rem, 4vw, 3.4rem); }
-  .work-step-text { font-size: clamp(0.82rem, 1.25vw, 1.02rem); }
-  .rsvp-footer__links p { font-size: clamp(0.7rem, 1.1vw, 0.86rem); }
 }
 
 html {
@@ -251,94 +286,413 @@ body {
   width: 100%;
   max-width: 100vw;
   margin: 0;
+  padding: 0;
   min-height: calc(500vw - var(--first-section-height));
-  display: flex;
-  flex-direction: column;
+  display: block;
+  background-color: #1a0d0b;
 }
 
-.ext-bkg-section {
+.ext-section {
   position: relative;
   width: 100%;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
 }
 
-.ext-bkg-section__img {
+.ext-section__bkg {
   display: block;
   width: 100%;
   height: auto;
-  vertical-align: bottom;
-}
-
-.ext-bkg-section__content {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(48px, 6vw, 88px) 0;
-}
-
-.ext-bkg-section .rsvp-section,
-.ext-bkg-section .rsvp-footer {
-  width: var(--content-width);
-  max-width: 92vw;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.ext-bkg-section__content--flow {
-  display: block;
-  width: 100%;
-  max-width: 100%;
   margin: 0;
-  min-height: 100%;
+  padding: 0;
+  vertical-align: bottom;
+  pointer-events: none;
 }
 
-.flow-asset {
+.ext-section__lighty-line {
   position: absolute;
-  display: block;
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 3px;
+  margin: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 120, 60, 0.3) 15%,
+    rgba(255, 140, 70, 0.9) 50%,
+    rgba(255, 120, 60, 0.3) 85%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 12px rgba(255, 100, 50, 0.6),
+    0 0 24px rgba(255, 80, 40, 0.4);
+  pointer-events: none;
 }
 
-/* Join top-center, chip top-right, steps center, card bottom-left */
-.flow-asset--join {
-  width: clamp(140px, 25vw, 460px);
-  top: clamp(2%, 2.5vw, 12%);
+.ext-content__lighty-line--top {
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 120, 60, 0.3) 15%,
+    rgba(255, 140, 70, 0.9) 50%,
+    rgba(255, 120, 60, 0.3) 85%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 12px rgba(255, 100, 50, 0.6),
+    0 0 24px rgba(255, 80, 40, 0.4);
+}
+
+.ext-section__lighty-line--top {
+  margin-bottom: clamp(32px, 4vw, 56px);
+}
+
+.ext-section__inner {
+  position: absolute;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.flow-asset--chip {
-  width: clamp(40px, 8vw, 120px);
-  top: clamp(2%, 2.5vw, 8%);
-  right: clamp(3%, 4vw, 8%);
-}
-
-.flow-asset--steps {
-  width: clamp(280px, 75vw, 1100px);
-  max-width: 96%;
-  max-height: 85%;
-  object-fit: contain;
-  left: 50%;
-  top: 58%;
-  transform: translate(-50%, -50%);
-}
-
-.flow-asset--card {
-  width: clamp(60px, 12vw, 150px);
-  left: clamp(2%, 3vw, 6%);
-  bottom: clamp(6%, 8vw, 14%);
-  transform: rotate(-14deg);
-}
-
-.rsvp-section {
-  width: 100%;
+  width: var(--content-width);
+  max-width: 92vw;
+  height: 100%;
+  z-index: 1;
+  padding: clamp(48px, 6vw, 88px) 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Section 1: How does it work */
+.section-title--center {
+  text-align: center;
+  margin-bottom: clamp(20px, 3vw, 36px);
+}
+
+.section-1__panel {
+  position: relative;
+  width: 100%;
+  max-width: min(92%, 680px);
+  margin: 0 auto clamp(24px, 3vw, 36px);
+}
+
+.section-1__panel-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.section-1__panel-content {
+  position: relative;
+  padding: clamp(20px, 4vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.5vw, 18px);
+}
+
+.section-1__step {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(12px, 1.5vw, 20px);
+}
+
+.section-1__step-icon {
+  flex-shrink: 0;
+  width: clamp(32px, 5vw, 48px);
+  height: auto;
+}
+
+.section-1__step-text {
+  margin: 0;
+  color: var(--cream-soft);
+  font-family: "Georgia", serif;
+  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+  line-height: 1.45;
+}
+
+.section-1__join-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: clamp(8px, 1vw, 16px);
+}
+
+.section-1__join-link {
+  display: inline-block;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+}
+
+.section-1__join-link button,
+.section-1__join-link input[type="submit"] {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.section-1__join-btn {
+  width: clamp(140px, 22vw, 280px);
+  height: auto;
+  display: block;
+}
+
+.section-1__poker-chip {
+  position: absolute;
+  width: clamp(36px, 6vw, 72px);
+  height: auto;
+  top: -8%;
+  right: calc(50% - clamp(70px, 11vw, 140px));
+  transform: translateX(50%);
+}
+
+.section-1__tagline {
+  margin: 0 0 clamp(20px, 2.5vw, 32px);
+  text-align: center;
+  color: rgba(255, 248, 236, 0.9);
+  font-family: "Katibeh", serif;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+}
+
+.section-1__carousel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 16px);
+  flex-wrap: wrap;
+}
+
+.section-1__carousel-item {
+  width: clamp(48px, 8vw, 80px);
+  height: auto;
+  object-fit: contain;
+}
+
+/* Section 2: About Hack Club / Jackpot Trailer */
+.section-2__about {
+  margin-bottom: clamp(32px, 4vw, 48px);
+}
+
+.section-2__hackclub-box {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 720px);
+  height: auto;
+}
+
+.section-2__trailer {
+  margin-top: clamp(24px, 3vw, 40px);
+}
+
+.section-2__trailer-box {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 720px);
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Section 3: You can create EVERYTHING! */
+.section-3__header {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(12px, 1.5vw, 20px);
+  margin-bottom: clamp(20px, 2.5vw, 32px);
+}
+
+.section-3__card-icon {
+  width: clamp(40px, 6vw, 64px);
+  height: auto;
+  flex-shrink: 0;
+}
+
+.section-3__title {
+  margin: 0;
+}
+
+.section-3__title-accent {
+  color: #e87d3a;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.section-3__cards {
+  display: flex;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 24px);
+  flex-wrap: wrap;
+  margin-bottom: clamp(20px, 2.5vw, 32px);
+}
+
+.section-3__prj-card {
+  width: clamp(140px, 22vw, 280px);
+  height: auto;
+  object-fit: contain;
+}
+
+.section-3__see-more-link {
+  display: flex;
+  justify-content: center;
+}
+
+.section-3__see-more {
+  width: clamp(180px, 28vw, 320px);
+  height: auto;
+}
+
+/* Section 4: Don't know where to start? */
+.section-4__content {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.section-4__box {
+  width: 100%;
+  max-width: min(92%, 680px);
+  height: auto;
+}
+
+.section-4__poker-chip {
+  position: absolute;
+  width: clamp(40px, 6vw, 80px);
+  height: auto;
+  bottom: 5%;
+  right: 10%;
+}
+
+/* Section 5: Past Events */
+.section-5__subtitle {
+  margin: 0 0 clamp(20px, 2.5vw, 32px);
+  text-align: center;
+  color: rgba(255, 248, 236, 0.85);
+  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+}
+
+.section-5__emma-box {
+  width: 100%;
+  max-width: min(100%, 720px);
+  height: auto;
+  margin: 0 auto clamp(24px, 3vw, 36px);
+  display: block;
+}
+
+.section-5__events {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3vw, 40px);
+  margin-bottom: clamp(24px, 3vw, 36px);
+}
+
+.section-5__event {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 2vw, 28px);
+  flex-wrap: wrap;
+}
+
+.section-5__event-img {
+  width: clamp(180px, 35vw, 400px);
+  height: auto;
+  object-fit: contain;
+}
+
+.section-5__event-txt {
+  width: clamp(140px, 25vw, 280px);
+  height: auto;
+  object-fit: contain;
+}
+
+.section-5__see-more-link {
+  display: flex;
+  justify-content: center;
+}
+
+.section-5__see-more {
+  width: clamp(200px, 30vw, 360px);
+  height: auto;
+}
+
+/* Section 6: Info / Footer */
+.section-6__subtitle {
+  margin: 0 0 clamp(20px, 2.5vw, 28px);
+  text-align: center;
+  color: rgba(255, 248, 236, 0.9);
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+}
+
+.section-6__comm-box {
+  width: 100%;
+  max-width: min(100%, 900px);
+  height: auto;
+  margin: 0 auto clamp(24px, 3vw, 36px);
+  display: block;
+}
+
+.section-6__questions {
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+
+.section-6__questions-box {
+  width: 100%;
+  max-width: min(100%, 640px);
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+.section-6__footer {
+  text-align: center;
+}
+
+.section-6__footer-links {
+  display: flex;
+  justify-content: center;
+  gap: clamp(24px, 4vw, 48px);
+  flex-wrap: wrap;
+  margin-bottom: clamp(12px, 1.5vw, 20px);
+}
+
+.section-6__footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.section-6__footer-col a {
+  color: var(--cream-soft);
+  font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+  text-decoration: none;
+}
+
+.section-6__footer-col a:hover {
+  text-decoration: underline;
+}
+
+.section-6__copyright {
+  margin: 0;
+  color: rgba(255, 248, 236, 0.6);
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
 }
 
 .section-title {
@@ -358,126 +712,6 @@ body {
 
 .section-title--info {
   margin-bottom: clamp(16px, 2.8vw, 28px);
-}
-
-.work-card {
-  position: relative;
-  width: var(--content-width-narrow);
-  min-height: clamp(220px, 30vw, 330px);
-}
-
-.work-card-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 14px;
-  object-fit: cover;
-  opacity: 0.28;
-}
-
-.work-card-overlay {
-  position: relative;
-  display: grid;
-  gap: clamp(12px, 1.8vw, 18px);
-  width: 100%;
-  padding: clamp(18px, 3vw, 28px);
-  border-radius: 16px;
-  background: rgba(54, 38, 33, 0.8);
-  border: 2px solid rgba(255, 237, 187, 0.18);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
-}
-
-.work-step {
-  display: grid;
-  grid-template-columns: clamp(36px, 6vw, 56px) 1fr;
-  gap: clamp(10px, 1.6vw, 16px);
-  align-items: center;
-}
-
-.work-step-icon {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.work-step-text {
-  margin: 0;
-  color: var(--cream-soft);
-  font-family: "Georgia", serif;
-  font-size: clamp(0.92rem, 1.55vw, 1.16rem);
-  line-height: 1.45;
-  text-align: left;
-}
-
-.work-step-text--accent {
-  color: #d83d5b;
-  font-weight: 700;
-}
-
-.content-box {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.content-box--large {
-  width: min(100%, 980px);
-}
-
-.content-box--wide {
-  width: min(100%, 1024px);
-}
-
-.rsvp-section--info .content-box + .content-box {
-  margin-top: clamp(20px, 2.8vw, 32px);
-}
-
-.rsvp-footer {
-  position: relative;
-  width: 100%;
-  margin-top: 0;
-  padding-top: clamp(28px, 4vw, 40px);
-}
-
-.rsvp-footer__divider {
-  width: min(88%, 760px);
-  height: 2px;
-  margin: 0 auto clamp(20px, 3vw, 28px);
-  background: rgba(255, 240, 210, 0.72);
-  box-shadow: 0 0 12px rgba(255, 245, 214, 0.42);
-}
-
-.rsvp-footer__links {
-  display: grid;
-  gap: 8px;
-  width: min(88%, 720px);
-  margin: 0 auto;
-  text-align: center;
-}
-
-.rsvp-footer__links p {
-  margin: 0;
-  color: rgba(255, 243, 224, 0.94);
-  font-family: "Georgia", serif;
-  font-size: clamp(0.78rem, 1.25vw, 0.94rem);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-
-.rsvp-footer__links a {
-  color: var(--cream);
-  text-decoration: none;
-}
-
-.rsvp-footer__links a:hover {
-  text-decoration: underline;
-}
-
-.rsvp-footer__art {
-  display: block;
-  width: min(100%, 1024px);
-  height: auto;
-  margin: clamp(20px, 3vw, 30px) auto 0;
 }
 
 @media (max-width: 1023px) {
@@ -503,23 +737,10 @@ body {
   .hero-logo { width: 130px; }
 
   .ext-content {
-    width: min(94vw, 640px);
     padding-top: clamp(80px, 12vw, 120px);
   }
 
-  .work-step {
-    grid-template-columns: 40px 1fr;
-    align-items: flex-start;
-  }
-
-  /* Flow section + text: tablet – resize only */
-  .flow-asset--join { width: clamp(90px, 20vw, 200px); }
-  .flow-asset--chip { width: clamp(28px, 6vw, 65px); }
-  .flow-asset--steps { width: clamp(260px, 88vw, 580px); }
-  .flow-asset--card { width: clamp(45px, 10vw, 85px); }
   .section-title { font-size: clamp(1.75rem, 4.2vw, 3.2rem); }
-  .work-step-text { font-size: clamp(0.82rem, 1.35vw, 1.05rem); }
-  .rsvp-footer__links p { font-size: clamp(0.7rem, 1.1vw, 0.85rem); }
 }
 
 @media (max-width: 479px) {
@@ -535,42 +756,14 @@ body {
     font-size: clamp(1.6rem, 4.5vw, 2.7rem);
   }
 
-  .work-step-text {
-    font-size: clamp(0.78rem, 1.25vw, 0.98rem);
-  }
-
-  .rsvp-footer__links p {
-    font-size: clamp(0.66rem, 1vw, 0.8rem);
-  }
-
-  .work-card-overlay {
-    padding: 16px 14px;
-  }
-
-  .rsvp-footer__links {
-    width: 92%;
-  }
-
   .ext-content {
     padding-top: 64px;
     padding-bottom: 24px;
   }
 
-  /* Flow section: mobile – resize only */
-  .flow-asset--join { width: clamp(80px, 24vw, 150px); }
-  .flow-asset--chip { width: clamp(24px, 7vw, 50px); }
-  .flow-asset--steps { width: clamp(220px, 88vw, 360px); }
-  .flow-asset--card { width: clamp(36px, 11vw, 70px); }
 }
 
-/* Flow section + text: very narrow – resize only */
 @media (max-width: 360px) {
-  .flow-asset--join { width: clamp(70px, 22vw, 130px); }
-  .flow-asset--chip { width: clamp(22px, 6vw, 45px); }
-  .flow-asset--steps { width: clamp(200px, 85vw, 320px); }
-  .flow-asset--card { width: clamp(32px, 10vw, 60px); }
   .section-title { font-size: clamp(1.45rem, 4vw, 2.4rem); }
-  .work-step-text { font-size: clamp(0.74rem, 1.2vw, 0.92rem); }
-  .rsvp-footer__links p { font-size: clamp(0.62rem, 0.95vw, 0.76rem); }
 }
 </style>
