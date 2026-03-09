@@ -1,5 +1,5 @@
 <div class="main">
-  <section class="page-section page-section--hero">
+  <section class="page-section page-section--hero ext-section--0" id="section-0">
     <div class="hero-overlays">
       <%= image_tag "title.PNG", alt: "Jackpot Title", class: "hero-title" %>
       <%= image_tag "centralmg.png", alt: "Center Art", class: "hero-center" %>
@@ -217,6 +217,7 @@ body {
   position: relative;
   height: var(--first-section-height);
   min-height: var(--first-section-height);
+  margin: 0;
   background: url(<%= image_path "first_bkg.jpg" %>) no-repeat top center #000;
   background-size: 100% auto;
 }
@@ -310,6 +311,35 @@ body {
   pointer-events: none;
 }
 
+/* Responsive: crop backgrounds on smaller viewports */
+@media (max-width: 1023px) {
+  .ext-section {
+    min-height: clamp(280px, 75vw, 480px);
+  }
+
+  .ext-section__bkg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .ext-section {
+    min-height: clamp(260px, 85vw, 400px);
+  }
+}
+
+@media (max-width: 479px) {
+  .ext-section {
+    min-height: clamp(240px, 90vw, 360px);
+  }
+}
+
 .ext-section__lighty-line {
   position: absolute;
   bottom: 0;
@@ -384,6 +414,8 @@ body {
   width: 100%;
   max-width: min(92%, 680px);
   margin: 0 auto clamp(24px, 3vw, 36px);
+  container-type: inline-size;
+  container-name: panel;
 }
 
 .section-1__panel-bg {
@@ -421,6 +453,38 @@ body {
   font-family: "Georgia", serif;
   font-size: clamp(0.9rem, 1.4vw, 1.1rem);
   line-height: 1.45;
+}
+
+@container panel (max-width: 480px) {
+  .section-1__panel-content {
+    padding: clamp(12px, 3vw, 20px);
+    gap: clamp(8px, 1.2vw, 14px);
+  }
+  .section-1__step {
+    gap: clamp(8px, 1.2vw, 14px);
+  }
+  .section-1__step-icon {
+    width: clamp(24px, 4vw, 36px);
+  }
+  .section-1__step-text {
+    font-size: 0.8rem;
+  }
+}
+
+@container panel (max-width: 360px) {
+  .section-1__panel-content {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .section-1__step {
+    gap: 6px;
+  }
+  .section-1__step-icon {
+    width: clamp(20px, 3.5vw, 28px);
+  }
+  .section-1__step-text {
+    font-size: 0.72rem;
+  }
 }
 
 .section-1__join-wrap {
@@ -718,6 +782,12 @@ body {
   .hero-title { width: clamp(240px, 50vw, 420px); }
   .hero-center { width: clamp(260px, 90vw, 600px); }
   .hero-logo { width: clamp(100px, 18vw, 160px); }
+
+  /* Section 0: crop background like other sections */
+  .ext-section--0.page-section--hero {
+    background-size: cover;
+    background-position: center center;
+  }
 }
 
 @media (max-width: 767px) {
@@ -725,9 +795,13 @@ body {
     --first-section-height: 168vw;
   }
 
-  .page-section--hero {
+  .section-1__panel-bg {
+    display: none;
+  }
+
+  .ext-section--0.page-section--hero {
     background-size: cover;
-    background-position: top center;
+    background-position: center center;
   }
 
   .hero-overlays { transform: translateY(2vh); }
@@ -737,7 +811,7 @@ body {
   .hero-logo { width: 130px; }
 
   .ext-content {
-    padding-top: clamp(80px, 12vw, 120px);
+    padding-top: 0;
   }
 
   .section-title { font-size: clamp(1.75rem, 4.2vw, 3.2rem); }
@@ -746,6 +820,11 @@ body {
 @media (max-width: 479px) {
   :root {
     --first-section-height: 182vw;
+  }
+
+  .ext-section--0.page-section--hero {
+    background-size: cover;
+    background-position: center center;
   }
 
   .hero-title { top: -18vh; width: 95vw; }
@@ -757,8 +836,8 @@ body {
   }
 
   .ext-content {
-    padding-top: 64px;
-    padding-bottom: 24px;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
 }
