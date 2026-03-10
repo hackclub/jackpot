@@ -4,6 +4,10 @@
       <%= image_tag "title.PNG", alt: "Jackpot Title", class: "hero-title" %>
       <%= image_tag "centralmg.png", alt: "Center Art", class: "hero-center" %>
       <%= link_to image_tag("HC_logo.png", alt: "Hack Club Logo", class: "hero-logo"), "https://hackclub.com", class: "hero-logo-link" %>
+      <p class="hero-dateline">
+        <span class="hero-dateline__top">May 8 - 11  |  teenagers 13-18  | Las Vegas</span><br>
+        <span class="hero-dateline__bottom">Code your project - get free prizes - fly out to the next Las Vegas Hackathon</span>
+      </p>
     </div>
     <%= render "home/rsvp" %>
   </section>
@@ -290,7 +294,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transform: translateY(-8vh);
+  transform: translateY(2vh);
   max-width: 100vw;
   overflow: hidden;
 }
@@ -298,10 +302,10 @@ body {
 .hero-title {
   position: absolute;
   left: 50%;
-  top: clamp(-12vh, -16vh, -10vh);
+  top: clamp(-80vh, -22vh, 16vh);
   transform: translateX(-50%) rotate(3deg);
-  max-width: min(90vw, 520px);
-  width: clamp(280px, 42vw, 520px);
+  max-width: min(92vw, 700px);
+  width: clamp(340px, 52vw, 700px);
   height: auto;
   filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35));
   animation: title-flicker 4.5s infinite steps(1, end);
@@ -321,10 +325,10 @@ body {
 .hero-center {
   position: absolute;
   left: 50%;
-  top: clamp(12vh, 16vh, 20vh);
-  transform: translateX(-50%);
-  max-width: min(85vw, 720px);
-  width: clamp(280px, 85vw, 720px);
+  top: clamp(-28vh, 9vh, 42vh);
+  transform: translateX(-51%);
+  max-width: min(92vw, 1200px);
+  width: clamp(520px, 200vw, 1210px);
   height: auto;
   filter:
     drop-shadow(0 0 18px rgba(255, 230, 170, 0.35))
@@ -334,8 +338,8 @@ body {
 
 .hero-logo-link {
   position: absolute;
-  top: clamp(8px, 10vh, 12vh);
-  left: max(8px, env(safe-area-inset-left));
+  top: max(-3px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
   pointer-events: auto;
   display: block;
   line-height: 0;
@@ -344,6 +348,31 @@ body {
 .hero-logo {
   width: clamp(100px, 22vw, 180px);
   height: auto;
+  display: block;
+}
+
+.hero-dateline {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(135px + 10vh);
+  margin: 0;
+  text-align: center;
+  font-family: "Katibeh", "Georgia", serif;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 0.70;
+  max-width: min(92vw, 640px);
+  white-space: normal;
+}
+
+.hero-dateline__top {
+  color: #FFFDA7;
+  display: block;
+  margin-bottom: 0;
+}
+
+.hero-dateline__bottom {
+  color: #9F2D2F;
   display: block;
 }
 
@@ -1335,8 +1364,8 @@ body {
 }
 
 @media (max-width: 1023px) {
-  .hero-title { width: clamp(240px, 50vw, 420px); }
-  .hero-center { width: clamp(260px, 90vw, 600px); }
+  .hero-title { width: clamp(300px, 54vw, 520px); }
+  .hero-center { width: clamp(300px, 90vw, 720px); }
   .hero-logo { width: clamp(100px, 18vw, 160px); }
 
   /* Section 0: crop background like other sections */
@@ -1361,9 +1390,9 @@ body {
   }
 
   .hero-overlays { transform: translateY(2vh); }
-  .hero-title { top: -18vh; width: clamp(220px, 55vw, 380px); }
-  .hero-center { top: 14vh; width: clamp(240px, 95vw, 500px); }
-  .hero-logo-link { top: 8vh; }
+  .hero-title { top: clamp(6vh, 10vh, 14vh); width: clamp(280px, 58vw, 440px); }
+  .hero-center { top: clamp(24vh, 30vh, 36vh); width: clamp(280px, 95vw, 560px); }
+  .hero-logo-link { top: max(6px, env(safe-area-inset-top)); }
   .hero-logo { width: 130px; }
 
   .ext-content {
@@ -1383,8 +1412,8 @@ body {
     background-position: center center;
   }
 
-  .hero-title { top: -18vh; width: 95vw; }
-  .hero-center { top: 12vh; width: 130vw; max-width: 380px; }
+  .hero-title { top: clamp(5vh, 8vh, 12vh); width: 95vw; }
+  .hero-center { top: clamp(22vh, 28vh, 34vh); width: 95vw; max-width: 420px; }
   .hero-logo { width: 100px; }
 
   .section-title {
