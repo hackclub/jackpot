@@ -1,13 +1,9 @@
-<div id="rsvp-container">
-  <%# Join Button — Triggers HCA Login %>
-    <%= button_to "/auth/hack_club",
-      method: :post,
-      data: { turbo: false },
-      class: "rsvp-button",
-      style: "background: #d9cbab; border-radius: 18px; padding: 24px 80px; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;" do %>
-    <span class="rsvp-button__label">Join</span>
-  <% end %>
-</div>
+<%# Scroll-down arrow (old Join button position) — wiggle animation %>
+<a href="#steps" class="scroll-down-v" aria-label="Scroll down">
+  <svg class="scroll-down-v__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M2.99854 7.00153L12.0006 17.0027L21.0027 7.00153" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</a>
 
   <%# Modal Overlay %>
   <div id="rsvp-overlay" class="rsvp-modal" onclick="if(event.target===this){this.classList.remove('rsvp-modal--visible'); document.body.style.overflow='';}">
@@ -113,15 +109,44 @@
   font-display: swap;
 }
 
-/* --- Position RSVP button bottom-center (within hero section, scrolls with page) --- */
-#rsvp-container {
+/* --- Scroll-down arrow in old Join position (bottom-center), wiggle animation --- */
+.scroll-down-v {
   position: absolute;
   left: 50%;
-  bottom: 40px;
+  bottom: calc(40px + 8vh);
   transform: translateX(-50%);
   z-index: 100;
   pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  color: rgba(255, 240, 200, 0.95);
+  text-decoration: none;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.4));
   animation: rsvp-bob 3.2s ease-in-out infinite;
+  transition: color 0.2s ease;
+}
+.scroll-down-v:hover {
+  color: rgba(255, 255, 255, 1);
+}
+.scroll-down-v__icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* --- Join button top-right (safe area for notches) --- */
+#rsvp-container {
+  position: absolute;
+  top: max(24px, env(safe-area-inset-top));
+  right: max(24px, env(safe-area-inset-right));
+  left: auto;
+  bottom: auto;
+  transform: none;
+  z-index: 100;
+  pointer-events: auto;
 }
 
 /* --- Vintage Card (reusable) --- */
@@ -156,7 +181,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #rsvp-container { animation: none; }
+  .scroll-down-v { animation: none; }
 }
 /* --- RSVP Button (horizontal) --- */
 .rsvp-button {
@@ -222,8 +247,9 @@
 
 /* --- Modal Card --- */
 .rsvp-modal__card {
-  width: 320px;
+  width: min(320px, 92vw);
   max-width: 90vw;
+  margin: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
 }
 .rsvp-modal__content {
   position: relative;
@@ -231,7 +257,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 36px 30px;
+  padding: clamp(24px, 5vw, 36px) clamp(20px, 4vw, 30px);
 }
 
 .rsvp-modal__close {
@@ -282,8 +308,10 @@
   gap: 8px;
 }
 .rsvp-modal__input {
-  width: 240px;
+  width: min(240px, 85vw);
+  max-width: 100%;
   padding: 8px 12px;
+  box-sizing: border-box;
   border: 1px solid #a08060;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.5);
@@ -331,15 +359,35 @@
   background: rgba(45, 80, 22, 0.1);
 }
 
-@media (max-width: 600px) {
-  .rsvp-button {
-    padding: 16px 40px;
-    width: 85vw;
-    box-sizing: border-box;
-  }
-  .rsvp-button__label {
-    font-size: 42px;
-    top: 8px;
-  }
+/* --- Tablet: slightly smaller Join --- */
+@media (max-width: 1023px) {
+  #rsvp-container { top: max(20px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); }
+  .rsvp-button { padding: 18px 48px; }
+  .rsvp-button__label { font-size: 44px; top: 12px; }
+  .scroll-down-v { width: 64px; height: 64px; bottom: calc(32px + 6vh); }
+}
+
+@media (max-width: 767px) {
+  #rsvp-container { top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); }
+  .rsvp-button { padding: 14px 36px; }
+  .rsvp-button__label { font-size: 36px; top: 8px; }
+  .scroll-down-v { width: 56px; height: 56px; bottom: calc(28px + 5vh); }
+}
+
+@media (max-width: 599px) {
+  #rsvp-container { top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
+  .rsvp-button { padding: 12px 28px; }
+  .rsvp-button__label { font-size: 32px; top: 6px; }
+  .scroll-down-v { width: 52px; height: 52px; }
+}
+
+@media (max-width: 479px) {
+  #rsvp-container { top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); }
+  .rsvp-button { padding: 10px 22px; }
+  .rsvp-button__label { font-size: 26px; top: 4px; }
+  .scroll-down-v { width: 44px; height: 44px; }
+  .rsvp-modal__card { width: min(300px, 94vw); }
+  .rsvp-modal__title { font-size: 28px; }
+  .rsvp-modal__input { width: 100%; }
 }
 </style>
