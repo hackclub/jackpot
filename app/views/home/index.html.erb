@@ -450,6 +450,7 @@ body {
     object-fit: cover;
     object-position: center;
   }
+
 }
 
 @media (max-width: 767px) {
@@ -1217,6 +1218,7 @@ body {
 
 .section-5__event {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: clamp(24px, 3.5vw, 48px);
@@ -1247,10 +1249,21 @@ body {
 }
 
 .section-5__event-txt {
+  order: -1;
   width: clamp(220px, 38vw, 460px);
   max-width: 100%;
   height: auto;
   object-fit: contain;
+}
+
+@media (min-width: 1024px) {
+  .section-5__event {
+    flex-direction: row;
+  }
+
+  .section-5__event-txt {
+    order: 0;
+  }
 }
 
 .section-5__see-more-link {
@@ -1284,7 +1297,7 @@ body {
 /* 3 community cards overlapping the top of the box bkg, shifted left */
 .section-6__comm-buttons {
   position: absolute;
-  top: clamp(40px, 5vw, 100px);
+  top: clamp(28px, 3.5vw, 56px);
   left: 0;
   right: 0;
   width: 100%;
@@ -1297,7 +1310,7 @@ body {
   flex-wrap: wrap;
   pointer-events: none;
   box-sizing: border-box;
-  transform: translateX(clamp(-48px, -8vw, -24px));
+  transform: none;
 }
 
 .section-6__comm-buttons .section-6__card-link {
@@ -1345,7 +1358,7 @@ body {
 /* 2 question cards overlapping the top of the box bkg, shifted left */
 .section-6__questions-buttons {
   position: absolute;
-  top: clamp(180px, 7vw, 120px);
+  top: clamp(28px, 10vw, 150px);
   left: 0;
   right: 0;
   width: 100%;
@@ -1354,11 +1367,11 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  gap: clamp(80px, 1.5vw, 24px);
+  gap: clamp(10px, 1.5vw, 24px);
   flex-wrap: wrap;
   pointer-events: none;
   box-sizing: border-box;
-  transform: translateX(clamp(148px, -8vw, -24px));
+  transform: translate(clamp(140px, 2vw, 36px), clamp(10px, 1.2vw, 20px));
 }
 
 .section-6__questions-buttons .section-6__card-link {
@@ -1485,6 +1498,42 @@ body {
   .hero-center { width: clamp(300px, 90vw, 720px); }
   .hero-logo { width: clamp(100px, 18vw, 160px); }
 
+  /* "and enjoy our prizes" subtitle scales down on tablets/phones */
+  .section-1__carousel-subtitle {
+    max-width: min(84%, 420px);
+  }
+
+  /* Keep section 5 cards inside and aligned with their boxes on smaller screens */
+  .section-6__comm-buttons,
+  .section-6__questions-buttons {
+    top: clamp(16px, 3vw, 36px);
+    gap: clamp(8px, 1.6vw, 16px);
+  }
+
+  .section-6__comm-card,
+  .section-6__question-card {
+    max-height: clamp(72px, 13vw, 130px);
+  }
+
+  /* Mobile/tablet: prevent per-section inner scrolling */
+  .ext-section {
+    overflow: visible;
+  }
+
+  .ext-section__inner {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 100%;
+    overflow-y: visible;
+    padding-left: clamp(10px, 2vw, 20px);
+    padding-right: clamp(10px, 2vw, 20px);
+  }
+
   /* Section 0: crop background like other sections */
   .ext-section--0.page-section--hero {
     background-size: cover;
@@ -1517,6 +1566,15 @@ body {
   }
 
   .section-title { font-size: clamp(1.75rem, 4.2vw, 3.2rem); }
+
+  .section-1__carousel-subtitle {
+    max-width: min(82%, 320px);
+  }
+
+  /* Keep questions cards centered on iPhone widths */
+  .section-6__questions-buttons {
+    transform: translate(clamp(0px, 0.4vw, 4px), clamp(8px, 1.2vw, 14px));
+  }
 }
 
 @media (max-width: 479px) {
