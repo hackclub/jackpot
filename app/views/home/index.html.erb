@@ -166,25 +166,53 @@
       <div class="ext-section__inner ext-section__inner--5">
         <h2 class="section-title section-title--center section-title--info">info</h2>
         <div class="section-6__cards">
-          <%= image_tag "RSVP_comp/fifth_section/joinComm_box.png", alt: "Ask a question, Updates and News, Join the community", class: "section-6__comm-box" %>
+          <div class="section-6__comm-buttons">
+            <%= link_to "https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_1.png", alt: "Ask a question", class: "section-6__comm-card", aria: { hidden: true } %>
+            <% end %>
+            <%= link_to "https://hackclub.enterprise.slack.com/archives/C0ADEGZL5HD", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_2.png", alt: "Updates and News", class: "section-6__comm-card", aria: { hidden: true } %>
+            <% end %>
+            <%= link_to "https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_3.png", alt: "Join the community", class: "section-6__comm-card", aria: { hidden: true } %>
+            <% end %>
+          </div>
+          <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityBox_bkg.png", alt: "Ask a question, Updates and News, Join the community", class: "section-6__comm-box" %>
         </div>
         <div class="section-6__questions">
-          <%= image_tag "RSVP_comp/fifth_section/questions_box.png", alt: "Questions FAQ Rules", class: "section-6__questions-box" %>
+          <div class="section-6__questions-buttons">
+            <%= link_to "https://jackpot.hackclub.com/faq", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/FAQ_card_1.png", alt: "FAQ", class: "section-6__question-card", aria: { hidden: true } %>
+            <% end %>
+            <%= link_to "https://jackpot.hackclub.com/rules", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/rules_card_2.png", alt: "Rules", class: "section-6__question-card", aria: { hidden: true } %>
+            <% end %>
+          </div>
+          <%= image_tag "RSVP_comp/fifth_section/joinComm_box/questionBox_bkg.png", alt: "Questions FAQ Rules", class: "section-6__questions-box" %>
         </div>
         <footer class="section-6__footer">
+          <div class="section-6__footer-line"></div>
+          <p class="section-6__questions-cta">
+            Have more questions? Email us at <%= link_to "emmaborghi@hackclub.com", "mailto:emmaborghi@hackclub.com", class: "section-6__questions-cta-link" %>
+          </p>
           <div class="section-6__footer-links">
             <div class="section-6__footer-col">
-              <a href="mailto:highschoolhackathons@hackclub.com">Email</a>
-              <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4" target="_blank" rel="noopener noreferrer">Slack</a>
-              <a href="https://discord.gg/hackclub" target="_blank" rel="noopener noreferrer">Discord</a>
-              <a href="https://twitter.com/hackclub" target="_blank" rel="noopener noreferrer">Twitter</a>
-              <a href="https://www.patreon.com/hackclub" target="_blank" rel="noopener noreferrer">Patreon</a>
+              <span class="section-6__footer-col-title">Hack Club</span>
+              <a href="https://hackclub.com/philosophy/" target="_blank" rel="noopener noreferrer">Philosophy</a>
+              <a href="https://hackclub.com/team/" target="_blank" rel="noopener noreferrer">Our Team &amp; Board</a>
+              <a href="https://hackclub.com/jobs/" target="_blank" rel="noopener noreferrer">Jobs</a>
+              <a href="https://hackclub.com/brand/" target="_blank" rel="noopener noreferrer">Brand Guide</a>
+              <a href="https://hackclub.com/press/" target="_blank" rel="noopener noreferrer">Press Inquiries</a>
+              <a href="https://hackclub.com/philanthropy/" target="_blank" rel="noopener noreferrer">Donate</a>
             </div>
             <div class="section-6__footer-col">
-              <a href="/contact">Contact Us</a>
-              <a href="/terms">Terms of Use</a>
-              <a href="/privacy">Privacy Policy</a>
-              <a href="/sitemap">Sitemap</a>
+              <span class="section-6__footer-col-title">Resources</span>
+              <a href="https://events.hackclub.com/" target="_blank" rel="noopener noreferrer">Community Events</a>
+              <a href="https://jams.hackclub.com/" target="_blank" rel="noopener noreferrer">Jams</a>
+              <a href="https://toolbox.hackclub.com/" target="_blank" rel="noopener noreferrer">Toolbox</a>
+              <a href="https://hackclub.com/map" target="_blank" rel="noopener noreferrer">Clubs Map</a>
+              <a href="https://hackclub.com/conduct/" target="_blank" rel="noopener noreferrer">Code of Conduct</a>
+              <a href="https://hackclub.com/privacy/" target="_blank" rel="noopener noreferrer">Privacy &amp; Terms</a>
             </div>
           </div>
           <p class="section-6__copyright">© <%= Date.current.year %> Hack Club. All rights reserved.</p>
@@ -1004,7 +1032,10 @@ body {
 }
 
 .ext-section__inner--5 {
-  padding-top: clamp(8px, 1.2vw, 20px);
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: clamp(12px, 1.5vw, 24px);
+  padding-bottom: clamp(16px, 2vw, 28px);
 }
 
 .section-4__title-image {
@@ -1094,28 +1125,154 @@ body {
 }
 
 /* Section 6: Info / Footer */
-.section-6__comm-box {
+.section-6__cards {
+  position: relative;
+  margin: 0;
+  margin-bottom: clamp(32px, 5vw, 64px);
   width: 100%;
   max-width: min(100%, 1280px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 3 community cards overlapping the top of the box bkg, shifted left */
+.section-6__comm-buttons {
+  position: absolute;
+  top: clamp(40px, 5vw, 100px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: clamp(10px, 1.5vw, 24px);
+  flex-wrap: wrap;
+  pointer-events: none;
+  box-sizing: border-box;
+  transform: translateX(clamp(-48px, -8vw, -24px));
+}
+
+.section-6__comm-buttons .section-6__card-link {
+  pointer-events: auto;
+}
+
+.section-6__card-link {
+  display: block;
+  line-height: 0;
+  transition: transform 0.25s ease;
+}
+
+.section-6__card-link:hover {
+  transform: scale(1.08);
+}
+
+.section-6__comm-card {
+  display: block;
   height: auto;
-  margin: 0 auto clamp(12px, 1.5vw, 20px);
+  max-height: clamp(120px, 20vw, 260px);
+  width: auto;
+  object-fit: contain;
+}
+
+.section-6__comm-box {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
   display: block;
 }
 
 .section-6__questions {
-  margin-bottom: clamp(12px, 1.5vw, 20px);
+  position: relative;
+  margin-bottom: clamp(56px, 9vw, 120px);
+  margin-top: 0;
+  width: 100%;
+  max-width: min(100%, 1480px);
+  margin-left: auto;
+  margin-right: clamp(16px, 3vw, 48px);
+}
+
+/* 2 question cards overlapping the top of the box bkg, shifted left */
+.section-6__questions-buttons {
+  position: absolute;
+  top: clamp(180px, 7vw, 120px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: clamp(80px, 1.5vw, 24px);
+  flex-wrap: wrap;
+  pointer-events: none;
+  box-sizing: border-box;
+  transform: translateX(clamp(148px, -8vw, -24px));
+}
+
+.section-6__questions-buttons .section-6__card-link {
+  pointer-events: auto;
+}
+
+.section-6__question-card {
+  display: block;
+  height: auto;
+  max-height: clamp(120px, 20vw, 260px);
+  width: auto;
+  object-fit: contain;
 }
 
 .section-6__questions-box {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: min(100%, 1100px);
+  max-width: 100%;
   height: auto;
-  margin: 0 auto;
+  margin: 0;
   display: block;
 }
 
 .section-6__footer {
   text-align: center;
+  margin-top: clamp(64px, 10vw, 140px);
+  width: 100%;
+}
+
+.section-6__footer-line {
+  width: 100%;
+  max-width: min(100%, 720px);
+  height: 2px;
+  margin: 0 auto clamp(20px, 3vw, 36px);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--cream) 20%,
+    var(--cream) 80%,
+    transparent 100%
+  );
+  opacity: 0.95;
+}
+
+.section-6__questions-cta {
+  margin: 0 auto clamp(28px, 4vw, 48px);
+  color: var(--cream);
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.4;
+  max-width: 90%;
+}
+
+.section-6__questions-cta-link {
+  color: #FFBAAB;
+  text-decoration: underline;
+}
+
+.section-6__questions-cta-link:hover {
+  opacity: 0.9;
 }
 
 .section-6__footer-links {
@@ -1131,6 +1288,13 @@ body {
   flex-direction: column;
   gap: 8px;
   align-items: center;
+}
+
+.section-6__footer-col-title {
+  color: var(--cream);
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .section-6__footer-col a {
@@ -1165,7 +1329,9 @@ body {
 }
 
 .section-title--info {
-  margin-bottom: clamp(16px, 2.8vw, 28px);
+  margin-top: clamp(140px, 24vw, 360px);
+  margin-bottom: clamp(28px, 4vw, 56px);
+  font-size: clamp(5rem, 13vw, 9.5rem);
 }
 
 @media (max-width: 1023px) {
