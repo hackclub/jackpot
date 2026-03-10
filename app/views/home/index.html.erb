@@ -129,26 +129,33 @@
     <section class="ext-section ext-section--4">
       <%= image_tag "RSVP_comp/bkgs/extBkg_section_4.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
       <div class="ext-section__inner ext-section__inner--4">
-        <h2 class="section-title section-title--center">Past Events</h2>
-        <p class="section-5__subtitle">and projects organized by us!</p>
+        <%= image_tag "RSVP_comp/fourth_section/title_section_4.png", alt: "Past Events", class: "section-4__title-image" %>
         <div class="section-5__intro">
-          <%= image_tag "RSVP_comp/fourth_section/emma_box.png", alt: "Past events intro", class: "section-5__emma-box" %>
+          <%= link_to "https://emmaborghi.tech/", target: "_blank", rel: "noopener noreferrer", class: "section-5__emma-box-link" do %>
+            <%= image_tag "RSVP_comp/fourth_section/emma_box.png", alt: "Past events intro", class: "section-5__emma-box" %>
+          <% end %>
         </div>
         <div class="section-5__events">
           <div class="section-5__event section-5__event--juice">
-            <%= image_tag "RSVP_comp/fourth_section/juice_img.png", alt: "Juice event", class: "section-5__event-img" %>
+            <%= link_to "https://www.youtube.com/watch?v=fuTlToZ1SX8&t=2s&pp=ygUPaGFjayBjbHViIGp1aWNl", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
+              <%= image_tag "RSVP_comp/fourth_section/juice_img.png", alt: "Juice event", class: "section-5__event-img" %>
+            <% end %>
             <%= image_tag "RSVP_comp/fourth_section/juice_txt.png", alt: "Juice", class: "section-5__event-txt" %>
           </div>
           <div class="section-5__event section-5__event--moonshot">
             <%= image_tag "RSVP_comp/fourth_section/moonshot_txt.png", alt: "Moonshot", class: "section-5__event-txt" %>
-            <%= image_tag "RSVP_comp/fourth_section/moonshot_img.png", alt: "Moonshot event", class: "section-5__event-img" %>
+            <%= link_to "https://moonshot.hackclub.com/", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
+              <%= image_tag "RSVP_comp/fourth_section/moonshot_img.png", alt: "Moonshot event", class: "section-5__event-img" %>
+            <% end %>
           </div>
           <div class="section-5__event section-5__event--overglade">
-            <%= image_tag "RSVP_comp/fourth_section/overglade_img.png", alt: "Overglade event", class: "section-5__event-img" %>
+            <%= link_to "https://overglade.hackclub.com/", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
+              <%= image_tag "RSVP_comp/fourth_section/overglade_img.png", alt: "Overglade event", class: "section-5__event-img" %>
+            <% end %>
             <%= image_tag "RSVP_comp/fourth_section/overglade_txt.png", alt: "Overglade", class: "section-5__event-txt" %>
           </div>
         </div>
-        <%= link_to image_tag("RSVP_comp/fourth_section/seeMoreHackathonsButton.png", alt: "See more hackathons", class: "section-5__see-more"), "#", class: "section-5__see-more-link" %>
+        <%= link_to image_tag("RSVP_comp/fourth_section/seeMoreHackathonsButton.png", alt: "See more hackathons", class: "section-5__see-more"), "https://hackclub.com/hackathons/", target: "_blank", rel: "noopener noreferrer", class: "section-5__see-more-link" %>
       </div>
       <div class="ext-section__lighty-line"></div>
     </section>
@@ -158,7 +165,6 @@
       <%= image_tag "RSVP_comp/bkgs/extBkg_section_5.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
       <div class="ext-section__inner ext-section__inner--5">
         <h2 class="section-title section-title--center section-title--info">info</h2>
-        <p class="section-6__subtitle">Join the community</p>
         <div class="section-6__cards">
           <%= image_tag "RSVP_comp/fifth_section/joinComm_box.png", alt: "Ask a question, Updates and News, Join the community", class: "section-6__comm-box" %>
         </div>
@@ -992,44 +998,85 @@ body {
   align-items: center;
 }
 
-.section-5__subtitle {
-  margin: 0 0 clamp(20px, 2.5vw, 32px);
-  text-align: center;
-  color: rgba(255, 248, 236, 0.85);
-  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+.ext-section__inner--4 {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.ext-section__inner--5 {
+  padding-top: clamp(8px, 1.2vw, 20px);
+}
+
+.section-4__title-image {
+  display: block;
+  width: min(100%, 880px);
+  height: auto;
+  margin: 0 auto 0;
+  margin-top: clamp(220px, 32vw, 420px);
+  transform: translateX(clamp(10px, 1.8vw, 28px));
+  object-fit: contain;
+}
+
+.section-5__intro {
+  margin: 0;
+  padding: 0;
+}
+
+.section-5__emma-box-link {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 1400px);
+  margin: 0 auto 0;
+  margin-top: 2px;
+  margin-bottom: clamp(56px, 9vw, 120px);
 }
 
 .section-5__emma-box {
   width: 100%;
-  max-width: min(100%, 900px);
+  max-width: min(100%, 1400px);
   height: auto;
-  margin: 0 auto clamp(24px, 3vw, 36px);
+  margin: 0;
   display: block;
 }
 
 .section-5__events {
   display: flex;
   flex-direction: column;
-  gap: clamp(24px, 3vw, 40px);
-  margin-bottom: clamp(24px, 3vw, 36px);
+  gap: clamp(28px, 4vw, 56px);
+  margin: 0;
+  margin-top: 0;
+  margin-bottom: clamp(56px, 9vw, 120px);
+  width: 100%;
+  max-width: 100%;
+  align-items: center;
 }
 
 .section-5__event {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(16px, 2vw, 28px);
+  gap: clamp(24px, 3.5vw, 48px);
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+}
+
+.section-5__event-img-link {
+  display: block;
+  line-height: 0;
 }
 
 .section-5__event-img {
-  width: clamp(180px, 35vw, 400px);
+  width: clamp(280px, 55vw, 680px);
+  max-width: 100%;
   height: auto;
   object-fit: contain;
+  display: block;
 }
 
 .section-5__event-txt {
-  width: clamp(140px, 25vw, 280px);
+  width: clamp(220px, 38vw, 460px);
+  max-width: 100%;
   height: auto;
   object-fit: contain;
 }
@@ -1037,36 +1084,31 @@ body {
 .section-5__see-more-link {
   display: flex;
   justify-content: center;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .section-5__see-more {
-  width: clamp(200px, 30vw, 360px);
+  width: clamp(380px, 58vw, 720px);
   height: auto;
 }
 
 /* Section 6: Info / Footer */
-.section-6__subtitle {
-  margin: 0 0 clamp(20px, 2.5vw, 28px);
-  text-align: center;
-  color: rgba(255, 248, 236, 0.9);
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-}
-
 .section-6__comm-box {
   width: 100%;
-  max-width: min(100%, 980px);
+  max-width: min(100%, 1280px);
   height: auto;
-  margin: 0 auto clamp(24px, 3vw, 36px);
+  margin: 0 auto clamp(12px, 1.5vw, 20px);
   display: block;
 }
 
 .section-6__questions {
-  margin-bottom: clamp(28px, 4vw, 44px);
+  margin-bottom: clamp(12px, 1.5vw, 20px);
 }
 
 .section-6__questions-box {
   width: 100%;
-  max-width: min(100%, 760px);
+  max-width: min(100%, 1100px);
   height: auto;
   margin: 0 auto;
   display: block;
@@ -1081,19 +1123,19 @@ body {
   justify-content: center;
   gap: clamp(24px, 4vw, 48px);
   flex-wrap: wrap;
-  margin-bottom: clamp(12px, 1.5vw, 20px);
+  margin-bottom: clamp(10px, 1.2vw, 16px);
 }
 
 .section-6__footer-col {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 
 .section-6__footer-col a {
   color: var(--cream-soft);
-  font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
   text-decoration: none;
 }
 
@@ -1104,7 +1146,7 @@ body {
 .section-6__copyright {
   margin: 0;
   color: rgba(255, 248, 236, 0.6);
-  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  font-size: clamp(0.9rem, 1.3vw, 1.1rem);
 }
 
 .section-title {
