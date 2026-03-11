@@ -16,7 +16,7 @@ class ReqItemController < ApplicationController
 
       week_start = Time.current.beginning_of_week
       week_end = Time.current.end_of_week
-      @this_week_item_names = ShopItemRequest.where(created_at: week_start..week_end).order(created_at: :asc).pluck(:item_name)
+      @this_week_requests = ShopItemRequest.where(created_at: week_start..week_end).order(created_at: :asc)
     end
   end
 
@@ -41,7 +41,7 @@ class ReqItemController < ApplicationController
       @can_submit = next_allowed_on.nil? || Date.current >= next_allowed_on
       week_start = Time.current.beginning_of_week
       week_end = Time.current.end_of_week
-      @this_week_item_names = ShopItemRequest.where(created_at: week_start..week_end).order(created_at: :asc).pluck(:item_name)
+      @this_week_requests = ShopItemRequest.where(created_at: week_start..week_end).order(created_at: :asc)
       render :index, status: :unprocessable_entity
     end
   end

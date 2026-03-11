@@ -1,47 +1,38 @@
 <% content_for(:title) { "Request Item" } %>
 
 <div class="req-item-page" role="main" aria-label="Request Item">
-  <div class="req-item-floating-icons" aria-hidden="true">
-    <%= image_tag "icons/chip.png", class: "req-item-icon req-item-icon--1", alt: "" %>
-    <%= image_tag "icons/cherry.png", class: "req-item-icon req-item-icon--2", alt: "" %>
-    <%= image_tag "icons/cards.png", class: "req-item-icon req-item-icon--3", alt: "" %>
-    <%= image_tag "icons/diamond.png", class: "req-item-icon req-item-icon--4", alt: "" %>
-    <%= image_tag "icons/chip.png", class: "req-item-icon req-item-icon--5", alt: "" %>
-    <%= image_tag "icons/cherry.png", class: "req-item-icon req-item-icon--6", alt: "" %>
-    <%= image_tag "icons/diamond.png", class: "req-item-icon req-item-icon--7", alt: "" %>
-    <%= image_tag "icons/cards.png", class: "req-item-icon req-item-icon--8", alt: "" %>
-    <%= image_tag "icons/cherry.png", class: "req-item-icon req-item-icon--9", alt: "" %>
-    <%= image_tag "icons/diamond.png", class: "req-item-icon req-item-icon--10", alt: "" %>
-    <%= image_tag "icons/chip.png", class: "req-item-icon req-item-icon--11", alt: "" %>
-    <%= image_tag "icons/cards.png", class: "req-item-icon req-item-icon--12", alt: "" %>
-    <%= image_tag "icons/diamond.png", class: "req-item-icon req-item-icon--13", alt: "" %>
-    <%= image_tag "icons/cherry.png", class: "req-item-icon req-item-icon--14", alt: "" %>
-    <%= image_tag "icons/chip.png", class: "req-item-icon req-item-icon--15", alt: "" %>
-    <%= image_tag "icons/diamond.png", class: "req-item-icon req-item-icon--16", alt: "" %>
-  </div>
   <% if @show_req_item_form %>
   <div class="req-item-content">
     <header class="req-item-header">
-      <%= image_tag "exDesk_title.png", alt: "Welcome to the Jackpot Exchange Desk", class: "req-item-title" %>
+      <%= image_tag "req_items/title.png", alt: "Jackpot Exchange Desk", class: "req-item-title-img" %>
     </header>
 
-    <div class="req-item-two-col">
+    <div class="req-item-three-col">
+      <!-- Left: steps_block.png asset -->
       <section class="req-item-how-section" aria-label="How it works">
-        <p class="req-item-intro">♣ Step up and talk to our dealer.</p>
-        <p class="req-item-how">♣ Here's how it works:</p>
-        <ol class="req-item-steps">
-          <li>Fill out the form with the item you want added to the <%= link_to "shop", shop_path, class: "req-item-link" %>. (please be specific, or your item might be canceled!)</li>
-          <li>Wait for the shop refresh (check the <%= link_to "countdown", shop_path, class: "req-item-link" %>, it's every Friday!)</li>
-          <li>Earn your prize!!</li>
-        </ol>
-        <p class="req-item-attention">
-          <strong>♣ ATTENTION!</strong> You can request one item every 2 weeks, so choose wisely.<br>
-          <span class="req-item-warning"><u><strong>Once the form is submitted, it cannot be edited or canceled.</strong></u></span>
-        </p>
+        <%= image_tag "req_items/steps_block.png", alt: "Step up and talk to our dealer. Here's how it works: 1. Check the current request list below. 2. Fill out the form. 3. Wait for the shop refresh. 4. Earn your prize. Attention: one item every 2 weeks.", class: "req-item-steps-block-img" %>
       </section>
 
-      <div class="req-item-divider" aria-hidden="true"></div>
+      <!-- Center: This week's requests (small boxes with name + price) -->
+      <section class="req-item-week-section req-item-week-panel" aria-label="This week's requests">
+        <h2 class="req-item-week-heading">This week's requests:</h2>
+        <div class="req-item-week-content">
+          <% if @this_week_requests.any? %>
+            <ul class="req-item-week-list">
+              <% @this_week_requests.each do |request| %>
+                <li class="req-item-week-item">
+                  <span class="req-item-week-item-name"><%= request.item_name %></span>
+                  <span class="req-item-week-item-price"><%= number_to_currency(request.price, precision: 2) %></span>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="req-item-week-empty">No requests this week yet.</p>
+          <% end %>
+        </div>
+      </section>
 
+      <!-- Right: cards.png as form block, fields on top + button asset -->
       <div class="req-item-form-column">
         <% if flash[:notice].present? %>
           <div class="req-item-flash req-item-flash--success" role="alert"><%= flash[:notice] %></div>
@@ -50,62 +41,60 @@
           <div class="req-item-flash req-item-flash--error" role="alert"><%= flash[:alert] %></div>
         <% end %>
 
-        <div class="req-item-form-box">
-          <% if @can_submit %>
-            <%= form_with model: @shop_item_request, url: req_item_path, method: :post, local: true, class: "req-item-form" do |f| %>
-              <% if @shop_item_request.errors.any? %>
-                <div class="req-item-errors" role="alert">
-                  <ul>
-                    <% @shop_item_request.errors.full_messages.each do |msg| %>
-                      <li><%= msg %></li>
-                    <% end %>
-                  </ul>
+        <div class="req-item-form-on-cards">
+          <%= image_tag "req_items/cards.png", alt: "", class: "req-item-form-cards-bg" %>
+          <div class="req-item-form-overlay">
+            <div class="req-item-form-clock">
+              <%= image_tag "req_items/clockIMG.png", alt: "", class: "req-item-clock-img" %>
+            </div>
+            <% if @can_submit %>
+              <%= form_with model: @shop_item_request, url: req_item_path, method: :post, local: true, class: "req-item-form" do |f| %>
+                <% if @shop_item_request.errors.any? %>
+                  <div class="req-item-errors" role="alert">
+                    <ul>
+                      <% @shop_item_request.errors.full_messages.each do |msg| %>
+                        <li><%= msg %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+
+                <div class="req-item-field">
+                  <%= f.label :item_name, "Item name:" %>
+                  <%= f.text_field :item_name, class: "req-item-input", placeholder: "Eg. Arduino Uno R4", required: true, autocomplete: "off" %>
+                </div>
+
+                <div class="req-item-field">
+                  <%= f.label :price, "Item price (USD):" %>
+                  <div class="req-item-price-wrap">
+                    <span class="req-item-price-prefix">$</span>
+                    <%= f.number_field :price, class: "req-item-input req-item-input-price", placeholder: "Eg. 20.99", min: 0, step: 0.01, required: true %>
+                  </div>
+                </div>
+
+                <div class="req-item-field">
+                  <%= f.label :reference_link, "Reference Link (Eg. Amazon):" %>
+                  <%= f.url_field :reference_link, class: "req-item-input", placeholder: "https://...", required: true %>
+                </div>
+
+                <div class="req-item-actions">
+                  <button type="submit" class="req-item-submit-btn" aria-label="Submit Request">
+                    <%= image_tag "req_items/button.png", alt: "Submit Request", class: "req-item-submit-btn-img" %>
+                  </button>
                 </div>
               <% end %>
-
-              <div class="req-item-field">
-                <%= f.label :item_name, "Item name:" %>
-                <%= f.text_field :item_name, class: "req-item-input", placeholder: "e.g. Arduino Starter Kit", required: true, autocomplete: "off" %>
-              </div>
-
-              <div class="req-item-field">
-                <%= f.label :price, "Item $$ price:" %>
-                <%= f.number_field :price, class: "req-item-input", placeholder: "e.g. 24.99", min: 0, step: 0.01, required: true %>
-              </div>
-
-              <div class="req-item-field">
-                <%= f.label :reference_link, "Reference link (e.g. buying page like Amazon):" %>
-                <%= f.url_field :reference_link, class: "req-item-input", placeholder: "https://...", required: true %>
-              </div>
-
-              <div class="req-item-actions">
-                <%= f.submit "Submit request", class: "req-item-submit" %>
+            <% else %>
+              <div class="req-item-blocked" role="status">
+                <p>You've already submitted a request recently. You can request one item every 2 weeks.</p>
+                <% if @next_allowed_on.present? %>
+                  <p>Your next request is allowed on <strong><%= @next_allowed_on.strftime('%A, %B %-d') %></strong>.</p>
+                <% end %>
               </div>
             <% end %>
-          <% else %>
-            <div class="req-item-blocked" role="status">
-              <p>You've already submitted a request recently. You can request one item every 2 weeks.</p>
-              <% if @next_allowed_on.present? %>
-                <p>Your next request is allowed on <strong><%= @next_allowed_on.strftime('%A, %B %-d') %></strong>.</p>
-              <% end %>
-            </div>
-          <% end %>
+          </div>
         </div>
       </div>
     </div>
-
-    <section class="req-item-week-section" aria-label="This week's requests">
-      <h2 class="req-item-week-heading">This week's requests</h2>
-      <% if @this_week_item_names.any? %>
-        <ul class="req-item-week-list">
-          <% @this_week_item_names.each do |name| %>
-            <li><%= name %></li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="req-item-week-empty">No requests this week yet.</p>
-      <% end %>
-    </section>
   </div>
   <% else %>
   <div class="req-item-coming-soon-wrap">
