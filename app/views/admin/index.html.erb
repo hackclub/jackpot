@@ -53,6 +53,14 @@
         </div>
       <% end %>
 
+      <%= link_to admin_airtable_sync_path, class: "admin-link" do %>
+        <span class="admin-link-icon"></span>
+        <div>
+          Airtable Sync
+          <span class="admin-link-desc">Sync status, logs, and diagnostics</span>
+        </div>
+      <% end %>
+
       <%= link_to admin_console_path, class: "admin-link" do %>
         <span class="admin-link-icon">💎</span>
         <div>

@@ -11,6 +11,41 @@ class AdminController < ApplicationController
   def console
   end
 
+  def airtable_sync
+    @sync_jobs = [
+      { name: "Users", job_class: "Airtable::UserSyncJob", model: User, table_env: "AIRTABLE_USERS_TABLE", table_default: "_users" },
+      { name: "Projects", job_class: "Airtable::ProjectSyncJob", model: Project, table_env: "AIRTABLE_PROJECTS_TABLE", table_default: "_projects" },
+      { name: "RSVPs", job_class: "Airtable::RsvpSyncJob", model: RsvpTable, table_env: "AIRTABLE_RSVPS_TABLE", table_default: "_rsvps" },
+      { name: "Shop Orders", job_class: "Airtable::ShopOrderSyncJob", model: ShopOrder, table_env: "AIRTABLE_SHOP_ORDERS_TABLE", table_default: "_shop_orders" },
+      { name: "Shop Items", job_class: "Airtable::ShopItemSyncJob", model: ShopItem, table_env: "AIRTABLE_SHOP_ITEMS_TABLE", table_default: "_shop_items" },
+      { name: "Journal Entries", job_class: "Airtable::JournalEntrySyncJob", model: JournalEntry, table_env: "AIRTABLE_JOURNAL_ENTRIES_TABLE", table_default: "_journal_entries" },
+      { name: "Project Comments", job_class: "Airtable::ProjectCommentSyncJob", model: ProjectComment, table_env: "AIRTABLE_PROJECT_COMMENTS_TABLE", table_default: "_project_comments" },
+      { name: "Shop Item Requests", job_class: "Airtable::ShopItemRequestSyncJob", model: ShopItemRequest, table_env: "AIRTABLE_SHOP_ITEM_REQUESTS_TABLE", table_default: "_shop_item_requests" }
+    ]
+
+    @sync_jobs.each do |job|
+      model = job[:model]
+      job[:total] = model.count
+      job[:synced] = model.where.not(airtable_id: nil).count
+      job[:unsynced] = job[:total] - job[:synced]
+      job[:never_synced] = model.where(synced_at: nil).count
+      job[:last_synced_at] = model.where.not(synced_at: nil).maximum(:synced_at)
+      job[:oldest_sync] = model.where.not(synced_at: nil).minimum(:synced_at)
+      job[:airtable_table] = ENV.fetch(job[:table_env], job[:table_default])
+
+      # Check Solid Queue for recent job runs
+      job[:pending_jobs] = SolidQueue::Job.where(class_name: job[:job_class], finished_at: nil).count
+      job[:last_finished] = SolidQueue::Job.where(class_name: job[:job_class]).where.not(finished_at: nil).order(finished_at: :desc).first
+      job[:last_failed] = SolidQueue::FailedExecution.joins(:job).where(solid_queue_jobs: { class_name: job[:job_class] }).order(created_at: :desc).first
+    end
+
+    @has_token = (Rails.application.credentials&.airtable&.acces_token || ENV["AIRTABLE_API_KEY"]).present?
+    @has_base_id = (Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]).present?
+    @base_id = Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
+
+    @recurring_tasks = SolidQueue::RecurringTask.where("key LIKE ?", "airtable%") rescue []
+  end
+
   # Executes Ruby code submitted from the admin console.
   # Captures stdout and the return value, with a 30-second timeout.
   def execute_console

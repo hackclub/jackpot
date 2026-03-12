@@ -56,6 +56,7 @@ Rails.application.routes.draw do
   get "/admin/review", to: "admin#review", as: :admin_review
   get "/admin/console", to: "admin#console", as: :admin_console
   post "/admin/console", to: "admin#execute_console", as: :admin_console_execute
+  get "/admin/airtable_sync", to: "admin#airtable_sync", as: :admin_airtable_sync
 
   namespace :admin do
     constraints AdminConstraint do
