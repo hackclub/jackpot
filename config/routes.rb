@@ -66,6 +66,7 @@ Rails.application.routes.draw do
   end
 
   get "/status", to: "status#index", as: :status
+  post "/projects/:project_id/comments", to: "project_comments#create", as: :project_comments
 
   get "/faq", to: "home#faq", as: :faq
   get "/rules", to: "home#rules", as: :rules

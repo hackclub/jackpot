@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_09_152614) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_12_130100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -100,6 +100,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_152614) do
     t.index ["user_id", "project_index"], name: "index_journal_entries_on_user_id_and_project_index"
   end
 
+  create_table "project_comments", force: :cascade do |t|
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.bigint "project_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["project_id", "created_at"], name: "index_project_comments_on_project_id_and_created_at"
+    t.index ["project_id"], name: "index_project_comments_on_project_id"
+    t.index ["user_id"], name: "index_project_comments_on_user_id"
+  end
+
   create_table "projects", force: :cascade do |t|
     t.text "admin_feedback"
     t.string "airtable_id"
@@ -120,12 +131,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_152614) do
     t.string "project_type"
     t.boolean "reviewed", default: false, null: false
     t.datetime "reviewed_at"
+    t.bigint "reviewed_by_user_id"
     t.boolean "shipped", default: false, null: false
     t.datetime "shipped_at"
     t.string "status", default: "pending"
     t.date "synced_at"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["reviewed_by_user_id"], name: "index_projects_on_reviewed_by_user_id"
     t.index ["user_id", "position"], name: "index_projects_on_user_id_and_position"
     t.index ["user_id"], name: "index_projects_on_user_id"
   end
@@ -356,7 +369,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_152614) do
 
   add_foreign_key "journal_entries", "projects"
   add_foreign_key "journal_entries", "users"
+  add_foreign_key "project_comments", "projects"
+  add_foreign_key "project_comments", "users"
   add_foreign_key "projects", "users"
+  add_foreign_key "projects", "users", column: "reviewed_by_user_id"
   add_foreign_key "shop_grant_types", "shop_categories"
   add_foreign_key "shop_item_requests", "users"
   add_foreign_key "shop_items", "shop_grant_types"

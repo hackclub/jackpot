@@ -3,6 +3,11 @@
 <div class="leaderboard-page">
   <div class="leaderboard-container">
     <h1 class="leaderboard-title">Leaderboard</h1>
+    <div class="leaderboard-sort" aria-label="Sort by">
+      <%= link_to "Chips", leaderboard_path(sort: "chips"), class: "leaderboard-sort-link #{'leaderboard-sort-link--active' if @sort == 'chips'}" %>
+      <span class="leaderboard-sort-sep">·</span>
+      <%= link_to "Hours", leaderboard_path(sort: "hours"), class: "leaderboard-sort-link #{'leaderboard-sort-link--active' if @sort == 'hours'}" %>
+    </div>
 
     <% if @users.any? %>
       <table class="leaderboard-table" id="leaderboardTable">
@@ -10,6 +15,7 @@
           <tr>
             <th class="col-rank">#</th>
             <th class="col-player">User</th>
+            <th class="col-hours">Hours logged</th>
             <th class="col-chips">Chips</th>
           </tr>
         </thead>
@@ -37,6 +43,9 @@
                   <% end %>
                 </div>
               </td>
+              <td class="col-hours">
+                <span class="hours-count"><%= number_with_precision(user.hackatime_hours.to_f, precision: 1) %></span>
+              </td>
               <td class="col-chips">
                 <span class="chip-count"><%= user.chip_am.to_f %></span>
               </td>
@@ -48,13 +57,13 @@
       <% if @total_pages > 1 %>
         <div class="pagination">
           <% if @page > 1 %>
-            <%= link_to "← Prev", leaderboard_path(page: @page - 1), class: "page-link" %>
+            <%= link_to "← Prev", leaderboard_path(page: @page - 1, sort: @sort), class: "page-link" %>
           <% end %>
 
           <span class="page-info">Page <%= @page %> of <%= @total_pages %></span>
 
           <% if @page < @total_pages %>
-            <%= link_to "Next →", leaderboard_path(page: @page + 1), class: "page-link" %>
+            <%= link_to "Next →", leaderboard_path(page: @page + 1, sort: @sort), class: "page-link" %>
           <% end %>
         </div>
       <% end %>
