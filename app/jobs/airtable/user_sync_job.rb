@@ -23,6 +23,7 @@ class Airtable::UserSyncJob < Airtable::BaseSyncJob
       "Slack Username" => user.slack_username,
       "Role" => user.role,
       "chip_am" => user.chip_am.to_f,
+      "Hackatime Hours" => user.hackatime_hours.to_f,
       "tut" => user.tutorial_completed,
       "Last Sign In" => user.last_sign_in_at&.iso8601,
       "Created At" => user.created_at&.iso8601

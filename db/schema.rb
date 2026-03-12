@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_12_130100) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_12_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -87,12 +87,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_130100) do
   end
 
   create_table "journal_entries", force: :cascade do |t|
+    t.string "airtable_id"
     t.datetime "created_at", null: false
     t.text "description"
     t.decimal "hours_worked", precision: 5, scale: 2
     t.bigint "project_id"
     t.integer "project_index", null: false
     t.string "project_name", null: false
+    t.date "synced_at"
     t.datetime "time_done"
     t.string "tools_used", default: [], array: true
     t.datetime "updated_at", null: false
@@ -101,9 +103,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_130100) do
   end
 
   create_table "project_comments", force: :cascade do |t|
+    t.string "airtable_id"
     t.text "body", null: false
     t.datetime "created_at", null: false
     t.bigint "project_id", null: false
+    t.date "synced_at"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["project_id", "created_at"], name: "index_project_comments_on_project_id_and_created_at"
@@ -177,11 +181,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_130100) do
   end
 
   create_table "shop_item_requests", force: :cascade do |t|
+    t.string "airtable_id"
     t.boolean "approved", default: false, null: false
     t.datetime "created_at", null: false
     t.string "item_name", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
     t.string "reference_link"
+    t.date "synced_at"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id", "created_at"], name: "index_shop_item_requests_on_user_id_and_created_at"
@@ -190,6 +196,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_130100) do
 
   create_table "shop_items", force: :cascade do |t|
     t.boolean "active", default: true, null: false
+    t.string "airtable_id"
     t.string "category"
     t.datetime "created_at", null: false
     t.text "description"
@@ -205,12 +212,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_130100) do
     t.decimal "price_usd", precision: 10, scale: 2
     t.integer "shipping_tax_cents", default: 0, null: false
     t.bigint "shop_grant_type_id"
+    t.date "synced_at"
     t.datetime "updated_at", null: false
     t.index ["max_per_person"], name: "index_shop_items_on_max_per_person"
     t.index ["shop_grant_type_id"], name: "index_shop_items_on_shop_grant_type_id"
   end
 
   create_table "shop_orders", force: :cascade do |t|
+    t.string "airtable_id"
     t.datetime "created_at", null: false
     t.string "item_name", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
@@ -218,6 +227,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_130100) do
     t.bigint "shop_item_id"
     t.string "slack_id"
     t.string "status", default: "pending", null: false
+    t.date "synced_at"
     t.datetime "updated_at", null: false
     t.string "user_email"
     t.bigint "user_id", null: false

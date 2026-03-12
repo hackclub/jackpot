@@ -10,6 +10,7 @@ class Airtable::BaseSyncJob < ApplicationJob
   # Syncs records to Airtable, creating new or updating existing.
   # Stores airtable_id on local records for future updates.
   def perform
+    ensure_fields_exist
     records_to_sync.each do |record|
       sync_single_record(record)
     end
@@ -96,10 +97,74 @@ class Airtable::BaseSyncJob < ApplicationJob
   end
 
   def table
-    @table ||= Norairrecord.table(
-      Rails.application.credentials&.airtable&.acces_token || ENV["AIRTABLE_API_KEY"],
-      Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"],
-      table_name
+    @table ||= Norairrecord.table(api_token, base_id, table_name)
+  end
+
+  def api_token
+    @api_token ||= Rails.application.credentials&.airtable&.acces_token || ENV["AIRTABLE_API_KEY"]
+  end
+
+  def base_id
+    @base_id ||= Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
+  end
+
+  def meta_connection
+    @meta_connection ||= Faraday.new(
+      url: "https://api.airtable.com",
+      headers: {
+        "Authorization" => "Bearer #{api_token}",
+        "Content-Type" => "application/json"
+      }
     )
+  end
+
+  def fetch_table_meta
+    response = meta_connection.get("v0/meta/bases/#{base_id}/tables")
+    return nil unless response.success?
+
+    tables = JSON.parse(response.body)["tables"] || []
+    tables.find { |t| t["name"] == table_name }
+  end
+
+  def ensure_fields_exist
+    sample = records_to_sync.first
+    return unless sample
+
+    needed_fields = field_mapping(sample)
+    table_meta = fetch_table_meta
+    return unless table_meta
+
+    existing_names = table_meta["fields"].map { |f| f["name"] }.to_set
+    table_id = table_meta["id"]
+
+    needed_fields.each do |name, value|
+      next if existing_names.include?(name)
+
+      field_def = { name: name, type: infer_airtable_type(value) }
+      response = meta_connection.post("v0/meta/bases/#{base_id}/tables/#{table_id}/fields", field_def.to_json)
+
+      if response.success?
+        Rails.logger.info("Airtable: created field '#{name}' in #{table_name}")
+      else
+        Rails.logger.warn("Airtable: failed to create field '#{name}' in #{table_name}: #{response.body}")
+      end
+    end
+  rescue => e
+    Rails.logger.warn("Airtable: field auto-creation skipped: #{e.message}")
+  end
+
+  def infer_airtable_type(value)
+    case value
+    when TrueClass, FalseClass
+      "checkbox"
+    when Integer
+      "number"
+    when Float, BigDecimal
+      "number"
+    when /\A\d{4}-\d{2}-\d{2}T/
+      "dateTime"
+    else
+      "singleLineText"
+    end
   end
 end
