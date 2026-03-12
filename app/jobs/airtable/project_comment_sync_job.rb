@@ -1,6 +1,6 @@
 class Airtable::ProjectCommentSyncJob < Airtable::BaseSyncJob
   def table_name
-    ENV.fetch("AIRTABLE_PROJECT_COMMENTS_TABLE", "_project_comments")
+    ENV.fetch("AIRTABLE_PROJECT_COMMENTS_TABLE", "_project_comment")
   end
 
   def records

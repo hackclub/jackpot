@@ -10,6 +10,7 @@ class Airtable::JournalEntrySyncJob < Airtable::BaseSyncJob
   def field_mapping(entry)
     {
       "Project Name" => entry.project_name,
+      "id" => entry.id.to_s,
       "Description" => entry.description,
       "Hours Worked" => entry.hours_worked.to_f,
       "Tools Used" => (entry.tools_used || []).join(", "),
