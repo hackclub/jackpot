@@ -32,7 +32,7 @@
         </div>
       </section>
 
-      <!-- Right: cards.png as form block, fields on top + button asset -->
+      <!-- Right: countdown + cards.png form block -->
       <div class="req-item-form-column">
         <% if flash[:notice].present? %>
           <div class="req-item-flash req-item-flash--success" role="alert"><%= flash[:notice] %></div>
@@ -40,6 +40,10 @@
         <% if flash[:alert].present? %>
           <div class="req-item-flash req-item-flash--error" role="alert"><%= flash[:alert] %></div>
         <% end %>
+
+        <div class="req-item-upgrade-countdown" aria-live="polite">
+          Next shop upgrade: <span id="reqItemUpgradeCountdown">--:--:--</span>
+        </div>
 
         <div class="req-item-form-on-cards">
           <%= image_tag "req_items/cards.png", alt: "", class: "req-item-form-cards-bg" %>
@@ -96,6 +100,89 @@
       </div>
     </div>
   </div>
+  <script>
+  (function() {
+    var el = document.getElementById('reqItemUpgradeCountdown');
+    if (!el) return;
+    function tzParts(date, timeZone) {
+      var dtf = new Intl.DateTimeFormat('en-US', {
+        timeZone: timeZone,
+        hour12: false,
+        weekday: 'short',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      var parts = dtf.formatToParts(date);
+      var out = {};
+      parts.forEach(function(p) { if (p.type !== 'literal') out[p.type] = p.value; });
+      return out;
+    }
+    function tzOffsetMs(date, timeZone) {
+      var p = tzParts(date, timeZone);
+      var asUtc = Date.UTC(
+        parseInt(p.year, 10),
+        parseInt(p.month, 10) - 1,
+        parseInt(p.day, 10),
+        parseInt(p.hour, 10),
+        parseInt(p.minute, 10),
+        parseInt(p.second, 10)
+      );
+      return asUtc - date.getTime();
+    }
+    function zonedTimeToUtcMs(ymdhms, timeZone) {
+      var utcGuess = Date.UTC(ymdhms.year, ymdhms.month - 1, ymdhms.day, ymdhms.hour, ymdhms.minute, ymdhms.second);
+      var d1 = new Date(utcGuess);
+      var off1 = tzOffsetMs(d1, timeZone);
+      var utc1 = utcGuess - off1;
+      var d2 = new Date(utc1);
+      var off2 = tzOffsetMs(d2, timeZone);
+      return utcGuess - off2;
+    }
+    function nextFridayMidnightUtcMs(now) {
+      var tz = 'America/New_York';
+      var p = tzParts(now, tz);
+      var weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+      var dow = weekdayMap[p.weekday] == null ? 0 : weekdayMap[p.weekday];
+      var hour = parseInt(p.hour, 10);
+      var minute = parseInt(p.minute, 10);
+      var second = parseInt(p.second, 10);
+      var days = (5 - dow + 7) % 7;
+      if (days === 0 && (hour > 0 || minute > 0 || second > 0)) days = 7;
+      var baseNoonUtc = zonedTimeToUtcMs({
+        year: parseInt(p.year, 10),
+        month: parseInt(p.month, 10),
+        day: parseInt(p.day, 10),
+        hour: 12, minute: 0, second: 0
+      }, tz);
+      var fridayNoonUtc = baseNoonUtc + (days * 86400000);
+      var fri = tzParts(new Date(fridayNoonUtc), tz);
+      return zonedTimeToUtcMs({
+        year: parseInt(fri.year, 10),
+        month: parseInt(fri.month, 10),
+        day: parseInt(fri.day, 10),
+        hour: 0, minute: 0, second: 0
+      }, tz);
+    }
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function render() {
+      var now = new Date();
+      var target = nextFridayMidnightUtcMs(now);
+      var ms = target - now.getTime();
+      if (ms < 0) ms = 0;
+      var totalSeconds = Math.floor(ms / 1000);
+      var hours = Math.floor(totalSeconds / 3600);
+      var minutes = Math.floor((totalSeconds % 3600) / 60);
+      var seconds = totalSeconds % 60;
+      el.textContent = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
+    }
+    render();
+    var iv = setInterval(render, 1000);
+  })();
+  </script>
   <% else %>
   <div class="req-item-coming-soon-wrap">
     <div class="req-item-coming-soon" aria-label="Coming Soon">Coming Soon!</div>
