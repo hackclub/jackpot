@@ -299,6 +299,19 @@ class DeckController < ApplicationController
 
     begin
       if user.approve_project(project_index, approved_hours, justification, feedback)
+        project = user.projects.order(position: :asc)[project_index]
+        if project
+          project.update!(
+            reviewed: true,
+            reviewed_at: Time.current,
+            status: "approved",
+            approved_hours: approved_hours,
+            hour_justification: justification,
+            admin_feedback: feedback,
+            chips_earned: chips_earned,
+            reviewed_by_user_id: current_user.id
+          )
+        end
         Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
         render json: { success: true, message: "Project approved", chips_earned: chips_earned }
       else
@@ -323,6 +336,16 @@ class DeckController < ApplicationController
 
     begin
       if user.reject_project(project_index, feedback)
+        project = user.projects.order(position: :asc)[project_index]
+        if project
+          project.update!(
+            reviewed: true,
+            reviewed_at: Time.current,
+            status: "rejected",
+            admin_feedback: feedback,
+            reviewed_by_user_id: current_user.id
+          )
+        end
         Rails.logger.info "Project rejected for user #{user_id}"
         render json: { success: true, message: "Project rejected" }
       else

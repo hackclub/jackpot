@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :projects, dependent: :destroy
   has_many :shop_orders, dependent: :destroy
   has_many :shop_item_requests, dependent: :destroy
+  has_many :project_comments, dependent: :destroy
   enum :role, { user: 0, admin: 1 }, prefix: true
 
   validates :hack_club_id, presence: true, uniqueness: true

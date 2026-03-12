@@ -40,6 +40,38 @@
   margin: 0 0 4px;
 }
 
+.leaderboard-sort {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.leaderboard-sort-link {
+  font-family: 'Georgia', serif;
+  font-size: 1rem;
+  color: #a89878;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.leaderboard-sort-link:hover {
+  color: #c4b89a;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-sort-link--active {
+  color: #f0e6d2;
+  font-weight: 700;
+  background: rgba(212, 160, 23, 0.2);
+}
+
+.leaderboard-sort-sep {
+  color: #6b5d4a;
+  margin: 0 4px;
+  user-select: none;
+}
+
 .welcome-banner {
   background: linear-gradient(135deg, rgba(34, 120, 69, 0.85), rgba(22, 80, 45, 0.9));
   border: 1px solid rgba(240, 230, 210, 0.3);
@@ -93,6 +125,11 @@
 .leaderboard-table th.col-rank {
   width: 50px;
   text-align: center;
+}
+
+.leaderboard-table th.col-hours {
+  text-align: right;
+  width: 100px;
 }
 
 .leaderboard-table th.col-chips {
@@ -177,6 +214,16 @@
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.col-hours {
+  text-align: right;
+}
+
+.hours-count {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #c4b89a;
 }
 
 .col-chips {
