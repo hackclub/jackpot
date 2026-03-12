@@ -1,6 +1,6 @@
 class Airtable::ShopItemSyncJob < Airtable::BaseSyncJob
   def table_name
-    ENV.fetch("AIRTABLE_SHOP_ITEMS_TABLE", "_shop_items")
+    ENV.fetch("AIRTABLE_SHOP_ITEMS_TABLE", "_shop_item")
   end
 
   def records
@@ -19,6 +19,7 @@ class Airtable::ShopItemSyncJob < Airtable::BaseSyncJob
       "Active" => item.active,
       "Item Quantity" => item.item_quantity,
       "Max Per Person" => item.max_per_person,
+      "id" => item.id.to_s,
       "Created At" => item.created_at&.iso8601
     }
   end

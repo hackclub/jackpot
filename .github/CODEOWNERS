@@ -1,7 +1,7 @@
 Dockerfile @NeonGamerBot-QK
 docker-compose.yml @NeonGamerBot-QK
 config.ru @NeonGamerBot-QK
-
+app/jobs/airtable @NeonGamerBot-QK
 # Rails config
 config/ @NeonGamerBot-QK
 
