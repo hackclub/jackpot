@@ -666,3 +666,32 @@
   text-align: right;
 }
 
+.sync-force-btn {
+  background: linear-gradient(135deg, #d4a017, #8b6914);
+  color: #fff;
+  border: none;
+  padding: 0.7rem 2rem;
+  border-radius: 8px;
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.sync-force-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.sync-force-btn:active {
+  transform: scale(0.98);
+}
+
+.sync-alert-ok {
+  background: rgba(60, 176, 67, 0.15);
+  border: 1px solid rgba(60, 176, 67, 0.4);
+  color: #6fd876;
+  margin-bottom: 1.5rem;
+}
+

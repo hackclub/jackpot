@@ -43,7 +43,37 @@ class AdminController < ApplicationController
     @has_base_id = (Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]).present?
     @base_id = Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
 
-    @recurring_tasks = SolidQueue::RecurringTask.where("key LIKE ?", "airtable%") rescue []
+    @recurring_config = begin
+      raw = YAML.safe_load(ERB.new(File.read(Rails.root.join("config/recurring.yml"))).result) || {}
+      env_config = raw[Rails.env] || raw["production"] || {}
+      env_config.select { |key, _| key.to_s.start_with?("airtable") }
+    rescue => e
+      Rails.logger.warn("Failed to load recurring.yml: #{e.message}")
+      {}
+    end
+
+    @recurring_tasks_db = begin
+      SolidQueue::RecurringTask.where("key LIKE ?", "airtable%").to_a
+    rescue
+      []
+    end
+  end
+
+  def force_airtable_sync
+    jobs = [
+      Airtable::UserSyncJob,
+      Airtable::ProjectSyncJob,
+      Airtable::RsvpSyncJob,
+      Airtable::ShopOrderSyncJob,
+      Airtable::ShopItemSyncJob,
+      Airtable::JournalEntrySyncJob,
+      Airtable::ProjectCommentSyncJob,
+      Airtable::ShopItemRequestSyncJob
+    ]
+
+    jobs.each { |job| job.perform_later }
+
+    redirect_to admin_airtable_sync_path, notice: "All #{jobs.size} sync jobs enqueued!"
   end
 
   # Executes Ruby code submitted from the admin console.

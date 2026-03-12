@@ -1,12 +1,24 @@
 <% content_for(:title) { "Airtable Sync Status" } %>
+<% content_for(:head) do %>
+  <meta http-equiv="refresh" content="10">
+<% end %>
 
 <div class="admin-page">
   <div class="admin-content" style="max-width: 1100px;">
     <h1>Airtable Sync Status</h1>
 
-    <p style="text-align: center; margin-bottom: 2rem;">
+    <p style="text-align: center; margin-bottom: 0.5rem;">
       <%= link_to "← Back to Admin", admin_path, class: "admin-link-inline" %>
     </p>
+    <p class="sync-muted" style="text-align: center; margin-bottom: 1rem;">Auto-refreshes every 10s · Last loaded: <%= Time.current.strftime("%H:%M:%S %Z") %></p>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <%= button_to "⚡ Force Sync All", admin_force_airtable_sync_path, class: "sync-force-btn", data: { turbo_confirm: "Enqueue all 8 Airtable sync jobs now?" } %>
+    </div>
+
+    <% if flash[:notice] %>
+      <div class="sync-alert sync-alert-ok"><%= flash[:notice] %></div>
+    <% end %>
 
     <div class="sync-section">
       <h2 class="sync-section-heading">⚙️ Configuration</h2>
@@ -32,32 +44,47 @@
     </div>
 
     <div class="sync-section">
-      <h2 class="sync-section-heading">Recurring Tasks</h2>
-      <% if @recurring_tasks.any? %>
+      <h2 class="sync-section-heading">⏰ Recurring Tasks</h2>
+
+      <% if @recurring_config.any? %>
         <div class="sync-table-wrap">
           <table class="sync-table">
             <thead>
               <tr>
-                <th>Task</th>
+                <th>Task Key</th>
                 <th>Class</th>
                 <th>Schedule</th>
                 <th>Queue</th>
+                <th>Worker Loaded</th>
               </tr>
             </thead>
             <tbody>
-              <% @recurring_tasks.each do |task| %>
+              <% @recurring_config.each do |key, config| %>
+                <% db_task = @recurring_tasks_db.find { |t| t.key == key } %>
                 <tr>
-                  <td><%= task.key %></td>
-                  <td><code><%= task.class_name %></code></td>
-                  <td><%= task.schedule %></td>
-                  <td><%= task.queue_name || "default" %></td>
+                  <td><%= key %></td>
+                  <td><code><%= config["class"] %></code></td>
+                  <td><%= config["schedule"] %></td>
+                  <td><%= config["queue"] || "default" %></td>
+                  <td>
+                    <% if db_task %>
+                      <span class="sync-ok">Active</span>
+                    <% else %>
+                      <span class="sync-warn">Waiting for worker</span>
+                    <% end %>
+                  </td>
                 </tr>
               <% end %>
             </tbody>
           </table>
         </div>
+        <% if @recurring_tasks_db.empty? %>
+          <p class="sync-muted" style="margin-top: 0.5rem;">
+            Tasks are configured in <code>recurring.yml</code> but Solid Queue worker hasn't loaded them yet. Make sure <code>bin/jobs</code> is running.
+          </p>
+        <% end %>
       <% else %>
-        <p class="sync-muted">No Airtable recurring tasks found in Solid Queue. Check <code>config/recurring.yml</code>.</p>
+        <p class="sync-muted">No Airtable recurring tasks found in <code>config/recurring.yml</code>.</p>
       <% end %>
     </div>
 
@@ -92,11 +119,11 @@
 
           <div class="sync-details">
             <div class="sync-detail-row">
-              <span class="sync-detail-label">Last sync_at:</span>
+              <span class="sync-detail-label">Last synced_at:</span>
               <span class="sync-detail-value"><%= job[:last_synced_at] ? job[:last_synced_at].to_s : "—" %></span>
             </div>
             <div class="sync-detail-row">
-              <span class="sync-detail-label">Oldest sync_at:</span>
+              <span class="sync-detail-label">Oldest synced_at:</span>
               <span class="sync-detail-value"><%= job[:oldest_sync] ? job[:oldest_sync].to_s : "—" %></span>
             </div>
             <div class="sync-detail-row">
