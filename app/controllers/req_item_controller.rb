@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ReqItemController < ApplicationController
-  ADMIN_ONLY = true
+  ADMIN_ONLY = false
 
   before_action :authenticate_user!
 
