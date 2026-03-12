@@ -21,12 +21,6 @@ class Airtable::BaseSyncJob < ApplicationJob
       return
     end
 
-    begin
-      ensure_fields_exist
-    rescue => e
-      log("Field auto-creation error: #{e.class}: #{e.message}")
-    end
-
     to_sync = records_to_sync
     log("Records to sync: #{to_sync.size}")
 
@@ -59,7 +53,7 @@ class Airtable::BaseSyncJob < ApplicationJob
       create_airtable_record(record, fields)
     end
 
-    record.update_column(synced_at_field, Time.current)
+    record.update_column(synced_at_field, Date.current)
     log("#{prefix}: OK")
   rescue Norairrecord::Error => e
     log("#{prefix}: FAILED - #{e.class}: #{e.message}")
@@ -136,75 +130,5 @@ class Airtable::BaseSyncJob < ApplicationJob
 
   def base_id
     @base_id ||= Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
-  end
-
-  def meta_connection
-    @meta_connection ||= Faraday.new(
-      url: "https://api.airtable.com",
-      headers: {
-        "Authorization" => "Bearer #{api_token}",
-        "Content-Type" => "application/json"
-      }
-    )
-  end
-
-  def fetch_table_meta
-    response = meta_connection.get("v0/meta/bases/#{base_id}/tables")
-    unless response.success?
-      log("Metadata API failed: HTTP #{response.status} - #{response.body.to_s.truncate(500)}")
-      return nil
-    end
-
-    tables = JSON.parse(response.body)["tables"] || []
-    found = tables.find { |t| t["name"] == table_name }
-    log("Table '#{table_name}' #{found ? 'found' : 'NOT FOUND'} in Airtable base")
-    found
-  end
-
-  def ensure_fields_exist
-    sample = records_to_sync.first
-    return unless sample
-
-    needed_fields = field_mapping(sample)
-    table_meta = fetch_table_meta
-    return unless table_meta
-
-    existing_names = table_meta["fields"].map { |f| f["name"] }.to_set
-    table_id = table_meta["id"]
-    missing = needed_fields.keys.reject { |name| existing_names.include?(name) }
-
-    if missing.empty?
-      log("All #{needed_fields.size} fields exist")
-      return
-    end
-
-    log("Creating #{missing.size} missing fields: #{missing.join(', ')}")
-
-    missing.each do |name|
-      value = needed_fields[name]
-      field_def = { name: name, type: infer_airtable_type(value) }
-      response = meta_connection.post("v0/meta/bases/#{base_id}/tables/#{table_id}/fields", field_def.to_json)
-
-      if response.success?
-        log("Created field '#{name}' (#{field_def[:type]})")
-      else
-        log("FAILED to create field '#{name}': #{response.body.to_s.truncate(300)}")
-      end
-    end
-  end
-
-  def infer_airtable_type(value)
-    case value
-    when TrueClass, FalseClass
-      "checkbox"
-    when Integer
-      "number"
-    when Float, BigDecimal
-      "number"
-    when /\A\d{4}-\d{2}-\d{2}T/
-      "dateTime"
-    else
-      "singleLineText"
-    end
   end
 end
