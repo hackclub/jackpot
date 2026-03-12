@@ -52,7 +52,7 @@ class ShopController < ApplicationController
     total_cost = item.price.to_f * quantity.to_f
     already = current_user.shop_orders.where(shop_item_id: item.id, status: %w[pending sent]).sum(:quantity).to_i
     if item.max_per_person.present? && (already + quantity) > item.max_per_person.to_i
-      remaining = [item.max_per_person.to_i - already, 0].max
+      remaining = [ item.max_per_person.to_i - already, 0 ].max
       msg = remaining.zero? ? "Purchase limit reached for this item." : "You can only purchase #{remaining} more of this item."
       if request.xhr?
         return render json: { error: msg }, status: :unprocessable_entity
@@ -128,5 +128,4 @@ class ShopController < ApplicationController
 
     redirect_to root_path, alert: "The shop is not available yet."
   end
-
 end

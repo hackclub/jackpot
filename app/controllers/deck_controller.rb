@@ -1,11 +1,11 @@
 class DeckController < ApplicationController
    before_action :authenticate_user!
-   before_action :authenticate_admin!, only: [:approve_project_admin, :reject_project_admin]
+   before_action :authenticate_admin!, only: [ :approve_project_admin, :reject_project_admin ]
 
   def index
     projects = current_user.projects.order(position: :asc).to_a
     project_ids = projects.map(&:id)
-    
+
     all_journal_entries = project_ids.present? ? current_user.journal_entries.where(project_id: project_ids).to_a : []
     journal_by_project_id = all_journal_entries.group_by(&:project_id)
 
@@ -76,10 +76,10 @@ class DeckController < ApplicationController
     banner_url = params[:banner_url].to_s.strip
     hackatime_projects = Array(params[:hackatime_projects]).map(&:strip).reject(&:blank?)
 
-    if code_url.start_with?('[') || code_url.start_with?('{')
+    if code_url.start_with?("[") || code_url.start_with?("{")
       return render json: { error: "Code URL is invalid" }, status: :unprocessable_entity
     end
-    if playable_url.start_with?('[') || playable_url.start_with?('{')
+    if playable_url.start_with?("[") || playable_url.start_with?("{")
       return render json: { error: "Playable URL is invalid" }, status: :unprocessable_entity
     end
 

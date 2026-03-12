@@ -7,7 +7,7 @@ class LeaderboardController < ApplicationController
   SORT_OPTIONS = %w[chips hours].freeze
 
   def index
-    @page = [params.fetch(:page, 1).to_i, 1].max
+    @page = [ params.fetch(:page, 1).to_i, 1 ].max
     @sort = params[:sort].presence_in(SORT_OPTIONS) || "chips"
     order_clause = @sort == "hours" ? { hackatime_hours: :desc } : { chip_am: :desc }
     @users = User.order(order_clause)

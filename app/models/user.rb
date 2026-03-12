@@ -134,9 +134,9 @@ class User < ApplicationRecord
 
      idx = project_index.to_i
      approved_hours_float = approved_hours.to_f
-     
+
      chips_earned = (approved_hours_float * 50).round(2)
-     
+
      projects[idx]["reviewed"] = true
      projects[idx]["status"] = "approved"
      projects[idx]["approved_hours"] = approved_hours_float
@@ -144,9 +144,9 @@ class User < ApplicationRecord
      projects[idx]["admin_feedback"] = feedback
      projects[idx]["reviewed_at"] = Time.current.iso8601
      projects[idx]["chips_earned"] = chips_earned
-     
+
      self.chip_am = (chip_am || 0) + chips_earned
-     
+
      update!(projects: projects, chip_am: chip_am)
    end
 

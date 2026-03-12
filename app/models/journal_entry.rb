@@ -12,7 +12,7 @@ class JournalEntry < ApplicationRecord
   def self.for_user_and_project(user_id, project_index)
     for_user(user_id).for_project(project_index).order(created_at: :desc)
   end
-  
+
   def self.for_user_and_project_id(user_id, project_id)
     for_user(user_id).for_project_id(project_id).order(created_at: :desc)
   end

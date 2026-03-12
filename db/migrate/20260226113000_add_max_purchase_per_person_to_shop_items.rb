@@ -4,4 +4,3 @@ class AddMaxPurchasePerPersonToShopItems < ActiveRecord::Migration[8.1]
     add_index :shop_items, :max_per_person
   end
 end
-

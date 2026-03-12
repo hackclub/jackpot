@@ -17,13 +17,13 @@ class AdminControllerTest < ActionDispatch::IntegrationTest
       access_token: "test_token_2",
       role: :user
     )
-    
+
     @user_with_projects.projects.create!(
       name: "Valid Project",
       description: "A real project",
       project_type: "Web App"
     )
-    
+
     @user_with_projects.projects.create!(
       name: "Another Project",
       description: "Second project",

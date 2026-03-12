@@ -5,4 +5,3 @@ class AddReviewedByUserIdToProjects < ActiveRecord::Migration[8.1]
     add_foreign_key :projects, :users, column: :reviewed_by_user_id
   end
 end
-

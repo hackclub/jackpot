@@ -6,23 +6,23 @@ class Project < ApplicationRecord
 
   validates :name, :user_id, presence: true
   validate :safe_urls
-  
+
   scope :shipped, -> { where(shipped: true) }
   scope :reviewed, -> { where(reviewed: true) }
   scope :pending_review, -> { where(shipped: true, reviewed: false) }
-  
+
   before_create :set_position
-  
+
   def set_position
     self.position = user.projects.count
   end
-  
+
   def self.from_json(user, json_projects)
     return [] unless json_projects.present?
-    
+
     json_projects.each_with_index do |project_data, index|
       next if project_data.nil?
-      
+
       project = user.projects.find_or_create_by(name: project_data["name"], created_at: project_data["created_at"]) do |p|
         p.description = project_data["description"]
         p.project_type = project_data["project_type"]
@@ -43,7 +43,7 @@ class Project < ApplicationRecord
       project.save! if project.changed?
     end
   end
-  
+
   private
 
   def safe_urls

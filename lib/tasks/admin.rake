@@ -1,8 +1,8 @@
 namespace :admin do
   desc "Make a user admin by email or Slack ID"
-  task :promote, [:identifier] => :environment do |t, args|
-    identifier = args[:identifier] || ENV['USER_ID']
-    
+  task :promote, [ :identifier ] => :environment do |t, args|
+    identifier = args[:identifier] || ENV["USER_ID"]
+
     unless identifier
       puts "Usage: bin/rails admin:promote[email_or_slack_id]"
       puts "   Or: USER_ID=email_or_slack_id bin/rails admin:promote"
@@ -10,7 +10,7 @@ namespace :admin do
     end
 
     user = User.find_by(email: identifier) || User.find_by(hack_club_id: identifier)
-    
+
     unless user
       puts "User not found with identifier: #{identifier}"
       puts "\nExisting users:"
@@ -27,7 +27,7 @@ namespace :admin do
   end
 
   desc "List all users with their roles"
-  task :list => :environment do
+  task list: :environment do
     puts "All users:"
     User.all.each do |u|
       admin_marker = u.role_admin? ? "👑" : "  "

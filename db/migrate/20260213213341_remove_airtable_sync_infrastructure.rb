@@ -10,7 +10,7 @@ class RemoveAirtableSyncInfrastructure < ActiveRecord::Migration[8.1]
       t.string :syncable_type
       t.datetime :synced_at
       t.datetime :updated_at, null: false
-      t.index [:syncable_type, :syncable_id], name: "index_airtable_sync_logs_on_syncable_type_and_syncable_id"
+      t.index [ :syncable_type, :syncable_id ], name: "index_airtable_sync_logs_on_syncable_type_and_syncable_id"
     end
 
     remove_column :users, :airtable_record_id, :string
