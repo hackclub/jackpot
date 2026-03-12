@@ -13,7 +13,7 @@
     <p class="sync-muted" style="text-align: center; margin-bottom: 1rem;">Auto-refreshes every 10s · Last loaded: <%= Time.current.strftime("%H:%M:%S %Z") %></p>
 
     <div style="text-align: center; margin-bottom: 2rem;">
-      <%= button_to "⚡ Force Sync All", admin_force_airtable_sync_path, class: "sync-force-btn", data: { turbo_confirm: "Enqueue all 8 Airtable sync jobs now?" } %>
+      <%= button_to "Force Sync All", admin_force_airtable_sync_path, class: "sync-force-btn", data: { turbo_confirm: "Run all 8 Airtable sync jobs now?" } %>
     </div>
 
     <% if flash[:notice] %>
@@ -21,7 +21,7 @@
     <% end %>
 
     <div class="sync-section">
-      <h2 class="sync-section-heading">⚙️ Configuration</h2>
+      <h2 class="sync-section-heading">Configuration</h2>
       <div class="sync-config-grid">
         <div class="sync-config-item">
           <span class="sync-config-label">API Token</span>
@@ -44,7 +44,7 @@
     </div>
 
     <div class="sync-section">
-      <h2 class="sync-section-heading">⏰ Recurring Tasks</h2>
+      <h2 class="sync-section-heading">Recurring Tasks</h2>
 
       <% if @recurring_config.any? %>
         <div class="sync-table-wrap">
@@ -80,7 +80,7 @@
         </div>
         <% if @recurring_tasks_db.empty? %>
           <p class="sync-muted" style="margin-top: 0.5rem;">
-            Tasks are configured in <code>recurring.yml</code> but Solid Queue worker hasn't loaded them yet. Make sure <code>bin/jobs</code> is running.
+            Tasks are configured in recurring.yml but Solid Queue worker hasn't loaded them yet. Make sure bin/jobs is running.
           </p>
         <% end %>
       <% else %>

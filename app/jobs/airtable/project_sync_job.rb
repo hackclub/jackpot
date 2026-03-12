@@ -1,19 +1,12 @@
-# Syncs projects to Airtable from the local database.
-# Pushes project data for external tracking/reporting.
 class Airtable::ProjectSyncJob < Airtable::BaseSyncJob
-  # @return [String] Airtable table name
   def table_name
     ENV.fetch("AIRTABLE_PROJECTS_TABLE", "_projects")
   end
 
-  # @return [ActiveRecord::Relation] all Project records
   def records
     Project.all
   end
 
-  # Maps Project attributes to Airtable fields.
-  # @param project [Project] the project to map
-  # @return [Hash] Airtable field values
   def field_mapping(project)
     {
       "Name" => project.name,

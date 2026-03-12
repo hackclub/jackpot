@@ -695,3 +695,20 @@
   margin-bottom: 1.5rem;
 }
 
+.sync-log-output {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem;
+  background: rgba(10, 8, 5, 0.9);
+  border: 1px solid rgba(139, 105, 20, 0.3);
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: #c4b89a;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 400px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+

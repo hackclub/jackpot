@@ -60,7 +60,7 @@ class AdminController < ApplicationController
   end
 
   def force_airtable_sync
-    jobs = [
+    job_classes = [
       Airtable::UserSyncJob,
       Airtable::ProjectSyncJob,
       Airtable::RsvpSyncJob,
@@ -71,9 +71,20 @@ class AdminController < ApplicationController
       Airtable::ShopItemRequestSyncJob
     ]
 
-    jobs.each { |job| job.perform_later }
+    @sync_results = []
 
-    redirect_to admin_airtable_sync_path, notice: "All #{jobs.size} sync jobs enqueued!"
+    job_classes.each do |klass|
+      job = klass.new
+      begin
+        job.perform
+        @sync_results << { name: klass.name, status: "ok", log: job.sync_log || [] }
+      rescue => e
+        log = (job.sync_log || []) + ["EXCEPTION: #{e.class}: #{e.message}", e.backtrace&.first(5)&.join("\n")].compact
+        @sync_results << { name: klass.name, status: "error", log: log }
+      end
+    end
+
+    render :force_sync_results
   end
 
   # Executes Ruby code submitted from the admin console.

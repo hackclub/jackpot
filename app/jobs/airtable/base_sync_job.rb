@@ -1,67 +1,97 @@
 class Airtable::BaseSyncJob < ApplicationJob
   queue_as :literally_whenever
 
+  attr_reader :sync_log
+
   def self.perform_later(*args)
     return if SolidQueue::Job.where(class_name: name, finished_at: nil).exists?
 
     super
   end
 
-  # Syncs records to Airtable, creating new or updating existing.
-  # Stores airtable_id on local records for future updates.
   def perform
-    ensure_fields_exist
-    records_to_sync.each do |record|
-      sync_single_record(record)
+    @sync_log = []
+    log("Starting #{self.class.name}")
+    log("API token present: #{api_token.present?}")
+    log("Base ID: #{base_id.presence || 'MISSING'}")
+    log("Table name: #{table_name}")
+
+    unless api_token.present? && base_id.present?
+      log("ERROR: Missing Airtable credentials, aborting")
+      return
     end
+
+    begin
+      ensure_fields_exist
+    rescue => e
+      log("Field auto-creation error: #{e.class}: #{e.message}")
+    end
+
+    to_sync = records_to_sync
+    log("Records to sync: #{to_sync.size}")
+
+    to_sync.each_with_index do |record, i|
+      sync_single_record(record, i)
+    end
+
+    log("Finished #{self.class.name}")
   end
 
   private
 
-  # Syncs a single record to Airtable.
-  # Creates if no airtable_id, updates if airtable_id exists.
-  def sync_single_record(record)
+  def log(msg)
+    @sync_log ||= []
+    entry = "[#{Time.current.strftime('%H:%M:%S')}] #{msg}"
+    @sync_log << entry
+    Rails.logger.info("AirtableSync: #{msg}")
+  end
+
+  def sync_single_record(record, index = nil)
     fields = field_mapping(record)
+    prefix = "Record ##{record.id}"
+    prefix += " (#{index + 1})" if index
 
     if record.airtable_id.present?
+      log("#{prefix}: updating airtable_id=#{record.airtable_id}")
       update_airtable_record(record, fields)
     else
+      log("#{prefix}: creating new")
       create_airtable_record(record, fields)
     end
 
     record.update_column(synced_at_field, Time.current)
+    log("#{prefix}: OK")
   rescue Norairrecord::Error => e
-    Rails.logger.error("Airtable sync failed for #{record.class}##{record.id}: #{e.message}")
+    log("#{prefix}: FAILED - #{e.class}: #{e.message}")
+  rescue => e
+    log("#{prefix}: FAILED - #{e.class}: #{e.message}")
   end
 
-  # Creates a new record in Airtable and stores the airtable_id locally.
   def create_airtable_record(record, fields)
     airtable_record = table.new(fields)
     airtable_record.create
     record.update_column(:airtable_id, airtable_record.id)
   end
 
-  # Updates an existing Airtable record by its stored airtable_id.
   def update_airtable_record(record, fields)
     airtable_record = table.find(record.airtable_id)
     fields.each { |key, value| airtable_record[key] = value }
     airtable_record.save
   rescue Norairrecord::RecordNotFoundError
-    # Record was deleted in Airtable, recreate it
     record.update_column(:airtable_id, nil)
     create_airtable_record(record, fields)
   end
 
   def table_name
-    raise NotImplementedError, "Subclass must implement #table_name"
+    raise NotImplementedError
   end
 
   def records
-    raise NotImplementedError, "Subclass must implement #records"
+    raise NotImplementedError
   end
 
   def field_mapping(_record)
-    raise NotImplementedError, "Subclass must implement #field_mapping"
+    raise NotImplementedError
   end
 
   def synced_at_field
@@ -120,10 +150,15 @@ class Airtable::BaseSyncJob < ApplicationJob
 
   def fetch_table_meta
     response = meta_connection.get("v0/meta/bases/#{base_id}/tables")
-    return nil unless response.success?
+    unless response.success?
+      log("Metadata API failed: HTTP #{response.status} - #{response.body.to_s.truncate(500)}")
+      return nil
+    end
 
     tables = JSON.parse(response.body)["tables"] || []
-    tables.find { |t| t["name"] == table_name }
+    found = tables.find { |t| t["name"] == table_name }
+    log("Table '#{table_name}' #{found ? 'found' : 'NOT FOUND'} in Airtable base")
+    found
   end
 
   def ensure_fields_exist
@@ -136,21 +171,26 @@ class Airtable::BaseSyncJob < ApplicationJob
 
     existing_names = table_meta["fields"].map { |f| f["name"] }.to_set
     table_id = table_meta["id"]
+    missing = needed_fields.keys.reject { |name| existing_names.include?(name) }
 
-    needed_fields.each do |name, value|
-      next if existing_names.include?(name)
+    if missing.empty?
+      log("All #{needed_fields.size} fields exist")
+      return
+    end
 
+    log("Creating #{missing.size} missing fields: #{missing.join(', ')}")
+
+    missing.each do |name|
+      value = needed_fields[name]
       field_def = { name: name, type: infer_airtable_type(value) }
       response = meta_connection.post("v0/meta/bases/#{base_id}/tables/#{table_id}/fields", field_def.to_json)
 
       if response.success?
-        Rails.logger.info("Airtable: created field '#{name}' in #{table_name}")
+        log("Created field '#{name}' (#{field_def[:type]})")
       else
-        Rails.logger.warn("Airtable: failed to create field '#{name}' in #{table_name}: #{response.body}")
+        log("FAILED to create field '#{name}': #{response.body.to_s.truncate(300)}")
       end
     end
-  rescue => e
-    Rails.logger.warn("Airtable: field auto-creation skipped: #{e.message}")
   end
 
   def infer_airtable_type(value)
