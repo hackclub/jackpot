@@ -1,0 +1,10 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "1af867eb683263c30775c7b00cef6bb6936e79fb9803689c4691cab6b70e6b1f",
+      "note": "Admin-only console behind authentication; intentional eval usage"
+    }
+  ],
+  "updated": "2026-03-12",
+  "brakeman_version": "8.0.4"
+}
