@@ -48,4 +48,4 @@ production:
   hackatime_hours_sync:
     class: HackatimeHoursSyncJob
     queue: literally_whenever
-    schedule: every 10 minutes
+    schedule: every 5 minutes
