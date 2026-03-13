@@ -22,6 +22,8 @@ class DeckController < ApplicationController
          hours
        end
 
+       project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours != hackatime_hours
+
        project_journals = journal_by_project_id[project.id] || []
        journal_hours = project_journals.sum(&:hours_worked).to_f
        total_hours = hackatime_hours + journal_hours
