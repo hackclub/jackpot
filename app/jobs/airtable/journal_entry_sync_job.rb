@@ -18,4 +18,20 @@ class Airtable::JournalEntrySyncJob < Airtable::BaseSyncJob
       "Created At" => entry.created_at&.iso8601
     }
   end
+
+  def perform
+    super
+    update_projects_total_hours
+  end
+
+  private
+
+  def update_projects_total_hours
+    totals_by_project_id = JournalEntry.group(:project_id).sum(:hours_worked)
+
+    Project.where(id: totals_by_project_id.keys).find_each do |project|
+      total_hours = totals_by_project_id[project.id] || 0
+      project.update!(total_hours: total_hours)
+    end
+  end
 end

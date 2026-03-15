@@ -27,6 +27,7 @@ class DeckController < ApplicationController
        project_journals = journal_by_project_id[project.id] || []
        journal_hours = project_journals.sum(&:hours_worked).to_f
        total_hours = hackatime_hours + journal_hours
+       project.update_column(:total_hours, total_hours) if project.total_hours != total_hours
        Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
        project_hash = {
@@ -150,7 +151,7 @@ class DeckController < ApplicationController
 
       project.update!(
         shipped: true,
-        status: "pending",
+        status: "in-review",
         shipped_at: Time.current
       )
     end
@@ -227,6 +228,8 @@ class DeckController < ApplicationController
       description: params[:description],
       tools_used: Array(params[:tools_used]).map(&:strip).reject(&:blank?)
     )
+
+    project.update_total_hours
 
     render json: entry
   rescue => e

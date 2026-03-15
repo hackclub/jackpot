@@ -147,76 +147,124 @@ class AdminController < ApplicationController
   end
 
   def review
+     begin
+       all_db_projects = Project.includes(:user).order(created_at: :desc)
+       pending_db_projects = Project.where(shipped: true, status: "in-review", reviewed: false).includes(:user).order(created_at: :desc)
+
+       @projects_for_review = []
+       @all_projects = []
+
+       all_db_projects.each do |db_project|
+         user = db_project.user
+         next unless user
+
+         project_hash = {
+           "id" => db_project.id,
+           "name" => db_project.name,
+           "description" => db_project.description,
+           "project_type" => db_project.project_type,
+           "code_url" => db_project.code_url,
+           "playable_url" => db_project.playable_url,
+           "banner_url" => db_project.banner_url,
+           "hackatime_projects" => db_project.hackatime_projects || [],
+           "shipped" => db_project.shipped,
+           "shipped_at" => db_project.shipped_at&.iso8601,
+           "status" => db_project.status,
+           "reviewed" => db_project.reviewed,
+           "reviewed_at" => db_project.reviewed_at&.iso8601,
+           "created_at" => db_project.created_at&.iso8601,
+           "total_hours" => db_project.total_hours || 0,
+           "hours" => db_project.total_hours || 0
+         }
+
+         project_item = {
+           user: user,
+           project: project_hash,
+           project_index: db_project.position
+         }
+
+         @all_projects << project_item
+       end
+
+       pending_db_projects.each do |db_project|
+         user = db_project.user
+         next unless user
+
+         project_hash = {
+           "id" => db_project.id,
+           "name" => db_project.name,
+           "description" => db_project.description,
+           "project_type" => db_project.project_type,
+           "code_url" => db_project.code_url,
+           "playable_url" => db_project.playable_url,
+           "banner_url" => db_project.banner_url,
+           "hackatime_projects" => db_project.hackatime_projects || [],
+           "shipped" => db_project.shipped,
+           "shipped_at" => db_project.shipped_at&.iso8601,
+           "status" => db_project.status,
+           "reviewed" => db_project.reviewed,
+           "reviewed_at" => db_project.reviewed_at&.iso8601,
+           "created_at" => db_project.created_at&.iso8601,
+           "total_hours" => db_project.total_hours || 0,
+           "hours" => db_project.total_hours || 0
+         }
+
+         project_item = {
+           user: user,
+           project: project_hash,
+           project_index: db_project.position
+         }
+
+         @projects_for_review << project_item
+       end
+     rescue => e
+       Rails.logger.error("FATAL ERROR in review action: #{e.class} - #{e.message}")
+       Rails.logger.error(e.backtrace.join("\n"))
+       @projects_for_review = []
+       @all_projects = []
+     end
+   end
+
+  def review_project
     begin
-      Rails.logger.info "=== AdminController#review START ==="
-      @all_users = User.where("projects IS NOT NULL AND projects != '[]'")
-      Rails.logger.info "Found #{@all_users.count} users with projects"
-      @projects_for_review = []
-      @all_projects = []
+      project_id = params[:project_id]
+      @project_db = Project.find(project_id)
+      @user = @project_db.user
 
-      service = HackatimeService.new
-      start_date = Date.new(2026, 2, 14)
-
-      @all_users.each do |user|
-        begin
-          Rails.logger.info "Processing user #{user.id} (#{user.email})"
-          projects = user.projects || []
-          Rails.logger.info "  User has #{projects.length} projects"
-
-          projects.each_with_index do |project, index|
-            Rails.logger.info "  Processing project[#{index}]: #{project.inspect}"
-            next if project.nil?
-
-            begin
-              # Calculate hours (same as deck_controller)
-              Rails.logger.info "    Calculating hours for project[#{index}]..."
-              total_hours = calculate_project_hours(user, project, index, service, start_date)
-              Rails.logger.info "    calculate_project_hours returned: #{total_hours.inspect} (class: #{total_hours.class})"
-
-              total_hours = 0.0 if total_hours.nil?
-              Rails.logger.info "    After nil check: #{total_hours.inspect}"
-
-              total_hours = total_hours.to_f
-              Rails.logger.info "    After to_f: #{total_hours.inspect} (class: #{total_hours.class})"
-
-              journal_entries = user.journal_entries.for_project(index) rescue []
-              Rails.logger.info "    Journal entries: #{journal_entries.length} found"
-
-              project_item = {
-                user: user,
-                project: project,
-                project_index: index,
-                hours: total_hours,
-                journal_entries: journal_entries || []
-              }
-
-              Rails.logger.info "    Created project_item with hours=#{project_item[:hours].inspect}"
-              @all_projects << project_item
-
-              if project["shipped"].to_s == "true" && project["reviewed"].to_s != "true"
-                Rails.logger.info "    Adding to @projects_for_review"
-                @projects_for_review << project_item
-              end
-            rescue => e
-              Rails.logger.error("ERROR processing project[#{index}] for user #{user.id}: #{e.class} - #{e.message}")
-              Rails.logger.error(e.backtrace.join("\n"))
-            end
-          end
-        rescue => e
-          Rails.logger.error("ERROR processing user #{user.id}: #{e.class} - #{e.message}")
-          Rails.logger.error(e.backtrace.join("\n"))
-        end
+      unless @user
+        redirect_to admin_review_path, alert: "Project user not found"
+        return
       end
 
-      Rails.logger.info "=== AdminController#review END ==="
-      Rails.logger.info "Total @all_projects: #{@all_projects.length}"
-      Rails.logger.info "Total @projects_for_review: #{@projects_for_review.length}"
+      # Find the project index for this user
+      @project_index = @project_db.position
+
+      # Get journal entries
+      @journal_entries = @project_db.journal_entries || []
+      # Use the project's canonical total_hours so combined hours match what users reported
+      @total_hours = (@project_db.total_hours || 0).to_f
+
+      # Convert to hash format for view
+      @project = {
+        "id" => @project_db.id,
+        "name" => @project_db.name,
+        "description" => @project_db.description,
+        "project_type" => @project_db.project_type,
+        "code_url" => @project_db.code_url,
+        "playable_url" => @project_db.playable_url,
+        "banner_url" => @project_db.banner_url,
+        "hackatime_projects" => @project_db.hackatime_projects || [],
+        "shipped" => @project_db.shipped,
+        "shipped_at" => @project_db.shipped_at&.iso8601,
+        "status" => @project_db.status,
+        "reviewed" => @project_db.reviewed,
+        "reviewed_at" => @project_db.reviewed_at&.iso8601,
+        "created_at" => @project_db.created_at&.iso8601
+      }
     rescue => e
-      Rails.logger.error("FATAL ERROR in review action: #{e.class} - #{e.message}")
+      Rails.logger.error("Error loading review_project: #{e.class} - #{e.message}")
       Rails.logger.error(e.backtrace.join("\n"))
-      @all_users = []
-      @projects_for_review = []
-      @all_projects = []
+      redirect_to admin_review_path, alert: "Error loading project"
     end
   end
 
