@@ -18,4 +18,9 @@ class Airtable::JournalEntrySyncJob < Airtable::BaseSyncJob
       "Created At" => entry.created_at&.iso8601
     }
   end
+
+  def perform
+    super
+    Project.find_each(&:update_total_hours)
+  end
 end

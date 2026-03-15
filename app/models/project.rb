@@ -9,12 +9,19 @@ class Project < ApplicationRecord
 
   scope :shipped, -> { where(shipped: true) }
   scope :reviewed, -> { where(reviewed: true) }
-  scope :pending_review, -> { where(shipped: true, reviewed: false) }
+  scope :pending_review, -> { where(status: "in-review", reviewed: false) }
 
   before_create :set_position
 
   def set_position
     self.position = user.projects.count
+  end
+
+  def update_total_hours
+    journal_hours = journal_entries.sum(:hours_worked).to_f || 0
+    hackatime_hours = self.hackatime_hours.to_f || 0
+    total = journal_hours + hackatime_hours
+    self.update_column(:total_hours, total)
   end
 
   def self.from_json(user, json_projects)
