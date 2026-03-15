@@ -150,14 +150,14 @@ class AdminController < ApplicationController
      begin
        all_db_projects = Project.includes(:user).order(created_at: :desc)
        pending_db_projects = Project.where(shipped: true, status: "in-review", reviewed: false).includes(:user).order(created_at: :desc)
-       
+
        @projects_for_review = []
        @all_projects = []
 
        all_db_projects.each do |db_project|
          user = db_project.user
          next unless user
-         
+
          project_hash = {
            "id" => db_project.id,
            "name" => db_project.name,
@@ -230,7 +230,7 @@ class AdminController < ApplicationController
       project_id = params[:project_id]
       @project_db = Project.find(project_id)
       @user = @project_db.user
-      
+
       unless @user
         redirect_to admin_review_path, alert: "Project user not found"
         return
