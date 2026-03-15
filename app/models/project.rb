@@ -18,7 +18,7 @@ class Project < ApplicationRecord
   end
 
   def update_total_hours
-    journal_hours = journal_entries.sum(:hours_worked).to_f || 0
+    journal_hours = JournalEntry.where(user_id: user_id, project_id: id).sum(:hours_worked).to_f || 0
     hackatime_hours = self.hackatime_hours.to_f || 0
     total = journal_hours + hackatime_hours
     self.update_column(:total_hours, total)

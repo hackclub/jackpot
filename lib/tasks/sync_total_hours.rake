@@ -2,7 +2,7 @@ namespace :projects do
   desc "Sync total_hours for all projects"
   task sync_total_hours: :environment do
     Project.find_each do |project|
-      journal_hours = project.journal_entries.sum(:hours_worked).to_f || 0
+      journal_hours = JournalEntry.where(project_id: project.id).sum(:hours_worked).to_f || 0
       hackatime_hours = project.hackatime_hours.to_f || 0
       total = journal_hours + hackatime_hours
       

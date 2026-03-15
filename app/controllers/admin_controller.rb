@@ -241,7 +241,8 @@ class AdminController < ApplicationController
 
       # Get journal entries
       @journal_entries = @project_db.journal_entries || []
-      @total_hours = @journal_entries.sum(&:hours_worked).to_f
+      # Use the project's canonical total_hours so combined hours match what users reported
+      @total_hours = (@project_db.total_hours || 0).to_f
 
       # Convert to hash format for view
       @project = {

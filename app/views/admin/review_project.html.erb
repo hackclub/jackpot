@@ -533,13 +533,41 @@
       const preview = document.getElementById('reviewPreview');
       const feedback = document.querySelector('.review-feedback-input').value;
       const hours = document.querySelector('.review-hours-input').value;
-      
+
+      // Clear previous preview content safely
+      preview.textContent = '';
+
+      const strong = document.createElement('strong');
+
       if (action === 'approve') {
-        preview.innerHTML = `<strong style="color: #3cb043;">✓ APPROVED</strong><br>Hours: ${hours}<br>${feedback ? 'Comment: ' + feedback : ''}`;
+        strong.style.color = '#3cb043';
+        strong.textContent = '✓ APPROVED';
+        preview.appendChild(strong);
+        preview.appendChild(document.createElement('br'));
+
+        const hoursText = document.createTextNode('Hours: ' + hours);
+        preview.appendChild(hoursText);
+        preview.appendChild(document.createElement('br'));
+
+        if (feedback) {
+          const commentText = document.createTextNode('Comment: ' + feedback);
+          preview.appendChild(commentText);
+        }
       } else if (action === 'reject') {
-        preview.innerHTML = `<strong style="color: #d42b2b;">✗ REJECTED</strong><br>Reason: ${feedback || '(no reason provided)'}`;
+        strong.style.color = '#d42b2b';
+        strong.textContent = '✗ REJECTED';
+        preview.appendChild(strong);
+        preview.appendChild(document.createElement('br'));
+
+        const reasonText = document.createTextNode('Reason: ' + (feedback || '(no reason provided)'));
+        preview.appendChild(reasonText);
       } else {
-        preview.innerHTML = `<strong>💬 COMMENT</strong><br>${feedback || '(no comment)'}`;
+        strong.textContent = '💬 COMMENT';
+        preview.appendChild(strong);
+        preview.appendChild(document.createElement('br'));
+
+        const commentOnlyText = document.createTextNode(feedback || '(no comment)');
+        preview.appendChild(commentOnlyText);
       }
     }
 
@@ -550,8 +578,10 @@
       const feedback = feedbackInput.value;
 
       const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      const action = (window.currentReviewAction || 'approve');
+      const endpoint = action === 'reject' ? '<%= reject_project_admin_path %>' : '<%= approve_project_admin_path %>';
 
-      fetch('<%= approve_project_admin_path %>', {
+      fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -562,7 +592,8 @@
           project_index: projectIndex,
           approved_hours: approvedHours || 0,
           hour_justification: '',
-          feedback: feedback
+          feedback: feedback,
+          action: action
         })
       })
       .then(r => r.json())

@@ -299,7 +299,7 @@
                       <span><%= item[:user]&.display_name || item[:user]&.email || "Unknown" %></span>
                     </div>
                     <div class="project-stats">
-                       <span class="stat-badge"><%= "%.1f" % (project["total_hours"] || project["hours"] || 0) %>h</span>
+                       <span class="stat-badge"><%= "%.1f" % (item[:hours] || 0) %>h</span>
                        <% if project["created_at"].present? %>
                          <% begin %>
                            <span class="stat-badge"><%= time_ago_in_words(Time.parse(project["created_at"])) %></span>
@@ -329,8 +329,8 @@
           <% @projects_for_review.each do |item| %>
             <% next if item.nil? || item[:project].nil? %>
             <% project = item[:project] %>
-            <a href="<%= admin_review_project_path(project["id"]) %>">
-              <div class="project-card">
+            <div class="project-card">
+              <a href="<%= admin_review_project_path(project["id"]) %>">
                 <div class="project-thumbnail">
                   <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
                     <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>">
@@ -365,18 +365,18 @@
                       <% end %>
                       <span class="review-count">Reviews: 1</span>
                     </div>
-                    </div>
-                    </div>
-                    </div>
-                    </a>
-                    <% end %>
-                    </div>
-                    <% end %>
-                    </div>
-                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
 
   <script>
-    function switchTab(tabName) {
+    function switchTab(tabName, evtOrElement) {
       document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
       });
@@ -384,7 +384,19 @@
         btn.classList.remove('active');
       });
       document.getElementById(tabName).classList.add('active');
-      event.target.classList.add('active');
+      var activeButton = null;
+      if (evtOrElement instanceof Event && evtOrElement.target) {
+        activeButton = evtOrElement.target;
+      } else if (evtOrElement && evtOrElement.nodeType === 1) {
+        // A DOM element was passed directly (e.g., switchTab('all', this))
+        activeButton = evtOrElement;
+      } else if (typeof event !== 'undefined' && event && event.target) {
+        // Backwards-compatible fallback for browsers exposing a global event
+        activeButton = event.target;
+      }
+      if (activeButton) {
+        activeButton.classList.add('active');
+      }
     }
 
     // Search functionality
