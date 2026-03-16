@@ -381,6 +381,62 @@
       color: #b0a080;
     }
 
+    .review-project-comments-section {
+      background: rgba(50, 40, 30, 0.8);
+      padding: 1.5rem;
+      border: 1px solid #8b6914;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+    }
+
+    .review-project-comments-title {
+      font-weight: 700;
+      color: #d4a017;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .review-project-comment {
+      background: rgba(10, 5, 0, 0.8);
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 0.8rem;
+      border: 1px solid rgba(139, 105, 20, 0.5);
+    }
+
+    .review-project-comment:last-child {
+      margin-bottom: 0;
+    }
+
+    .review-project-comment-head {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #d0c8b8;
+      margin-bottom: 0.5rem;
+    }
+
+    .review-project-comment-author {
+      font-weight: 600;
+      color: #d4a017;
+    }
+
+    .review-project-comment-body {
+      color: #e8dcc8;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .review-project-comments-empty {
+      color: #b0a080;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
     .already-reviewed {
       color: #3cb043;
       font-weight: 700;
@@ -495,6 +551,23 @@
           </div>
         <% end %>
 
+        <div class="review-project-comments-section">
+          <div class="review-project-comments-title">Comments (from status page)</div>
+          <% if @project_comments.present? %>
+            <% @project_comments.each do |c| %>
+              <div class="review-project-comment">
+                <div class="review-project-comment-head">
+                  <span class="review-project-comment-author"><%= c.user&.display_name || c.user&.email || 'Unknown' %></span>
+                  <span><%= c.created_at.strftime("%m/%d/%y %l:%M %P").strip %></span>
+                </div>
+                <div class="review-project-comment-body"><%= c.body %></div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="review-project-comments-empty">No comments yet.</div>
+          <% end %>
+        </div>
+
         <% if @project_db.reviewed %>
           <div class="already-reviewed">
             ✓ This project has already been reviewed.
@@ -515,7 +588,7 @@
             <textarea class="review-comment-textarea review-feedback-input" placeholder="Add your comment here..."></textarea>
           </div>
 
-          <button class="submit-review-btn" onclick="submitReview(<%= @user.id %>, <%= @project_index %>)">Submit Review</button>
+          <button class="submit-review-btn" onclick="submitReview(<%= @user.id %>, <%= @project_index %>, <%= @project_db.id %>)">Submit Review</button>
 
           <div class="review-preview">
             <div class="review-preview-title">Preview:</div>
@@ -571,7 +644,7 @@
       }
     }
 
-    function submitReview(userId, projectIndex) {
+    function submitReview(userId, projectIndex, projectId) {
       const hoursInput = document.querySelector('.review-hours-input');
       const feedbackInput = document.querySelector('.review-feedback-input');
       const approvedHours = hoursInput.value;
@@ -590,6 +663,7 @@
         body: JSON.stringify({
           user_id: userId,
           project_index: projectIndex,
+          project_id: projectId,
           approved_hours: approvedHours || 0,
           hour_justification: '',
           feedback: feedback,
