@@ -15,9 +15,10 @@ class HackatimeHoursSyncJob < ApplicationJob
         linked = project.hackatime_projects || []
         next if linked.empty?
 
-        project_total = linked.sum do |hp_name|
+        project_total_raw = linked.sum do |hp_name|
           service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
         end
+        project_total = project_total_raw.round
 
         project.update_column(:hackatime_hours, project_total) if project.hackatime_hours != project_total
         user_total += project_total

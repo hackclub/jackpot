@@ -16,11 +16,12 @@ class DeckController < ApplicationController
 
      @projects = projects.map.with_index do |project, index|
        linked = project.hackatime_projects || []
-       hackatime_hours = linked.sum do |hp_name|
+       hackatime_hours_raw = linked.sum do |hp_name|
          hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
          Rails.logger.info("  project[#{index}] #{hp_name}: #{hours}h from hackatime")
          hours
        end
+       hackatime_hours = hackatime_hours_raw.round
 
        project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours != hackatime_hours
 
@@ -293,6 +294,7 @@ class DeckController < ApplicationController
   def approve_project_admin
     user_id = params[:user_id]
     project_index = params[:project_index].to_i
+    project_id = params[:project_id]
     approved_hours = params[:approved_hours].to_f
     justification = params[:hour_justification]
     feedback = params[:feedback]
@@ -300,29 +302,40 @@ class DeckController < ApplicationController
     user = User.find(user_id)
     chips_earned = (approved_hours * 50).round(2)
 
-    Rails.logger.info "Approving project for user #{user_id}: #{approved_hours} hours = #{chips_earned} chips"
+    # Resolve project by id (status page sync) or by index
+    project = if project_id.present?
+                user.projects.find_by(id: project_id)
+    else
+                user.projects.order(position: :asc)[project_index]
+    end
+
+    unless project
+      Rails.logger.error "Project not found for user #{user_id} (project_id=#{project_id}, project_index=#{project_index})"
+      return render json: { error: "Project not found" }, status: :unprocessable_entity
+    end
+
+    # Derive index from project position for User#approve_project (chip_am / legacy jsonb)
+    resolved_index = user.projects.order(position: :asc).pluck(:id).index(project.id)
+
+    Rails.logger.info "Approving project for user #{user_id} project_id=#{project.id}: #{approved_hours} hours = #{chips_earned} chips"
 
     begin
-      if user.approve_project(project_index, approved_hours, justification, feedback)
-        project = user.projects.order(position: :asc)[project_index]
-        if project
-          project.update!(
-            reviewed: true,
-            reviewed_at: Time.current,
-            status: "approved",
-            approved_hours: approved_hours,
-            hour_justification: justification,
-            admin_feedback: feedback,
-            chips_earned: chips_earned,
-            reviewed_by_user_id: current_user.id
-          )
-        end
-        Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
-        render json: { success: true, message: "Project approved", chips_earned: chips_earned }
-      else
-        Rails.logger.error "Failed to approve project"
-        render json: { error: "Could not approve project" }, status: :unprocessable_entity
-      end
+      # Always update the Project record so status page shows review (single source of truth)
+      project.update!(
+        reviewed: true,
+        reviewed_at: Time.current,
+        status: "approved",
+        approved_hours: approved_hours,
+        hour_justification: justification,
+        admin_feedback: feedback,
+        chips_earned: chips_earned,
+        reviewed_by_user_id: current_user.id
+      )
+
+      user.approve_project(resolved_index, approved_hours, justification, feedback) if resolved_index.present?
+
+      Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
+      render json: { success: true, message: "Project approved", chips_earned: chips_earned }
     rescue => e
       Rails.logger.error "Error approving project: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
@@ -333,30 +346,41 @@ class DeckController < ApplicationController
   def reject_project_admin
     user_id = params[:user_id]
     project_index = params[:project_index].to_i
+    project_id = params[:project_id]
     feedback = params[:feedback]
 
     user = User.find(user_id)
 
-    Rails.logger.info "Rejecting project for user #{user_id}"
+    # Resolve project by id (status page sync) or by index
+    project = if project_id.present?
+                user.projects.find_by(id: project_id)
+    else
+                user.projects.order(position: :asc)[project_index]
+    end
+
+    unless project
+      Rails.logger.error "Project not found for user #{user_id} (project_id=#{project_id}, project_index=#{project_index})"
+      return render json: { error: "Project not found" }, status: :unprocessable_entity
+    end
+
+    resolved_index = user.projects.order(position: :asc).pluck(:id).index(project.id)
+
+    Rails.logger.info "Rejecting project for user #{user_id} project_id=#{project.id}"
 
     begin
-      if user.reject_project(project_index, feedback)
-        project = user.projects.order(position: :asc)[project_index]
-        if project
-          project.update!(
-            reviewed: true,
-            reviewed_at: Time.current,
-            status: "rejected",
-            admin_feedback: feedback,
-            reviewed_by_user_id: current_user.id
-          )
-        end
-        Rails.logger.info "Project rejected for user #{user_id}"
-        render json: { success: true, message: "Project rejected" }
-      else
-        Rails.logger.error "Failed to reject project"
-        render json: { error: "Could not reject project" }, status: :unprocessable_entity
-      end
+      # Always update the Project record so status page shows review (single source of truth)
+      project.update!(
+        reviewed: true,
+        reviewed_at: Time.current,
+        status: "rejected",
+        admin_feedback: feedback,
+        reviewed_by_user_id: current_user.id
+      )
+
+      user.reject_project(resolved_index, feedback) if resolved_index.present?
+
+      Rails.logger.info "Project rejected for user #{user_id}"
+      render json: { success: true, message: "Project rejected" }
     rescue => e
       Rails.logger.error "Error rejecting project: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace.join("\n")

@@ -76,6 +76,26 @@
   pointer-events: none;
   z-index: 2;
   display: block;
+  filter: drop-shadow(0 0 20px rgba(212, 160, 23, 0.5)) drop-shadow(0 0 40px rgba(212, 160, 23, 0.25));
+  animation: status-prize-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes status-prize-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 16px rgba(212, 160, 23, 0.45)) drop-shadow(0 0 32px rgba(212, 160, 23, 0.2));
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(212, 160, 23, 0.7)) drop-shadow(0 0 52px rgba(212, 160, 23, 0.35));
+    transform: translateY(-50%) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-prize-img {
+    animation: none;
+    filter: drop-shadow(0 0 20px rgba(212, 160, 23, 0.5));
+  }
 }
 
 /* --- Modal --- */

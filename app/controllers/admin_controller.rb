@@ -244,6 +244,9 @@ class AdminController < ApplicationController
       # Use the project's canonical total_hours so combined hours match what users reported
       @total_hours = (@project_db.total_hours || 0).to_f
 
+      # Project comments (from status page) so admin can see user comments in review
+      @project_comments = @project_db.project_comments.includes(:user).order(created_at: :asc)
+
       # Convert to hash format for view
       @project = {
         "id" => @project_db.id,

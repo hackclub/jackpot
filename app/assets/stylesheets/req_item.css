@@ -564,6 +564,85 @@
   font-style: italic;
 }
 
+/* Past weeks: dropdown (details/summary) */
+.req-item-week-details {
+  margin-bottom: 0.65rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 160, 23, 0.45);
+  background: rgba(20, 16, 12, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.req-item-week-details:hover {
+  border-color: rgba(212, 160, 23, 0.6);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.req-item-week-details[open] {
+  border-color: rgba(212, 160, 23, 0.7);
+  box-shadow: 0 4px 16px rgba(212, 160, 23, 0.2);
+}
+
+.req-item-week-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.7rem 1rem 0.7rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f0e6d2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(180deg, rgba(60, 45, 25, 0.85) 0%, rgba(40, 28, 18, 0.9) 100%);
+  transition: background 0.2s, color 0.2s;
+  user-select: none;
+}
+
+.req-item-week-summary::-webkit-details-marker {
+  display: none;
+}
+
+.req-item-week-summary::before {
+  content: "";
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid rgba(212, 160, 23, 0.95);
+  border-bottom: 2px solid rgba(212, 160, 23, 0.95);
+  transform: rotate(-45deg);
+  margin-right: 0.25rem;
+  transition: transform 0.25s ease;
+}
+
+.req-item-week-details[open] .req-item-week-summary::before {
+  transform: rotate(135deg);
+}
+
+.req-item-week-summary:hover {
+  color: #fff5e6;
+  background: linear-gradient(180deg, rgba(70, 52, 32, 0.9) 0%, rgba(50, 36, 24, 0.95) 100%);
+}
+
+.req-item-week-badge {
+  color: #f0e6d2;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.req-item-week-meta {
+  color: rgba(212, 160, 23, 0.95);
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.req-item-week-details .req-item-week-list,
+.req-item-week-details .req-item-week-empty {
+  padding: 0.6rem 1rem 0.85rem 1.75rem;
+  border-top: 1px solid rgba(212, 160, 23, 0.2);
+}
 
 .req-item-coming-soon-wrap {
   min-height: 100vh;
