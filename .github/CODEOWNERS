@@ -5,15 +5,8 @@ app/jobs/airtable @NeonGamerBot-QK
 # Rails config
 config/ @NeonGamerBot-QK
 
-
 # CI and deployment
 .github/ @NeonGamerBot-QK
-
-# Core application logic
-app/controllers/application_controller.rb @NeonGamerBot-QK
-app/controllers/sessions_controller.rb @NeonGamerBot-QK
-app/controllers/admin_controller.rb @NeonGamerBot-QK
-app/models/user.rb @NeonGamerBot-QK
 
 # Entrypoints
 bin/ @NeonGamerBot-QK
