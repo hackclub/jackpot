@@ -304,10 +304,10 @@ body {
 .hero-title {
   position: absolute;
   left: 50%;
-  top: clamp(-80vh, -22vh, 16vh);
+  top: clamp(-76vh, -3vh, 20vh);
   transform: translateX(-50%) rotate(3deg);
-  max-width: min(92vw, 700px);
-  width: clamp(340px, 52vw, 700px);
+  max-width: min(85vw, 580px);
+  width: clamp(280px, 44vw, 580px);
   height: auto;
   filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35));
   animation: title-flicker 4.5s infinite steps(1, end);
@@ -405,6 +405,26 @@ body {
 .hero-dateline__bottom {
   color: #9F2D2F;
   display: block;
+}
+
+/* Mac desktop/laptop tuning: reduce hero overlap while keeping responsive clamps */
+@media (min-width: 1024px) and (max-width: 1728px) and (max-height: 1120px) {
+  .hero-title {
+    top: clamp(-81vh, -3vh, 15vh);
+    width: clamp(250px, 40vw, 520px);
+  }
+
+  .hero-center {
+    top: clamp(-22vh, 13vh, 44vh);
+    width: clamp(540px, 80vw, 1100px);
+  }
+
+  .hero-dateline {
+    bottom: calc(96px + 8vh);
+    font-size: clamp(1.2rem, 2.4vw, 1.9rem);
+    line-height: 0.78;
+    max-width: min(90vw, 560px);
+  }
 }
 
 .ext-content {
@@ -1494,7 +1514,7 @@ body {
 }
 
 @media (max-width: 1023px) {
-  .hero-title { width: clamp(300px, 54vw, 520px); }
+  .hero-title { width: clamp(260px, 46vw, 450px); }
   .hero-center { width: clamp(300px, 90vw, 720px); }
   .hero-logo { width: clamp(100px, 18vw, 160px); }
 
@@ -1556,7 +1576,7 @@ body {
   }
 
   .hero-overlays { transform: translateY(2vh); }
-  .hero-title { top: clamp(6vh, 10vh, 14vh); width: clamp(280px, 58vw, 440px); }
+  .hero-title { top: clamp(10vh, 14vh, 18vh); width: clamp(240px, 50vw, 380px); }
   .hero-center { top: clamp(24vh, 30vh, 36vh); width: clamp(280px, 95vw, 560px); }
   .hero-logo-link { top: max(6px, env(safe-area-inset-top)); }
   .hero-logo { width: 130px; }
@@ -1587,7 +1607,7 @@ body {
     background-position: center center;
   }
 
-  .hero-title { top: clamp(5vh, 8vh, 12vh); width: 95vw; }
+  .hero-title { top: clamp(9vh, 12vh, 16vh); width: 85vw; }
   .hero-center { top: clamp(22vh, 28vh, 34vh); width: 95vw; max-width: 420px; }
   .hero-logo { width: 100px; }
 
