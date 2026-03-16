@@ -27,4 +27,3 @@ class AddWeekToShopItemRequests < ActiveRecord::Migration[8.1]
     remove_column :shop_item_requests, :week
   end
 end
-
