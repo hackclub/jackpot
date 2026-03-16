@@ -19,4 +19,3 @@ class ProjectCommentsController < ApplicationController
     redirect_to status_path, alert: "Comment can't be blank."
   end
 end
-

@@ -21,6 +21,10 @@ production:
     class: Airtable::ProjectSyncJob
     queue: literally_whenever
     schedule: every 5 minutes
+  airtable_rsvp_sync:
+    class: Airtable::RsvpSyncJob
+    queue: literally_whenever
+    schedule: every 5 minutes
   airtable_shop_order_sync:
     class: Airtable::ShopOrderSyncJob
     queue: literally_whenever
@@ -39,5 +43,9 @@ production:
     schedule: every 5 minutes
   airtable_shop_item_request_sync:
     class: Airtable::ShopItemRequestSyncJob
+    queue: literally_whenever
+    schedule: every 5 minutes
+  hackatime_hours_sync:
+    class: HackatimeHoursSyncJob
     queue: literally_whenever
     schedule: every 5 minutes

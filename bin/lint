@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🔧 Auto-fixing lint issues..."
+bundle exec rubocop --config .rubocop.yml --autocorrect-all "$@"

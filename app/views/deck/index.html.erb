@@ -25,7 +25,7 @@
                data-project-name="<%= project["name"] %>"
                data-project-description="<%= project["description"] %>"
                data-project-type="<%= project["project_type"] %>"
-               data-project-hours="<%= project["hours"] || 0 %>"
+               data-project-hours="<%= project["total_hours"] || project["hours"] || 0 %>"
                data-hackatime-hours="<%= project["hackatime_hours"] || 0 %>"
                data-journal-hours="<%= project["journal_hours"] || 0 %>"
                data-project-shipped="<%= project["shipped"] ? "true" : "false" %>"
@@ -36,7 +36,7 @@
              >
               <span class="card-project-name"><%= project["name"] %></span>
               <div class="card-stats">
-                <span class="card-hours"><%= "%.1f" % (project["hours"] || 0) %></span>
+                <span class="card-hours"><%= "%.1f" % (project["total_hours"] || project["hours"] || 0) %></span>
                 <span class="card-hours-label">hours</span>
               </div>
               <% if project["shipped"] %>

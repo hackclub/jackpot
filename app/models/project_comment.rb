@@ -6,4 +6,3 @@ class ProjectComment < ApplicationRecord
 
   validates :body, presence: true
 end
-

@@ -16,6 +16,7 @@ class Airtable::ProjectSyncJob < Airtable::BaseSyncJob
       "Playable URL" => project.playable_url,
       "Hackatime Projects" => (project.hackatime_projects || []).join(", "),
       "Hackatime Hours" => project.hackatime_hours.to_f,
+      "Total Hours" => project.total_hours.to_f,
       "Shipped" => project.shipped,
       "Shipped At" => project.shipped_at&.iso8601,
       "Status" => project.status,

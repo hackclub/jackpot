@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_13_120000) do
+
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_184133) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -140,6 +141,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_120000) do
     t.datetime "shipped_at"
     t.string "status", default: "pending"
     t.date "synced_at"
+    t.decimal "total_hours", precision: 10, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["reviewed_by_user_id"], name: "index_projects_on_reviewed_by_user_id"

@@ -10,4 +10,3 @@ class CreateProjectComments < ActiveRecord::Migration[8.1]
     add_index :project_comments, %i[project_id created_at]
   end
 end
-

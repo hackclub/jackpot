@@ -58,4 +58,3 @@ class ReqItemController < ApplicationController
     params.require(:shop_item_request).permit(:item_name, :price, :reference_link)
   end
 end
-
