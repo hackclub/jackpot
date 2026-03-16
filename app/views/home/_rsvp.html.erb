@@ -183,6 +183,13 @@
 @media (prefers-reduced-motion: reduce) {
   .scroll-down-v { animation: none; }
 }
+
+/* Mac desktop/laptop: place animated arrow lower in hero */
+@media (min-width: 1024px) and (max-width: 1728px) and (max-height: 1120px) {
+  .scroll-down-v {
+    bottom: calc(20px + 4vh);
+  }
+}
 /* --- RSVP Button (horizontal) --- */
 .rsvp-button {
   display: inline-flex;
