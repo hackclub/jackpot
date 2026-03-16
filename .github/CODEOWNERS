@@ -5,9 +5,6 @@ app/jobs/airtable @NeonGamerBot-QK
 # Rails config
 config/ @NeonGamerBot-QK
 
-# Database schema and migrations
-db/schema.rb @NeonGamerBot-QK
-db/migrate/ @NeonGamerBot-QK
 
 # CI and deployment
 .github/ @NeonGamerBot-QK
