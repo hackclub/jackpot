@@ -49,7 +49,8 @@ class ShopController < ApplicationController
     item = ShopItem.active.find(params[:id])
     quantity = params[:quantity].to_i
     quantity = 1 if quantity < 1
-    total_cost = item.price.to_f * quantity.to_f
+    unit_price = item.price.to_d.ceil
+    total_cost = (unit_price * quantity).to_d
     already = current_user.shop_orders.where(shop_item_id: item.id, status: %w[pending sent]).sum(:quantity).to_i
     if item.max_per_person.present? && (already + quantity) > item.max_per_person.to_i
       remaining = [item.max_per_person.to_i - already, 0].max
@@ -74,7 +75,7 @@ class ShopController < ApplicationController
         end
       end
 
-      current_user.update!(chip_am: current_user.chip_am.to_f - total_cost)
+      current_user.update!(chip_am: current_user.chip_am.to_d - total_cost)
 
       current_user.shop_orders.create!(
         shop_item: item,

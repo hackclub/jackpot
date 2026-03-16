@@ -750,7 +750,7 @@ var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
       var usd = parseFloat(priceUsd, 10);
       var dph = parseFloat(dollarPerHour, 10);
       if (!Number.isFinite(usd) || !Number.isFinite(dph) || dph <= 0) return null;
-      return Math.round((usd / dph) * 50 * 100) / 100;
+      return Math.ceil((usd / dph) * 50);
     }
 
     function updateAddFormChips() {
