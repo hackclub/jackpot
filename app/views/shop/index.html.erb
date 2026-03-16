@@ -555,10 +555,11 @@
     if (ms < 0) ms = 0;
 
     var totalSeconds = Math.floor(ms / 1000);
-    var hours = Math.floor(totalSeconds / 3600);
+    var days = Math.floor(totalSeconds / 86400);
+    var hours = Math.floor((totalSeconds % 86400) / 3600);
     var minutes = Math.floor((totalSeconds % 3600) / 60);
     var seconds = totalSeconds % 60;
-    shopUpgradeCountdown.textContent = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
+    shopUpgradeCountdown.textContent = pad2(days) + ':' + pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
   }
 
   if (window.__shopUpgradeCountdownInterval) {
@@ -664,9 +665,11 @@
     var qty = Math.max(1, parseInt(itemModalQty && itemModalQty.value, 10) || 1);
     if (itemModalQty) itemModalQty.value = String(qty);
     var shipping = Math.max(0, toNumber(itemModalShipping && itemModalShipping.value));
+    shipping = Math.ceil(shipping);
     if (itemModalShipping) itemModalShipping.value = String(shipping);
     var total = (itemModalCurrent.basePrice * qty) + shipping;
-    itemModalTotal.textContent = (total % 1 === 0) ? String(Math.round(total)) : String(total.toFixed(1));
+    total = Math.ceil(total);
+    itemModalTotal.textContent = String(total);
   }
 
   function openItemModal(data) {
@@ -676,7 +679,7 @@
      itemModalCurrent.id = data.id || null;
      itemModalCurrent.name = data.name || '';
      itemModalCurrent.link = data.link || '';
-     itemModalCurrent.basePrice = toNumber(data.price);
+     itemModalCurrent.basePrice = Math.ceil(toNumber(data.price));
 
      if (itemModalLimit) {
        var maxPerPerson = parseInt(data.maxPerPerson || "", 10);

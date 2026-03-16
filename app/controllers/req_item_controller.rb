@@ -14,9 +14,12 @@ class ReqItemController < ApplicationController
       @next_allowed_on = @last_request_at.present? ? (@last_request_at.to_date + 14.days) : nil
       @can_submit = @next_allowed_on.nil? || Date.current >= @next_allowed_on
 
-      week_start = Time.current.beginning_of_week
-      week_end = Time.current.end_of_week
-      @this_week_requests = ShopItemRequest.where(created_at: week_start..week_end).order(created_at: :asc)
+      current_week = ShopItemRequest.week_for_time(Time.current)
+      @this_week_requests = ShopItemRequest.where(week: current_week).order(created_at: :asc)
+      @past_weeks_grouped = ShopItemRequest
+        .where("week IS NOT NULL AND week < ?", current_week)
+        .order(week: :desc, created_at: :asc)
+        .group_by(&:week)
     end
   end
 
@@ -39,9 +42,12 @@ class ReqItemController < ApplicationController
       @last_request_at = last_request_at
       @next_allowed_on = next_allowed_on
       @can_submit = next_allowed_on.nil? || Date.current >= next_allowed_on
-      week_start = Time.current.beginning_of_week
-      week_end = Time.current.end_of_week
-      @this_week_requests = ShopItemRequest.where(created_at: week_start..week_end).order(created_at: :asc)
+      current_week = ShopItemRequest.week_for_time(Time.current)
+      @this_week_requests = ShopItemRequest.where(week: current_week).order(created_at: :asc)
+      @past_weeks_grouped = ShopItemRequest
+        .where("week IS NOT NULL AND week < ?", current_week)
+        .order(week: :desc, created_at: :asc)
+        .group_by(&:week)
       render :index, status: :unprocessable_entity
     end
   end

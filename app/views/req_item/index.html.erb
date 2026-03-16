@@ -13,8 +13,8 @@
         <%= image_tag "req_items/steps_block.png", alt: "Step up and talk to our dealer. Here's how it works: 1. Check the current request list →. 2. Fill out the form. 3. Wait for the shop refresh. 4. Earn your prize. Attention: one item every 2 weeks.", class: "req-item-steps-block-img" %>
       </section>
 
-      <!-- Center: This week's requests (small boxes with name + price) -->
-      <section class="req-item-week-section req-item-week-panel" aria-label="This week's requests">
+      <!-- Center: requests list (this week + past weeks stacked) -->
+      <section class="req-item-week-section req-item-week-panel" aria-label="Requests by week">
         <h2 class="req-item-week-heading">This week's requests:</h2>
         <div class="req-item-week-content">
           <% if @this_week_requests.any? %>
@@ -30,6 +30,33 @@
             <p class="req-item-week-empty">No requests this week yet.</p>
           <% end %>
         </div>
+
+        <% if @past_weeks_grouped.present? %>
+          <h2 class="req-item-week-heading" style="margin-top: 24px;">Past weeks</h2>
+          <div class="req-item-week-content">
+            <% @past_weeks_grouped.keys.sort.reverse.each do |week_number| %>
+              <% requests = @past_weeks_grouped[week_number] %>
+              <details class="req-item-week-details">
+                <summary class="req-item-week-summary">
+                  <span class="req-item-week-badge">Week <%= week_number %></span>
+                  <span class="req-item-week-meta">(<%= pluralize(requests.size, "request") %>)</span>
+                </summary>
+                <% if requests.any? %>
+                  <ul class="req-item-week-list">
+                    <% requests.each do |request| %>
+                      <li class="req-item-week-item">
+                        <span class="req-item-week-item-name"><%= request.item_name %></span>
+                        <span class="req-item-week-item-price"><%= number_to_currency(request.price, precision: 2) %></span>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% else %>
+                  <p class="req-item-week-empty">No requests.</p>
+                <% end %>
+              </details>
+            <% end %>
+          </div>
+        <% end %>
       </section>
 
       <!-- Right: countdown + cards.png form block -->
@@ -173,11 +200,12 @@
       var target = nextFridayMidnightUtcMs(now);
       var ms = target - now.getTime();
       if (ms < 0) ms = 0;
-      var totalSeconds = Math.floor(ms / 1000);
-      var hours = Math.floor(totalSeconds / 3600);
-      var minutes = Math.floor((totalSeconds % 3600) / 60);
-      var seconds = totalSeconds % 60;
-      el.textContent = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
+    var totalSeconds = Math.floor(ms / 1000);
+    var days = Math.floor(totalSeconds / 86400);
+    var hours = Math.floor((totalSeconds % 86400) / 3600);
+    var minutes = Math.floor((totalSeconds % 3600) / 60);
+    var seconds = totalSeconds % 60;
+    el.textContent = pad2(days) + ':' + pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
     }
     render();
     var iv = setInterval(render, 1000);

@@ -21,8 +21,9 @@ class ShopItem < ApplicationRecord
   def display_price
     p = price
     return "" if p.nil?
-    s = p.to_d.to_s("F")
-    s.sub(/\.0+\z/, "").sub(/(\.\d*?)0+\z/, '\1')
+    n = p.to_d
+    n_ceil = n.ceil
+    n_ceil.to_i.to_s
   end
 
   # Hours needed to purchase (price_usd / dollar_per_hour). Nil if not set.
@@ -47,7 +48,8 @@ class ShopItem < ApplicationRecord
   def compute_price_from_usd
     return if price_usd.blank? || dollar_per_hour.blank?
     return if dollar_per_hour.to_d <= 0
-    self.price = (price_usd.to_d / dollar_per_hour.to_d) * 50
+    raw_price = (price_usd.to_d / dollar_per_hour.to_d) * 50
+    self.price = raw_price.ceil
   end
 
   def sync_category_and_grant_type
