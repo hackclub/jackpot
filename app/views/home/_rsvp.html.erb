@@ -187,7 +187,16 @@
 /* Mac desktop/laptop: place animated arrow lower in hero */
 @media (min-width: 1024px) and (max-width: 1728px) and (max-height: 1120px) {
   .scroll-down-v {
-    bottom: calc(20px + 4vh);
+    bottom: calc(28px + 4vh);
+  }
+}
+
+/* Landscape desktop band fix: 1728x916 down to 917x916 */
+@media (min-width: 917px) and (max-width: 1728px) and (max-height: 916px) {
+  .scroll-down-v {
+    bottom: calc(24px + 2vh);
+    width: 60px;
+    height: 60px;
   }
 }
 /* --- RSVP Button (horizontal) --- */
