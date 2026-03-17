@@ -1625,4 +1625,107 @@ body {
 @media (max-width: 360px) {
   .section-title { font-size: clamp(1.45rem, 4vw, 2.4rem); }
 }
+
+/*
+  1512x982-ish landscape desktops (with flexibility):
+  - remove section-1 nested scrolling
+  - keep section-0 hero composition clear (no subtitle overlap on center art)
+*/
+@media (min-width: 1280px) and (max-width: 1728px) and (min-height: 900px) and (max-height: 1080px) and (min-aspect-ratio: 14/10) and (max-aspect-ratio: 18/10) {
+  /* Section 1 only: prevent individual section scroll capture */
+  .ext-section__inner--1 {
+    overflow-y: visible;
+  }
+
+  .section-1__panel-content {
+    overflow: visible;
+  }
+
+  .section-1__carousel,
+  .section-1__carousel-viewport {
+    overflow: hidden;
+  }
+}
+
+/*
+  Landscape desktop band fix: 1728x916 down to 917x916
+  (prevents hero overlap, section-1 collisions, and inner-section scrolling)
+*/
+@media (min-width: 917px) and (max-width: 1728px) and (max-height: 916px) {
+  /* Section 1: lift title so it doesn't sink into yellow panel */
+  .ext-section__inner--1 .section-title--center {
+    margin-top: clamp(110px, 13vw, 170px);
+    transform: translateY(0);
+  }
+
+  /* Keep carousel from introducing horizontal pan in this ratio */
+  .ext-section__inner--1 .section-1__carousel {
+    width: min(88vw, 980px);
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+  }
+
+  .ext-section__inner--1 .section-1__carousel-box {
+    width: clamp(130px, 16vw, 220px);
+  }
+
+  /* Keep sections layered correctly over their backgrounds (no flow override). */
+  .ext-section__inner {
+    overflow-y: visible;
+    overscroll-behavior: auto;
+  }
+
+  .section-1__panel-content {
+    overflow: visible;
+  }
+
+  .ext-section__inner--3 {
+    padding-top: clamp(24px, 3vw, 40px);
+  }
+
+  .ext-section__inner--4,
+  .ext-section__inner--5 {
+    padding-top: clamp(24px, 3vw, 40px);
+    padding-bottom: clamp(24px, 3vw, 40px);
+  }
+
+  /* Final info section: avoid clipping links in this ratio */
+  .ext-section--5 {
+    overflow: visible;
+  }
+
+  .section-title--info {
+    margin-top: clamp(56px, 8vw, 120px);
+    margin-bottom: clamp(16px, 2vw, 28px);
+    font-size: clamp(3.8rem, 8vw, 6.6rem);
+  }
+
+  .section-6__cards {
+    margin-bottom: clamp(16px, 2vw, 32px);
+  }
+
+  .section-6__questions {
+    margin-bottom: clamp(20px, 3vw, 44px);
+  }
+
+  .section-6__footer {
+    margin-top: clamp(24px, 3vw, 48px);
+  }
+
+  .section-6__footer-links {
+    gap: clamp(16px, 2.4vw, 32px);
+    margin-bottom: clamp(6px, 1vw, 12px);
+  }
+
+  .section-4__title-image {
+    margin-top: clamp(32px, 6vw, 96px);
+    transform: none;
+  }
+
+  .section-5__events,
+  .section-6__questions {
+    margin-bottom: clamp(32px, 5vw, 72px);
+  }
+}
 </style>
