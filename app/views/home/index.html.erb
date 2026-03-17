@@ -1563,7 +1563,8 @@ body {
 
 @media (max-width: 767px) {
   :root {
-    --first-section-height: 168vw;
+    /* Phone baseline: keep hero stable across tall/short phone ratios */
+    --first-section-height: 100dvh;
   }
 
   .section-1__panel-bg {
@@ -1571,13 +1572,21 @@ body {
   }
 
   .ext-section--0.page-section--hero {
+    height: 100dvh;
+    min-height: 100dvh;
     background-size: cover;
-    background-position: center center;
+    background-position: center top;
   }
 
-  .hero-overlays { transform: translateY(2vh); }
-  .hero-title { top: clamp(10vh, 14vh, 18vh); width: clamp(240px, 50vw, 380px); }
-  .hero-center { top: clamp(24vh, 30vh, 36vh); width: clamp(280px, 95vw, 560px); }
+  .hero-overlays { transform: translateY(0); }
+  .hero-title { top: clamp(6vh, 10vh, 13vh); width: clamp(220px, 56vw, 360px); }
+  .hero-center { top: clamp(28vh, 34vh, 40vh); width: clamp(280px, 88vw, 560px); }
+  .hero-dateline {
+    bottom: clamp(140px, 18vh, 220px);
+    font-size: clamp(1.28rem, 5.2vw, 2rem);
+    line-height: 0.86;
+    max-width: 90vw;
+  }
   .hero-logo-link { top: max(6px, env(safe-area-inset-top)); }
   .hero-logo { width: 130px; }
 
@@ -1595,20 +1604,38 @@ body {
   .section-6__questions-buttons {
     transform: translate(clamp(0px, 0.4vw, 4px), clamp(8px, 1.2vw, 14px));
   }
+
+  /* Last section: move content upward on phones */
+  .ext-section__inner--5 {
+    padding-top: 0;
+  }
+
+  .section-title--info {
+    margin-top: clamp(48px, 10vw, 96px);
+    margin-bottom: clamp(20px, 3vw, 36px);
+    font-size: clamp(3rem, 11vw, 5.2rem);
+  }
 }
 
 @media (max-width: 479px) {
   :root {
-    --first-section-height: 182vw;
+    --first-section-height: 100dvh;
   }
 
   .ext-section--0.page-section--hero {
+    height: 100dvh;
+    min-height: 100dvh;
     background-size: cover;
-    background-position: center center;
+    background-position: center top;
   }
 
-  .hero-title { top: clamp(9vh, 12vh, 16vh); width: 85vw; }
-  .hero-center { top: clamp(22vh, 28vh, 34vh); width: 95vw; max-width: 420px; }
+  .hero-title { top: clamp(7vh, 11vh, 14vh); width: 84vw; }
+  .hero-center { top: clamp(27vh, 33vh, 38vh); width: 94vw; max-width: 460px; }
+  .hero-dateline {
+    bottom: clamp(128px, 17vh, 190px);
+    font-size: clamp(1.2rem, 5.8vw, 1.7rem);
+    line-height: 0.9;
+  }
   .hero-logo { width: 100px; }
 
   .section-title {
@@ -1726,6 +1753,196 @@ body {
   .section-5__events,
   .section-6__questions {
     margin-bottom: clamp(32px, 5vw, 72px);
+  }
+}
+
+/*
+  Final phone-portrait override (placed last so it wins):
+  fixes hero sizing/position and lifts final section content on common phone ratios.
+*/
+@media (max-width: 600px) and (min-height: 800px) and (orientation: portrait) {
+  .hero-center {
+    top: 35vh !important;
+    width: min(96vw, 480px) !important;
+  }
+
+  .hero-dateline {
+    bottom: 19vh !important;
+    font-size: clamp(1.3rem, 6vw, 1.85rem) !important;
+    line-height: 0.92 !important;
+    max-width: 92vw !important;
+  }
+
+  .ext-section__inner--5 {
+    padding-top: 0 !important;
+    padding-bottom: 12px !important;
+  }
+
+  .section-title--info {
+    margin-top: 28px !important;
+    margin-bottom: 18px !important;
+    font-size: clamp(2.8rem, 10.5vw, 4.8rem) !important;
+  }
+
+  .section-6__cards {
+    margin-bottom: 16px !important;
+  }
+
+  .section-6__questions {
+    margin-bottom: 18px !important;
+  }
+
+  .section-6__footer {
+    margin-top: 16px !important;
+  }
+}
+
+/* 360x740-ish phones (Galaxy/Android portrait) */
+@media (min-width: 340px) and (max-width: 390px) and (min-height: 700px) and (max-height: 780px) and (orientation: portrait) {
+  .hero-title {
+    top: 10vh !important;
+    width: 82vw !important;
+  }
+
+  .hero-center {
+    top: 33vh !important;
+    width: 95vw !important;
+    max-width: 430px !important;
+  }
+
+  .hero-dateline {
+    bottom: 20vh !important;
+    font-size: clamp(1.15rem, 5.5vw, 1.6rem) !important;
+    line-height: 0.9 !important;
+    max-width: 90vw !important;
+  }
+
+  .scroll-down-v {
+    bottom: 12vh !important;
+  }
+
+  .ext-section__inner--5 {
+    padding-top: 0 !important;
+  }
+
+  .section-title--info {
+    margin-top: 20px !important;
+    font-size: clamp(2.6rem, 10vw, 4.3rem) !important;
+  }
+}
+
+/* Broad fallback for small portrait phones if exact ratio query misses */
+@media (max-width: 430px) and (max-height: 900px) and (orientation: portrait) {
+  .hero-title {
+    top: 9vh !important;
+    width: 84vw !important;
+  }
+
+  .hero-center {
+    top: 34vh !important;
+    width: 96vw !important;
+    max-width: 460px !important;
+  }
+
+  .hero-dateline {
+    bottom: 19vh !important;
+    font-size: clamp(1.18rem, 5.7vw, 1.68rem) !important;
+    line-height: 0.92 !important;
+  }
+
+  .scroll-down-v {
+    bottom: 11vh !important;
+  }
+}
+
+/* iPhone Safari portrait around ~390–520px (Pro, Pro Max, Plus) */
+@media (min-width: 375px) and (max-width: 540px) and (min-height: 700px) and (max-height: 1000px) {
+  .hero-center {
+    top: 32vh !important;
+    width: min(100vw, 520px) !important;
+    max-width: 100vw !important;
+  }
+
+  .hero-dateline {
+    bottom: 12vh !important;
+    font-size: clamp(1.2rem, 4.2vw, 1.65rem) !important;
+    max-width: 98vw !important;
+    line-height: 0.95 !important;
+  }
+
+  .scroll-down-v {
+    bottom: 5vh !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+}
+
+/* FORCE: bigger center hero image on phone ratios */
+@media (max-width: 767px) and (orientation: portrait) {
+  .hero-overlays {
+    overflow: visible !important;
+  }
+
+  .page-section--hero .hero-title {
+    width: 78vw !important;
+  }
+
+  .page-section--hero .hero-center {
+    width: min(118vw, 880px) !important;
+    max-width: none !important;
+    top: 29vh !important;
+    transform: translateX(-51%) scale(1.24) !important;
+    transform-origin: center top !important;
+  }
+
+  .hero-dateline {
+    font-size: clamp(1.28rem, 6vw, 1.9rem) !important;
+    bottom: 10vh !important;
+  }
+
+  .scroll-down-v {
+    bottom: 3.5vh !important;
+  }
+}
+
+/* Extra boost for 360x740-ish phones */
+@media (min-width: 320px) and (max-width: 430px) and (min-height: 680px) and (max-height: 900px) and (orientation: portrait) {
+  .page-section--hero .hero-title {
+    width: 80vw !important;
+  }
+
+  .page-section--hero .hero-center {
+    width: 120vw !important;
+    top: 30vh !important;
+    transform: translateX(-51%) scale(1.3) !important;
+  }
+
+  .hero-dateline {
+    font-size: clamp(1.32rem, 6.2vw, 2rem) !important;
+    bottom: 9vh !important;
+  }
+
+  .scroll-down-v {
+    bottom: 3vh !important;
+  }
+}
+
+/* iOS Safari-specific phone tuning: keep subtitle clear of center image */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) and (orientation: portrait) {
+    .page-section--hero .hero-center {
+      top: 26vh !important;
+    }
+
+    .hero-dateline {
+      bottom: 6vh !important;
+      max-width: 96vw !important;
+      line-height: 0.98 !important;
+    }
+
+    .scroll-down-v {
+      bottom: 1.8vh !important;
+    }
   }
 }
 </style>
