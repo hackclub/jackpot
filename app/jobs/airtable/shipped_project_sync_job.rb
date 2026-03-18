@@ -36,7 +36,7 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
       "ZIP / Postal Code"   => identity.dig("address", "postal_code") || identity["postal_code"],
       "Birthday"            => identity["birthday"],
       "Optional - Override Hours Spent" => project.approved_hours&.to_f,
-      "Optional - Override Hours Spent Justification" => justification_text(project),
+      "Optional - Override Hours Spent Justification" => justification_text(project)
     }.compact
   end
 
