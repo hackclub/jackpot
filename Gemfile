@@ -84,3 +84,6 @@ gem "omniauth-rails_csrf_protection"
 gem "norairrecord"
 gem "faraday-net_http_persistent", "~> 2.0"
 gem "aws-sdk-s3", "~> 1.0"
+
+# Pin to fix stored XSS vulnerability (GHSA-qmpg-8xg6-ph5q)
+gem "action_text-trix", ">= 2.1.17"
