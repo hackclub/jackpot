@@ -2,16 +2,12 @@
 
 class StatusController < ApplicationController
   before_action :authenticate_user!
-  before_action :require_status_feature
 
   def index
-  end
-
-  private
-
-  def require_status_feature
-    return if Flipper.enabled?(:status, current_user)
-
-    redirect_to root_path, alert: "The status page is not available yet."
+    @show_status_content = true
+    @projects = current_user.projects.includes(:reviewed_by, project_comments: :user).order(:position, created_at: :desc)
+    @total_chips = current_user.chip_am.to_i
+    @fulfilled_orders = current_user.shop_orders.sent.order(created_at: :desc)
+    @rejected_orders = current_user.shop_orders.refunded.order(created_at: :desc)
   end
 end

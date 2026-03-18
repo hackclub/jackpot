@@ -1,215 +1,73 @@
-<div style="padding: 3rem 2rem; max-width: 1400px; margin: 0 auto;">
+<div style="background: linear-gradient(135deg, #1e1410 0%, #2a2015 100%); min-height: 100vh; padding: 2rem; font-family: 'Georgia', 'Times New Roman', serif;">
   <style>
-    .review-container {
-      font-family: 'Georgia', serif;
-      color: #333;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    .review-header {
-      display: flex;
-      gap: 3rem;
+    body {
+      background: linear-gradient(135deg, #1e1410 0%, #2a2015 100%);
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: #e8dcc8;
+    }
+
+    .review-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
       margin-bottom: 3rem;
     }
 
-    .review-section {
-      flex: 1;
-    }
-
-    .review-section h2 {
-      font-size: 1.8rem;
-      color: #8b6914;
-      margin: 0 0 1rem 0;
-      font-style: italic;
-    }
-
-    .project-card {
-      background: #f5f1e8;
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .project-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
       margin-bottom: 1rem;
+      text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.7);
     }
 
-    .project-title {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #1a1a1a;
-      margin: 0;
-    }
-
-    .project-meta {
-      font-size: 0.9rem;
-      color: #666;
-      margin: 0.5rem 0 0 0;
-      line-height: 1.6;
-    }
-
-    .approved-hours {
-      text-align: right;
-    }
-
-    .approved-hours-value {
-      font-size: 1.6rem;
-      font-weight: bold;
-      color: #8b6914;
-    }
-
-    .project-description {
-      color: #555;
-      margin: 1rem 0;
-      line-height: 1.6;
-    }
-
-    .project-buttons {
-      display: flex;
-      gap: 0.8rem;
-      margin: 1rem 0;
-      flex-wrap: wrap;
-    }
-
-    .project-buttons a,
-    .project-buttons button {
-      padding: 0.6rem 1rem;
-      border: 1px solid #8b6914;
-      border-radius: 6px;
-      background: #f5f1e8;
-      color: #333;
-      text-decoration: none;
-      font-family: 'Georgia', serif;
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: all 0.2s;
-    }
-
-    .project-buttons a:hover,
-    .project-buttons button:hover {
-      background: #e8dcc8;
-    }
-
-    .review-btn {
-      background: #8b6914 !important;
-      color: white !important;
-      font-weight: 600;
-    }
-
-    .review-btn:hover {
-      background: #9a761a !important;
-    }
-
-    .journal-view {
-      background: white;
-      padding: 0.8rem;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      font-size: 0.9rem;
-    }
-
-    .journal-rendered-desc {
-      font-size: 0.9rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.5;
-    }
-
-    .journal-rendered-desc img {
-      max-width: 100%;
-      border-radius: 6px;
-      margin: 6px 0;
-      display: block;
-      border: 1px solid #ddd;
-    }
-
-    .review-inputs {
-      margin-top: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .review-inputs input,
-    .review-inputs textarea {
+    .search-bar {
       width: 100%;
-      padding: 0.8rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-family: 'Georgia', serif;
-      font-size: 0.95rem;
-    }
-
-    .review-inputs textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .review-actions {
-      display: flex;
-      gap: 0.8rem;
-      margin-top: 1rem;
-    }
-
-    .approve-btn {
-      flex: 1;
-      background: #8b6914;
-      color: white;
+      padding: 1rem 1.5rem;
+      background: rgba(30, 20, 10, 0.85);
       border: 2px solid #8b6914;
-      padding: 0.8rem;
-      border-radius: 6px;
+      border-radius: 50px;
+      color: #e8dcc8;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
       font-family: 'Georgia', serif;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 1rem;
     }
 
-    .approve-btn:hover {
-      background: #9a761a;
-    }
-
-    .reject-btn {
-      flex: 1;
-      background: white;
-      color: #d42b2b;
-      border: 2px solid #d42b2b;
-      padding: 0.8rem;
-      border-radius: 6px;
-      font-family: 'Georgia', serif;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-
-    .reject-btn:hover {
-      background: #ffe6e6;
+    .search-bar::placeholder {
+      color: #8b6914;
     }
 
     .tabs {
       display: flex;
-      gap: 1rem;
+      gap: 2rem;
       margin-bottom: 2rem;
-      border-bottom: 2px solid #ddd;
+      border-bottom: 2px solid #8b6914;
     }
 
     .tab-btn {
-      padding: 0.8rem 1.5rem;
+      padding: 1rem 0;
       background: none;
       border: none;
       border-bottom: 3px solid transparent;
-      font-family: 'Georgia', serif;
-      font-size: 1.1rem;
-      color: #666;
+      color: #b0a080;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      font-family: 'Georgia', serif;
     }
 
     .tab-btn.active {
-      color: #8b6914;
-      border-bottom-color: #8b6914;
+      color: #d4a017;
+      border-bottom-color: #d4a017;
     }
 
     .tab-content {
@@ -220,319 +78,340 @@
       display: block;
     }
 
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .project-card {
+      background: rgba(30, 20, 10, 0.85);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid #8b6914;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .project-card:hover {
+      transform: translateY(-4px);
+      border-color: #d4a017;
+      box-shadow: 0 8px 24px rgba(212, 160, 23, 0.3);
+    }
+
+    .project-thumbnail {
+      width: 100%;
+      height: 180px;
+      background: #0B0D17;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 0.85rem;
+      overflow: hidden;
+    }
+
+    .project-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .project-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-left: 3px solid #8b6914;
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 0.5rem;
+      gap: 1rem;
+    }
+
+    .project-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f0e6d2;
+      margin: 0;
+      flex: 1;
+      word-break: break-word;
+      font-family: 'Georgia', serif;
+    }
+
+    .status-badge {
+      background: #8b6914;
+      color: #f0e6d2;
+      padding: 0.3rem 0.7rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+      font-family: 'Georgia', serif;
+    }
+
+    .project-description {
+      color: #d0c8b8;
+      font-size: 0.85rem;
+      margin: 0.8rem 0;
+      line-height: 1.4;
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .project-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin: 0.8rem 0;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      background: rgba(139, 105, 20, 0.4);
+      color: #e8dcc8;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Georgia', serif;
+    }
+
+    .project-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid #8b6914;
+      font-size: 0.8rem;
+    }
+
+    .project-user {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #d0c8b8;
+    }
+
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #8b6914;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f0e6d2;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .project-stats {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .stat-badge {
+      background: #d4a017;
+      color: #1e1410;
+      padding: 0.3rem 0.7rem;
+      border-radius: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      font-family: 'Georgia', serif;
+    }
+
+    .review-count {
+      color: #d0c8b8;
+    }
+
     .empty-state {
       text-align: center;
       padding: 3rem;
-      color: #999;
+      color: #666;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
     }
   </style>
 
   <div class="review-container">
-    <div class="review-header">
-      <div class="review-section">
-        <h2>All Projects (<%= @all_projects.length %>)</h2>
-      </div>
-      <div class="review-section">
-        <h2>Pending Review (<%= @projects_for_review.length %>)</h2>
-      </div>
+    <div class="page-header">
+      <h1 class="page-title">Project Reviews</h1>
     </div>
 
+    <input type="text" class="search-bar" placeholder="Search project reviews..." id="searchInput">
+
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('all')">All Projects</button>
-      <button class="tab-btn" onclick="switchTab('pending')">Pending Review</button>
+      <button class="tab-btn active" onclick="switchTab('all')">All Projects (<%= @all_projects.length %>)</button>
+      <button class="tab-btn" onclick="switchTab('pending')">Pending Review (<%= @projects_for_review.length %>)</button>
     </div>
 
     <!-- All Projects Tab -->
     <div id="all" class="tab-content active">
       <% if @all_projects.empty? %>
         <div class="empty-state">
-          <p>No projects yet.</p>
+          No projects yet.
         </div>
       <% else %>
-        <% @all_projects.each do |item| %>
-          <% next if item.nil? || item[:project].nil? %>
-          <% project = item[:project] %>
-          <div class="project-card">
-            <div class="project-card-header">
-              <div>
-                <p class="project-title"><%= project["name"] || "Untitled Project" %></p>
-                <p class="project-meta">
-                   by <%= item[:user]&.display_name || item[:user]&.email || "Unknown" %> 
-                   (<%= item[:user]&.email || "N/A" %>) 
-                   • <%= sprintf("%.4f", (item[:hours] || 0).to_f) %> hours logged
-                   <% if project["created_at"].present? %>
-                     <% begin %>
-                       • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
-                     <% rescue => e %>
-                       • submitted (invalid date)
-                     <% end %>
-                   <% end %>
-                   <% status = project["status"] %>
-                  <% if status.present? %>
-                    <% case status
-                       when "approved" %>
-                        <br><span style="color: #3cb043; font-weight: bold;">✓ Approved</span>
-                       <% when "rejected" %>
-                        <br><span style="color: #d42b2b; font-weight: bold;">✗ Rejected</span>
-                       <% when "pending" %>
-                        <br><span style="color: #d4a017; font-weight: bold;">⏳ Pending Review</span>
-                       <% end %>
-                  <% end %>
-                </p>
-              </div>
-              <div class="approved-hours">
-                 <div class="approved-hours-value"><%= sprintf("%.4f", (item[:hours] || 0).to_f) %>h</div>
-               </div>
-            </div>
-
-            <p class="project-description"><%= project["description"] || "" %></p>
-
-            <div class="project-buttons">
-              <% if project["code_url"].present? %>
-                <a href="<%= project["code_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["code_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Code</a>
-              <% end %>
-              <% if project["playable_url"].present? %>
-                <a href="<%= project["playable_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["playable_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Demo</a>
-              <% end %>
-              <% if item[:journal_entries].present? %>
-                <button class="journal-toggle" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                    View Journal (<%= item[:journal_entries].length %> entries)
-                </button>
-                <div class="journal-inline" style="display:none; margin-top: 10px;">
-                  <% item[:journal_entries].each do |je| %>
-                    <div style="background: white; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #ddd;">
-                      <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; margin-bottom: 4px;">
-                        <span><%= je.time_done %></span>
-                        <span><%= je.hours_worked %>h</span>
-                      </div>
-                      <div class="journal-rendered-desc"><%= render_journal_description(je.description) %></div>
-                      <% if je.tools_used.present? %>
-                        <p style="font-size: 0.8rem; color: #888; margin: 4px 0 0;"><strong>Tools:</strong> <%= Array(je.tools_used).join(", ") %></p>
-                      <% end %>
-                    </div>
+        <div class="projects-grid">
+          <% @all_projects.each do |item| %>
+            <% next if item.nil? || item[:project].nil? %>
+            <% project = item[:project] %>
+            <a href="<%= admin_review_project_path(project["id"]) %>">
+              <div class="project-card">
+                <div class="project-thumbnail">
+                  <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
+                    <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>">
+                  <% else %>
+                    Image could not be loaded
                   <% end %>
                 </div>
-              <% end %>
+                <div class="project-content">
+                  <div class="project-header">
+                    <h3 class="project-title"><%= project["name"] || "Untitled Project" %></h3>
+                    <span class="status-badge"><%= project["status"] || "pending" %></span>
+                  </div>
+                  <p class="project-description"><%= project["description"] || "" %></p>
+                  <div class="project-tags">
+                    <% if project["project_type"].present? %>
+                      <span class="tag"><%= project["project_type"] %></span>
+                    <% end %>
+                  </div>
+                  <div class="project-footer">
+                    <div class="project-user">
+                      <div class="user-avatar"><%= item[:user]&.email&.first&.upcase || "?" %></div>
+                      <span><%= item[:user]&.display_name || item[:user]&.email || "Unknown" %></span>
+                    </div>
+                    <div class="project-stats">
+                       <span class="stat-badge"><%= "%.1f" % (item[:hours] || 0) %>h</span>
+                       <% if project["created_at"].present? %>
+                         <% begin %>
+                           <span class="stat-badge"><%= time_ago_in_words(Time.parse(project["created_at"])) %></span>
+                         <% rescue %>
+                           <span class="stat-badge">unknown</span>
+                         <% end %>
+                       <% end %>
+                       <span class="review-count">Reviews: 1</span>
+                     </div>
+                  </div>
+                </div>
               </div>
-
-              <% unless project["reviewed"] %>
-              <div class="review-inputs">
-                <input type="number" class="review-hours-input" placeholder="Approved Hours" value="<%= item[:hours] %>" step="0.5" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
-                <input type="text" class="review-justification-input" placeholder="Hour Justification (internal)" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
-                <textarea class="review-feedback-input" placeholder="Feedback for the user..." data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>"></textarea>
-              </div>
-              <div class="review-actions">
-                <button class="approve-btn" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">Approve</button>
-                <button class="reject-btn" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">Reject</button>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
+            </a>
+          <% end %>
+        </div>
       <% end %>
     </div>
 
+    <!-- Pending Review Tab -->
     <div id="pending" class="tab-content">
       <% if @projects_for_review.empty? %>
         <div class="empty-state">
-          <p>All projects have been reviewed!</p>
+          All projects have been reviewed!
         </div>
       <% else %>
-        <% @projects_for_review.each do |item| %>
-          <% next if item.nil? || item[:project].nil? %>
-          <% project = item[:project] %>
-          <div class="project-card">
-            <div class="project-card-header">
-              <div>
-                <p class="project-title"><%= project["name"] || "Untitled Project" %></p>
-                <p class="project-meta">
-                  by <%= item[:user]&.display_name || item[:user]&.email || "Unknown" %> 
-                  (<%= item[:user]&.email || "N/A" %>) 
-                  • <%= sprintf("%.4f", (item[:hours] || 0).to_f) %> hours logged 
-                   <% if project["created_at"].present? %>
-                     <% begin %>
-                       • submitted <%= time_ago_in_words(Time.parse(project["created_at"])) %> ago
-                     <% rescue => e %>
-                       • submitted (invalid date)
-                     <% end %>
-                   <% end %>
-                   <% status = project["status"] %>
-                   <% if status.present? %>
-                      <% case status
-                         when "approved" %>
-                          <br><span style="color: #3cb043; font-weight: bold;">✓ Approved</span>
-                         <% when "rejected" %>
-                          <br><span style="color: #d42b2b; font-weight: bold;">✗ Rejected</span>
-                         <% when "pending" %>
-                          <br><span style="color: #d4a017; font-weight: bold;">⏳ Pending Review</span>
-                         <% end %>
-                    <% end %>
-                   </p>
-                   </div>
-                   <div class="approved-hours">
-                   <div class="approved-hours-value"><%= sprintf("%.4f", (item[:hours] || 0).to_f) %>h</div>
+        <div class="projects-grid">
+          <% @projects_for_review.each do |item| %>
+            <% next if item.nil? || item[:project].nil? %>
+            <% project = item[:project] %>
+            <div class="project-card">
+              <a href="<%= admin_review_project_path(project["id"]) %>">
+                <div class="project-thumbnail">
+                  <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
+                    <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>">
+                  <% else %>
+                    Image could not be loaded
+                  <% end %>
+                </div>
+                <div class="project-content">
+                  <div class="project-header">
+                    <h3 class="project-title"><%= project["name"] || "Untitled Project" %></h3>
+                    <span class="status-badge"><%= project["status"] || "pending" %></span>
                   </div>
-                  </div>
-
                   <p class="project-description"><%= project["description"] || "" %></p>
-
-                  <div class="project-buttons">
-                  <% if project["code_url"].present? %>
-                    <a href="<%= project["code_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["code_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Code</a>
-                  <% end %>
-                  <% if project["playable_url"].present? %>
-                    <a href="<%= project["playable_url"].to_s.match?(/\Ahttps?:\/\//i) ? project["playable_url"] : '#' %>" target="_blank" rel="noopener noreferrer">View Demo</a>
-                  <% end %>
-                  <% if item[:journal_entries].present? %>
-                  <button class="journal-toggle" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                   View Journal (<%= item[:journal_entries].length %> entries)
-                  </button>
-                  <div class="journal-inline" style="display:none; margin-top: 10px;">
-                    <% item[:journal_entries].each do |je| %>
-                      <div style="background: white; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #ddd;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; margin-bottom: 4px;">
-                          <span><%= je.time_done %></span>
-                          <span><%= je.hours_worked %>h</span>
-                        </div>
-                        <div class="journal-rendered-desc"><%= render_journal_description(je.description) %></div>
-                        <% if je.tools_used.present? %>
-                          <p style="font-size: 0.8rem; color: #888; margin: 4px 0 0;"><strong>Tools:</strong> <%= Array(je.tools_used).join(", ") %></p>
-                        <% end %>
-                      </div>
+                  <div class="project-tags">
+                    <% if project["project_type"].present? %>
+                      <span class="tag"><%= project["project_type"] %></span>
                     <% end %>
                   </div>
-              <% end %>
+                  <div class="project-footer">
+                    <div class="project-user">
+                      <div class="user-avatar"><%= item[:user]&.email&.first&.upcase || "?" %></div>
+                      <span><%= item[:user]&.display_name || item[:user]&.email || "Unknown" %></span>
+                    </div>
+                    <div class="project-stats">
+                      <span class="stat-badge"><%= "%.1f" % (project["total_hours"] || project["hours"] || 0) %>h</span>
+                      <% if project["created_at"].present? %>
+                        <% begin %>
+                          <span class="stat-badge"><%= time_ago_in_words(Time.parse(project["created_at"])) %></span>
+                        <% rescue %>
+                          <span class="stat-badge">unknown</span>
+                        <% end %>
+                      <% end %>
+                      <span class="review-count">Reviews: 1</span>
+                    </div>
+                  </div>
+                </div>
+              </a>
             </div>
-
-            <div class="review-inputs">
-              <input type="number" class="review-hours-input" placeholder="Approved Hours" value="<%= item[:hours] %>" step="0.5" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
-              <input type="text" class="review-justification-input" placeholder="Hour Justification (internal)" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">
-              <textarea class="review-feedback-input" placeholder="Feedback for the user..." data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>"></textarea>
-            </div>
-            <div class="review-actions">
-              <button class="approve-btn" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">Approve</button>
-              <button class="reject-btn" data-user-id="<%= item[:user].id %>" data-project-index="<%= item[:project_index] %>">Reject</button>
-            </div>
+            <% end %>
           </div>
         <% end %>
-      <% end %>
+      </div>
     </div>
-            </div>
 
-            <script>
-              function switchTab(tabName) {
-                document.querySelectorAll('.tab-content').forEach(tab => {
-                  tab.classList.remove('active');
-                });
-                document.querySelectorAll('.tab-btn').forEach(btn => {
-                  btn.classList.remove('active');
-                });
+  <script>
+    function switchTab(tabName, evtOrElement) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(tabName).classList.add('active');
+      var activeButton = null;
+      if (evtOrElement instanceof Event && evtOrElement.target) {
+        activeButton = evtOrElement.target;
+      } else if (evtOrElement && evtOrElement.nodeType === 1) {
+        // A DOM element was passed directly (e.g., switchTab('all', this))
+        activeButton = evtOrElement;
+      } else if (typeof event !== 'undefined' && event && event.target) {
+        // Backwards-compatible fallback for browsers exposing a global event
+        activeButton = event.target;
+      }
+      if (activeButton) {
+        activeButton.classList.add('active');
+      }
+    }
 
-                // Show selected tab
-                document.getElementById(tabName).classList.add('active');
-                event.target.classList.add('active');
-              }
-
-              document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.journal-view').forEach(function(btn) {
-                  btn.addEventListener('click', function() {
-                    alert(this.dataset.journal);
-                  });
-                });
-
-                // Approve button handlers
-                document.querySelectorAll('.approve-btn').forEach(btn => {
-                  btn.addEventListener('click', function() {
-                    const userId = this.dataset.userId;
-                    const projectIndex = this.dataset.projectIndex;
-                    const card = this.closest('.project-card');
-                    const hoursInput = card.querySelector('.review-hours-input');
-                    const justificationInput = card.querySelector('.review-justification-input');
-                    const feedbackInput = card.querySelector('.review-feedback-input');
-
-                    const approvedHours = hoursInput.value;
-                    const justification = justificationInput.value;
-                    const feedback = feedbackInput.value;
-
-                    if (!approvedHours || approvedHours <= 0) {
-                      alert('Please enter valid approved hours');
-                      return;
-                    }
-
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-                    fetch('<%= approve_project_admin_path %>', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': csrfToken
-                      },
-                      body: JSON.stringify({
-                        user_id: userId,
-                        project_index: projectIndex,
-                        approved_hours: approvedHours,
-                        hour_justification: justification,
-                        feedback: feedback
-                      })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                      if (data.success) {
-                        alert('Project approved!');
-                        location.reload();
-                      } else {
-                        alert('Error: ' + (data.error || 'Unknown error'));
-                      }
-                    })
-                    .catch(e => {
-                      console.error('Error:', e);
-                      alert('Failed to approve project');
-                    });
-                  });
-                });
-
-                // Reject button handlers
-                document.querySelectorAll('.reject-btn').forEach(btn => {
-                  btn.addEventListener('click', function() {
-                    const userId = this.dataset.userId;
-                    const projectIndex = this.dataset.projectIndex;
-                    const card = this.closest('.project-card');
-                    const feedbackInput = card.querySelector('.review-feedback-input');
-                    const feedback = feedbackInput.value;
-
-                    if (!feedback.trim()) {
-                      alert('Please provide feedback for rejection');
-                      return;
-                    }
-
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-                    fetch('<%= reject_project_admin_path %>', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': csrfToken
-                      },
-                      body: JSON.stringify({
-                        user_id: userId,
-                        project_index: projectIndex,
-                        feedback: feedback
-                      })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                      if (data.success) {
-                        alert('Project rejected!');
-                        location.reload();
-                      } else {
-                        alert('Error: ' + (data.error || 'Unknown error'));
-                      }
-                    })
-                    .catch(e => {
-                      console.error('Error:', e);
-                      alert('Failed to reject project');
-                    });
-                  });
-                });
-              });
-            </script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      document.querySelectorAll('.project-card').forEach(card => {
+        const title = card.querySelector('.project-title').textContent.toLowerCase();
+        const desc = card.querySelector('.project-description').textContent.toLowerCase();
+        const parentLink = card.closest('a');
+        if (title.includes(searchTerm) || desc.includes(searchTerm)) {
+          parentLink.style.display = '';
+        } else {
+          parentLink.style.display = 'none';
+        }
+      });
+    });
+  </script>
 </div>

@@ -1,0 +1,172 @@
+<% content_for(:title) { "Airtable Sync Status" } %>
+<% content_for(:head) do %>
+  <meta http-equiv="refresh" content="10">
+<% end %>
+
+<div class="admin-page">
+  <div class="admin-content" style="max-width: 1100px;">
+    <h1>Airtable Sync Status</h1>
+
+    <p style="text-align: center; margin-bottom: 0.5rem;">
+      <%= link_to "← Back to Admin", admin_path, class: "admin-link-inline" %>
+    </p>
+    <p class="sync-muted" style="text-align: center; margin-bottom: 1rem;">Auto-refreshes every 10s · Last loaded: <%= Time.current.strftime("%H:%M:%S %Z") %></p>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <%= button_to "Force Sync All", admin_force_airtable_sync_path, class: "sync-force-btn", data: { turbo_confirm: "Run all 8 Airtable sync jobs now?" } %>
+    </div>
+
+    <% if flash[:notice] %>
+      <div class="sync-alert sync-alert-ok"><%= flash[:notice] %></div>
+    <% end %>
+
+    <div class="sync-section">
+      <h2 class="sync-section-heading">Configuration</h2>
+      <div class="sync-config-grid">
+        <div class="sync-config-item">
+          <span class="sync-config-label">API Token</span>
+          <span class="sync-status-badge <%= @has_token ? 'sync-ok' : 'sync-error' %>">
+            <%= @has_token ? "Set" : "Missing" %>
+          </span>
+        </div>
+        <div class="sync-config-item">
+          <span class="sync-config-label">Base ID</span>
+          <span class="sync-status-badge <%= @has_base_id ? 'sync-ok' : 'sync-error' %>">
+            <%= @has_base_id ? "#{@base_id}" : "Missing" %>
+          </span>
+        </div>
+      </div>
+      <% unless @has_token && @has_base_id %>
+        <div class="sync-alert sync-alert-error">
+          Airtable credentials are missing. Set <code>airtable.acces_token</code> and <code>airtable.base_id</code> in Rails credentials, or set <code>AIRTABLE_API_KEY</code> and <code>AIRTABLE_BASE_ID</code> env vars.
+        </div>
+      <% end %>
+    </div>
+
+    <div class="sync-section">
+      <h2 class="sync-section-heading">Recurring Tasks</h2>
+
+      <% if @recurring_config.any? %>
+        <div class="sync-table-wrap">
+          <table class="sync-table">
+            <thead>
+              <tr>
+                <th>Task Key</th>
+                <th>Class</th>
+                <th>Schedule</th>
+                <th>Queue</th>
+                <th>Worker Loaded</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @recurring_config.each do |key, config| %>
+                <% db_task = @recurring_tasks_db.find { |t| t.key == key } %>
+                <tr>
+                  <td><%= key %></td>
+                  <td><code><%= config["class"] %></code></td>
+                  <td><%= config["schedule"] %></td>
+                  <td><%= config["queue"] || "default" %></td>
+                  <td>
+                    <% if db_task %>
+                      <span class="sync-ok">Active</span>
+                    <% else %>
+                      <span class="sync-warn">Waiting for worker</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        <% if @recurring_tasks_db.empty? %>
+          <p class="sync-muted" style="margin-top: 0.5rem;">
+            Tasks are configured in recurring.yml but Solid Queue worker hasn't loaded them yet. Make sure bin/jobs is running.
+          </p>
+        <% end %>
+      <% else %>
+        <p class="sync-muted">No Airtable recurring tasks found in <code>config/recurring.yml</code>.</p>
+      <% end %>
+    </div>
+
+    <div class="sync-section">
+      <h2 class="sync-section-heading">Sync Status by Model</h2>
+
+      <% @sync_jobs.each do |job| %>
+        <div class="sync-model-card">
+          <div class="sync-model-header">
+            <h3 class="sync-model-name"><%= job[:name] %></h3>
+            <code class="sync-model-table"><%= job[:airtable_table] %></code>
+          </div>
+
+          <div class="sync-stats-grid">
+            <div class="sync-stat">
+              <span class="sync-stat-value"><%= job[:total] %></span>
+              <span class="sync-stat-label">Total Records</span>
+            </div>
+            <div class="sync-stat">
+              <span class="sync-stat-value sync-ok"><%= job[:synced] %></span>
+              <span class="sync-stat-label">Synced to Airtable</span>
+            </div>
+            <div class="sync-stat">
+              <span class="sync-stat-value <%= job[:unsynced] > 0 ? 'sync-warn' : 'sync-ok' %>"><%= job[:unsynced] %></span>
+              <span class="sync-stat-label">Not Yet Synced</span>
+            </div>
+            <div class="sync-stat">
+              <span class="sync-stat-value <%= job[:never_synced] > 0 ? 'sync-warn' : 'sync-ok' %>"><%= job[:never_synced] %></span>
+              <span class="sync-stat-label">Never Touched</span>
+            </div>
+          </div>
+
+          <div class="sync-details">
+            <div class="sync-detail-row">
+              <span class="sync-detail-label">Last synced_at:</span>
+              <span class="sync-detail-value"><%= job[:last_synced_at] ? job[:last_synced_at].to_s : "—" %></span>
+            </div>
+            <div class="sync-detail-row">
+              <span class="sync-detail-label">Oldest synced_at:</span>
+              <span class="sync-detail-value"><%= job[:oldest_sync] ? job[:oldest_sync].to_s : "—" %></span>
+            </div>
+            <div class="sync-detail-row">
+              <span class="sync-detail-label">Pending queue jobs:</span>
+              <span class="sync-detail-value <%= job[:pending_jobs] > 0 ? 'sync-warn' : '' %>"><%= job[:pending_jobs] %></span>
+            </div>
+            <div class="sync-detail-row">
+              <span class="sync-detail-label">Last finished job:</span>
+              <span class="sync-detail-value">
+                <% if job[:last_finished] %>
+                  <%= job[:last_finished].finished_at.strftime("%Y-%m-%d %H:%M:%S UTC") %>
+                  <span class="sync-muted">(ID: <%= job[:last_finished].id %>)</span>
+                <% else %>
+                  <span class="sync-error">Never run</span>
+                <% end %>
+              </span>
+            </div>
+            <div class="sync-detail-row">
+              <span class="sync-detail-label">Last failure:</span>
+              <span class="sync-detail-value">
+                <% if job[:last_failed] %>
+                  <span class="sync-error">
+                    <%= job[:last_failed].created_at.strftime("%Y-%m-%d %H:%M:%S UTC") %>
+                  </span>
+                  <details class="sync-error-details">
+                    <summary>Show error</summary>
+                    <pre class="sync-error-trace"><%= job[:last_failed].error.to_s.truncate(2000) %></pre>
+                  </details>
+                <% else %>
+                  <span class="sync-ok">No failures</span>
+                <% end %>
+              </span>
+            </div>
+          </div>
+
+          <% if job[:total] > 0 %>
+            <div class="sync-progress-bar">
+              <div class="sync-progress-fill" style="width: <%= (job[:synced].to_f / job[:total] * 100).round(1) %>%"></div>
+            </div>
+            <div class="sync-progress-label"><%= (job[:synced].to_f / job[:total] * 100).round(1) %>% synced</div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

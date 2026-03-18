@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   post "/shop/buy/:id", to: "shop#buy", as: :buy_shop_item
 
   get "/req_item", to: "req_item#index", as: :req_item
+  post "/req_item", to: "req_item#create"
 
   get "/admin/shop", to: "admin_shop#index", as: :admin_shop
   post "/admin/shop/items", to: "admin_shop#create_item", as: :admin_shop_create_item
@@ -44,13 +45,20 @@ Rails.application.routes.draw do
   patch "/admin/shop/categories/:id", to: "admin_shop#update_category", as: :admin_shop_update_category
   patch "/admin/shop/grant_types/:id", to: "admin_shop#update_grant_type", as: :admin_shop_update_grant_type
   patch "/admin/shop/items/:id", to: "admin_shop#update_item", as: :admin_shop_update_item
+  post "/admin/shop/items/reorder", to: "admin_shop#reorder_items", as: :admin_shop_reorder_items
+  patch "/admin/shop/purchases_lock", to: "admin_shop#update_purchases_lock", as: :admin_shop_purchases_lock
   delete "/admin/shop/items/:id", to: "admin_shop#delete_item", as: :admin_shop_delete_item
   patch "/admin/shop/orders/:id", to: "admin_shop#update_order_status", as: :admin_shop_update_order
 
   get "/admin", to: "admin#index", as: :admin
+  get "/admin/items_request", to: "admin#items_request", as: :admin_items_request
+  patch "/admin/items_request/:id", to: "admin#update_item_request", as: :admin_update_item_request
   get "/admin/review", to: "admin#review", as: :admin_review
+  get "/admin/review/project/:project_id", to: "admin#review_project", as: :admin_review_project
   get "/admin/console", to: "admin#console", as: :admin_console
   post "/admin/console", to: "admin#execute_console", as: :admin_console_execute
+  get "/admin/airtable_sync", to: "admin#airtable_sync", as: :admin_airtable_sync
+  post "/admin/airtable_sync/force", to: "admin#force_airtable_sync", as: :admin_force_airtable_sync
 
   namespace :admin do
     constraints AdminConstraint do
@@ -61,6 +69,7 @@ Rails.application.routes.draw do
   end
 
   get "/status", to: "status#index", as: :status
+  post "/projects/:project_id/comments", to: "project_comments#create", as: :project_comments
 
   get "/faq", to: "home#faq", as: :faq
   get "/rules", to: "home#rules", as: :rules

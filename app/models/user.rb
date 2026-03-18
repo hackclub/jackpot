@@ -5,6 +5,8 @@ class User < ApplicationRecord
   has_many :journal_entries, foreign_key: :user_id, dependent: :destroy
   has_many :projects, dependent: :destroy
   has_many :shop_orders, dependent: :destroy
+  has_many :shop_item_requests, dependent: :destroy
+  has_many :project_comments, dependent: :destroy
   enum :role, { user: 0, admin: 1 }, prefix: true
 
   validates :hack_club_id, presence: true, uniqueness: true
@@ -123,7 +125,6 @@ class User < ApplicationRecord
   end
 
   def role_admin?
-    return true if hack_club_id == "U046VA0KR8R"
     super
   end
 
@@ -132,9 +133,9 @@ class User < ApplicationRecord
 
      idx = project_index.to_i
      approved_hours_float = approved_hours.to_f
-     
-     chips_earned = (approved_hours_float * 35).round(2)
-     
+
+     chips_earned = (approved_hours_float * 50).round(2)
+
      projects[idx]["reviewed"] = true
      projects[idx]["status"] = "approved"
      projects[idx]["approved_hours"] = approved_hours_float
@@ -142,9 +143,9 @@ class User < ApplicationRecord
      projects[idx]["admin_feedback"] = feedback
      projects[idx]["reviewed_at"] = Time.current.iso8601
      projects[idx]["chips_earned"] = chips_earned
-     
+
      self.chip_am = (chip_am || 0) + chips_earned
-     
+
      update!(projects: projects, chip_am: chip_am)
    end
 

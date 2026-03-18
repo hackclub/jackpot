@@ -1,0 +1,688 @@
+<div style="background: linear-gradient(135deg, #1e1410 0%, #2a2015 100%); min-height: 100vh; padding: 2rem; font-family: 'Georgia', 'Times New Roman', serif;">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e1410 0%, #2a2015 100%);
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: #e8dcc8;
+    }
+
+    .review-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 2rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 2px solid #8b6914;
+      border-radius: 6px;
+      color: #d4a017;
+      text-decoration: none;
+      font-family: 'Georgia', serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .back-button:hover {
+      background: rgba(139, 105, 20, 0.3);
+      color: #f0e6d2;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.7);
+    }
+
+    .page-meta {
+      color: #d0c8b8;
+      font-size: 1rem;
+    }
+
+    .review-page-screenshot {
+      width: 100%;
+      height: 350px;
+      background: rgba(10, 5, 0, 0.8);
+      border: 2px solid #8b6914;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 1rem;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .review-page-screenshot img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .review-page-body {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .review-guidelines-column {
+      flex: 0 0 35%;
+      border-right: 2px solid #8b6914;
+      padding-right: 2rem;
+    }
+
+    .review-project-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .guidelines-section {
+      margin-bottom: 2rem;
+    }
+
+    .guidelines-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #d4a017;
+      margin-bottom: 0.8rem;
+      text-transform: uppercase;
+      font-family: 'Georgia', serif;
+    }
+
+    .guidelines-content {
+      color: #e8dcc8;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .guidelines-content ul {
+      margin: 1rem 0 0 1.5rem;
+      padding: 0;
+    }
+
+    .guidelines-content li {
+      margin-bottom: 0.8rem;
+    }
+
+    .quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .quick-link-btn {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 2px solid #8b6914;
+      border-radius: 20px;
+      color: #d4a017;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Georgia', serif;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .quick-link-btn:hover {
+      background: rgba(139, 105, 20, 0.3);
+      color: #f0e6d2;
+    }
+
+    .project-status-section {
+      background: rgba(50, 40, 30, 0.8);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #8b6914;
+      margin-bottom: 1rem;
+    }
+
+    .project-status-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #d4a017;
+      margin-bottom: 0.8rem;
+      font-family: 'Georgia', serif;
+    }
+
+    .time-tracking-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+
+    .time-tracking-table th,
+    .time-tracking-table td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid #8b6914;
+      color: #e8dcc8;
+      font-family: 'Georgia', serif;
+    }
+
+    .time-tracking-table th {
+      background: rgba(139, 105, 20, 0.3);
+      color: #d4a017;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    .time-tracking-table tr:last-child {
+      border-bottom: 2px solid #8b6914;
+      font-weight: 700;
+    }
+
+    .time-tracking-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .hours-approved {
+      color: #d4a017;
+      font-weight: 700;
+    }
+
+    .review-info-banner {
+      background: rgba(212, 160, 23, 0.2);
+      border: 1px solid #8b6914;
+      border-radius: 6px;
+      padding: 1rem;
+      color: #e8dcc8;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .review-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .review-btn {
+      flex: 1;
+      padding: 0.8rem;
+      border: 2px solid #8b6914;
+      border-radius: 6px;
+      background: transparent;
+      color: #e8dcc8;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Georgia', serif;
+    }
+
+    .review-btn:hover {
+      background: rgba(139, 105, 20, 0.3);
+      color: #f0e6d2;
+    }
+
+    .review-btn.approve {
+      color: #3cb043;
+      border-color: #3cb043;
+    }
+
+    .review-btn.approve:hover {
+      background: rgba(60, 176, 67, 0.1);
+    }
+
+    .review-btn.reject {
+      color: #d42b2b;
+      border-color: #d42b2b;
+    }
+
+    .review-btn.reject:hover {
+      background: rgba(212, 43, 43, 0.1);
+    }
+
+    .review-comment-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .review-comment-label {
+      font-weight: 700;
+      color: #d4a017;
+      font-size: 0.9rem;
+      font-family: 'Georgia', serif;
+    }
+
+    .review-comment-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 1rem;
+      background: rgba(234, 225, 200, 0.85);
+      border: 1px solid #8b6914;
+      border-radius: 6px;
+      color: #1e1410;
+      font-family: 'Georgia', serif;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .review-comment-textarea::placeholder {
+      color: #8b6914;
+    }
+
+    .submit-review-btn {
+      width: 100%;
+      padding: 1rem;
+      background: #8b6914;
+      color: #f0e6d2;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Georgia', serif;
+      text-transform: uppercase;
+    }
+
+    .submit-review-btn:hover {
+      background: #9a761a;
+    }
+
+    .review-preview {
+      background: rgba(50, 40, 30, 0.8);
+      border: 1px solid #8b6914;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .review-preview-title {
+      font-weight: 700;
+      color: #d4a017;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      font-family: 'Georgia', serif;
+    }
+
+    .review-preview-content {
+      background: rgba(10, 5, 0, 0.8);
+      padding: 1rem;
+      border-radius: 4px;
+      color: #e8dcc8;
+      font-size: 0.85rem;
+      min-height: 100px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .review-preview-empty {
+      color: #666;
+      font-style: italic;
+    }
+
+    .journal-section {
+      background: rgba(50, 40, 30, 0.8);
+      padding: 1.5rem;
+      border: 1px solid #8b6914;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+    }
+
+    .journal-section-title {
+      font-weight: 700;
+      color: #d4a017;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .journal-entry {
+      background: rgba(10, 5, 0, 0.8);
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 0.8rem;
+      border: 1px solid #8b6914;
+    }
+
+    .journal-entry-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #d0c8b8;
+      margin-bottom: 0.5rem;
+    }
+
+    .journal-entry-desc {
+      color: #e8dcc8;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .journal-tools {
+      font-size: 0.8rem;
+      color: #b0a080;
+    }
+
+    .review-project-comments-section {
+      background: rgba(50, 40, 30, 0.8);
+      padding: 1.5rem;
+      border: 1px solid #8b6914;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+    }
+
+    .review-project-comments-title {
+      font-weight: 700;
+      color: #d4a017;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .review-project-comment {
+      background: rgba(10, 5, 0, 0.8);
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 0.8rem;
+      border: 1px solid rgba(139, 105, 20, 0.5);
+    }
+
+    .review-project-comment:last-child {
+      margin-bottom: 0;
+    }
+
+    .review-project-comment-head {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #d0c8b8;
+      margin-bottom: 0.5rem;
+    }
+
+    .review-project-comment-author {
+      font-weight: 600;
+      color: #d4a017;
+    }
+
+    .review-project-comment-body {
+      color: #e8dcc8;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .review-project-comments-empty {
+      color: #b0a080;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    .already-reviewed {
+      color: #3cb043;
+      font-weight: 700;
+      padding: 1rem;
+      background: rgba(60, 176, 67, 0.1);
+      border-radius: 6px;
+      border: 1px solid #3cb043;
+    }
+  </style>
+
+  <div class="review-container">
+    <a href="<%= admin_review_path %>" class="back-button">← Back to Reviews</a>
+
+    <div class="page-header">
+      <h1 class="page-title"><%= @project["name"] %></h1>
+      <p class="page-meta">by <%= @user.display_name || @user.email %> (<%= @user.email %>)</p>
+    </div>
+
+    <div class="review-page-screenshot">
+      <% if @project["banner_url"].present? && @project["banner_url"].match?(/\Ahttps?:\/\//i) %>
+        <img src="<%= @project["banner_url"] %>" alt="<%= @project["name"] %>">
+      <% else %>
+        Screenshot unavailable
+      <% end %>
+    </div>
+
+    <div class="review-page-body">
+      <div class="review-guidelines-column">
+        <div class="guidelines-section">
+          <div class="guidelines-title">Definitions</div>
+          <div class="guidelines-content">
+            <strong>Shipped Project:</strong> A project that is code-complete, published on source control (e.g., GitHub), and easily experienceable (live website or clear local setup instructions). It should be polished, with a descriptive README and minimal bugs/visual glitches.
+          </div>
+        </div>
+
+        <div class="guidelines-section">
+          <div class="guidelines-title">Review Process</div>
+          <div class="guidelines-content">
+            <strong>1. Initial Checks:</strong>
+            <ul>
+              <li>Verify project is a "Shipped Project" (see definition above)</li>
+              <li>Assess if reported time is realistic for the project</li>
+              <li>Confirm approximately one commit per hour (sample random commits and optionally skim others)</li>
+            </ul>
+            <strong>2. Decision Making:</strong>
+            <ul>
+              <li>Assume good faith by default</li>
+              <li>If rejecting, provide actionable feedback for resubmission</li>
+              <li>If unsure, approve the project</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-project-column">
+        <div class="quick-links">
+          <% if @project["code_url"].present? && @project["code_url"].match?(/\Ahttps?:\/\//i) %>
+            <a href="<%= @project["code_url"] %>" target="_blank" class="quick-link-btn">📂 Code Repository</a>
+          <% end %>
+          <% if @project["playable_url"].present? && @project["playable_url"].match?(/\Ahttps?:\/\//i) %>
+            <a href="<%= @project["playable_url"] %>" target="_blank" class="quick-link-btn">▶ Live Demo</a>
+          <% end %>
+          <button class="quick-link-btn" onclick="alert('Fraud link placeholder')">⚠ Report Fraud (Title)</button>
+          <button class="quick-link-btn" onclick="alert('Fraud link placeholder')">⚠ Report Fraud (Open)</button>
+        </div>
+
+        <div class="project-status-section">
+          <div class="project-status-title">Time Tracking</div>
+          <table class="time-tracking-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Raw Hours</th>
+                <th>Approved</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><%= @project["name"] %></td>
+                <td><%= @total_hours.to_f.round(2) %></td>
+                <td class="hours-approved"><input type="number" class="review-hours-input" value="<%= @total_hours.to_f.round(2) %>" step="0.5" style="width: 100%; background: transparent; border: 1px solid #8b6914; color: #d4a017; padding: 0.3rem;"></td>
+              </tr>
+              <tr>
+                <td>Journal entries</td>
+                <td><%= @journal_entries.length > 0 ? @journal_entries.sum(&:hours_worked).to_f.round(2) : '0.00' %></td>
+                <td class="hours-approved">0.00</td>
+              </tr>
+              <tr>
+                <td><strong>Total</strong></td>
+                <td><%= @total_hours.to_f.round(2) %></td>
+                <td class="hours-approved">0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <% if @journal_entries.present? %>
+          <div class="journal-section">
+            <div class="journal-section-title">Journal Entries (<%= @journal_entries.length %>)</div>
+            <% @journal_entries.each do |je| %>
+              <div class="journal-entry">
+                <div class="journal-entry-header">
+                  <span><%= je.time_done %></span>
+                  <span><%= je.hours_worked %>h</span>
+                </div>
+                <div class="journal-entry-desc"><%= je.description %></div>
+                <% if je.tools_used.present? %>
+                  <div class="journal-tools"><strong>Tools:</strong> <%= Array(je.tools_used).join(", ") %></div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="review-project-comments-section">
+          <div class="review-project-comments-title">Comments (from status page)</div>
+          <% if @project_comments.present? %>
+            <% @project_comments.each do |c| %>
+              <div class="review-project-comment">
+                <div class="review-project-comment-head">
+                  <span class="review-project-comment-author"><%= c.user&.display_name || c.user&.email || 'Unknown' %></span>
+                  <span><%= c.created_at.strftime("%m/%d/%y %l:%M %P").strip %></span>
+                </div>
+                <div class="review-project-comment-body"><%= c.body %></div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="review-project-comments-empty">No comments yet.</div>
+          <% end %>
+        </div>
+
+        <% if @project_db.reviewed %>
+          <div class="already-reviewed">
+            ✓ This project has already been reviewed.
+          </div>
+        <% else %>
+          <div class="review-info-banner">
+            Enter hour values to approve the raw hours from Hackatime. Leave blank for no approval.
+          </div>
+
+          <div class="review-controls">
+            <button class="review-btn approve" onclick="setReviewAction('approve')">✓ Approve</button>
+            <button class="review-btn reject" onclick="setReviewAction('reject')">✗ Reject</button>
+            <button class="review-btn" onclick="setReviewAction('comment')">💬 Comment</button>
+          </div>
+
+          <div class="review-comment-section">
+            <label class="review-comment-label">Comment (optional)</label>
+            <textarea class="review-comment-textarea review-feedback-input" placeholder="Add your comment here..."></textarea>
+          </div>
+
+          <button class="submit-review-btn" onclick="submitReview(<%= @user.id %>, <%= @project_index %>, <%= @project_db.id %>)">Submit Review</button>
+
+          <div class="review-preview">
+            <div class="review-preview-title">Preview:</div>
+            <div class="review-preview-content" id="reviewPreview">
+              <span class="review-preview-empty">[Review preview will appear here]</span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setReviewAction(action) {
+      const preview = document.getElementById('reviewPreview');
+      const feedback = document.querySelector('.review-feedback-input').value;
+      const hours = document.querySelector('.review-hours-input').value;
+
+      // Clear previous preview content safely
+      preview.textContent = '';
+
+      const strong = document.createElement('strong');
+
+      if (action === 'approve') {
+        strong.style.color = '#3cb043';
+        strong.textContent = '✓ APPROVED';
+        preview.appendChild(strong);
+        preview.appendChild(document.createElement('br'));
+
+        const hoursText = document.createTextNode('Hours: ' + hours);
+        preview.appendChild(hoursText);
+        preview.appendChild(document.createElement('br'));
+
+        if (feedback) {
+          const commentText = document.createTextNode('Comment: ' + feedback);
+          preview.appendChild(commentText);
+        }
+      } else if (action === 'reject') {
+        strong.style.color = '#d42b2b';
+        strong.textContent = '✗ REJECTED';
+        preview.appendChild(strong);
+        preview.appendChild(document.createElement('br'));
+
+        const reasonText = document.createTextNode('Reason: ' + (feedback || '(no reason provided)'));
+        preview.appendChild(reasonText);
+      } else {
+        strong.textContent = '💬 COMMENT';
+        preview.appendChild(strong);
+        preview.appendChild(document.createElement('br'));
+
+        const commentOnlyText = document.createTextNode(feedback || '(no comment)');
+        preview.appendChild(commentOnlyText);
+      }
+    }
+
+    function submitReview(userId, projectIndex, projectId) {
+      const hoursInput = document.querySelector('.review-hours-input');
+      const feedbackInput = document.querySelector('.review-feedback-input');
+      const approvedHours = hoursInput.value;
+      const feedback = feedbackInput.value;
+
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      const action = (window.currentReviewAction || 'approve');
+      const endpoint = action === 'reject' ? '<%= reject_project_admin_path %>' : '<%= approve_project_admin_path %>';
+
+      fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          project_index: projectIndex,
+          project_id: projectId,
+          approved_hours: approvedHours || 0,
+          hour_justification: '',
+          feedback: feedback,
+          action: action
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          alert('Project reviewed!');
+          window.location.href = '<%= admin_review_path %>';
+        } else {
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+      })
+      .catch(e => {
+        console.error('Error:', e);
+        alert('Failed to submit review');
+      });
+    }
+  </script>
+</div>

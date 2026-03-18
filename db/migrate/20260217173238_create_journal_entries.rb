@@ -13,6 +13,6 @@ class CreateJournalEntries < ActiveRecord::Migration[7.1]
     end
 
     add_foreign_key :journal_entries, :users
-    add_index :journal_entries, [:user_id, :project_index]
+    add_index :journal_entries, [ :user_id, :project_index ]
   end
 end

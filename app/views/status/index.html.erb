@@ -1,2 +1,177 @@
-<h1>Status</h1>
-<p>Status page coming soon.</p>
+<% content_for(:title) { "Status" } %>
+
+<div class="status-page" role="main" aria-label="Status">
+  <% if @show_status_content %>
+    <div class="status-content">
+      <div class="status-panels">
+        <div class="status-panel status-panel--review">
+          <h2 class="status-panel-title">
+            Review Status
+            <%= image_tag "req_items/clockIMG.png", alt: "", class: "status-panel-title-icon", aria: { hidden: true } %>
+          </h2>
+          <ul class="status-review-list" aria-label="Project review status">
+            <% @projects.each do |project| %>
+              <% status_slug = project.status.presence || "pending" %>
+              <li>
+                <button
+                  type="button"
+                  class="status-review-item status-review-item--btn"
+                  data-status-project-open
+                  data-project-id="<%= project.id %>">
+                  <span class="status-review-name"><%= project.name %></span>
+                  <span class="status-review-badge status-review-badge--<%= status_slug %>"><%= status_slug.humanize %></span>
+                </button>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+
+        <div class="status-panel-purchase-wrap">
+          <div class="status-panel status-panel--purchase">
+          <h2 class="status-panel-title">Purchase History</h2>
+          <div class="status-purchase-header">
+            <div class="status-total-chips">
+              <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "status-chip-icon", aria: { hidden: true } %>
+              <span class="status-total-chips-label">Total Chips</span>
+              <span class="status-total-chips-value"><%= @total_chips %></span>
+            </div>
+          </div>
+          <section class="status-purchase-section" aria-label="Fulfilled purchases">
+            <h3 class="status-purchase-section-title">Fulfilled [<%= @fulfilled_orders.size %>]</h3>
+            <ul class="status-purchase-list">
+              <% @fulfilled_orders.each do |order| %>
+                <li class="status-purchase-row">
+                  <span class="status-purchase-item-name"><%= order.item_name %></span>
+                  <span class="status-purchase-qty">Qty: <%= order.quantity %></span>
+                  <span class="status-purchase-chips">
+                    <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "status-chip-icon-inline", aria: { hidden: true } %>
+                    <%= number_with_precision(order.price.to_f, precision: 0) %>
+                  </span>
+                  <span class="status-purchase-at"><%= order.created_at.strftime("%m/%d/%y - %l:%M %P").strip %></span>
+                </li>
+              <% end %>
+            </ul>
+          </section>
+          <section class="status-purchase-section" aria-label="Rejected purchases">
+            <h3 class="status-purchase-section-title">Rejected [<%= @rejected_orders.size %>]</h3>
+            <ul class="status-purchase-list">
+              <% @rejected_orders.each do |order| %>
+                <li class="status-purchase-row">
+                  <span class="status-purchase-item-name"><%= order.item_name %></span>
+                  <span class="status-purchase-qty">Qty: <%= order.quantity %></span>
+                  <span class="status-purchase-chips">
+                    <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "status-chip-icon-inline", aria: { hidden: true } %>
+                    <%= number_with_precision(order.price.to_f, precision: 0) %>
+                  </span>
+                  <span class="status-purchase-at"><%= order.created_at.strftime("%m/%d/%y - %l:%M %P").strip %></span>
+                </li>
+              <% end %>
+            </ul>
+          </section>
+          </div>
+          <%= image_tag "status/Purchase_img.png", alt: "", class: "status-prize-img", aria: { hidden: true } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-modal" id="statusProjectModal" aria-hidden="true">
+      <div class="status-modal__backdrop" data-status-project-close></div>
+      <div class="status-modal__dialog" role="dialog" aria-modal="true" aria-label="Project details">
+        <button type="button" class="status-modal__close" data-status-project-close aria-label="Close">×</button>
+        <div class="status-modal__body" id="statusProjectModalBody"></div>
+      </div>
+    </div>
+
+    <% @projects.each do |project| %>
+      <% reviewer_name = project.reviewed_by&.name %>
+      <template id="statusProjectTemplate-<%= project.id %>">
+        <div class="status-project-detail">
+          <h3 class="status-project-detail__title"><%= project.name %></h3>
+          <div class="status-project-detail__meta">
+            <div><span class="status-project-detail__label">Status</span> <span class="status-project-detail__value"><%= (project.status.presence || "pending").humanize %></span></div>
+            <% if project.reviewed? && reviewer_name.present? %>
+              <div><span class="status-project-detail__label">Reviewer</span> <span class="status-project-detail__value"><%= reviewer_name %></span></div>
+            <% end %>
+            <% if project.reviewed_at.present? %>
+              <div><span class="status-project-detail__label">Reviewed</span> <span class="status-project-detail__value"><%= project.reviewed_at.strftime("%m/%d/%y - %l:%M %P").strip %></span></div>
+            <% end %>
+            <% if project.approved_hours.present? %>
+              <div><span class="status-project-detail__label">Approved hours</span> <span class="status-project-detail__value"><%= number_with_precision(project.approved_hours.to_f, precision: 2) %></span></div>
+            <% end %>
+            <% if project.chips_earned.present? %>
+              <div><span class="status-project-detail__label">Chips earned</span> <span class="status-project-detail__value"><%= number_with_precision(project.chips_earned.to_f, precision: 0) %></span></div>
+            <% end %>
+          </div>
+
+          <% if project.admin_feedback.present? %>
+            <div class="status-project-detail__section">
+              <div class="status-project-detail__section-title">Reviewer feedback</div>
+              <div class="status-project-detail__feedback"><%= project.admin_feedback %></div>
+            </div>
+          <% end %>
+
+          <div class="status-project-detail__section">
+            <div class="status-project-detail__section-title">Comments</div>
+            <div class="status-project-comments">
+              <% if project.project_comments.any? %>
+                <% project.project_comments.sort_by(&:created_at).each do |c| %>
+                  <div class="status-project-comment">
+                    <div class="status-project-comment__head">
+                      <span class="status-project-comment__author"><%= c.user.name %></span>
+                      <span class="status-project-comment__time"><%= c.created_at.strftime("%m/%d/%y %l:%M %P").strip %></span>
+                    </div>
+                    <div class="status-project-comment__body"><%= c.body %></div>
+                  </div>
+                <% end %>
+              <% else %>
+                <div class="status-project-comments__empty">No comments yet.</div>
+              <% end %>
+
+              <%= form_with url: project_comments_path(project_id: project.id), scope: :project_comment, method: :post, local: true, class: "status-project-comment-form" do |f| %>
+                <%= f.text_area :body, rows: 3, placeholder: "Write a comment…", class: "status-project-comment-form__textarea" %>
+                <%= f.submit "Send", class: "status-project-comment-form__submit" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </template>
+    <% end %>
+
+    <script>
+      (function() {
+        function qs(sel, root) { return (root || document).querySelector(sel); }
+        function qsa(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+        var modal = document.getElementById('statusProjectModal');
+        var body = document.getElementById('statusProjectModalBody');
+        if (!modal || !body) return;
+
+        function openProject(id) {
+          var tpl = document.getElementById('statusProjectTemplate-' + id);
+          if (!tpl) return;
+          body.innerHTML = tpl.innerHTML;
+          modal.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function close() {
+          modal.setAttribute('aria-hidden', 'true');
+          body.innerHTML = '';
+          document.body.style.overflow = '';
+        }
+
+        qsa('[data-status-project-open]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            openProject(btn.getAttribute('data-project-id'));
+          });
+        });
+        qsa('[data-status-project-close]').forEach(function(el) {
+          el.addEventListener('click', close);
+        });
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') close();
+        });
+      })();
+    </script>
+  <% end %>
+</div>

@@ -1,0 +1,24 @@
+<% content_for(:title) { "Airtable Sync Results" } %>
+
+<div class="admin-page">
+  <div class="admin-content" style="max-width: 1100px;">
+    <h1>Airtable Sync Results</h1>
+
+    <p style="text-align: center; margin-bottom: 2rem;">
+      <%= link_to "Back to Sync Status", admin_airtable_sync_path, class: "admin-link-inline" %>
+    </p>
+
+    <% @sync_results.each do |result| %>
+      <div class="sync-model-card">
+        <div class="sync-model-header">
+          <h3 class="sync-model-name"><%= result[:name] %></h3>
+          <span class="sync-status-badge <%= result[:status] == 'ok' ? 'sync-ok' : 'sync-error' %>">
+            <%= result[:status] == "ok" ? "OK" : "ERROR" %>
+          </span>
+        </div>
+        <pre class="sync-log-output"><% result[:log].each do |line| %><%= h(line) %>
+<% end %></pre>
+      </div>
+    <% end %>
+  </div>
+</div>

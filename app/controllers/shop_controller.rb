@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ShopController < ApplicationController
-  ADMIN_ONLY = true
+  ADMIN_ONLY = false
   PINNED_ITEM_NAME = ShopItem::PINNED_INVITATION_NAME
 
   before_action :authenticate_user!
@@ -9,6 +9,7 @@ class ShopController < ApplicationController
   before_action :require_shop_feature
 
   def index
+    @shop_purchases_locked = shop_purchases_locked?
     @pinned_item = ShopItem.active.find_by(name: PINNED_ITEM_NAME)
     @purchased_qty_by_item_id = current_user.shop_orders
       .where(status: %w[pending sent])
@@ -24,8 +25,7 @@ class ShopController < ApplicationController
         active_items = gt.shop_items
           .select(&:active?)
           .reject { |it| it.name.to_s.strip.casecmp?(PINNED_ITEM_NAME) }
-          .sort_by(&:created_at)
-          .reverse
+          .sort_by { |it| [ it.position.to_i, -(it.created_at.to_i) ] }
         next if active_items.empty?
         { grant_type: gt, items: active_items }
       end.compact
@@ -36,13 +36,24 @@ class ShopController < ApplicationController
   end
 
   def buy
+    if shop_purchases_locked?
+      msg = "Hey! It looks like you're trying to purchase something, well... this function is now under maintenance. It will be available again soon!"
+      if request.xhr?
+        return render json: { error: msg }, status: :service_unavailable
+      else
+        flash[:alert] = msg
+        return redirect_to shop_path
+      end
+    end
+
     item = ShopItem.active.find(params[:id])
     quantity = params[:quantity].to_i
     quantity = 1 if quantity < 1
-    total_cost = item.price.to_f * quantity.to_f
+    unit_price = item.price.to_d.ceil
+    total_cost = (unit_price * quantity).to_d
     already = current_user.shop_orders.where(shop_item_id: item.id, status: %w[pending sent]).sum(:quantity).to_i
     if item.max_per_person.present? && (already + quantity) > item.max_per_person.to_i
-      remaining = [item.max_per_person.to_i - already, 0].max
+      remaining = [ item.max_per_person.to_i - already, 0 ].max
       msg = remaining.zero? ? "Purchase limit reached for this item." : "You can only purchase #{remaining} more of this item."
       if request.xhr?
         return render json: { error: msg }, status: :unprocessable_entity
@@ -64,7 +75,7 @@ class ShopController < ApplicationController
         end
       end
 
-      current_user.update!(chip_am: current_user.chip_am.to_f - total_cost)
+      current_user.update!(chip_am: current_user.chip_am.to_d - total_cost)
 
       current_user.shop_orders.create!(
         shop_item: item,
@@ -118,6 +129,4 @@ class ShopController < ApplicationController
 
     redirect_to root_path, alert: "The shop is not available yet."
   end
-
-
 end

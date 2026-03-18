@@ -1,26 +1,35 @@
 class Project < ApplicationRecord
   belongs_to :user
+  belongs_to :reviewed_by, class_name: "User", optional: true
+  has_many :project_comments, dependent: :destroy
   has_many :journal_entries, foreign_key: :user_id, primary_key: :user_id, dependent: :destroy
 
   validates :name, :user_id, presence: true
   validate :safe_urls
-  
+
   scope :shipped, -> { where(shipped: true) }
   scope :reviewed, -> { where(reviewed: true) }
-  scope :pending_review, -> { where(shipped: true, reviewed: false) }
-  
-  before_save :set_position, if: :position.nil?
-  
+  scope :pending_review, -> { where(status: "in-review", reviewed: false) }
+
+  before_create :set_position
+
   def set_position
     self.position = user.projects.count
   end
-  
+
+  def update_total_hours
+    journal_hours = JournalEntry.where(user_id: user_id, project_id: id).sum(:hours_worked).to_f || 0
+    hackatime_hours = self.hackatime_hours.to_f || 0
+    total = journal_hours + hackatime_hours
+    self.update_column(:total_hours, total)
+  end
+
   def self.from_json(user, json_projects)
     return [] unless json_projects.present?
-    
+
     json_projects.each_with_index do |project_data, index|
       next if project_data.nil?
-      
+
       project = user.projects.find_or_create_by(name: project_data["name"], created_at: project_data["created_at"]) do |p|
         p.description = project_data["description"]
         p.project_type = project_data["project_type"]
@@ -41,36 +50,11 @@ class Project < ApplicationRecord
       project.save! if project.changed?
     end
   end
-  
-  def approve(approved_hours, justification = nil, feedback = nil)
-    self.reviewed = true
-    self.status = "approved"
-    self.approved_hours = approved_hours.to_f
-    self.hour_justification = justification
-    self.admin_feedback = feedback
-    self.reviewed_at = Time.current
-    self.chips_earned = (approved_hours.to_f * 35).round(2)
-    
-    user.chip_am = (user.chip_am || 0) + chips_earned
-    
-    transaction do
-      save!
-      user.save!
-    end
-  end
-  
-  def reject(feedback = nil)
-    self.reviewed = true
-    self.status = "rejected"
-    self.admin_feedback = feedback
-    self.reviewed_at = Time.current
-    save!
-  end
 
   private
 
   def safe_urls
-    %i[code_url playable_url].each do |attr|
+    %i[code_url playable_url banner_url].each do |attr|
       value = send(attr).to_s.strip
       next if value.blank?
       unless value.match?(/\Ahttps?:\/\//i)

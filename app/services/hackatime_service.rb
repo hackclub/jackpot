@@ -34,7 +34,7 @@ class HackatimeService
 
   def get_user_projects(slack_id, start_date: nil)
     return [] unless slack_id.present?
-    
+
     response = @conn.get("users/#{slack_id}/stats") do |req|
       req.params["features"] = "projects"
       req.params["start_date"] = start_date.to_s if start_date
@@ -66,7 +66,7 @@ class HackatimeService
 
   def get_project_hours(slack_id, project_name, start_date: nil, end_date: nil)
     return 0.0 unless slack_id.present?
-    
+
     response = @conn.get("users/#{slack_id}/stats") do |req|
       req.params["features"] = "projects"
       req.params["start_date"] = start_date.to_s if start_date
@@ -82,12 +82,12 @@ class HackatimeService
 
     body = response.body || {}
     total_seconds = body["total_seconds"]
-    
+
     unless total_seconds.is_a?(Numeric)
       Rails.logger.warn("Hackatime API returned non-numeric total_seconds for user #{slack_id}, project #{project_name}: #{total_seconds.inspect}")
       return 0.0
     end
-    
+
     total_seconds / 3600.0
   rescue Faraday::Error => e
     Rails.logger.error("Hackatime API Connection Error for user #{slack_id}: #{e.message}")

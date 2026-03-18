@@ -1,244 +1,357 @@
 <div class="main">
-<div class="page-section page-section--hero">
-  <div class="hero-overlays">
-    <%= image_tag 'title.PNG', alt: 'Jackpot Title', class: 'hero-title' %>
-    <%= image_tag 'centralmg.png', alt: 'Center Art', class: 'hero-center' %>
-    <%= link_to image_tag('HC_logo.png', alt: 'Hack Club Logo', class: 'hero-logo'), 'https://hackclub.com', class: 'hero-logo-link' %>
+  <section class="page-section page-section--hero ext-section--0" id="section-0">
+    <div class="hero-overlays">
+      <%= image_tag "title.PNG", alt: "Jackpot Title", class: "hero-title" %>
+      <%= image_tag "centralmg.png", alt: "Center Art", class: "hero-center" %>
+      <%= link_to image_tag("HC_logo.png", alt: "Hack Club Logo", class: "hero-logo"), "https://hackclub.com", class: "hero-logo-link" %>
+      <p class="hero-dateline">
+        <span class="hero-dateline__top">May 8 - 11  |  teenagers 13-18  | Las Vegas</span><br>
+        <span class="hero-dateline__bottom">Code your project - get free prizes - fly out to the next Las Vegas Hackathon</span>
+      </p>
+    </div>
+    <%= render "home/rsvp" %>
+  </section>
+
+  <div id="steps" class="ext-content">
+    <div class="ext-content__lighty-line--top"></div>
+    <%# Section 1: How does it work %>
+    <section class="ext-section ext-section--1">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_1.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--1">
+        <h2 class="section-title section-title--center">How does it work</h2>
+        <div class="section-1__panel">
+          <%= image_tag "RSVP_comp/first_section/yellow_box.png", alt: "", class: "section-1__panel-bg", aria: { hidden: true } %>
+          <div class="section-1__panel-content">
+            <div class="section-1__step">
+              <%= image_tag "RSVP_comp/first_section/icon1_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <p class="section-1__step-text">Work on a <span class="section-1__step-accent">software/hardware/art</span> project and track your time with <%= link_to "Hackatime", "https://hackatime.hackclub.com", target: "_blank", rel: "noopener", class: "section-1__step-accent section-1__step-link" %>.</p>
+            </div>
+            <div class="section-1__step">
+              <%= image_tag "RSVP_comp/first_section/icon2_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <p class="section-1__step-text">Post your project on <%= link_to "GitHub", "https://github.com", target: "_blank", rel: "noopener", class: "section-1__step-accent section-1__step-link" %> as an open-source project and ship it on the <span class="section-1__step-accent">Jackpot website</span>.</p>
+            </div>
+            <div class="section-1__step">
+              <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <p class="section-1__step-text">Wait for a <span class="section-1__step-accent">review</span> from our team and redeem poker chips (<span class="section-1__step-accent">points</span>).</p>
+            </div>
+            <div class="section-1__step">
+              <%= image_tag "RSVP_comp/first_section/icon4_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <p class="section-1__step-text">Spend your points on <span class="section-1__step-accent">free prizes</span> or use them to get an official invitation to the <span class="section-1__step-accent section-1__step-accent--yellow">Las Vegas Hackathon</span>.</p>
+            </div>
+          </div>
+        </div>
+        <div class="section-1__join-wrap">
+          <%= button_to "/auth/hack_club", method: :post, data: { turbo: false }, class: "section-1__join-link" do %>
+            <%= image_tag "RSVP_comp/first_section/join_button.png", alt: "Join", class: "section-1__join-btn" %>
+          <% end %>
+        </div>
+        <div class="section-1__carousel-wrap">
+          <%= image_tag "RSVP_comp/first_section/subtitle_carousel.png", alt: "", class: "section-1__carousel-subtitle", aria: { hidden: true } %>
+          <div class="section-1__carousel">
+          <div class="section-1__carousel-viewport">
+            <div class="section-1__carousel-track">
+              <% carousel_images = [
+                "RSVP_comp/first_section/shop_items_carousel/cloud Background Removed.png",
+                "RSVP_comp/first_section/shop_items_carousel/console.png",
+                "RSVP_comp/first_section/shop_items_carousel/drone.png",
+                "RSVP_comp/first_section/shop_items_carousel/ebook Background Removed.png",
+                "RSVP_comp/first_section/shop_items_carousel/gpu.png",
+                "RSVP_comp/first_section/shop_items_carousel/headp Background Removed.png",
+                "RSVP_comp/first_section/shop_items_carousel/ipad.png",
+                "RSVP_comp/first_section/shop_items_carousel/mac Background Removed.png",
+                "RSVP_comp/first_section/shop_items_carousel/mic Background Removed.png",
+                "RSVP_comp/first_section/shop_items_carousel/monitor Background Removed.png",
+                "RSVP_comp/first_section/shop_items_carousel/mouse Background Removed.png",
+                "RSVP_comp/first_section/shop_items_carousel/rasp.png"
+              ] %>
+              <% (carousel_images + carousel_images).each do |img_path| %>
+                <div class="section-1__carousel-box">
+                  <%= image_tag "RSVP_comp/first_section/carousel_box.png", alt: "", class: "section-1__carousel-box-bg", aria: { hidden: true } %>
+                  <%= image_tag img_path, alt: "", class: "section-1__carousel-item", aria: { hidden: true } %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+      <div class="ext-section__lighty-line"></div>
+    </section>
+
+    <%# Section 2: About Hack Club / Jackpot Trailer %>
+    <section class="ext-section ext-section--2">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_2.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--2">
+        <div class="section-2__about">
+          <%= link_to "https://hackclub.com", target: "_blank", rel: "noopener noreferrer", class: "section-2__about-link" do %>
+            <%= image_tag "RSVP_comp/second_section/hackclub_box.png", alt: "About Hack Club", class: "section-2__hackclub-box" %>
+          <% end %>
+        </div>
+        <div class="section-2__trailer">
+          <%= link_to "https://www.youtube.com/watch?v=4pV9bcxCTDo", target: "_blank", rel: "noopener", class: "section-2__trailer-link" do %>
+            <%= image_tag "RSVP_comp/second_section/jackpottrailer_box.png", alt: "Jackpot Trailer", class: "section-2__trailer-box" %>
+          <% end %>
+        </div>
+      </div>
+      <div class="ext-section__lighty-line"></div>
+    </section>
+
+    <%# Section 3: You can create EVERYTHING! %>
+    <section class="ext-section ext-section--3">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_3.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--3">
+        <div class="section-3__title-row">
+          <%= image_tag "RSVP_comp/third_section/card_draw.png", alt: "", class: "section-3__title-card-draw", aria: { hidden: true } %>
+          <%= image_tag "RSVP_comp/third_section/title_section_3.png", alt: "You can create everything", class: "section-3__title-image" %>
+        </div>
+        <div class="section-3__cards">
+          <%= image_tag "RSVP_comp/third_section/prj_card_1.png", alt: "Project card", class: "section-3__prj-card" %>
+          <%= image_tag "RSVP_comp/third_section/prj_card_2.png", alt: "Project card", class: "section-3__prj-card" %>
+          <%= image_tag "RSVP_comp/third_section/prj_card_3.png", alt: "Project card", class: "section-3__prj-card" %>
+        </div>
+        <%= link_to image_tag("RSVP_comp/third_section/seeMoreButton.png", alt: "See your projects", class: "section-3__see-more"), "https://scrapbook.hackclub.com/", target: "_blank", rel: "noopener", class: "section-3__see-more-link" %>
+        <div class="section-3__where-start">
+          <%= image_tag "RSVP_comp/third_section/where_to_start_box.png", alt: "Get started", class: "section-3__where-start-box" %>
+          <div class="section-3__where-start-content">
+            <a class="section-3__where-start-item" href="https://workshops.hackclub.com/personal_website/" target="_blank" rel="noopener">
+              <span class="section-3__where-start-label"><span class="section-3__where-start-symbol">♧</span> Personal website</span>
+              <span class="section-3__where-start-url">https://workshops.hackclub.com/personal_website/</span>
+            </a>
+            <a class="section-3__where-start-item" href="https://workshops.hackclub.com/particle_physics/" target="_blank" rel="noopener">
+              <span class="section-3__where-start-label"><span class="section-3__where-start-symbol">♧</span> Particle Physics simulation</span>
+              <span class="section-3__where-start-url">https://workshops.hackclub.com/particle_physics/</span>
+            </a>
+            <a class="section-3__where-start-item" href="https://boba.hackclub.com/" target="_blank" rel="noopener">
+              <span class="section-3__where-start-label"><span class="section-3__where-start-symbol">♧</span> Boba Drops - make a website!</span>
+              <span class="section-3__where-start-url">https://boba.hackclub.com/</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="ext-section__lighty-line"></div>
+    </section>
+
+    <%# Section 4: Past Events %>
+    <section class="ext-section ext-section--4">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_4.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--4">
+        <%= image_tag "RSVP_comp/fourth_section/title_section_4.png", alt: "Past Events", class: "section-4__title-image" %>
+        <div class="section-5__intro">
+          <%= link_to "https://emmaborghi.tech/", target: "_blank", rel: "noopener noreferrer", class: "section-5__emma-box-link" do %>
+            <%= image_tag "RSVP_comp/fourth_section/emma_box.png", alt: "Past events intro", class: "section-5__emma-box" %>
+          <% end %>
+        </div>
+        <div class="section-5__events">
+          <div class="section-5__event section-5__event--juice">
+            <%= link_to "https://www.youtube.com/watch?v=fuTlToZ1SX8&t=2s&pp=ygUPaGFjayBjbHViIGp1aWNl", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
+              <%= image_tag "RSVP_comp/fourth_section/juice_img.png", alt: "Juice event", class: "section-5__event-img" %>
+            <% end %>
+            <%= image_tag "RSVP_comp/fourth_section/juice_txt.png", alt: "Juice", class: "section-5__event-txt" %>
+          </div>
+          <div class="section-5__event section-5__event--moonshot">
+            <%= image_tag "RSVP_comp/fourth_section/moonshot_txt.png", alt: "Moonshot", class: "section-5__event-txt" %>
+            <%= link_to "https://moonshot.hackclub.com/", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
+              <%= image_tag "RSVP_comp/fourth_section/moonshot_img.png", alt: "Moonshot event", class: "section-5__event-img" %>
+            <% end %>
+          </div>
+          <div class="section-5__event section-5__event--overglade">
+            <%= link_to "https://overglade.hackclub.com/", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
+              <%= image_tag "RSVP_comp/fourth_section/overglade_img.png", alt: "Overglade event", class: "section-5__event-img" %>
+            <% end %>
+            <%= image_tag "RSVP_comp/fourth_section/overglade_txt.png", alt: "Overglade", class: "section-5__event-txt" %>
+          </div>
+        </div>
+        <%= link_to image_tag("RSVP_comp/fourth_section/seeMoreHackathonsButton.png", alt: "See more hackathons", class: "section-5__see-more"), "https://hackclub.com/hackathons/", target: "_blank", rel: "noopener noreferrer", class: "section-5__see-more-link" %>
+      </div>
+      <div class="ext-section__lighty-line"></div>
+    </section>
+
+    <%# Section 5: Info / Footer %>
+    <section class="ext-section ext-section--5">
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_5.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <div class="ext-section__inner ext-section__inner--5">
+        <h2 class="section-title section-title--center section-title--info">info</h2>
+        <div class="section-6__cards">
+          <div class="section-6__comm-buttons">
+            <%= link_to "https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_1.png", alt: "Ask a question", class: "section-6__comm-card", aria: { hidden: true } %>
+            <% end %>
+            <%= link_to "https://hackclub.enterprise.slack.com/archives/C0ADEGZL5HD", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_2.png", alt: "Updates and News", class: "section-6__comm-card", aria: { hidden: true } %>
+            <% end %>
+            <%= link_to "https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_3.png", alt: "Join the community", class: "section-6__comm-card", aria: { hidden: true } %>
+            <% end %>
+          </div>
+          <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityBox_bkg.png", alt: "Ask a question, Updates and News, Join the community", class: "section-6__comm-box" %>
+        </div>
+        <div class="section-6__questions">
+          <div class="section-6__questions-buttons">
+            <%= link_to "https://jackpot.hackclub.com/faq", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/FAQ_card_1.png", alt: "FAQ", class: "section-6__question-card", aria: { hidden: true } %>
+            <% end %>
+            <%= link_to "https://jackpot.hackclub.com/rules", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/rules_card_2.png", alt: "Rules", class: "section-6__question-card", aria: { hidden: true } %>
+            <% end %>
+          </div>
+          <%= image_tag "RSVP_comp/fifth_section/joinComm_box/questionBox_bkg.png", alt: "Questions FAQ Rules", class: "section-6__questions-box" %>
+        </div>
+        <footer class="section-6__footer">
+          <div class="section-6__footer-line"></div>
+          <p class="section-6__questions-cta">
+            Have more questions? Email us at <%= link_to "emmaborghi@hackclub.com", "mailto:emmaborghi@hackclub.com", class: "section-6__questions-cta-link" %>
+          </p>
+          <div class="section-6__footer-links">
+            <div class="section-6__footer-col">
+              <span class="section-6__footer-col-title">Hack Club</span>
+              <a href="https://hackclub.com/philosophy/" target="_blank" rel="noopener noreferrer">Philosophy</a>
+              <a href="https://hackclub.com/team/" target="_blank" rel="noopener noreferrer">Our Team &amp; Board</a>
+              <a href="https://hackclub.com/jobs/" target="_blank" rel="noopener noreferrer">Jobs</a>
+              <a href="https://hackclub.com/brand/" target="_blank" rel="noopener noreferrer">Brand Guide</a>
+              <a href="https://hackclub.com/press/" target="_blank" rel="noopener noreferrer">Press Inquiries</a>
+              <a href="https://hackclub.com/philanthropy/" target="_blank" rel="noopener noreferrer">Donate</a>
+            </div>
+            <div class="section-6__footer-col">
+              <span class="section-6__footer-col-title">Resources</span>
+              <a href="https://events.hackclub.com/" target="_blank" rel="noopener noreferrer">Community Events</a>
+              <a href="https://jams.hackclub.com/" target="_blank" rel="noopener noreferrer">Jams</a>
+              <a href="https://toolbox.hackclub.com/" target="_blank" rel="noopener noreferrer">Toolbox</a>
+              <a href="https://hackclub.com/map" target="_blank" rel="noopener noreferrer">Clubs Map</a>
+              <a href="https://hackclub.com/conduct/" target="_blank" rel="noopener noreferrer">Code of Conduct</a>
+              <a href="https://hackclub.com/privacy/" target="_blank" rel="noopener noreferrer">Privacy &amp; Terms</a>
+            </div>
+          </div>
+          <p class="section-6__copyright">© <%= Date.current.year %> Hack Club. All rights reserved.</p>
+        </footer>
+      </div>
+      <div class="ext-section__lighty-line"></div>
+    </section>
   </div>
-  <%= render "home/rsvp" %>
-</div>
-<div class="page-section page-section--steps">
-  <div class="steps-content">
-    <%= image_tag 'RSVP_steps.png', alt: 'RSVP Steps', class: 'steps-image' %>
-    <div class="steps-cards">
-      <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU" target="_blank" rel="noopener noreferrer" class="steps-card-link"><%= image_tag 'Card_1.png', alt: 'Ask a question', class: 'steps-card' %></a>
-      <a href="https://hackclub.enterprise.slack.com/archives/C0ADEGZL5HD" target="_blank" rel="noopener noreferrer" class="steps-card-link"><%= image_tag 'Card_2.png', alt: 'Updates and News!', class: 'steps-card' %></a>
-      <a href="https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4" target="_blank" rel="noopener noreferrer" class="steps-card-link"><%= image_tag 'Card_3.png', alt: 'Join the community', class: 'steps-card' %></a>
-    </div>
-    <div class="steps-faq-row">
-      <%= link_to faq_path, class: "steps-faq-btn" do %>
-        <%= image_tag 'FAQ_card.png', alt: 'FAQ', class: 'steps-faq-card' %>
-      <% end %>
-      <%= link_to rules_path, class: "steps-faq-btn" do %>
-        <%= image_tag 'rules_card.png', alt: 'Rules', class: 'steps-faq-card' %>
-      <% end %>
-    </div>
-    <p class="steps-coming-soon">
-    More info<br>coming soon
-  </p>
-    </div>
-</div>
-<div class="page-section page-section--tail"></div>
 </div>
 
 <style>
+@font-face {
+  font-family: "Katibeh";
+  src: url(<%= asset_path "Katibeh/Katibeh-Regular.ttf" %>) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --first-section-height: 56.25vw;
+  --content-width: min(92vw, 1024px);
+  --content-width-narrow: min(88vw, 760px);
+  --cream: #efe394;
+  --cream-soft: #f1dfc5;
+  --brown: #6b2218;
+  --brown-dark: #43110e;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  :root {
+    --first-section-height: 100vw;
+  }
+}
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-background: url(<%= image_path 'RSVP_extended2.jpg' %>);
-min-height: 100vh;
-margin: 0;
-padding: 0;
-background-repeat: no-repeat;
-background-size: 100% 427vh;
-background-position: top center;
-background-color: #000;
-width: 100%;
-min-width: 100%;
-box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  min-height: max(100vh, 500vw);
+  min-height: max(100dvh, 500vw);
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: #000;
+  color: #fff8ec;
+}
+
+.main,
+.main * {
+  box-sizing: border-box;
 }
 
 .main {
-color: white;
-text-align: center;
-position: relative;
-width: 100%;
-min-width: 100%;
-box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
 }
 
-.page-section {
-min-height: 100vh;
-position: relative;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-.page-section--tail {
-min-height: 55vh;
-}
-.page-section--steps .steps-content {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-gap: 6vh;
-width: 100%;
-margin-top: 10vh;
-}
-.page-section--steps .steps-image {
-max-width: 85vw;
-width: 100%;
-height: auto;
-object-fit: contain;
-}
-.page-section--steps .steps-cards {
-display: flex;
-flex-direction: row;
-align-items: center;
-justify-content: center;
-gap: 2vw;
-flex-wrap: wrap;
-}
-.page-section--steps .steps-coming-soon {
-margin: 0;
-margin-top: 6vh;
-font-size: 8rem;
-color: rgba(255, 240, 200, 0.9);
-font-style: italic;
-letter-spacing: 0.15em;
-animation: coming-soon-pulse 2.5s ease-in-out infinite;
-}
-@keyframes coming-soon-pulse {
-0%, 100% { opacity: 0.7; transform: scale(1); }
-50% { opacity: 1; transform: scale(1.05); }
-}
-.page-section--steps .steps-card-link {
-display: block;
-transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease, box-shadow 0.3s ease;
-}
-.page-section--steps .steps-card-link:hover {
-transform: scale(1.08) translateY(-8px);
-filter: drop-shadow(0 12px 24px rgba(255, 180, 80, 0.4));
-}
-.page-section--steps .steps-card {
-max-width: 380px;
-width: 32vw;
-height: auto;
-object-fit: contain;
-display: block;
-pointer-events: none;
-}
-.steps-faq-row {
-display: flex;
-flex-direction: row;
-align-items: center;
-justify-content: center;
-gap: 2vw;
-flex-wrap: wrap;
-margin-top: 2vh;
-}
-.steps-faq-btn {
-display: block;
-text-decoration: none;
-transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease, box-shadow 0.3s ease;
-}
-.steps-faq-btn:hover {
-transform: scale(1.08) translateY(-8px);
-filter: drop-shadow(0 12px 24px rgba(255, 180, 80, 0.4));
-}
-.steps-faq-card {
-max-width: 380px;
-width: 32vw;
-height: auto;
-object-fit: contain;
-display: block;
-pointer-events: none;
-}
-.steps-rules-card {
-max-width: 380px;
-width: 32vw;
-aspect-ratio: 1 / 0.62;
-display: flex;
-align-items: center;
-justify-content: center;
-border-radius: 18px;
-background: rgba(0, 0, 0, 0.35);
-border: 1px solid rgba(255, 200, 100, 0.35);
-color: rgba(255, 240, 200, 0.92);
-text-transform: uppercase;
-letter-spacing: 0.18em;
-font-size: clamp(2rem, 3.2vw, 3rem);
-line-height: 1;
-box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
-pointer-events: none;
-}
 .page-section--hero {
-position: relative;
-min-height: 100vh;
+  position: relative;
+  height: var(--first-section-height);
+  min-height: var(--first-section-height);
+  margin: 0;
+  background: url(<%= image_path "first_bkg.jpg" %>) no-repeat top center #000;
+  background-size: 100% auto;
 }
-.page-section--hero #rsvp-container {
-bottom: calc(40px + 8vh);
-}
-</style>
 
-<style>
 .hero-overlays {
-position: absolute;
-inset: 0;
-pointer-events: none;
-transform: translateY(-8vh);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateY(2vh);
+  max-width: 100vw;
+  overflow: hidden;
 }
+
 .hero-title {
-position: absolute;
-left: 50%;
-top: -16vh;
-transform: translateX(-50%) rotate(3deg);
-max-width: 90vw;
-width: 42vw;
-height: auto;
-/* gentle glow + occasional flicker */
-filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35));
-animation: title-flicker 4.5s infinite steps(1, end);
+  position: absolute;
+  left: 50%;
+  top: clamp(-76vh, -3vh, 20vh);
+  transform: translateX(-50%) rotate(3deg);
+  max-width: min(85vw, 580px);
+  width: clamp(280px, 44vw, 580px);
+  height: auto;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35));
+  animation: title-flicker 4.5s infinite steps(1, end);
 }
+
 .hero-title::after {
-content: "";
-position: absolute;
-inset: -8px;
-pointer-events: none;
-/* sweeping sheen to mimic moving lights */
-background: linear-gradient(75deg, rgba(255,240,180,0) 0%, rgba(255,240,180,0.0) 35%, rgba(255,240,180,0.45) 50%, rgba(255,240,180,0.0) 65%, rgba(255,240,180,0) 100%);
-mix-blend-mode: screen;
-transform: translateX(-160%);
-animation: title-sheen 5.75s infinite;
+  content: "";
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  background: linear-gradient(75deg, rgba(255, 240, 180, 0) 0%, rgba(255, 240, 180, 0) 35%, rgba(255, 240, 180, 0.45) 50%, rgba(255, 240, 180, 0) 65%, rgba(255, 240, 180, 0) 100%);
+  mix-blend-mode: screen;
+  transform: translateX(-160%);
+  animation: title-sheen 5.75s infinite;
 }
+
 .hero-center {
-position: absolute;
-left: 50%;
-top: 16vh;
-transform: translateX(-50%);
-max-width: 80vw; 
-width: 85vw; /* IMG SIZE */
-height: auto;
-/* bright pulsing glow around the image */
-filter:
-  drop-shadow(0 0 18px rgba(255, 230, 170, 0.35))
-  drop-shadow(0 0 48px rgba(255, 170, 60, 0.22));
-animation: center-glow 2.8s ease-in-out infinite;
+  position: absolute;
+  left: 50%;
+  top: clamp(-28vh, 9vh, 42vh);
+  transform: translateX(-51%);
+  max-width: min(92vw, 1200px);
+  width: clamp(520px, 200vw, 1210px);
+  height: auto;
+  filter:
+    drop-shadow(0 0 18px rgba(255, 230, 170, 0.35))
+    drop-shadow(0 0 48px rgba(255, 170, 60, 0.22));
+  animation: center-glow 2.8s ease-in-out infinite;
 }
-.hero-logo-link {
-position: absolute;
-top: 10vh;
-left: 8px;
-pointer-events: auto;
-display: block;
-line-height: 0;
-}
-.hero-logo {
-width: 180px;
-height: auto;
-display: block;
-}
+
 @keyframes title-sheen {
-  0%   { transform: translateX(-160%); opacity: 0.0; }
-  12%  { transform: translateX(160%);  opacity: 1.0; }
-  100% { transform: translateX(160%);  opacity: 0.0; }
+  0%   { transform: translateX(-160%); opacity: 0; }
+  12%  { transform: translateX(160%); opacity: 1; }
+  100% { transform: translateX(160%); opacity: 0; }
 }
+
 @keyframes title-flicker {
-  0%, 87%, 100%   { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.35)) brightness(1) }
-  88%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.35)) brightness(0.8) }
-  89%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.55)) brightness(1.2) }
-  90%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.30)) brightness(0.9) }
-  92%             { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5)) drop-shadow(0 8px 18px rgba(255,180,80,0.60)) brightness(1.25) }
+  0%, 87%, 100% { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35)) brightness(1); }
+  88%           { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.35)) brightness(0.8); }
+  89%           { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.55)) brightness(1.2); }
+  90%           { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.3)) brightness(0.9); }
+  92%           { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 8px 18px rgba(255, 180, 80, 0.6)) brightness(1.25); }
 }
+
 @keyframes center-glow {
   0%, 100% {
     filter:
@@ -254,74 +367,1582 @@ display: block;
   }
 }
 
-@media (max-width: 600px) {
-  .page-section--steps .steps-content {
-    margin-top: 0;
+.hero-logo-link {
+  position: absolute;
+  top: max(-3px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  pointer-events: auto;
+  display: block;
+  line-height: 0;
+}
+
+.hero-logo {
+  width: clamp(100px, 22vw, 180px);
+  height: auto;
+  display: block;
+}
+
+.hero-dateline {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(135px + 10vh);
+  margin: 0;
+  text-align: center;
+  font-family: "Katibeh", "Georgia", serif;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 0.70;
+  max-width: min(92vw, 640px);
+  white-space: normal;
+}
+
+.hero-dateline__top {
+  color: #FFFDA7;
+  display: block;
+  margin-bottom: 0;
+}
+
+.hero-dateline__bottom {
+  color: #9F2D2F;
+  display: block;
+}
+
+/* Mac desktop/laptop tuning: reduce hero overlap while keeping responsive clamps */
+@media (min-width: 1024px) and (max-width: 1728px) and (max-height: 1120px) {
+  .hero-title {
+    top: clamp(-81vh, -3vh, 15vh);
+    width: clamp(250px, 40vw, 520px);
   }
-  .page-section--steps .steps-cards {
-    gap: 3vw;
+
+  .hero-center {
+    top: clamp(-22vh, 13vh, 44vh);
+    width: clamp(540px, 80vw, 1100px);
   }
-  .page-section--steps .steps-card {
-    max-width: 240px;
-    width: 85vw;
-  }
-  .steps-faq-card,
-  .steps-rules-card {
-    max-width: 240px;
-    width: 85vw;
-  }
-  .steps-faq-btn:hover {
-    transform: scale(1.05) translateY(-4px);
-  }
-  .page-section--steps .steps-card-link:hover {
-    transform: scale(1.05) translateY(-4px);
-  }
-  .page-section--steps .steps-coming-soon {
-    font-size: 2.5rem;
-    margin-top: 6vh;
+
+  .hero-dateline {
+    bottom: calc(96px + 8vh);
+    font-size: clamp(1.2rem, 2.4vw, 1.9rem);
+    line-height: 0.78;
+    max-width: min(90vw, 560px);
   }
 }
 
-/* Mobile adjustments */
-@media (max-width: 600px) {
-  html, body {
+.ext-content {
+  width: 100%;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  min-height: calc(500vw - var(--first-section-height));
+  display: block;
+  background-color: #1a0d0b;
+}
+
+.ext-section {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ext-section__bkg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  vertical-align: bottom;
+  pointer-events: none;
+}
+
+/* Responsive: crop backgrounds on smaller viewports */
+@media (max-width: 1023px) {
+  .ext-section {
+    min-height: clamp(280px, 75vw, 480px);
+  }
+
+  .ext-section__bkg {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    min-width: 100vw;
-    overflow-x: hidden;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
-  body {
-    background-size: 102% 315vh;
-    background-position: top center;
+
+}
+
+@media (max-width: 767px) {
+  .ext-section {
+    min-height: clamp(260px, 85vw, 400px);
   }
-  .main {
-    min-width: 100vw;
+}
+
+@media (max-width: 479px) {
+  .ext-section {
+    min-height: clamp(240px, 90vw, 360px);
+  }
+}
+
+.ext-section__lighty-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 3px;
+  margin: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 120, 60, 0.3) 15%,
+    rgba(255, 140, 70, 0.9) 50%,
+    rgba(255, 120, 60, 0.3) 85%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 12px rgba(255, 100, 50, 0.6),
+    0 0 24px rgba(255, 80, 40, 0.4);
+  pointer-events: none;
+}
+
+.ext-content__lighty-line--top {
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 120, 60, 0.3) 15%,
+    rgba(255, 140, 70, 0.9) 50%,
+    rgba(255, 120, 60, 0.3) 85%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 12px rgba(255, 100, 50, 0.6),
+    0 0 24px rgba(255, 80, 40, 0.4);
+}
+
+.ext-section__lighty-line--top {
+  margin-bottom: clamp(32px, 4vw, 56px);
+}
+
+.ext-section__inner {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--content-width);
+  max-width: 92vw;
+  height: 100%;
+  z-index: 1;
+  padding: clamp(48px, 6vw, 88px) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* Section 1: How does it work - fill entire section */
+.ext-section__inner--1 {
+  width: 100%;
+  max-width: 100%;
+  padding: clamp(24px, 3vw, 48px) clamp(16px, 2vw, 32px);
+  justify-content: space-between;
+  transform: translateX(-50%) translateY(clamp(-72px, -8vw, -120px));
+}
+
+.section-title--center {
+  text-align: center;
+  margin-bottom: clamp(12px, 1.5vw, 24px);
+}
+
+.ext-section__inner--1 .section-title--center {
+  margin-top: clamp(60px, 10vw, 120px);
+  margin-bottom: 0;
+  flex-shrink: 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  transform: translateY(clamp(20px, 3vw, 48px));
+}
+
+.section-1__panel {
+  position: relative;
+  width: 100%;
+  max-width: min(98%, 900px);
+  aspect-ratio: 2570 / 1569;
+  margin: 0 auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  container-type: inline-size;
+  container-name: panel;
+  overflow: hidden;
+}
+
+.ext-section__inner--1 .section-1__panel {
+  margin: 0 auto;
+}
+
+.section-1__panel-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  object-position: center;
+}
+
+.section-1__panel-content {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: clamp(16px, 3vw, 48px) clamp(28px, 5vw, 72px) clamp(28px, 5vw, 72px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.5vw, 24px);
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .section-1__panel-content {
+    overflow: visible;
+  }
+}
+
+.section-1__step {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(12px, 1.5vw, 20px);
+}
+
+.section-1__step-icon {
+  flex-shrink: 0;
+  width: clamp(32px, 5vw, 56px);
+  height: auto;
+}
+
+.section-1__step-text {
+  margin: 0;
+  color: var(--cream-soft);
+  font-family: "Georgia", serif;
+  font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+  line-height: 1.45;
+}
+
+.section-1__step-accent {
+  color: #e63946;
+}
+
+.section-1__step-accent--yellow {
+  color: #f4d03f;
+}
+
+.section-1__step-link {
+  text-decoration: underline;
+}
+
+.section-1__step-link:hover {
+  opacity: 0.9;
+}
+
+@container panel (max-width: 480px) {
+  .section-1__panel-content {
+    padding: clamp(12px, 3vw, 20px);
+    gap: clamp(8px, 1.2vw, 14px);
+  }
+  .section-1__step {
+    gap: clamp(8px, 1.2vw, 14px);
+  }
+  .section-1__step-icon {
+    width: clamp(24px, 4vw, 36px);
+  }
+  .section-1__step-text {
+    font-size: 0.8rem;
+  }
+}
+
+@container panel (max-width: 360px) {
+  .section-1__panel-content {
+    padding: 14px 18px;
+    gap: 6px;
+  }
+  .section-1__step {
+    gap: 6px;
+  }
+  .section-1__step-icon {
+    width: clamp(20px, 3.5vw, 28px);
+  }
+  .section-1__step-text {
+    font-size: 0.72rem;
+  }
+}
+
+.section-1__join-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  flex-shrink: 0;
+  transform: translateY(clamp(-40px, -5vw, -80px));
+}
+
+.section-1__join-link {
+  display: inline-block;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+  transition: transform 0.25s ease;
+}
+
+.section-1__join-link:hover .section-1__join-btn,
+.section-1__join-link:focus-within .section-1__join-btn {
+  transform: scale(1.08);
+}
+
+.section-1__join-link button,
+.section-1__join-link input[type="submit"] {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.section-1__join-btn {
+  width: clamp(160px, 28vw, 380px);
+  height: auto;
+  display: block;
+  transition: transform 0.25s ease;
+  filter: drop-shadow(0 0 12px rgba(255, 200, 100, 0.5)) drop-shadow(0 0 28px rgba(255, 180, 60, 0.35));
+  animation: join-btn-glow 2.4s ease-in-out infinite;
+}
+
+.section-1__join-link:hover .section-1__join-btn,
+.section-1__join-link:focus-within .section-1__join-btn {
+  animation: join-btn-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes join-btn-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 210, 120, 0.4)) drop-shadow(0 0 24px rgba(255, 190, 80, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(255, 220, 140, 0.7)) drop-shadow(0 0 40px rgba(255, 180, 70, 0.5)) drop-shadow(0 0 60px rgba(255, 160, 50, 0.25));
+  }
+}
+
+.section-1__carousel-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 20px);
+  flex-shrink: 0;
+  transform: translateY(clamp(-24px, -3vw, -48px));
+}
+
+.section-1__carousel-subtitle {
+  width: 100%;
+  max-width: min(90%, 600px);
+  height: auto;
+  object-fit: contain;
+}
+
+.section-1__carousel {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: clamp(8px, 1vw, 16px) 0 clamp(8px, 1vw, 24px);
+  overflow: hidden;
+}
+
+.section-1__carousel-viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+.section-1__carousel-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2vw, 24px);
+  width: max-content;
+  animation: section-1-carousel-scroll 30s linear infinite;
+}
+
+@keyframes section-1-carousel-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.section-1__carousel-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: clamp(120px, 18vw, 220px);
+  aspect-ratio: 525 / 361;
+  overflow: hidden;
+}
+
+.section-1__carousel-box-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  object-position: center;
+}
+
+.section-1__carousel-item {
+  position: relative;
+  width: 70%;
+  height: auto;
+  max-height: 65%;
+  object-fit: contain;
+  z-index: 1;
+}
+
+/* Section 1: Desktop overrides - larger elements, tighter spacing */
+@media (min-width: 1024px) {
+  .ext-section__inner--1 {
+    padding: clamp(32px, 4vw, 64px) clamp(24px, 3vw, 48px);
+    transform: translateX(-50%) translateY(clamp(-120px, -10vw, -180px));
+  }
+
+  .ext-section__inner--1 .section-title--center {
+    font-size: clamp(4.5rem, 8vw, 7rem);
+    margin-top: clamp(160px, 22vw, 320px);
+    margin-bottom: 0;
+    transform: translateY(clamp(32px, 4vw, 64px));
+  }
+
+  .ext-section__inner--1 .section-1__panel {
+    max-width: min(96%, 1200px);
+    margin: 0 auto;
+  }
+
+  .ext-section__inner--1 .section-1__panel-content {
+    padding: clamp(24px, 4vw, 56px) clamp(48px, 7vw, 96px) clamp(48px, 7vw, 96px);
+    gap: clamp(28px, 3vw, 48px);
+  }
+
+  .ext-section__inner--1 .section-1__panel-bg {
+    object-position: center top;
+  }
+
+  .ext-section__inner--1 .section-1__step {
+    gap: clamp(24px, 3vw, 44px);
+  }
+
+  .ext-section__inner--1 .section-1__step-icon {
+    width: clamp(72px, 9vw, 112px);
+  }
+
+  .ext-section__inner--1 .section-1__step-text {
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+  }
+
+  .ext-section__inner--1 .section-1__join-wrap {
+    transform: translateY(clamp(-80px, -10vw, -160px));
+  }
+
+  .ext-section__inner--1 .section-1__carousel-wrap {
+    transform: translateY(clamp(-48px, -6vw, -96px));
+  }
+
+  .ext-section__inner--1 .section-1__carousel {
+    padding: clamp(4px, 0.5vw, 12px) 0 clamp(8px, 1vw, 24px);
+  }
+
+  .ext-section__inner--1 .section-1__carousel-box {
+    width: clamp(160px, 22vw, 280px);
+  }
+
+  .ext-section__inner--1 .section-1__join-btn {
+    width: clamp(260px, 36vw, 520px);
+  }
+}
+
+/* Section 2: About Hack Club / Jackpot Trailer */
+.ext-section__inner--2 {
+  width: 100%;
+  max-width: 100%;
+  padding: clamp(24px, 3vw, 48px) clamp(16px, 2.5vw, 40px);
+  align-items: center;
+  justify-content: center;
+}
+
+.section-2__about {
+  display: flex;
+  justify-content: center;
+  margin-bottom: clamp(12px, 1.5vw, 24px);
+  width: 100%;
+  transform: translate(clamp(6px, 1vw, 24px), clamp(32px, 4vw, 72px));
+}
+
+.section-2__about-link {
+  display: block;
+  width: 100%;
+  max-width: min(98%, 1280px);
+  line-height: 0;
+}
+
+.section-2__hackclub-box {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  transition: transform 0.25s ease;
+}
+
+.section-2__about-link:hover .section-2__hackclub-box {
+  transform: scale(1.06);
+}
+
+.section-2__trailer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: clamp(24px, 3vw, 40px);
+  transform: translate(clamp(12px, 1.5vw, 36px), clamp(28px, 4vw, 72px));
+}
+
+.section-2__trailer-link {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 1040px);
+}
+
+.section-2__trailer-box {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  transition: transform 0.25s ease;
+}
+
+.section-2__trailer-link:hover .section-2__trailer-box {
+  transform: scale(1.06);
+}
+
+/* Section 3: You can create EVERYTHING! */
+.ext-section__inner--3 {
+  width: 100%;
+  max-width: 100%;
+  padding: clamp(24px, 4vw, 56px) clamp(10px, 1.6vw, 24px) clamp(20px, 3vw, 32px);
+  justify-content: flex-start;
+  transform: translateX(-50%) translateY(clamp(32px, 5vw, 72px));
+}
+
+.section-3__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 28px);
+  margin-bottom: clamp(18px, 2vw, 28px);
+  transform: translateY(0);
+  flex-wrap: wrap;
+}
+
+.section-3__title-card-draw {
+  display: block;
+  width: auto;
+  height: clamp(100px, 14vw, 200px);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.section-3__title-image {
+  display: block;
+  width: min(100%, 820px);
+  margin: 0;
+  height: auto;
+  object-fit: contain;
+}
+
+.section-3__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 1.2vw, 16px);
+  width: 80%;
+  margin-bottom: clamp(10px, 1.2vw, 18px);
+  transform: translateY(0);
+}
+
+.section-3__prj-card {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+}
+
+.section-3__prj-card:hover {
+  transform: scale(1.05);
+}
+
+.section-3__where-start {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(8px, 1.5vw, 24px);
+  transform: none;
+}
+
+.section-3__where-start-box {
+  display: block;
+  width: min(100%, 1200px);
+  height: auto;
+}
+
+.section-3__where-start-content {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(44%, 360px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 0.8vw, 12px);
+  text-align: left;
+}
+
+.section-3__where-start-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  color: #000;
+  font-family: "Georgia", serif;
+  font-size: clamp(0.9rem, 1.55vw, 1.28rem);
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  word-break: break-word;
+  transition: transform 0.2s ease;
+}
+
+.section-3__where-start-item:hover {
+  text-decoration: underline;
+  transform: scale(1.03);
+}
+
+.section-3__where-start-symbol {
+  color: #c00;
+}
+
+.section-3__where-start-label {
+  display: block;
+}
+
+.section-3__where-start-url {
+  display: none; /* link is the whole row; href is the redirect */
+}
+
+.section-3__see-more-link {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(32px, 4vw, 56px);
+  margin-bottom: clamp(8px, 1vw, 14px);
+}
+
+.section-3__see-more {
+  width: clamp(150px, 22vw, 280px);
+  max-width: 72vw;
+  height: auto;
+  transition: transform 0.25s ease;
+}
+
+.section-3__see-more-link:hover .section-3__see-more {
+  transform: scale(1.08);
+}
+
+@media (max-width: 1023px) {
+  .section-2__about {
+    transform: translate(clamp(4px, 0.8vw, 14px), clamp(12px, 2vw, 28px));
+  }
+
+  .section-2__trailer {
+    transform: translate(clamp(8px, 1.2vw, 18px), clamp(12px, 2vw, 28px));
+  }
+
+  .section-2__about-link {
+    max-width: min(98%, 760px);
+  }
+  .section-2__hackclub-box {
+    max-width: 100%;
+  }
+
+  .section-2__trailer-link {
+    max-width: min(92%, 680px);
+  }
+
+  .ext-section__inner--3 {
+    padding: clamp(48px, 7vw, 84px) clamp(10px, 2vw, 18px) clamp(18px, 3vw, 28px);
+  }
+}
+
+@media (max-width: 767px) {
+  .ext-section__inner--2 {
+    padding: clamp(18px, 4vw, 28px) clamp(12px, 4vw, 20px);
+  }
+
+  .section-2__about {
+    margin-bottom: clamp(8px, 2vw, 16px);
+    transform: translate(clamp(2px, 1vw, 8px), clamp(12px, 3vw, 20px));
+  }
+
+  .section-2__trailer {
+    margin-top: clamp(14px, 3vw, 24px);
+    transform: translate(clamp(4px, 1vw, 12px), clamp(10px, 3vw, 20px));
+  }
+
+  .section-2__about-link {
+    max-width: min(98%, 640px);
+  }
+  .section-2__hackclub-box {
+    max-width: 100%;
+  }
+
+  .section-2__trailer-link {
+    max-width: min(88%, 520px);
+  }
+
+  .ext-section__inner--3 {
+    padding: clamp(36px, 8vw, 56px) clamp(8px, 3vw, 14px) clamp(16px, 4vw, 24px);
+  }
+
+  .section-3__title-row {
     width: 100%;
   }
-  .page-section {
-    min-width: 100%;
+
+  .section-3__title-image,
+  .section-3__where-start-box {
+    width: 100%;
   }
-  .hero-overlays {
-    transform: translateY(4vh);   /* less upward shift so image + button sit lower */
+
+  .section-3__where-start-content {
+    width: min(52%, 300px);
   }
-  .hero-title {
-    width: 110vw;                  /* title sz */
-    max-width: none;
-    top: -20vh;                   
+
+  .section-3__cards {
+    gap: 6px;
   }
+
+  .section-3__title-row,
+  .section-3__cards {
+    transform: translateY(0);
+  }
+
+  .section-3__see-more-link {
+    margin-top: clamp(24px, 5vw, 48px);
+  }
+
+  .section-3__where-start {
+    transform: none;
+  }
+
+  .section-3__see-more {
+    width: clamp(130px, 32vw, 220px);
+    max-width: 74vw;
+  }
+
+  .section-3__where-start-item {
+    font-size: clamp(0.82rem, 3.2vw, 1.08rem);
+  }
+}
+
+/* Section 4 & 5: Past Events, Info – fill section height */
+.ext-section__inner--4,
+.ext-section__inner--5 {
+  width: 100%;
+  max-width: 100%;
+  padding: clamp(20px, 3vw, 40px) clamp(16px, 2vw, 32px);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ext-section__inner--4 {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.ext-section__inner--5 {
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: clamp(12px, 1.5vw, 24px);
+  padding-bottom: clamp(16px, 2vw, 28px);
+}
+
+.section-4__title-image {
+  display: block;
+  width: min(100%, 880px);
+  height: auto;
+  margin: 0 auto 0;
+  margin-top: clamp(220px, 32vw, 420px);
+  transform: translateX(clamp(10px, 1.8vw, 28px));
+  object-fit: contain;
+}
+
+.section-5__intro {
+  margin: 0;
+  padding: 0;
+}
+
+.section-5__emma-box-link {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 1400px);
+  margin: 0 auto 0;
+  margin-top: 2px;
+  margin-bottom: clamp(56px, 9vw, 120px);
+}
+
+.section-5__emma-box-link .section-5__emma-box {
+  transition: transform 0.25s ease;
+}
+
+.section-5__emma-box-link:hover .section-5__emma-box {
+  transform: scale(1.05);
+}
+
+.section-5__emma-box {
+  width: 100%;
+  max-width: min(100%, 1400px);
+  height: auto;
+  margin: 0;
+  display: block;
+}
+
+.section-5__events {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 56px);
+  margin: 0;
+  margin-top: 0;
+  margin-bottom: clamp(56px, 9vw, 120px);
+  width: 100%;
+  max-width: 100%;
+  align-items: center;
+}
+
+.section-5__event {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 3.5vw, 48px);
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+}
+
+.section-5__event-img-link {
+  display: block;
+  line-height: 0;
+}
+
+.section-5__event-img-link .section-5__event-img {
+  transition: transform 0.25s ease;
+}
+
+.section-5__event-img-link:hover .section-5__event-img {
+  transform: scale(1.06);
+}
+
+.section-5__event-img {
+  width: clamp(280px, 55vw, 680px);
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.section-5__event-txt {
+  order: -1;
+  width: clamp(220px, 38vw, 460px);
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (min-width: 1024px) {
+  .section-5__event {
+    flex-direction: row;
+  }
+
+  .section-5__event-txt {
+    order: 0;
+  }
+}
+
+.section-5__see-more-link {
+  display: flex;
+  justify-content: center;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.section-5__see-more {
+  width: clamp(380px, 58vw, 720px);
+  height: auto;
+  transition: transform 0.25s ease;
+}
+
+.section-5__see-more-link:hover .section-5__see-more {
+  transform: scale(1.06);
+}
+
+/* Section 6: Info / Footer */
+.section-6__cards {
+  position: relative;
+  margin: 0;
+  margin-bottom: clamp(32px, 5vw, 64px);
+  width: 100%;
+  max-width: min(100%, 1280px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 3 community cards overlapping the top of the box bkg, shifted left */
+.section-6__comm-buttons {
+  position: absolute;
+  top: clamp(28px, 3.5vw, 56px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: clamp(10px, 1.5vw, 24px);
+  flex-wrap: wrap;
+  pointer-events: none;
+  box-sizing: border-box;
+  transform: none;
+}
+
+.section-6__comm-buttons .section-6__card-link {
+  pointer-events: auto;
+}
+
+.section-6__card-link {
+  display: block;
+  line-height: 0;
+  transition: transform 0.25s ease;
+}
+
+.section-6__card-link:hover {
+  transform: scale(1.08);
+}
+
+.section-6__comm-card {
+  display: block;
+  height: auto;
+  max-height: clamp(120px, 20vw, 260px);
+  width: auto;
+  object-fit: contain;
+}
+
+.section-6__comm-box {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+  display: block;
+}
+
+.section-6__questions {
+  position: relative;
+  margin-bottom: clamp(56px, 9vw, 120px);
+  margin-top: 0;
+  width: 100%;
+  max-width: min(100%, 1480px);
+  margin-left: auto;
+  margin-right: clamp(16px, 3vw, 48px);
+}
+
+/* 2 question cards overlapping the top of the box bkg, shifted left */
+.section-6__questions-buttons {
+  position: absolute;
+  top: clamp(28px, 10vw, 150px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: clamp(10px, 1.5vw, 24px);
+  flex-wrap: wrap;
+  pointer-events: none;
+  box-sizing: border-box;
+  transform: translate(clamp(140px, 2vw, 36px), clamp(10px, 1.2vw, 20px));
+}
+
+.section-6__questions-buttons .section-6__card-link {
+  pointer-events: auto;
+}
+
+.section-6__question-card {
+  display: block;
+  height: auto;
+  max-height: clamp(120px, 20vw, 260px);
+  width: auto;
+  object-fit: contain;
+}
+
+.section-6__questions-box {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+  display: block;
+}
+
+.section-6__footer {
+  text-align: center;
+  margin-top: clamp(64px, 10vw, 140px);
+  width: 100%;
+}
+
+.section-6__footer-line {
+  width: 100%;
+  max-width: min(100%, 720px);
+  height: 2px;
+  margin: 0 auto clamp(20px, 3vw, 36px);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--cream) 20%,
+    var(--cream) 80%,
+    transparent 100%
+  );
+  opacity: 0.95;
+}
+
+.section-6__questions-cta {
+  margin: 0 auto clamp(28px, 4vw, 48px);
+  color: var(--cream);
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.4;
+  max-width: 90%;
+}
+
+.section-6__questions-cta-link {
+  color: #FFBAAB;
+  text-decoration: underline;
+}
+
+.section-6__questions-cta-link:hover {
+  opacity: 0.9;
+}
+
+.section-6__footer-links {
+  display: flex;
+  justify-content: center;
+  gap: clamp(24px, 4vw, 48px);
+  flex-wrap: wrap;
+  margin-bottom: clamp(10px, 1.2vw, 16px);
+}
+
+.section-6__footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.section-6__footer-col-title {
+  color: var(--cream);
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.section-6__footer-col a {
+  color: var(--cream-soft);
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  text-decoration: none;
+}
+
+.section-6__footer-col a:hover {
+  text-decoration: underline;
+}
+
+.section-6__copyright {
+  margin: 0;
+  color: rgba(255, 248, 236, 0.6);
+  font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+}
+
+.section-title {
+  margin: 0 0 clamp(12px, 2vw, 20px);
+  color: var(--cream);
+  font-family: "Katibeh", "Georgia", serif;
+  font-size: clamp(2.2rem, 5.6vw, 4.3rem);
+  font-weight: 400;
+  line-height: 0.9;
+  text-shadow:
+    -2px -2px 0 var(--brown-dark),
+     2px -2px 0 var(--brown-dark),
+    -2px  2px 0 var(--brown-dark),
+     2px  2px 0 var(--brown-dark),
+     0 6px 12px rgba(0, 0, 0, 0.6);
+}
+
+.section-title--info {
+  margin-top: clamp(140px, 24vw, 360px);
+  margin-bottom: clamp(28px, 4vw, 56px);
+  font-size: clamp(5rem, 13vw, 9.5rem);
+}
+
+@media (max-width: 1023px) {
+  .hero-title { width: clamp(260px, 46vw, 450px); }
+  .hero-center { width: clamp(300px, 90vw, 720px); }
+  .hero-logo { width: clamp(100px, 18vw, 160px); }
+
+  /* "and enjoy our prizes" subtitle scales down on tablets/phones */
+  .section-1__carousel-subtitle {
+    max-width: min(84%, 420px);
+  }
+
+  /* Keep section 5 cards inside and aligned with their boxes on smaller screens */
+  .section-6__comm-buttons,
+  .section-6__questions-buttons {
+    top: clamp(16px, 3vw, 36px);
+    gap: clamp(8px, 1.6vw, 16px);
+  }
+
+  .section-6__comm-card,
+  .section-6__question-card {
+    max-height: clamp(72px, 13vw, 130px);
+  }
+
+  /* Mobile/tablet: prevent per-section inner scrolling */
+  .ext-section {
+    overflow: visible;
+  }
+
+  .ext-section__inner {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 100%;
+    overflow-y: visible;
+    padding-left: clamp(10px, 2vw, 20px);
+    padding-right: clamp(10px, 2vw, 20px);
+  }
+
+  /* Section 0: crop background like other sections */
+  .ext-section--0.page-section--hero {
+    background-size: cover;
+    background-position: center center;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    /* Phone baseline: keep hero stable across tall/short phone ratios */
+    --first-section-height: 100dvh;
+  }
+
+  .section-1__panel-bg {
+    display: none;
+  }
+
+  .ext-section--0.page-section--hero {
+    height: 100dvh;
+    min-height: 100dvh;
+    background-size: cover;
+    background-position: center top;
+  }
+
+  .hero-overlays { transform: translateY(0); }
+  .hero-title { top: clamp(6vh, 10vh, 13vh); width: clamp(220px, 56vw, 360px); }
+  .hero-center { top: clamp(28vh, 34vh, 40vh); width: clamp(280px, 88vw, 560px); }
+  .hero-dateline {
+    bottom: clamp(140px, 18vh, 220px);
+    font-size: clamp(1.28rem, 5.2vw, 2rem);
+    line-height: 0.86;
+    max-width: 90vw;
+  }
+  .hero-logo-link { top: max(6px, env(safe-area-inset-top)); }
+  .hero-logo { width: 130px; }
+
+  .ext-content {
+    padding-top: 0;
+  }
+
+  .section-title { font-size: clamp(1.75rem, 4.2vw, 3.2rem); }
+
+  .section-1__carousel-subtitle {
+    max-width: min(82%, 320px);
+  }
+
+  /* Keep questions cards centered on iPhone widths */
+  .section-6__questions-buttons {
+    transform: translate(clamp(0px, 0.4vw, 4px), clamp(8px, 1.2vw, 14px));
+  }
+
+  /* Last section: move content upward on phones */
+  .ext-section__inner--5 {
+    padding-top: 0;
+  }
+
+  .section-title--info {
+    margin-top: clamp(48px, 10vw, 96px);
+    margin-bottom: clamp(20px, 3vw, 36px);
+    font-size: clamp(3rem, 11vw, 5.2rem);
+  }
+}
+
+@media (max-width: 479px) {
+  :root {
+    --first-section-height: 100dvh;
+  }
+
+  .ext-section--0.page-section--hero {
+    height: 100dvh;
+    min-height: 100dvh;
+    background-size: cover;
+    background-position: center top;
+  }
+
+  .hero-title { top: clamp(7vh, 11vh, 14vh); width: 84vw; }
+  .hero-center { top: clamp(27vh, 33vh, 38vh); width: 94vw; max-width: 460px; }
+  .hero-dateline {
+    bottom: clamp(128px, 17vh, 190px);
+    font-size: clamp(1.2rem, 5.8vw, 1.7rem);
+    line-height: 0.9;
+  }
+  .hero-logo { width: 100px; }
+
+  .section-title {
+    font-size: clamp(1.6rem, 4.5vw, 2.7rem);
+  }
+
+  .ext-content {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+}
+
+@media (max-width: 360px) {
+  .section-title { font-size: clamp(1.45rem, 4vw, 2.4rem); }
+}
+
+/*
+  1512x982-ish landscape desktops (with flexibility):
+  - remove section-1 nested scrolling
+  - keep section-0 hero composition clear (no subtitle overlap on center art)
+*/
+@media (min-width: 1280px) and (max-width: 1728px) and (min-height: 900px) and (max-height: 1080px) and (min-aspect-ratio: 14/10) and (max-aspect-ratio: 18/10) {
+  /* Section 1 only: prevent individual section scroll capture */
+  .ext-section__inner--1 {
+    overflow-y: visible;
+  }
+
+  .section-1__panel-content {
+    overflow: visible;
+  }
+
+  .section-1__carousel,
+  .section-1__carousel-viewport {
+    overflow: hidden;
+  }
+}
+
+/*
+  Landscape desktop band fix: 1728x916 down to 917x916
+  (prevents hero overlap, section-1 collisions, and inner-section scrolling)
+*/
+@media (min-width: 917px) and (max-width: 1728px) and (max-height: 916px) {
+  /* Section 1: lift title so it doesn't sink into yellow panel */
+  .ext-section__inner--1 .section-title--center {
+    margin-top: clamp(110px, 13vw, 170px);
+    transform: translateY(0);
+  }
+
+  /* Keep carousel from introducing horizontal pan in this ratio */
+  .ext-section__inner--1 .section-1__carousel {
+    width: min(88vw, 980px);
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+  }
+
+  .ext-section__inner--1 .section-1__carousel-box {
+    width: clamp(130px, 16vw, 220px);
+  }
+
+  /* Keep sections layered correctly over their backgrounds (no flow override). */
+  .ext-section__inner {
+    overflow-y: visible;
+    overscroll-behavior: auto;
+  }
+
+  .section-1__panel-content {
+    overflow: visible;
+  }
+
+  .ext-section__inner--3 {
+    padding-top: clamp(24px, 3vw, 40px);
+  }
+
+  .ext-section__inner--4,
+  .ext-section__inner--5 {
+    padding-top: clamp(24px, 3vw, 40px);
+    padding-bottom: clamp(24px, 3vw, 40px);
+  }
+
+  /* Final info section: avoid clipping links in this ratio */
+  .ext-section--5 {
+    overflow: visible;
+  }
+
+  .section-title--info {
+    margin-top: clamp(56px, 8vw, 120px);
+    margin-bottom: clamp(16px, 2vw, 28px);
+    font-size: clamp(3.8rem, 8vw, 6.6rem);
+  }
+
+  .section-6__cards {
+    margin-bottom: clamp(16px, 2vw, 32px);
+  }
+
+  .section-6__questions {
+    margin-bottom: clamp(20px, 3vw, 44px);
+  }
+
+  .section-6__footer {
+    margin-top: clamp(24px, 3vw, 48px);
+  }
+
+  .section-6__footer-links {
+    gap: clamp(16px, 2.4vw, 32px);
+    margin-bottom: clamp(6px, 1vw, 12px);
+  }
+
+  .section-4__title-image {
+    margin-top: clamp(32px, 6vw, 96px);
+    transform: none;
+  }
+
+  .section-5__events,
+  .section-6__questions {
+    margin-bottom: clamp(32px, 5vw, 72px);
+  }
+}
+
+/*
+  Final phone-portrait override (placed last so it wins):
+  fixes hero sizing/position and lifts final section content on common phone ratios.
+*/
+@media (max-width: 600px) and (min-height: 800px) and (orientation: portrait) {
   .hero-center {
-    width: 150vw;                /* image sz */
-    max-width: none;
-    top: 16vh;                   /* lower so central image is more centered */
+    top: 35vh !important;
+    width: min(96vw, 480px) !important;
   }
-  .hero-logo-link {
-    top: -10vh;
-    left: 8px;
+
+  .hero-dateline {
+    bottom: 19vh !important;
+    font-size: clamp(1.3rem, 6vw, 1.85rem) !important;
+    line-height: 0.92 !important;
+    max-width: 92vw !important;
   }
-  .hero-logo {
-    width: 140px;
+
+  .ext-section__inner--5 {
+    padding-top: 0 !important;
+    padding-bottom: 12px !important;
   }
-  .page-section--hero #rsvp-container {
-    bottom: 160px;                /* lower button on mobile */
+
+  .section-title--info {
+    margin-top: 28px !important;
+    margin-bottom: 18px !important;
+    font-size: clamp(2.8rem, 10.5vw, 4.8rem) !important;
+  }
+
+  .section-6__cards {
+    margin-bottom: 16px !important;
+  }
+
+  .section-6__questions {
+    margin-bottom: 18px !important;
+  }
+
+  .section-6__footer {
+    margin-top: 16px !important;
+  }
+}
+
+/* 360x740-ish phones (Galaxy/Android portrait) */
+@media (min-width: 340px) and (max-width: 390px) and (min-height: 700px) and (max-height: 780px) and (orientation: portrait) {
+  .hero-title {
+    top: 10vh !important;
+    width: 82vw !important;
+  }
+
+  .hero-center {
+    top: 33vh !important;
+    width: 95vw !important;
+    max-width: 430px !important;
+  }
+
+  .hero-dateline {
+    bottom: 20vh !important;
+    font-size: clamp(1.15rem, 5.5vw, 1.6rem) !important;
+    line-height: 0.9 !important;
+    max-width: 90vw !important;
+  }
+
+  .scroll-down-v {
+    bottom: 12vh !important;
+  }
+
+  .ext-section__inner--5 {
+    padding-top: 0 !important;
+  }
+
+  .section-title--info {
+    margin-top: 20px !important;
+    font-size: clamp(2.6rem, 10vw, 4.3rem) !important;
+  }
+}
+
+/* Broad fallback for small portrait phones if exact ratio query misses */
+@media (max-width: 430px) and (max-height: 900px) and (orientation: portrait) {
+  .hero-title {
+    top: 9vh !important;
+    width: 84vw !important;
+  }
+
+  .hero-center {
+    top: 34vh !important;
+    width: 96vw !important;
+    max-width: 460px !important;
+  }
+
+  .hero-dateline {
+    bottom: 19vh !important;
+    font-size: clamp(1.18rem, 5.7vw, 1.68rem) !important;
+    line-height: 0.92 !important;
+  }
+
+  .scroll-down-v {
+    bottom: 11vh !important;
+  }
+}
+
+/* iPhone Safari portrait around ~390–520px (Pro, Pro Max, Plus) */
+@media (min-width: 375px) and (max-width: 540px) and (min-height: 700px) and (max-height: 1000px) {
+  .hero-center {
+    top: 32vh !important;
+    width: min(100vw, 520px) !important;
+    max-width: 100vw !important;
+  }
+
+  .hero-dateline {
+    bottom: 12vh !important;
+    font-size: clamp(1.2rem, 4.2vw, 1.65rem) !important;
+    max-width: 98vw !important;
+    line-height: 0.95 !important;
+  }
+
+  .scroll-down-v {
+    bottom: 5vh !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+}
+
+/* FORCE: bigger center hero image on phone ratios */
+@media (max-width: 767px) and (orientation: portrait) {
+  .hero-overlays {
+    overflow: visible !important;
+  }
+
+  .page-section--hero .hero-title {
+    width: 78vw !important;
+  }
+
+  .page-section--hero .hero-center {
+    width: min(118vw, 880px) !important;
+    max-width: none !important;
+    top: 29vh !important;
+    transform: translateX(-51%) scale(1.24) !important;
+    transform-origin: center top !important;
+  }
+
+  .hero-dateline {
+    font-size: clamp(1.28rem, 6vw, 1.9rem) !important;
+    bottom: 10vh !important;
+  }
+
+  .scroll-down-v {
+    bottom: 3.5vh !important;
+  }
+}
+
+/* Extra boost for 360x740-ish phones */
+@media (min-width: 320px) and (max-width: 430px) and (min-height: 680px) and (max-height: 900px) and (orientation: portrait) {
+  .page-section--hero .hero-title {
+    width: 80vw !important;
+  }
+
+  .page-section--hero .hero-center {
+    width: 120vw !important;
+    top: 30vh !important;
+    transform: translateX(-51%) scale(1.3) !important;
+  }
+
+  .hero-dateline {
+    font-size: clamp(1.32rem, 6.2vw, 2rem) !important;
+    bottom: 9vh !important;
+  }
+
+  .scroll-down-v {
+    bottom: 3vh !important;
+  }
+}
+
+/* iOS Safari-specific phone tuning: keep subtitle clear of center image */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 767px) and (orientation: portrait) {
+    .page-section--hero .hero-center {
+      top: 26vh !important;
+    }
+
+    .hero-dateline {
+      bottom: 6vh !important;
+      max-width: 96vw !important;
+      line-height: 0.98 !important;
+    }
+
+    .scroll-down-v {
+      bottom: 1.8vh !important;
+    }
   }
 }
 </style>

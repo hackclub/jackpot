@@ -4,4 +4,3 @@ class AddLogoUrlToShopGroups < ActiveRecord::Migration[8.1]
     add_column :shop_grant_types, :logo_url, :string
   end
 end
-

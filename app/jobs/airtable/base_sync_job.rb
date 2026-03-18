@@ -1,66 +1,91 @@
 class Airtable::BaseSyncJob < ApplicationJob
   queue_as :literally_whenever
 
+  attr_reader :sync_log
+
   def self.perform_later(*args)
     return if SolidQueue::Job.where(class_name: name, finished_at: nil).exists?
 
     super
   end
 
-  # Syncs records to Airtable, creating new or updating existing.
-  # Stores airtable_id on local records for future updates.
   def perform
-    records_to_sync.each do |record|
-      sync_single_record(record)
+    @sync_log = []
+    log("Starting #{self.class.name}")
+    log("API token present: #{api_token.present?}")
+    log("Base ID: #{base_id.presence || 'MISSING'}")
+    log("Table name: #{table_name}")
+
+    unless api_token.present? && base_id.present?
+      log("ERROR: Missing Airtable credentials, aborting")
+      return
     end
+
+    to_sync = records_to_sync
+    log("Records to sync: #{to_sync.size}")
+
+    to_sync.each_with_index do |record, i|
+      sync_single_record(record, i)
+    end
+
+    log("Finished #{self.class.name}")
   end
 
   private
 
-  # Syncs a single record to Airtable.
-  # Creates if no airtable_id, updates if airtable_id exists.
-  def sync_single_record(record)
+  def log(msg)
+    @sync_log ||= []
+    entry = "[#{Time.current.strftime('%H:%M:%S')}] #{msg}"
+    @sync_log << entry
+    Rails.logger.info("AirtableSync: #{msg}")
+  end
+
+  def sync_single_record(record, index = nil)
     fields = field_mapping(record)
+    prefix = "Record ##{record.id}"
+    prefix += " (#{index + 1})" if index
 
     if record.airtable_id.present?
+      log("#{prefix}: updating airtable_id=#{record.airtable_id}")
       update_airtable_record(record, fields)
     else
+      log("#{prefix}: creating new")
       create_airtable_record(record, fields)
     end
 
-    record.update_column(synced_at_field, Time.current)
+    record.update_column(synced_at_field, Date.current)
+    log("#{prefix}: OK")
   rescue Norairrecord::Error => e
-    Rails.logger.error("Airtable sync failed for #{record.class}##{record.id}: #{e.message}")
+    log("#{prefix}: FAILED - #{e.class}: #{e.message}")
+  rescue => e
+    log("#{prefix}: FAILED - #{e.class}: #{e.message}")
   end
 
-  # Creates a new record in Airtable and stores the airtable_id locally.
   def create_airtable_record(record, fields)
     airtable_record = table.new(fields)
     airtable_record.create
     record.update_column(:airtable_id, airtable_record.id)
   end
 
-  # Updates an existing Airtable record by its stored airtable_id.
   def update_airtable_record(record, fields)
     airtable_record = table.find(record.airtable_id)
     fields.each { |key, value| airtable_record[key] = value }
     airtable_record.save
   rescue Norairrecord::RecordNotFoundError
-    # Record was deleted in Airtable, recreate it
     record.update_column(:airtable_id, nil)
     create_airtable_record(record, fields)
   end
 
   def table_name
-    raise NotImplementedError, "Subclass must implement #table_name"
+    raise NotImplementedError
   end
 
   def records
-    raise NotImplementedError, "Subclass must implement #records"
+    raise NotImplementedError
   end
 
   def field_mapping(_record)
-    raise NotImplementedError, "Subclass must implement #field_mapping"
+    raise NotImplementedError
   end
 
   def synced_at_field
@@ -96,10 +121,14 @@ class Airtable::BaseSyncJob < ApplicationJob
   end
 
   def table
-    @table ||= Norairrecord.table(
-      Rails.application.credentials&.airtable&.acces_token || ENV["AIRTABLE_API_KEY"],
-      Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"],
-      table_name
-    )
+    @table ||= Norairrecord.table(api_token, base_id, table_name)
+  end
+
+  def api_token
+    @api_token ||= Rails.application.credentials&.airtable&.acces_token || ENV["AIRTABLE_API_KEY"]
+  end
+
+  def base_id
+    @base_id ||= Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
   end
 end

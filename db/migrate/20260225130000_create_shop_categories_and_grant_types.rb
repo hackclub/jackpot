@@ -58,4 +58,3 @@ class CreateShopCategoriesAndGrantTypes < ActiveRecord::Migration[8.1]
     drop_table :shop_categories
   end
 end
-

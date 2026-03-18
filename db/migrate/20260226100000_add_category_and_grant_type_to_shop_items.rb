@@ -19,4 +19,3 @@ class AddCategoryAndGrantTypeToShopItems < ActiveRecord::Migration[8.1]
     remove_column :shop_items, :category if column_exists?(:shop_items, :category)
   end
 end
-

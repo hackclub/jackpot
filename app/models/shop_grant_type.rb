@@ -24,4 +24,3 @@ class ShopGrantType < ApplicationRecord
     errors.add(:logo_url, "must start with http:// or https://")
   end
 end
-
