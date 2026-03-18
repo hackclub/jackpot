@@ -4,7 +4,7 @@ class Airtable::ProjectSyncJob < Airtable::BaseSyncJob
   end
 
   def records
-    Project.all
+    Project.all.includes(:user)
   end
 
   def field_mapping(project)
@@ -27,7 +27,12 @@ class Airtable::ProjectSyncJob < Airtable::BaseSyncJob
       "Admin Feedback" => project.admin_feedback,
       "Hour Justification" => project.hour_justification,
       "Banner URL" => project.banner_url,
-      "Created At" => project.created_at&.iso8601
+      "Position" => project.position,
+      "Hackatime Synced At" => project.hackatime_synced_at&.iso8601,
+      "Updated At" => project.updated_at&.iso8601,
+      "Created At" => project.created_at&.iso8601,
+      "User Email" => project.user.email,
+      "User Slack ID" => project.user.slack_id
     }
   end
 end
