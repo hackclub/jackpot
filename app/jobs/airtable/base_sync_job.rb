@@ -45,8 +45,8 @@ class Airtable::BaseSyncJob < ApplicationJob
     prefix = "Record ##{record.id}"
     prefix += " (#{index + 1})" if index
 
-    if record.airtable_id.present?
-      log("#{prefix}: updating airtable_id=#{record.airtable_id}")
+    if record.send(airtable_id_field).present?
+      log("#{prefix}: updating #{airtable_id_field}=#{record.send(airtable_id_field)}")
       update_airtable_record(record, fields)
     else
       log("#{prefix}: creating new")
@@ -62,17 +62,27 @@ class Airtable::BaseSyncJob < ApplicationJob
   end
 
   def create_airtable_record(record, fields)
-    airtable_record = table.new(fields)
-    airtable_record.create
-    record.update_column(:airtable_id, airtable_record.id)
+    # Lock the row so concurrent workers can't both see airtable_id: nil and
+    # each create a separate Airtable record for the same local record.
+    record.with_lock do
+      record.reload
+      return update_airtable_record(record, fields) if record.send(airtable_id_field).present?
+
+      airtable_record = table.new(fields)
+      airtable_record.create
+      record.update_column(airtable_id_field, airtable_record.id)
+    end
   end
 
   def update_airtable_record(record, fields)
-    airtable_record = table.find(record.airtable_id)
+    airtable_record = table.find(record.send(airtable_id_field))
     fields.each { |key, value| airtable_record[key] = value }
     airtable_record.save
   rescue Norairrecord::RecordNotFoundError
-    record.update_column(:airtable_id, nil)
+    # The Airtable record was deleted externally; clear the stale ID and recreate.
+    # Nil out first so create_airtable_record doesn't recurse back here.
+    record.update_column(airtable_id_field, nil)
+    record.reload
     create_airtable_record(record, fields)
   end
 
@@ -86,6 +96,10 @@ class Airtable::BaseSyncJob < ApplicationJob
 
   def field_mapping(_record)
     raise NotImplementedError
+  end
+
+  def airtable_id_field
+    :airtable_id
   end
 
   def synced_at_field
