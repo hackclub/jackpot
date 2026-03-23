@@ -20,10 +20,12 @@ class AdminController < ApplicationController
       { name: "Shop Items", job_class: "Airtable::ShopItemSyncJob", model: ShopItem, table_env: "AIRTABLE_SHOP_ITEMS_TABLE", table_default: "_shop_items" },
       { name: "Journal Entries", job_class: "Airtable::JournalEntrySyncJob", model: JournalEntry, table_env: "AIRTABLE_JOURNAL_ENTRIES_TABLE", table_default: "_journal_entries" },
       { name: "Project Comments", job_class: "Airtable::ProjectCommentSyncJob", model: ProjectComment, table_env: "AIRTABLE_PROJECT_COMMENTS_TABLE", table_default: "_project_comments" },
-      { name: "Shop Item Requests", job_class: "Airtable::ShopItemRequestSyncJob", model: ShopItemRequest, table_env: "AIRTABLE_SHOP_ITEM_REQUESTS_TABLE", table_default: "_shop_item_requests" }
+      { name: "Shop Item Requests", job_class: "Airtable::ShopItemRequestSyncJob", model: ShopItemRequest, table_env: "AIRTABLE_SHOP_ITEM_REQUESTS_TABLE", table_default: "_shop_item_requests" },
+      { name: "YSWS Project Submissions (Shipped)", job_class: "Airtable::ShippedProjectSyncJob", model: YswsProjectSubmission, table_env: "AIRTABLE_SHIPPED_PROJECTS_TABLE", table_default: "YSWS Project Submission", before_stats: -> { YswsProjectSubmission.ensure_rows_for_shipped_projects! } }
     ]
 
     @sync_jobs.each do |job|
+      job[:before_stats]&.call
       model = job[:model]
       job[:total] = model.count
       job[:synced] = model.where.not(airtable_id: nil).count
@@ -68,7 +70,8 @@ class AdminController < ApplicationController
       Airtable::ShopItemSyncJob,
       Airtable::JournalEntrySyncJob,
       Airtable::ProjectCommentSyncJob,
-      Airtable::ShopItemRequestSyncJob
+      Airtable::ShopItemRequestSyncJob,
+      Airtable::ShippedProjectSyncJob
     ]
 
     @sync_results = []

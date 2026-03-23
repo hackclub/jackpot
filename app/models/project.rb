@@ -1,6 +1,7 @@
 class Project < ApplicationRecord
   belongs_to :user
   belongs_to :reviewed_by, class_name: "User", optional: true
+  has_one :ysws_project_submission, dependent: :destroy
   has_many :project_comments, dependent: :destroy
   has_many :journal_entries, foreign_key: :user_id, primary_key: :user_id, dependent: :destroy
 
