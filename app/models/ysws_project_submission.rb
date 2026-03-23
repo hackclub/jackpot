@@ -17,6 +17,7 @@ class YswsProjectSubmission < ApplicationRecord
 
   def apply_mirror_fields!(identity, justification_text)
     p = project
+    addr = self.class.address_from_identity(identity)
     assign_attributes(
       code_url: p.code_url,
       playable_url: p.playable_url,
@@ -26,17 +27,40 @@ class YswsProjectSubmission < ApplicationRecord
       last_name: identity["last_name"],
       email: p.user.email,
       slack_id: p.user.slack_id,
-      github_username: identity["github"],
-      address_line_1: identity.dig("address", "line_1") || identity["address_line_1"],
-      address_line_2: identity.dig("address", "line_2") || identity["address_line_2"],
-      city: identity.dig("address", "city") || identity["city"],
-      state: identity.dig("address", "state") || identity["state"],
-      country: identity.dig("address", "country") || identity["country"],
-      postal_code: identity.dig("address", "postal_code") || identity["postal_code"],
+      github_username: self.class.github_from_identity(identity),
+      address_line_1: addr&.dig("line_1") || identity["address_line_1"],
+      address_line_2: addr&.dig("line_2") || identity["address_line_2"],
+      city: addr&.dig("city") || identity["city"],
+      state: addr&.dig("state") || identity["state"],
+      country: addr&.dig("country") || identity["country"],
+      postal_code: addr&.dig("postal_code") || identity["postal_code"],
       birthday: identity["birthday"],
       approved_hours: p.approved_hours,
       optional_override_hours_spent_justification: justification_text
     )
     save!
+  end
+
+
+  def self.address_from_identity(identity)
+    nested = identity["address"]
+    return nested if nested.is_a?(Hash)
+
+    addrs = identity["addresses"]
+    return nil unless addrs.is_a?(Array) && addrs.any?
+
+    addrs.find { |a| a.is_a?(Hash) && a["primary"] } || addrs.find { |a| a.is_a?(Hash) }
+  end
+
+  def self.github_from_identity(identity)
+    gh = identity["github"]
+    return gh["login"] if gh.is_a?(Hash) && gh["login"].present?
+
+    %w[github github_username github_login gh_username].each do |key|
+      val = identity[key]
+      return val if val.is_a?(String) && val.present?
+    end
+
+    nil
   end
 end

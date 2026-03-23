@@ -24,7 +24,7 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
       "First Name" => submission.first_name,
       "Last Name" => submission.last_name,
       "Email" => submission.email,
-      "Slack ID" => submission.slack_id,
+      slack_id_airtable_field => submission.slack_id,
       "GitHub Username" => submission.github_username,
       "Address (Line 1)" => submission.address_line_1,
       "Address (Line 2)" => submission.address_line_2,
@@ -39,6 +39,10 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
   end
 
   private
+
+  def slack_id_airtable_field
+    ENV.fetch("AIRTABLE_YSWS_SLACK_FIELD", "Slack ID")
+  end
 
   def sync_single_record(record, index = nil)
     project = record.project
