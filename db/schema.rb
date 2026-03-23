@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_18_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_23_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -381,6 +381,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_18_000001) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "ysws_project_submissions", force: :cascade do |t|
+    t.string "address_line_1"
+    t.string "address_line_2"
+    t.string "airtable_id"
+    t.decimal "approved_hours", precision: 10, scale: 2
+    t.string "banner_url"
+    t.string "birthday"
+    t.string "city"
+    t.string "code_url"
+    t.string "country"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "email"
+    t.string "first_name"
+    t.string "github_username"
+    t.string "last_name"
+    t.text "optional_override_hours_spent_justification"
+    t.string "playable_url"
+    t.string "postal_code"
+    t.bigint "project_id", null: false
+    t.string "slack_id"
+    t.string "state"
+    t.date "synced_at"
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_ysws_project_submissions_on_project_id", unique: true
+  end
+
   add_foreign_key "journal_entries", "projects"
   add_foreign_key "journal_entries", "users"
   add_foreign_key "project_comments", "projects"
@@ -398,4 +425,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_18_000001) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "ysws_project_submissions", "projects"
 end

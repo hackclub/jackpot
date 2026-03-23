@@ -13,7 +13,7 @@
     <p class="sync-muted" style="text-align: center; margin-bottom: 1rem;">Auto-refreshes every 10s · Last loaded: <%= Time.current.strftime("%H:%M:%S %Z") %></p>
 
     <div style="text-align: center; margin-bottom: 2rem;">
-      <%= button_to "Force Sync All", admin_force_airtable_sync_path, class: "sync-force-btn", data: { turbo_confirm: "Run all 8 Airtable sync jobs now?" } %>
+      <%= button_to "Force Sync All", admin_force_airtable_sync_path, class: "sync-force-btn", data: { turbo_confirm: "Run all 9 Airtable sync jobs now?" } %>
     </div>
 
     <% if flash[:notice] %>

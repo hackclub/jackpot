@@ -1,49 +1,52 @@
 class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
+  def perform
+    YswsProjectSubmission.ensure_rows_for_shipped_projects!
+    super
+  end
+
   def table_name
-    ENV.fetch("AIRTABLE_SHIPPED_PROJECTS_TABLE", "_shipped_projects")
-  end
-
-  def airtable_id_field
-    :shipped_airtable_id
-  end
-
-  def synced_at_field
-    :shipped_synced_at
+    ENV.fetch("AIRTABLE_SHIPPED_PROJECTS_TABLE", "YSWS Project Submission")
   end
 
   def records
-    Project.shipped.includes(:user, :reviewed_by)
+    YswsProjectSubmission
+      .joins(:project)
+      .merge(Project.shipped)
+      .includes(project: [ :user, :reviewed_by ])
   end
 
-  def field_mapping(project)
-    identity = fetch_identity(project.user)
-
+  def field_mapping(submission)
     {
-      "Code URL"            => project.code_url,
-      "Playable URL"        => project.playable_url,
-      "Description"         => project.description,
-      "Screenshot"          => project.banner_url.present? ? [ { "url" => project.banner_url } ] : nil,
-      "First Name"          => identity["first_name"],
-      "Last Name"           => identity["last_name"],
-      "Email"               => project.user.email,
-      "Slack ID"            => project.user.slack_id,
-      "GitHub Username"     => identity["github"],
-      "Address (Line 1)"    => identity.dig("address", "line_1") || identity["address_line_1"],
-      "Address (Line 2)"    => identity.dig("address", "line_2") || identity["address_line_2"],
-      "City"                => identity.dig("address", "city")   || identity["city"],
-      "State / Province"    => identity.dig("address", "state")  || identity["state"],
-      "Country"             => identity.dig("address", "country") || identity["country"],
-      "ZIP / Postal Code"   => identity.dig("address", "postal_code") || identity["postal_code"],
-      "Birthday"            => identity["birthday"],
-      "Optional - Override Hours Spent" => project.approved_hours&.to_f,
-      "Optional - Override Hours Spent Justification" => justification_text(project)
+      "Code URL" => submission.code_url,
+      "Playable URL" => submission.playable_url,
+      "Description" => submission.description,
+      "Screenshot" => submission.banner_url.present? ? [ { "url" => submission.banner_url } ] : nil,
+      "First Name" => submission.first_name,
+      "Last Name" => submission.last_name,
+      "Email" => submission.email,
+      "Slack ID" => submission.slack_id,
+      "GitHub Username" => submission.github_username,
+      "Address (Line 1)" => submission.address_line_1,
+      "Address (Line 2)" => submission.address_line_2,
+      "City" => submission.city,
+      "State / Province" => submission.state,
+      "Country" => submission.country,
+      "ZIP / Postal Code" => submission.postal_code,
+      "Birthday" => submission.birthday,
+      "Optional - Override Hours Spent" => submission.approved_hours&.to_f,
+      "Optional - Override Hours Spent Justification" => submission.optional_override_hours_spent_justification
     }.compact
   end
 
   private
 
-  # Fetches HCA identity for a user; caches per-job run to avoid redundant API calls
-  # when multiple projects belong to the same user.
+  def sync_single_record(record, index = nil)
+    project = record.project
+    identity = fetch_identity(project.user)
+    record.apply_mirror_fields!(identity, justification_text(project))
+    super
+  end
+
   def fetch_identity(user)
     @identity_cache ||= {}
     @identity_cache[user.id] ||= begin
