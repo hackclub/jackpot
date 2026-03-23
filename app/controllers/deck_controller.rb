@@ -36,8 +36,9 @@ class DeckController < ApplicationController
          "name" => project.name,
          "description" => project.description,
          "project_type" => project.project_type,
-         "code_url" => project.code_url,
-         "playable_url" => project.playable_url,
+        "code_url" => project.code_url,
+        "github_username" => project.github_username,
+        "playable_url" => project.playable_url,
          "hackatime_projects" => project.hackatime_projects || [],
          "hours" => total_hours,
          "hackatime_hours" => hackatime_hours,
@@ -77,6 +78,7 @@ class DeckController < ApplicationController
     project_type = params[:project_type].to_s.strip
     playable_url = params[:playable_url].to_s.strip
     code_url = params[:code_url].to_s.strip
+    github_username = params[:github_username].to_s.strip.delete_prefix("@")
     banner_url = params[:banner_url].to_s.strip
     hackatime_projects = Array(params[:hackatime_projects]).map(&:strip).reject(&:blank?)
 
@@ -101,6 +103,7 @@ class DeckController < ApplicationController
           project_type: project_type,
           playable_url: playable_url,
           code_url: code_url,
+          github_username: github_username,
           banner_url: banner_url,
           hackatime_projects: hackatime_projects
         )
@@ -114,6 +117,7 @@ class DeckController < ApplicationController
         project_type: project_type,
         playable_url: playable_url,
         code_url: code_url,
+        github_username: github_username,
         banner_url: banner_url,
         hackatime_projects: hackatime_projects
       )
@@ -141,11 +145,11 @@ class DeckController < ApplicationController
     project = current_user.projects.order(position: :asc)[project_index]
 
     if project
-      if project.playable_url.blank? || project.code_url.blank? || project.banner_url.blank?
+      if project.playable_url.blank? || project.code_url.blank? || project.banner_url.blank? || project.github_username.blank?
         if request.xhr?
-          return render json: { error: "Playable URL, Code URL, and Banner image are required to ship" }, status: :unprocessable_entity
+          return render json: { error: "Playable URL, Code URL, GitHub username, and Banner image are required to ship" }, status: :unprocessable_entity
         else
-          flash[:alert] = "Playable URL, Code URL, and Banner image are required to ship"
+          flash[:alert] = "Playable URL, Code URL, GitHub username, and Banner image are required to ship"
           return redirect_to deck_path
         end
       end
