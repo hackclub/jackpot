@@ -331,8 +331,9 @@ class AdminController < ApplicationController
         Rails.logger.info("        [calculate_project_hours] No hackatime projects, hackatime_id=#{hackatime_id}, has hackatime_projects=#{project['hackatime_projects'].present?}")
       end
 
-      Rails.logger.info("        [calculate_project_hours] Getting journal entries for project_index=#{project_index}")
-      journal_sum = user.journal_entries.for_project(project_index).sum(:hours_worked)
+      project_id = project.is_a?(Hash) ? project["id"] : project.id
+      Rails.logger.info("        [calculate_project_hours] Getting journal entries for project_id=#{project_id}")
+      journal_sum = user.journal_entries.for_project_id(project_id).sum(:hours_worked)
       Rails.logger.info("        [calculate_project_hours] journal_sum: #{journal_sum.inspect} (class: #{journal_sum.class})")
       journal_hours = journal_sum.to_f || 0.0
       Rails.logger.info("        [calculate_project_hours] journal_hours: #{journal_hours.inspect} (class: #{journal_hours.class})")

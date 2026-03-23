@@ -243,8 +243,8 @@ class DeckController < ApplicationController
   end
 
   def get_journal_entries
-    project_index = params[:project_index].to_i
-    entries = current_user.journal_entries.for_project(project_index).order(created_at: :desc)
+    project_id = params[:project_id]
+    entries = current_user.journal_entries.for_project_id(project_id).order(created_at: :desc)
     render json: entries
   end
 

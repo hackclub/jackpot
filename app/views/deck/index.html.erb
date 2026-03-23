@@ -655,9 +655,9 @@ function initDeck() {
    var currentBannerUrl = '';
    var currentDetailData = null;
 
-   function loadDetailJournalEntries(projectIndex) {
+   function loadDetailJournalEntries(projectId) {
      if (!detailJournalEntriesList) return;
-     fetch('/deck/journal_entries/' + projectIndex)
+     fetch('/deck/journal_entries/' + projectId)
        .then(function(r) { return r.json(); })
        .then(function(entries) {
          detailJournalEntriesList.innerHTML = '';
@@ -727,7 +727,7 @@ function initDeck() {
      }
      if (detailMainPanel) detailMainPanel.hidden = false;
      
-     loadDetailJournalEntries(data.index);
+     loadDetailJournalEntries(data.id);
 
      detailModal.classList.add('active');
      detailModal.setAttribute('aria-hidden', 'false');
@@ -1010,7 +1010,7 @@ function initDeck() {
     journalDrawer.classList.add('active');
     journalDrawer.setAttribute('aria-hidden', 'false');
     
-    loadJournalEntries(projectData.index);
+    loadJournalEntries(projectData.id);
   }
 
   function closeJournalDrawer() {
@@ -1019,8 +1019,8 @@ function initDeck() {
     journalDrawer.setAttribute('aria-hidden', 'true');
   }
 
-  function loadJournalEntries(projectIndex) {
-    fetch('/deck/journal_entries/' + projectIndex)
+  function loadJournalEntries(projectId) {
+    fetch('/deck/journal_entries/' + projectId)
       .then(function(r) { return r.json(); })
       .then(function(entries) {
         journalEntriesList.innerHTML = '';
@@ -1078,7 +1078,7 @@ function initDeck() {
         journalHoursWorked.value = '';
         journalDescription.value = '';
         journalToolsUsed.value = '';
-        loadJournalEntries(currentJournalData.index);
+        loadJournalEntries(currentJournalData.id);
       })
       .catch(function(e) { console.error('Failed to save journal entry:', e); });
     });
