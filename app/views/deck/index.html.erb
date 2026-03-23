@@ -31,6 +31,7 @@
                data-project-shipped="<%= project["shipped"] ? "true" : "false" %>"
                data-playable-url="<%= project["playable_url"] %>"
                data-code-url="<%= project["code_url"] %>"
+               data-github-username="<%= project["github_username"].to_s %>"
                data-banner-url="<%= project["banner_url"] %>"
                data-hackatime-projects="<%= (project["hackatime_projects"] || []).join(",") %>"
              >
@@ -131,6 +132,11 @@
        </div>
 
        <div class="project-form-field">
+         <label for="githubUsernameInput">GitHub username <span style="color:#c0392b;">*</span> <span class="hackatime-field-hint">(required before shipping)</span></label>
+         <input type="text" id="githubUsernameInput" name="github_username" placeholder="your-username" autocomplete="username">
+       </div>
+
+       <div class="project-form-field">
          <label>Hackatime projects (optional)</label>
          <p class="hackatime-field-hint">Link your Hackatime projects to track hours.</p>
          <div class="hackatime-picker" id="hackatimePicker">
@@ -188,6 +194,11 @@
          <div class="detail-stat-row" id="detailCodeRow">
            <span class="detail-label">Code URL</span>
            <input type="url" class="detail-value detail-url-input" id="detailCodeUrl" placeholder="https://github.com/...">
+         </div>
+
+         <div class="detail-stat-row" id="detailGithubRow">
+           <span class="detail-label">GitHub username <span style="color:#c0392b;">*</span></span>
+           <input type="text" class="detail-value detail-url-input" id="detailGithubUsername" placeholder="your-username" autocomplete="username">
          </div>
          
          <div class="detail-stat-row" id="detailBannerRow">
@@ -404,8 +415,10 @@ function initDeck() {
      
      var playableUrlInput = document.getElementById('playableUrlInput');
      var codeUrlInput = document.getElementById('codeUrlInput');
+     var githubUsernameInput = document.getElementById('githubUsernameInput');
      if (playableUrlInput) playableUrlInput.value = data.playableUrl || '';
      if (codeUrlInput) codeUrlInput.value = data.codeUrl || '';
+     if (githubUsernameInput) githubUsernameInput.value = data.githubUsername || '';
      
      projectModalTitle.textContent = data.isNew ? 'New Project' : 'Edit Project';
 
@@ -449,6 +462,8 @@ function initDeck() {
       text: 'Playable URL — skip if you don\'t have one yet' },
     { getEl: function() { return document.getElementById('codeUrlInput'); },
       text: 'Code URL — paste your repo link' },
+    { getEl: function() { return document.getElementById('githubUsernameInput'); },
+      text: 'GitHub username — required before you ship' },
     { getEl: function() { return document.getElementById('hackatimePicker'); },
       text: 'Link any Hackatime projects to track your hours' },
     { getEl: function() { return document.getElementById('projectModalSubmit'); },
@@ -564,6 +579,7 @@ function initDeck() {
       formData.append('project_type', selectedType);
       formData.append('playable_url', document.getElementById('playableUrlInput').value);
       formData.append('code_url', document.getElementById('codeUrlInput').value);
+      formData.append('github_username', document.getElementById('githubUsernameInput').value);
 
       var hackatimeCheckboxes = document.querySelectorAll('#hackatimePicker .hackatime-checkbox:checked');
       hackatimeCheckboxes.forEach(function(cb) {
@@ -622,6 +638,8 @@ function initDeck() {
    var detailMainPanel = document.getElementById('detailMainPanel');
    var detailPlayableUrl = document.getElementById('detailPlayableUrl');
    var detailCodeUrl = document.getElementById('detailCodeUrl');
+   var detailGithubUsername = document.getElementById('detailGithubUsername');
+   var detailGithubRow = document.getElementById('detailGithubRow');
    var shipProjectIndex = document.getElementById('shipProjectIndex');
    var detailShippedRow = document.getElementById('detailShippedRow');
    var detailPlayableRow = document.getElementById('detailPlayableRow');
@@ -675,6 +693,7 @@ function initDeck() {
      detailType.textContent = data.projectType || '—';
      detailPlayableUrl.value = data.playableUrl || '';
      detailCodeUrl.value = data.codeUrl || '';
+     if (detailGithubUsername) detailGithubUsername.value = data.githubUsername || '';
      shipProjectIndex.value = data.index;
 
      var linked = (data.hackatimeProjects || '').split(',').filter(function(s) { return s.length > 0; });
@@ -701,6 +720,7 @@ function initDeck() {
      detailDeleteBtn.style.display = isShipped ? 'none' : 'inline-block';
      detailSaveBtn.style.display = 'none';
      if (detailBannerRow) detailBannerRow.style.display = isShipped ? 'none' : 'flex';
+     if (detailGithubRow) detailGithubRow.style.display = isShipped ? 'none' : 'flex';
      if (detailTitle) {
        detailTitle.readOnly = isShipped;
        detailTitle.classList.toggle('modal-title-input--readonly', isShipped);
@@ -732,6 +752,7 @@ function initDeck() {
    if (detailTitle) detailTitle.addEventListener('input', showSaveBtn);
    if (detailDescription) detailDescription.addEventListener('input', showSaveBtn);
    if (detailPlayableUrl) detailPlayableUrl.addEventListener('input', showSaveBtn);
+   if (detailGithubUsername) detailGithubUsername.addEventListener('input', showSaveBtn);
    if (detailCodeUrl) detailCodeUrl.addEventListener('input', showSaveBtn);
 
    function uploadBannerFile(file) {
@@ -806,6 +827,7 @@ function initDeck() {
        formData.append('project_type', currentDetailData.projectType || '');
        formData.append('playable_url', detailPlayableUrl.value);
        formData.append('code_url', detailCodeUrl.value);
+       if (detailGithubUsername) formData.append('github_username', detailGithubUsername.value);
        formData.append('banner_url', currentBannerUrl);
        
        var hackatimeProjects = (currentDetailData.hackatimeProjects || '').split(',').filter(function(s) { return s.length > 0; });
@@ -845,6 +867,10 @@ function initDeck() {
        }
        if (!detailCodeUrl.value.trim()) {
           alert('Code URL is required to ship');
+          return;
+        }
+        if (!detailGithubUsername || !detailGithubUsername.value.trim()) {
+          alert('GitHub username is required to ship');
           return;
         }
         if (!currentBannerUrl) {
@@ -926,7 +952,7 @@ function initDeck() {
 
   emptyCards.forEach(function(card) {
     card.addEventListener('click', function() {
-      openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', isNew: true });
+      openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', githubUsername: '', isNew: true });
     });
   });
 
@@ -943,6 +969,7 @@ function initDeck() {
         shipped: card.dataset.projectShipped,
         playableUrl: card.dataset.playableUrl,
         codeUrl: card.dataset.codeUrl,
+        githubUsername: card.dataset.githubUsername,
         bannerUrl: card.dataset.bannerUrl,
         hackatimeProjects: card.dataset.hackatimeProjects
       });
@@ -954,7 +981,7 @@ function initDeck() {
     addBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-      openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', isNew: true });
+      openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', githubUsername: '', isNew: true });
     });
   }
 
@@ -1098,7 +1125,7 @@ function initDeck() {
         tutorialTarget.removeEventListener('click', handleTutorialClick);
         setTimeout(function() {
           overlay.remove();
-          openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', hackatimeProjects: '', isNew: true });
+          openProjectModal({ index: '', name: '', description: '', projectType: '', playableUrl: '', codeUrl: '', githubUsername: '', hackatimeProjects: '', isNew: true });
         }, 400);
       });
     }

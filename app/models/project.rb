@@ -35,6 +35,7 @@ class Project < ApplicationRecord
         p.description = project_data["description"]
         p.project_type = project_data["project_type"]
         p.code_url = project_data["code_url"]
+        p.github_username = project_data["github_username"].to_s.delete_prefix("@") if project_data.key?("github_username")
         p.playable_url = project_data["playable_url"]
         p.hackatime_projects = project_data["hackatime_projects"] || []
         p.shipped = project_data["shipped"] || false
