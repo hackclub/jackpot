@@ -453,9 +453,9 @@ class DeckController < ApplicationController
     user = User.find(user_id)
     project = if project_id.present?
                 user.projects.find_by(id: project_id)
-              else
+    else
                 user.projects.order(position: :asc)[project_index]
-              end
+    end
 
     unless project
       return render json: { error: "Project not found" }, status: :unprocessable_entity
