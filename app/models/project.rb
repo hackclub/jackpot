@@ -25,6 +25,32 @@ class Project < ApplicationRecord
     self.update_column(:total_hours, total)
   end
 
+  # Admin rejected a shipped submission: delete Airtable row first (avoid orphans), then remove YSWS row and return project to deck.
+  def unship_return_to_deck_after_rejection!(admin_feedback: nil)
+    submission = ysws_project_submission
+    attrs = {
+      shipped: false,
+      shipped_at: nil,
+      shipped_airtable_id: nil,
+      shipped_synced_at: nil,
+      status: "pending",
+      reviewed: false,
+      reviewed_at: nil,
+      reviewed_by_user_id: nil,
+      admin_feedback: admin_feedback
+    }
+
+    if submission
+      submission.delete_remote_airtable_record!
+      transaction do
+        submission.destroy!
+        update!(attrs)
+      end
+    else
+      update!(attrs)
+    end
+  end
+
   def self.from_json(user, json_projects)
     return [] unless json_projects.present?
 

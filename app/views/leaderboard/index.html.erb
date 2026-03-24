@@ -44,7 +44,7 @@
                 </div>
               </td>
               <td class="col-hours">
-                <span class="hours-count"><%= number_with_precision(user.hackatime_hours.to_f, precision: 1) %></span>
+                <span class="hours-count"><%= number_with_precision(user.total_logged_hours, precision: 1) %></span>
               </td>
               <td class="col-chips">
                 <span class="chip-count"><%= user.chip_am.to_f %></span>

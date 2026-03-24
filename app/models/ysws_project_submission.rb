@@ -1,5 +1,19 @@
 class YswsProjectSubmission < ApplicationRecord
+  SHIP_STATUSES = %w[Pending Approved Rejected].freeze
+
   belongs_to :project
+
+  validates :ship_status, inclusion: { in: SHIP_STATUSES }
+
+  def self.ship_status_for_project(project)
+    if project.reviewed? && project.status == "approved"
+      "Approved"
+    elsif project.reviewed? && project.status == "rejected"
+      "Rejected"
+    else
+      "Pending"
+    end
+  end
 
   def self.ensure_rows_for_shipped_projects!
     shipped_ids = Project.shipped.pluck(:id)
@@ -11,14 +25,53 @@ class YswsProjectSubmission < ApplicationRecord
 
     now = Time.current
     insert_all(
-      missing.map { |id| { project_id: id, created_at: now, updated_at: now } }
+      missing.map { |id| { project_id: id, ship_status: "Pending", created_at: now, updated_at: now } }
     )
+  end
+
+  # Removes the matching Airtable row (same table as ShippedProjectSyncJob). Call before destroying this row
+  # so a rejected submission does not leave an orphan in Airtable. Fails the request if the API errors (except 404).
+  def delete_remote_airtable_record!
+    aid = airtable_id
+    return if aid.blank?
+
+    token, base_id = self.class.airtable_api_credentials
+    unless token.present? && base_id.present?
+      if Rails.env.production?
+        raise StandardError, "Airtable is not configured; cannot remove synced submission #{aid.inspect} from Airtable."
+      end
+      Rails.logger.warn(
+        "YswsProjectSubmission id=#{id}: skip Airtable delete for #{aid.inspect} — credentials missing (non-production)"
+      )
+      return
+    end
+
+    tbl = Norairrecord.table(token, base_id, self.class.airtable_shipped_table_name)
+    rec = tbl.find(aid)
+    rec.destroy
+    Rails.logger.info("YswsProjectSubmission id=#{id}: deleted Airtable record #{aid}")
+  rescue Norairrecord::RecordNotFoundError
+    Rails.logger.info("YswsProjectSubmission id=#{id}: Airtable record #{aid} already gone (404)")
+  rescue Norairrecord::Error => e
+    Rails.logger.error("YswsProjectSubmission id=#{id}: Airtable delete failed: #{e.class}: #{e.message}")
+    raise
+  end
+
+  def self.airtable_shipped_table_name
+    ENV.fetch("AIRTABLE_SHIPPED_PROJECTS_TABLE", "YSWS Project Submission")
+  end
+
+  def self.airtable_api_credentials
+    token = Rails.application.credentials&.airtable&.acces_token || ENV["AIRTABLE_API_KEY"]
+    base_id = Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
+    [ token, base_id ]
   end
 
   def apply_mirror_fields!(identity, justification_text)
     p = project
     addr = self.class.address_from_identity(identity)
     assign_attributes(
+      ship_status: self.class.ship_status_for_project(p),
       code_url: p.code_url,
       playable_url: p.playable_url,
       description: p.description,

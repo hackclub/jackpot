@@ -342,6 +342,8 @@ class DeckController < ApplicationController
 
       user.approve_project(resolved_index, approved_hours, justification, feedback) if resolved_index.present?
 
+      project.ysws_project_submission&.update_column(:ship_status, "Approved")
+
       Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
       render json: { success: true, message: "Project approved", chips_earned: chips_earned }
     rescue => e
@@ -376,16 +378,9 @@ class DeckController < ApplicationController
     Rails.logger.info "Rejecting project for user #{user_id} project_id=#{project.id}"
 
     begin
-      # Always update the Project record so status page shows review (single source of truth)
-      project.update!(
-        reviewed: true,
-        reviewed_at: Time.current,
-        status: "rejected",
-        admin_feedback: feedback,
-        reviewed_by_user_id: current_user.id
-      )
-
-      user.reject_project(resolved_index, feedback) if resolved_index.present?
+      # Return project to the deck (not shipped) and drop the YSWS submission row; keep feedback on the project.
+      project.unship_return_to_deck_after_rejection!(admin_feedback: feedback)
+      user.unship_project_after_rejection!(resolved_index, admin_feedback: feedback) if resolved_index.present?
 
       Rails.logger.info "Project rejected for user #{user_id}"
       render json: { success: true, message: "Project rejected" }

@@ -17,6 +17,7 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
 
   def field_mapping(submission)
     {
+      ship_status_airtable_field => submission.ship_status,
       "Code URL" => submission.code_url,
       "Playable URL" => submission.playable_url,
       "Description" => submission.description,
@@ -42,6 +43,10 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
 
   def slack_id_airtable_field
     ENV.fetch("AIRTABLE_YSWS_SLACK_FIELD", "Slack ID")
+  end
+
+  def ship_status_airtable_field
+    ENV.fetch("AIRTABLE_YSWS_SHIP_STATUS_FIELD", "Ship Status")
   end
 
   def sync_single_record(record, index = nil)
