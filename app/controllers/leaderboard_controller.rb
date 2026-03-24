@@ -20,9 +20,9 @@ class LeaderboardController < ApplicationController
     scope = User.select("#{User.table_name}.*, #{LOGGED_HOURS_TOTAL_SQL} AS logged_hours_total")
     scope = if @sort == "hours"
               scope.order(Arel.sql("logged_hours_total DESC NULLS LAST, #{User.table_name}.id ASC"))
-            else
+    else
               scope.order(chip_am: :desc, id: :asc)
-            end
+    end
     @users = scope.limit(PER_PAGE).offset((@page - 1) * PER_PAGE)
     @total_count = User.count
     @total_pages = (@total_count.to_f / PER_PAGE).ceil
