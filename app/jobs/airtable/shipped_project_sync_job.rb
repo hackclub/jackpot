@@ -16,8 +16,9 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
   end
 
   def field_mapping(submission)
-    {
-      ship_status_airtable_field => submission.ship_status,
+    # Ship status: only sent when AIRTABLE_YSWS_SHIP_STATUS_FIELD is set to the *exact* Airtable column name.
+    # Add that field in Airtable first (e.g. Single select: Pending, Approved, Rejected — or Single line text).
+    fields = {
       "Code URL" => submission.code_url,
       "Playable URL" => submission.playable_url,
       "Description" => submission.description,
@@ -36,7 +37,11 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
       "Birthday" => submission.birthday,
       "Optional - Override Hours Spent" => submission.approved_hours&.to_f,
       "Optional - Override Hours Spent Justification" => submission.optional_override_hours_spent_justification
-    }.compact
+    }
+    if (name = ship_status_airtable_field_name.presence)
+      fields[name] = submission.ship_status
+    end
+    fields.compact
   end
 
   private
@@ -45,8 +50,8 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     ENV.fetch("AIRTABLE_YSWS_SLACK_FIELD", "Slack ID")
   end
 
-  def ship_status_airtable_field
-    ENV.fetch("AIRTABLE_YSWS_SHIP_STATUS_FIELD", "Ship Status")
+  def ship_status_airtable_field_name
+    ENV["AIRTABLE_YSWS_SHIP_STATUS_FIELD"]
   end
 
   def sync_single_record(record, index = nil)
