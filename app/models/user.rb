@@ -160,6 +160,36 @@ class User < ApplicationRecord
     update!(projects: projects)
   end
 
+  # Keep legacy jsonb `users.projects` in sync when a shipped project is rejected and returned to the deck.
+  def unship_project_after_rejection!(project_index, admin_feedback: nil)
+    raw = read_attribute(:projects)
+    return false unless raw.is_a?(Array)
+
+    idx = project_index.to_i
+    return false if idx.negative? || idx >= raw.size || raw[idx].nil?
+
+    arr = raw.deep_dup
+    slot = arr[idx]
+    slot = slot.is_a?(Hash) ? slot.stringify_keys.dup : {}
+    slot["shipped"] = false
+    slot.delete("shipped_at")
+    slot["status"] = "pending"
+    slot["reviewed"] = false
+    slot.delete("reviewed_at")
+    slot["admin_feedback"] = admin_feedback if admin_feedback.present?
+    arr[idx] = slot
+    update!(projects: arr)
+  end
+
+  # Sum of Hackatime hours on all projects plus all journal entries (pending + shipped).
+  def total_logged_hours
+    if has_attribute?(:logged_hours_total)
+      read_attribute(:logged_hours_total).to_f
+    else
+      projects.sum { |p| p.hackatime_hours.to_f } + journal_entries.sum(:hours_worked).to_f
+    end
+  end
+
   private
 
   def safe_profile_photo_url
