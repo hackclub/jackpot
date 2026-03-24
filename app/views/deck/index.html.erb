@@ -727,7 +727,7 @@ function initDeck() {
      }
      if (detailMainPanel) detailMainPanel.hidden = false;
      
-     loadDetailJournalEntries(data.id);
+     loadDetailJournalEntries(data.index);
 
      detailModal.classList.add('active');
      detailModal.setAttribute('aria-hidden', 'false');
@@ -1078,7 +1078,8 @@ function initDeck() {
         journalHoursWorked.value = '';
         journalDescription.value = '';
         journalToolsUsed.value = '';
-        loadJournalEntries(currentJournalData.id);
+        // Use the project id from the saved entry when refreshing, fallback to currentJournalData.id
+        loadJournalEntries(entry.project_id || currentJournalData.id);
       })
       .catch(function(e) { console.error('Failed to save journal entry:', e); });
     });
