@@ -1,4 +1,6 @@
 class ShopItem < ApplicationRecord
+  include AirtablePushOnChange
+
   PINNED_INVITATION_NAME = "Jackpot Official Invitation"
 
   has_many :shop_orders, dependent: :nullify
@@ -12,6 +14,8 @@ class ShopItem < ApplicationRecord
   validates :max_per_person, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :grant_type_required_unless_pinned
   validate :safe_urls
+
+  pushes_airtable_with Airtable::ShopItemSyncJob
 
   scope :active, -> { where(active: true) }
 

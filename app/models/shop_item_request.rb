@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 class ShopItemRequest < ApplicationRecord
+  include AirtablePushOnChange
+
   belongs_to :user
 
   validates :item_name, presence: true
   validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :reference_link, presence: true
+
+  pushes_airtable_with Airtable::ShopItemRequestSyncJob
 
   before_validation :assign_week, on: :create
 

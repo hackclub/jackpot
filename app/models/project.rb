@@ -1,5 +1,6 @@
 class Project < ApplicationRecord
   include GithubRepositoryKey
+  include AirtablePushOnChange
 
   belongs_to :user
   belongs_to :reviewed_by, class_name: "User", optional: true
@@ -9,6 +10,10 @@ class Project < ApplicationRecord
 
   validates :name, :user_id, presence: true
   validate :safe_urls
+
+  pushes_airtable_with Airtable::ProjectSyncJob
+
+  after_commit :enqueue_shipped_ysws_airtable_push, on: %i[create update]
 
   scope :shipped, -> { where(shipped: true) }
   scope :reviewed, -> { where(reviewed: true) }
@@ -28,6 +33,15 @@ class Project < ApplicationRecord
     hackatime_hours = self.hackatime_hours.to_f || 0
     total = journal_hours + hackatime_hours
     self.update_column(:total_hours, total)
+  end
+
+  def enqueue_shipped_ysws_airtable_push
+    return unless shipped?
+
+    sub = YswsProjectSubmission.ensure_row_for_project!(self)
+    return unless sub
+
+    Airtable::PushRecordJob.enqueue_if_configured(Airtable::ShippedProjectSyncJob, sub.id)
   end
 
   # Re-shipping after admin rejection: remove a leftover YSWS row if the DB was out of sync.

@@ -54,11 +54,18 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     ENV["AIRTABLE_YSWS_SHIP_STATUS_FIELD"]
   end
 
-  def sync_single_record(record, index = nil)
+  def push_record!(submission)
+    return unless submission.is_a?(YswsProjectSubmission)
+    return unless submission.project&.shipped?
+
+    super
+  end
+
+  def sync_single_record(record, index = nil, raise_on_error: false)
     project = record.project
     identity = fetch_identity(project.user)
     record.apply_mirror_fields!(identity, justification_text(project))
-    super
+    super(record, index, raise_on_error: raise_on_error)
   end
 
   def fetch_identity(user)

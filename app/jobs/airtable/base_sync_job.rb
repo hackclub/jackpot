@@ -9,6 +9,19 @@ class Airtable::BaseSyncJob < ApplicationJob
     super
   end
 
+  # Push a single row to Airtable (used by Airtable::PushRecordJob). Raises on API errors so the job can retry.
+  def push_record!(record)
+    unless airtable_configured?
+      Rails.logger.info("Airtable::#{self.class.name}: skip push_record #{record.class.name}##{record.id}, credentials missing")
+      return
+    end
+
+    @sync_log = []
+    Airtable::PushRecordJob.without_enqueue do
+      sync_single_record(record, nil, raise_on_error: true)
+    end
+  end
+
   def perform
     @sync_log = []
     log("Starting #{self.class.name}")
@@ -24,8 +37,10 @@ class Airtable::BaseSyncJob < ApplicationJob
     to_sync = records_to_sync
     log("Records to sync: #{to_sync.size}")
 
-    to_sync.each_with_index do |record, i|
-      sync_single_record(record, i)
+    Airtable::PushRecordJob.without_enqueue do
+      to_sync.each_with_index do |record, i|
+        sync_single_record(record, i)
+      end
     end
 
     log("Finished #{self.class.name}")
@@ -40,7 +55,7 @@ class Airtable::BaseSyncJob < ApplicationJob
     Rails.logger.info("AirtableSync: #{msg}")
   end
 
-  def sync_single_record(record, index = nil)
+  def sync_single_record(record, index = nil, raise_on_error: false)
     fields = field_mapping(record)
     prefix = "Record ##{record.id}"
     prefix += " (#{index + 1})" if index
@@ -57,8 +72,10 @@ class Airtable::BaseSyncJob < ApplicationJob
     log("#{prefix}: OK")
   rescue Norairrecord::Error => e
     log("#{prefix}: FAILED - #{e.class}: #{e.message}")
+    raise e if raise_on_error
   rescue => e
     log("#{prefix}: FAILED - #{e.class}: #{e.message}")
+    raise e if raise_on_error
   end
 
   def create_airtable_record(record, fields)
@@ -111,7 +128,7 @@ class Airtable::BaseSyncJob < ApplicationJob
   end
 
   def sync_limit
-    50
+    Thread.current[:airtable_admin_full_sync] ? 10_000 : 50
   end
 
   def null_sync_limit
@@ -144,5 +161,9 @@ class Airtable::BaseSyncJob < ApplicationJob
 
   def base_id
     @base_id ||= Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
+  end
+
+  def airtable_configured?
+    api_token.present? && base_id.present?
   end
 end

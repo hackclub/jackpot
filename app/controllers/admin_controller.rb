@@ -44,6 +44,7 @@ class AdminController < ApplicationController
     @has_token = (Rails.application.credentials&.airtable&.acces_token || ENV["AIRTABLE_API_KEY"]).present?
     @has_base_id = (Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]).present?
     @base_id = Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
+    @airtable_push_pending = SolidQueue::Job.where(class_name: "Airtable::PushRecordJob", finished_at: nil).count
 
     @recurring_config = begin
       raw = YAML.safe_load(ERB.new(File.read(Rails.root.join("config/recurring.yml"))).result) || {}
@@ -62,32 +63,16 @@ class AdminController < ApplicationController
   end
 
   def force_airtable_sync
-    job_classes = [
-      Airtable::UserSyncJob,
-      Airtable::ProjectSyncJob,
-      Airtable::RsvpSyncJob,
-      Airtable::ShopOrderSyncJob,
-      Airtable::ShopItemSyncJob,
-      Airtable::JournalEntrySyncJob,
-      Airtable::ProjectCommentSyncJob,
-      Airtable::ShopItemRequestSyncJob,
-      Airtable::ShippedProjectSyncJob
-    ]
-
-    @sync_results = []
-
-    job_classes.each do |klass|
-      job = klass.new
-      begin
-        job.perform
-        @sync_results << { name: klass.name, status: "ok", log: job.sync_log || [] }
-      rescue => e
-        log = (job.sync_log || []) + [ "EXCEPTION: #{e.class}: #{e.message}", e.backtrace&.first(5)&.join("\n") ].compact
-        @sync_results << { name: klass.name, status: "error", log: log }
-      end
+    token = Rails.application.credentials&.airtable&.acces_token || ENV["AIRTABLE_API_KEY"]
+    base = Rails.application.credentials&.airtable&.base_id || ENV["AIRTABLE_BASE_ID"]
+    unless token.present? && base.present?
+      redirect_to admin_airtable_sync_path, alert: "Airtable credentials are missing; cannot run sync."
+      return
     end
 
-    render :force_sync_results
+    Airtable::AdminForceSyncJob.perform_later
+    redirect_to admin_airtable_sync_path,
+      notice: "Full Airtable reconcile is queued (runs in the background). Refresh this page in a minute to see updated counts—ensure bin/jobs (or your Solid Queue worker) is running."
   end
 
   # Executes Ruby code submitted from the admin console.

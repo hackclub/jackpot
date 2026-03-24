@@ -7,6 +7,14 @@ class Airtable::JournalEntrySyncJob < Airtable::BaseSyncJob
     JournalEntry.all
   end
 
+  def push_record!(entry)
+    super(entry)
+    return unless entry.project_id
+
+    Project.find_by(id: entry.project_id)&.update_total_hours
+    Airtable::PushRecordJob.perform_later(Airtable::ProjectSyncJob.name, entry.project_id)
+  end
+
   def field_mapping(entry)
     {
       "Project Name" => entry.project_name,

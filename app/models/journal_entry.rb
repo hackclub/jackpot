@@ -1,9 +1,13 @@
 class JournalEntry < ApplicationRecord
+  include AirtablePushOnChange
+
   belongs_to :user, foreign_key: :user_id, primary_key: :id
   belongs_to :project, optional: true
 
   validates :user_id, :project_name, :project_index, presence: true
   validates :hours_worked, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
+
+  pushes_airtable_with Airtable::JournalEntrySyncJob
 
   scope :for_project, ->(project_index) { where(project_index: project_index) }
   scope :for_project_id, ->(project_id) { where(project_id: project_id) }

@@ -20,13 +20,19 @@ class HackatimeHoursSyncJob < ApplicationJob
         end
         project_total = project_total_raw.round
 
-        project.update_column(:hackatime_hours, project_total) if project.hackatime_hours != project_total
+        if project.hackatime_hours != project_total
+          project.update_column(:hackatime_hours, project_total)
+          Airtable::PushRecordJob.enqueue_if_configured(Airtable::ProjectSyncJob, project.id)
+        end
         user_total += project_total
       rescue => e
         Rails.logger.error("HackatimeHoursSync failed for Project##{project.id}: #{e.message}")
       end
 
-      user.update_column(:hackatime_hours, user_total) if user.hackatime_hours != user_total
+      if user.hackatime_hours != user_total
+        user.update_column(:hackatime_hours, user_total)
+        Airtable::PushRecordJob.enqueue_if_configured(Airtable::UserSyncJob, user.id)
+      end
     rescue => e
       Rails.logger.error("HackatimeHoursSync failed for User##{user.id}: #{e.message}")
     end
