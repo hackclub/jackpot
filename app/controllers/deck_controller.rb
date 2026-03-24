@@ -378,7 +378,7 @@ class DeckController < ApplicationController
     rescue => e
       Rails.logger.error "Error approving project: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
-      render json: { error: "Error: #{e.message}" }, status: :unprocessable_entity
+      render json: { error: e.message }, status: :unprocessable_entity
     end
   end
 
@@ -435,7 +435,7 @@ class DeckController < ApplicationController
     rescue => e
       Rails.logger.error "Error rejecting project: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
-      render json: { error: "Error: #{e.message}" }, status: :unprocessable_entity
+      render json: { error: e.message }, status: :unprocessable_entity
     end
   end
 
@@ -471,7 +471,7 @@ class DeckController < ApplicationController
   rescue => e
     Rails.logger.error "Error posting review comment: #{e.class}: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
-    render json: { error: "Error: #{e.message}" }, status: :unprocessable_entity
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   private
