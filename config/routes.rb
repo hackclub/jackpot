@@ -27,7 +27,7 @@ Rails.application.routes.draw do
    post "/deck/complete_tutorial", to: "deck#complete_tutorial", as: :complete_tutorial
    post "/deck/journal_entries", to: "deck#create_journal_entry", as: :create_journal_entry
      post "/deck/upload_image", to: "deck#upload_image", as: :upload_journal_image
-     get "/deck/journal_entries/:project_index", to: "deck#get_journal_entries", as: :get_journal_entries
+     get "/deck/journal_entries/:project_id", to: "deck#get_journal_entries", as: :get_journal_entries
      post "/deck/approve_project_admin", to: "deck#approve_project_admin", as: :approve_project_admin
      post "/deck/reject_project_admin", to: "deck#reject_project_admin", as: :reject_project_admin
   get "/leaderboard", to: "leaderboard#index", as: :leaderboard
