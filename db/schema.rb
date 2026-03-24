@@ -119,6 +119,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_180000) do
     t.text "admin_feedback"
     t.string "airtable_id"
     t.decimal "approved_hours", precision: 10, scale: 2
+    t.string "approver_display_name"
     t.string "banner_url"
     t.decimal "chips_earned", precision: 10, scale: 2
     t.string "code_url"
