@@ -366,7 +366,8 @@ class DeckController < ApplicationController
         hour_justification: justification,
         admin_feedback: feedback,
         chips_earned: chips_earned,
-        reviewed_by_user_id: current_user.id
+        reviewed_by_user_id: current_user.id,
+        approver_display_name: current_user.jackpot_profile_name
       )
 
       user.approve_project(resolved_index, approved_hours, justification, feedback) if resolved_index.present?

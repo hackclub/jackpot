@@ -85,7 +85,7 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
 
   # Default copy for Airtable "Optional - Override Hours Spent Justification" when the submission is approved.
   def approved_override_hours_justification(project)
-    mention = reviewer_slack_mention(project.reviewed_by)
+    mention = reviewer_mention_for_justification(project)
     approved = project.approved_hours.to_f
     raw = project.total_hours.to_f
     reduced = raw > approved
@@ -102,13 +102,17 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     body
   end
 
-  def reviewer_slack_mention(user)
-    return "@unknown" unless user
-
-    # Match the name shown next to the profile photo in Jackpot (display_name, not Slack handle).
-    label = user.display_name.presence || user.name.to_s
+  # Prefer name snapshotted on approve (avoids nil reviewed_by / deleted admin users); else load User by id.
+  def reviewer_mention_for_justification(project)
+    label = project.read_attribute(:approver_display_name).presence
+    if label.blank?
+      uid = project.read_attribute(:reviewed_by_user_id)
+      reviewer = User.find_by(id: uid) if uid.present?
+      reviewer ||= project.reviewed_by
+      label = reviewer&.jackpot_profile_name
+    end
     label = label.to_s.delete_prefix("@").strip
-    label = user.email.to_s.split("@").first if label.blank?
+    label = "unknown" if label.blank?
     "@#{label}"
   end
 
