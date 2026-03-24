@@ -72,10 +72,47 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
   end
 
   def justification_text(project)
+    if project.reviewed? && project.status.to_s == "approved"
+      return approved_override_hours_justification(project)
+    end
+
     parts = [ "EDIT ME" ]
     parts << "Hour Justification: #{project.hour_justification}" if project.hour_justification.present?
     parts << "Reviewed by: #{project.reviewed_by.name}"         if project.reviewed_by.present?
     parts << "Reviewed at: #{project.reviewed_at&.strftime('%Y-%m-%d %H:%M UTC')}" if project.reviewed_at.present?
     parts.join("\n")
+  end
+
+  # Default copy for Airtable "Optional - Override Hours Spent Justification" when the submission is approved.
+  def approved_override_hours_justification(project)
+    mention = reviewer_slack_mention(project.reviewed_by)
+    approved = project.approved_hours.to_f
+    raw = project.total_hours.to_f
+    reduced = raw > approved
+    body =
+      if reduced
+        "Project reviewed by #{mention}. Approved reduced #{format_hours_justification(raw)} to #{format_hours_justification(approved)} hours, as the timing didn't seem fair, and both the demo and repository looked solid, including the heartbeats."
+      else
+        "Project reviewed by #{mention}. Approved #{format_hours_justification(approved)} hours, as the timing seems reasonable, and both the demo and repository looked solid, including the heartbeats."
+      end
+    comment = project.admin_feedback.to_s.strip
+    if comment.present?
+      body += "\n\nReviewer-User comment: #{comment}."
+    end
+    body
+  end
+
+  def reviewer_slack_mention(user)
+    return "@unknown" unless user
+
+    label = user.slack_username.presence || user.display_name.presence || user.email.to_s.split("@").first
+    "@#{label.to_s.delete_prefix('@')}"
+  end
+
+  def format_hours_justification(n)
+    f = n.to_f
+    return "0.0" unless f.finite?
+
+    format("%.1f", f)
   end
 end
