@@ -1,6 +1,6 @@
 class DeckController < ApplicationController
    before_action :authenticate_user!
-   before_action :authenticate_admin!, only: [ :approve_project_admin, :reject_project_admin ]
+   before_action :authenticate_admin!, only: [ :approve_project_admin, :reject_project_admin, :comment_review_project_admin ]
 
   def index
     projects = current_user.projects.order(position: :asc).to_a
@@ -153,6 +153,31 @@ class DeckController < ApplicationController
           return redirect_to deck_path
         end
       end
+
+      repo_key = Project.github_repository_key(project.code_url)
+      if repo_key.present?
+        if project.status.to_s == "rejected"
+          # Only for a returned project: clear stale ship rows and replace any active queue entry for this repo.
+          project.clear_stale_ysws_submission_if_any!
+          project.displace_conflicting_shipped_same_repo!
+        else
+          conflict = current_user.projects.shipped.where.not(id: project.id).detect do |p|
+            Project.github_repository_key(p.code_url) == repo_key &&
+              Project::ACTIVE_SHIP_QUEUE_STATUSES.include?(p.status.to_s)
+          end
+          if conflict
+            msg = "Another project (“#{conflict.name}”) is already in the review queue with this GitHub repository. You can’t submit the same repo again while that review is pending or approved."
+            if request.xhr?
+              return render json: { error: msg }, status: :unprocessable_entity
+            else
+              flash[:alert] = msg
+              return redirect_to deck_path
+            end
+          end
+        end
+      end
+
+      project.reload if repo_key.present? && project.status.to_s == "rejected"
 
       project.update!(
         shipped: true,
@@ -322,6 +347,10 @@ class DeckController < ApplicationController
       return render json: { error: "Project not found" }, status: :unprocessable_entity
     end
 
+    unless project.shipped?
+      return render json: { error: "Project is not in the review queue" }, status: :unprocessable_entity
+    end
+
     # Derive index from project position for User#approve_project (chip_am / legacy jsonb)
     resolved_index = user.projects.order(position: :asc).pluck(:id).index(project.id)
 
@@ -373,14 +402,33 @@ class DeckController < ApplicationController
       return render json: { error: "Project not found" }, status: :unprocessable_entity
     end
 
+    unless project.shipped?
+      return render json: { error: "Project is not in the review queue" }, status: :unprocessable_entity
+    end
+
+    feedback_text = feedback.to_s.strip
+    if feedback_text.blank?
+      return render json: { error: "Rejection requires a written comment (what to fix before resubmitting)." }, status: :unprocessable_entity
+    end
+
     resolved_index = user.projects.order(position: :asc).pluck(:id).index(project.id)
 
     Rails.logger.info "Rejecting project for user #{user_id} project_id=#{project.id}"
 
     begin
-      # Return project to the deck (not shipped) and drop the YSWS submission row; keep feedback on the project.
-      project.unship_return_to_deck_after_rejection!(admin_feedback: feedback)
-      user.unship_project_after_rejection!(resolved_index, admin_feedback: feedback) if resolved_index.present?
+      chips_to_reverse = project.chips_earned.to_f
+      # Return project to the deck (not shipped) and drop the YSWS submission row; clear approval fields; keep feedback.
+      project.unship_return_to_deck_after_rejection!(admin_feedback: feedback_text)
+      user.unship_project_after_rejection!(resolved_index, admin_feedback: feedback_text) if resolved_index.present?
+
+      if chips_to_reverse.positive?
+        user.reload
+        new_balance = [ user.chip_am.to_f - chips_to_reverse, 0.0 ].max
+        user.update_column(:chip_am, new_balance)
+      end
+
+      project.reload
+      project.project_comments.create!(user: current_user, body: "Rejected — #{feedback_text}")
 
       Rails.logger.info "Project rejected for user #{user_id}"
       render json: { success: true, message: "Project rejected" }
@@ -389,6 +437,41 @@ class DeckController < ApplicationController
       Rails.logger.error e.backtrace.join("\n")
       render json: { error: "Error: #{e.message}" }, status: :unprocessable_entity
     end
+  end
+
+  # Admin-only: leave a note on a shipped project without changing approval state (still in review queue).
+  def comment_review_project_admin
+    user_id = params[:user_id]
+    project_index = params[:project_index].to_i
+    project_id = params[:project_id]
+    body = params[:feedback].to_s.strip
+
+    if body.blank?
+      return render json: { error: "Comment can’t be blank." }, status: :unprocessable_entity
+    end
+
+    user = User.find(user_id)
+    project = if project_id.present?
+                user.projects.find_by(id: project_id)
+              else
+                user.projects.order(position: :asc)[project_index]
+              end
+
+    unless project
+      return render json: { error: "Project not found" }, status: :unprocessable_entity
+    end
+    unless project.shipped?
+      return render json: { error: "Comment-only review applies to projects still in the shipped review queue." }, status: :unprocessable_entity
+    end
+
+    project.project_comments.create!(user: current_user, body: body)
+    render json: { success: true, message: "Comment posted" }
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "User or project not found" }, status: :unprocessable_entity
+  rescue => e
+    Rails.logger.error "Error posting review comment: #{e.class}: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { error: "Error: #{e.message}" }, status: :unprocessable_entity
   end
 
   private

@@ -1,4 +1,6 @@
 class Project < ApplicationRecord
+  include GithubRepositoryKey
+
   belongs_to :user
   belongs_to :reviewed_by, class_name: "User", optional: true
   has_one :ysws_project_submission, dependent: :destroy
@@ -11,6 +13,9 @@ class Project < ApplicationRecord
   scope :shipped, -> { where(shipped: true) }
   scope :reviewed, -> { where(reviewed: true) }
   scope :pending_review, -> { where(status: "in-review", reviewed: false) }
+
+  # Shipped rows that count as “the same repo already in the queue” (not displaced by a rejected resubmit).
+  ACTIVE_SHIP_QUEUE_STATUSES = %w[in-review approved].freeze
 
   before_create :set_position
 
@@ -25,6 +30,74 @@ class Project < ApplicationRecord
     self.update_column(:total_hours, total)
   end
 
+  # Re-shipping after admin rejection: remove a leftover YSWS row if the DB was out of sync.
+  def clear_stale_ysws_submission_if_any!
+    return unless status.to_s == "rejected"
+
+    s = ysws_project_submission
+    return unless s
+
+    begin
+      s.delete_remote_airtable_record!
+    rescue StandardError => e
+      Rails.logger.warn("Project##{id} clear_stale_ysws: Airtable delete skipped: #{e.message}")
+    end
+    s.destroy
+    reload
+  end
+
+  # When this (rejected) project is shipped again, remove any other shipped submission for the same GitHub repo
+  # that is still in-review or approved so the new ship is the only active queue entry.
+  def displace_conflicting_shipped_same_repo!
+    key = self.class.github_repository_key(code_url)
+    return if key.blank?
+
+    user.projects.shipped.where.not(id: id).find_each do |other|
+      next unless self.class.github_repository_key(other.code_url) == key
+      next unless ACTIVE_SHIP_QUEUE_STATUSES.include?(other.status.to_s)
+
+      other.displaced_by_same_repo_resubmit!
+    end
+  end
+
+  def displaced_by_same_repo_resubmit!
+    note = "This submission was removed from the review queue because the same GitHub repository was resubmitted from another project after corrections."
+    chips = chips_earned.to_f
+    uid = user_id
+
+    begin
+      ysws_project_submission&.delete_remote_airtable_record!
+    rescue StandardError => e
+      Rails.logger.warn("Project##{id} displaced_by_same_repo_resubmit: Airtable delete: #{e.message}")
+    end
+    ysws_project_submission&.destroy
+
+    combined_feedback = [ admin_feedback, note ].compact.join("\n\n").strip.presence
+
+    update!(
+      shipped: false,
+      shipped_at: nil,
+      shipped_airtable_id: nil,
+      shipped_synced_at: nil,
+      status: "rejected",
+      reviewed: false,
+      reviewed_at: nil,
+      reviewed_by_user_id: nil,
+      approved_hours: nil,
+      chips_earned: nil,
+      hour_justification: nil,
+      admin_feedback: combined_feedback
+    )
+
+    if chips.positive?
+      u = User.find(uid)
+      u.update_column(:chip_am, [ u.chip_am.to_f - chips, 0.0 ].max)
+    end
+
+    idx = user.projects.order(position: :asc).pluck(:id).index(id)
+    user.unship_project_after_rejection!(idx, admin_feedback: combined_feedback) if idx.present?
+  end
+
   # Admin rejected a shipped submission: delete Airtable row first (avoid orphans), then remove YSWS row and return project to deck.
   def unship_return_to_deck_after_rejection!(admin_feedback: nil)
     submission = ysws_project_submission
@@ -33,11 +106,14 @@ class Project < ApplicationRecord
       shipped_at: nil,
       shipped_airtable_id: nil,
       shipped_synced_at: nil,
-      status: "pending",
+      status: "rejected",
       reviewed: false,
       reviewed_at: nil,
       reviewed_by_user_id: nil,
-      admin_feedback: admin_feedback
+      admin_feedback: admin_feedback,
+      approved_hours: nil,
+      chips_earned: nil,
+      hour_justification: nil
     }
 
     if submission

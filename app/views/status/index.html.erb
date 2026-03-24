@@ -9,6 +9,9 @@
             Review Status
             <%= image_tag "req_items/clockIMG.png", alt: "", class: "status-panel-title-icon", aria: { hidden: true } %>
           </h2>
+          <p class="status-review-intro">
+            Open a project to see reviewer feedback and the full comment thread. If a submission was returned, it appears as <strong>Rejected</strong> here; read the notes, update your project on the deck, and ship again when ready.
+          </p>
           <ul class="status-review-list" aria-label="Project review status">
             <% @projects.each do |project| %>
               <% status_slug = project.status.presence || "pending" %>

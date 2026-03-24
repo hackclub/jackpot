@@ -568,27 +568,39 @@
           <% end %>
         </div>
 
-        <% if @project_db.reviewed %>
+        <% if @project_db.reviewed? && @project_db.shipped? %>
+          <div class="review-info-banner">
+            This project is already <strong>approved</strong> and still in the shipped queue. Post a comment below if you need to add a note — approval, hours, and chips stay the same.
+          </div>
+          <div class="review-comment-section">
+            <label class="review-comment-label">Comment</label>
+            <textarea class="review-comment-textarea review-followup-comment" rows="4" placeholder="Your note appears on the participant’s Status page in the thread…"></textarea>
+          </div>
+          <button type="button" class="submit-review-btn" onclick="submitFollowUpComment(<%= @user.id %>, <%= @project_index %>, <%= @project_db.id %>)">Post comment only</button>
+        <% elsif @project_db.reviewed? %>
           <div class="already-reviewed">
-            ✓ This project has already been reviewed.
+            ✓ This project has already been reviewed and is no longer in the shipped queue.
           </div>
         <% else %>
           <div class="review-info-banner">
-            Enter hour values to approve the raw hours from Hackatime. Leave blank for no approval.
+            <strong>Approve</strong> keeps the project in the shipped queue with approved status.
+            <strong>Reject</strong> returns it to the participant’s deck (they cannot remove it from the queue themselves once shipped) — you <strong>must</strong> explain what to fix.
+            <strong>Comment</strong> adds a note only; the project stays shipped with its current status (usually pending review).
+            Participants cannot ship the same GitHub repository twice while another shipped project uses that repo.
           </div>
 
           <div class="review-controls">
-            <button class="review-btn approve" onclick="setReviewAction('approve')">✓ Approve</button>
-            <button class="review-btn reject" onclick="setReviewAction('reject')">✗ Reject</button>
-            <button class="review-btn" onclick="setReviewAction('comment')">💬 Comment</button>
+            <button type="button" class="review-btn approve" onclick="setReviewAction('approve')">✓ Approve</button>
+            <button type="button" class="review-btn reject" onclick="setReviewAction('reject')">✗ Reject</button>
+            <button type="button" class="review-btn" onclick="setReviewAction('comment')">💬 Comment</button>
           </div>
 
           <div class="review-comment-section">
-            <label class="review-comment-label">Comment (optional)</label>
-            <textarea class="review-comment-textarea review-feedback-input" placeholder="Add your comment here..."></textarea>
+            <label class="review-comment-label">Comment (optional for approve; <strong>required</strong> for reject)</label>
+            <textarea class="review-comment-textarea review-feedback-input" placeholder="Add your comment here…"></textarea>
           </div>
 
-          <button class="submit-review-btn" onclick="submitReview(<%= @user.id %>, <%= @project_index %>, <%= @project_db.id %>)">Submit Review</button>
+          <button type="button" class="submit-review-btn" onclick="submitReview(<%= @user.id %>, <%= @project_index %>, <%= @project_db.id %>)">Submit Review</button>
 
           <div class="review-preview">
             <div class="review-preview-title">Preview:</div>
@@ -603,6 +615,8 @@
 
   <script>
     function setReviewAction(action) {
+      window.currentReviewAction = action;
+
       const preview = document.getElementById('reviewPreview');
       const feedback = document.querySelector('.review-feedback-input').value;
       const hours = document.querySelector('.review-hours-input').value;
@@ -634,27 +648,23 @@
 
         const reasonText = document.createTextNode('Reason: ' + (feedback || '(no reason provided)'));
         preview.appendChild(reasonText);
-      } else {
-        strong.textContent = '💬 COMMENT';
+      } else if (action === 'comment') {
+        strong.textContent = '💬 COMMENT ONLY';
         preview.appendChild(strong);
         preview.appendChild(document.createElement('br'));
-
-        const commentOnlyText = document.createTextNode(feedback || '(no comment)');
-        preview.appendChild(commentOnlyText);
+        preview.appendChild(document.createTextNode(feedback.trim() ? feedback : '(add a comment before submitting)'));
       }
     }
 
-    function submitReview(userId, projectIndex, projectId) {
-      const hoursInput = document.querySelector('.review-hours-input');
-      const feedbackInput = document.querySelector('.review-feedback-input');
-      const approvedHours = hoursInput.value;
-      const feedback = feedbackInput.value;
-
+    function submitFollowUpComment(userId, projectIndex, projectId) {
+      const ta = document.querySelector('.review-followup-comment');
+      const text = ta ? ta.value.trim() : '';
+      if (!text) {
+        alert('Enter a comment to post.');
+        return;
+      }
       const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-      const action = (window.currentReviewAction || 'approve');
-      const endpoint = action === 'reject' ? '<%= reject_project_admin_path %>' : '<%= approve_project_admin_path %>';
-
-      fetch(endpoint, {
+      fetch('<%= comment_review_project_admin_path %>', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -664,16 +674,73 @@
           user_id: userId,
           project_index: projectIndex,
           project_id: projectId,
-          approved_hours: approvedHours || 0,
-          hour_justification: '',
-          feedback: feedback,
-          action: action
+          feedback: text
         })
       })
       .then(r => r.json())
       .then(data => {
         if (data.success) {
-          alert('Project reviewed!');
+          alert('Comment posted.');
+          window.location.href = '<%= admin_review_path %>';
+        } else {
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+      })
+      .catch(e => {
+        console.error('Error:', e);
+        alert('Failed to post comment');
+      });
+    }
+
+    function submitReview(userId, projectIndex, projectId) {
+      const hoursInput = document.querySelector('.review-hours-input');
+      const feedbackInput = document.querySelector('.review-feedback-input');
+      const approvedHours = hoursInput ? hoursInput.value : '';
+      const feedback = feedbackInput ? feedbackInput.value : '';
+
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      const action = window.currentReviewAction;
+      if (!action || ['approve', 'reject', 'comment'].indexOf(action) === -1) {
+        alert('Choose Approve, Reject, or Comment before submitting.');
+        return;
+      }
+      if (action === 'reject' && !feedback.trim()) {
+        alert('Rejection requires a written comment (what the participant should fix).');
+        return;
+      }
+      if (action === 'comment' && !feedback.trim()) {
+        alert('Enter a comment to post.');
+        return;
+      }
+
+      let endpoint;
+      if (action === 'reject') endpoint = '<%= reject_project_admin_path %>';
+      else if (action === 'comment') endpoint = '<%= comment_review_project_admin_path %>';
+      else endpoint = '<%= approve_project_admin_path %>';
+
+      const body = {
+        user_id: userId,
+        project_index: projectIndex,
+        project_id: projectId,
+        feedback: feedback
+      };
+      if (action === 'approve') {
+        body.approved_hours = approvedHours || 0;
+        body.hour_justification = '';
+      }
+
+      fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify(body)
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          alert(action === 'comment' ? 'Comment posted.' : 'Project reviewed!');
           window.location.href = '<%= admin_review_path %>';
         } else {
           alert('Error: ' + (data.error || 'Unknown error'));

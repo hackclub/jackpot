@@ -299,6 +299,15 @@
   gap: 10px;
 }
 
+.status-review-intro {
+  font-family: Georgia, serif;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #c8bba8;
+  margin: 0 0 14px;
+  max-width: 42em;
+}
+
 .status-review-list > li {
   margin: 0;
   padding: 0;
@@ -353,7 +362,8 @@
   text-transform: capitalize;
 }
 
-.status-review-badge--pending {
+.status-review-badge--pending,
+.status-review-badge--in-review {
   color: #8ba3c7;
   text-shadow: 0 0 12px rgba(139, 163, 199, 0.5);
 }

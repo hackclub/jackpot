@@ -5,7 +5,13 @@ class StatusController < ApplicationController
 
   def index
     @show_status_content = true
-    @projects = current_user.projects.includes(:reviewed_by, project_comments: :user).order(:position, created_at: :desc)
+    @projects = current_user.projects
+      .includes(:reviewed_by, project_comments: :user)
+      .order(
+        Arel.sql("CASE WHEN projects.status = 'rejected' THEN 0 ELSE 1 END"),
+        :position,
+        created_at: :desc
+      )
     @total_chips = current_user.chip_am.to_i
     @fulfilled_orders = current_user.shop_orders.sent.order(created_at: :desc)
     @rejected_orders = current_user.shop_orders.refunded.order(created_at: :desc)
