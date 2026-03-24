@@ -160,22 +160,29 @@ class User < ApplicationRecord
     update!(projects: projects)
   end
 
-  # Keep legacy jsonb `users.projects` in sync when a shipped project is rejected and returned to the deck.
+  # Keep legacy jsonb `users.projects` column in sync when a shipped project is rejected (not the has_many :projects association).
   def unship_project_after_rejection!(project_index, admin_feedback: nil)
     raw = read_attribute(:projects)
     return false unless raw.is_a?(Array)
 
     idx = project_index.to_i
-    return false if idx.negative? || idx >= raw.size || raw[idx].nil?
+    return false if idx.negative?
 
     arr = raw.deep_dup
+    while arr.length <= idx
+      arr << {}
+    end
+
     slot = arr[idx]
     slot = slot.is_a?(Hash) ? slot.stringify_keys.dup : {}
     slot["shipped"] = false
     slot.delete("shipped_at")
-    slot["status"] = "pending"
+    slot["status"] = "rejected"
     slot["reviewed"] = false
     slot.delete("reviewed_at")
+    slot.delete("approved_hours")
+    slot.delete("chips_earned")
+    slot.delete("hour_justification")
     slot["admin_feedback"] = admin_feedback if admin_feedback.present?
     arr[idx] = slot
     update!(projects: arr)

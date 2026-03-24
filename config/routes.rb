@@ -30,6 +30,7 @@ Rails.application.routes.draw do
      get "/deck/journal_entries/:project_id", to: "deck#get_journal_entries", as: :get_journal_entries
      post "/deck/approve_project_admin", to: "deck#approve_project_admin", as: :approve_project_admin
      post "/deck/reject_project_admin", to: "deck#reject_project_admin", as: :reject_project_admin
+     post "/deck/comment_review_project_admin", to: "deck#comment_review_project_admin", as: :comment_review_project_admin
   get "/leaderboard", to: "leaderboard#index", as: :leaderboard
 
   get "/shop", to: "shop#index", as: :shop
