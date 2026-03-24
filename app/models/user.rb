@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  include AirtablePushOnChange
+
   has_encrypted :access_token
   has_many :journal_entries, foreign_key: :user_id, dependent: :destroy
   has_many :projects, dependent: :destroy
@@ -13,6 +15,8 @@ class User < ApplicationRecord
   validates :email, presence: true
   validates :access_token, presence: true
   validate :safe_profile_photo_url
+
+  pushes_airtable_with Airtable::UserSyncJob
 
   scope :active, -> { where("last_sign_in_at > ?", 6.months.ago) }
 

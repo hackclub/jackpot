@@ -13,7 +13,11 @@
     <p class="sync-muted" style="text-align: center; margin-bottom: 1rem;">Auto-refreshes every 10s · Last loaded: <%= Time.current.strftime("%H:%M:%S %Z") %></p>
 
     <div style="text-align: center; margin-bottom: 2rem;">
-      <%= button_to "Force Sync All", admin_force_airtable_sync_path, class: "sync-force-btn", data: { turbo_confirm: "Run all 9 Airtable sync jobs now?" } %>
+      <%= button_to "Queue full Airtable reconcile",
+          admin_force_airtable_sync_path,
+          class: "sync-force-btn",
+          form: { data: { turbo: false } },
+          data: { turbo_confirm: "Queue a background job to push all tables to Airtable (up to 10k rows per table per run). The worker must be running (e.g. bin/jobs)." } %>
     </div>
 
     <% if flash[:notice] %>
@@ -35,6 +39,15 @@
             <%= @has_base_id ? "#{@base_id}" : "Missing" %>
           </span>
         </div>
+        <% if @has_token && @has_base_id %>
+          <div class="sync-config-item" style="grid-column: 1 / -1;">
+            <span class="sync-config-label">Per-row sync</span>
+            <span class="sync-muted" style="text-align: left;">
+              Changes enqueue <code>Airtable::PushRecordJob</code> for that row. Recurring tasks (if configured) also run each table sync every 5 minutes as a safety net (50 rows/run).
+              Pending row pushes: <strong><%= @airtable_push_pending %></strong>.
+            </span>
+          </div>
+        <% end %>
       </div>
       <% unless @has_token && @has_base_id %>
         <div class="sync-alert sync-alert-error">
@@ -84,7 +97,10 @@
           </p>
         <% end %>
       <% else %>
-        <p class="sync-muted">No Airtable recurring tasks found in <code>config/recurring.yml</code>.</p>
+        <p class="sync-muted">
+          No Airtable recurring tasks found in <code>config/recurring.yml</code> for this environment. Per-row pushes use
+          <code>Airtable::PushRecordJob</code>; add scheduled tasks there for a periodic safety net.
+        </p>
       <% end %>
     </div>
 

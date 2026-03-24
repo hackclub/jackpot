@@ -1,7 +1,11 @@
 class YswsProjectSubmission < ApplicationRecord
+  include AirtablePushOnChange
+
   SHIP_STATUSES = %w[Pending Approved Rejected].freeze
 
   belongs_to :project
+
+  pushes_airtable_with Airtable::ShippedProjectSyncJob
 
   validates :ship_status, inclusion: { in: SHIP_STATUSES }
 
@@ -27,6 +31,16 @@ class YswsProjectSubmission < ApplicationRecord
     insert_all(
       missing.map { |id| { project_id: id, ship_status: "Pending", created_at: now, updated_at: now } }
     )
+  end
+
+  # One shipped project → ensure a submission row exists (for event-driven Airtable push without scanning all projects).
+  def self.ensure_row_for_project!(project)
+    return nil unless project&.shipped?
+
+    rec = find_or_initialize_by(project_id: project.id)
+    rec.ship_status = ship_status_for_project(project)
+    rec.save! if rec.new_record? || rec.changed?
+    rec
   end
 
   # Removes the matching Airtable row (same table as ShippedProjectSyncJob). Call before destroying this row
