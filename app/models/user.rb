@@ -185,7 +185,9 @@ class User < ApplicationRecord
     slot.delete("hour_justification")
     slot["admin_feedback"] = admin_feedback if admin_feedback.present?
     arr[idx] = slot
-    update!(projects: arr)
+    # Write the jsonb column only — `update!(projects: arr)` hits the has_many setter and raises
+    # "Project expected, got Hash" because each slot is a Hash, not a Project record.
+    update_columns(projects: arr, updated_at: Time.current)
   end
 
   # Sum of Hackatime hours on all projects plus all journal entries (pending + shipped).

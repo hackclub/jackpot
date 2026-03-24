@@ -105,8 +105,11 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
   def reviewer_slack_mention(user)
     return "@unknown" unless user
 
-    label = user.slack_username.presence || user.display_name.presence || user.email.to_s.split("@").first
-    "@#{label.to_s.delete_prefix('@')}"
+    # Match the name shown next to the profile photo in Jackpot (display_name, not Slack handle).
+    label = user.display_name.presence || user.name.to_s
+    label = label.to_s.delete_prefix("@").strip
+    label = user.email.to_s.split("@").first if label.blank?
+    "@#{label}"
   end
 
   def format_hours_justification(n)
