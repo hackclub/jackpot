@@ -243,8 +243,12 @@ class DeckController < ApplicationController
   end
 
   def get_journal_entries
-    project_id = params[:project_id]
-    entries = current_user.journal_entries.for_project_id(project_id).order(created_at: :desc)
+    pid = params[:project_id].to_s
+    unless pid.match?(/\A\d+\z/) && current_user.projects.exists?(id: pid)
+      return render json: []
+    end
+
+    entries = current_user.journal_entries.for_project_id(pid).order(created_at: :desc)
     render json: entries
   end
 

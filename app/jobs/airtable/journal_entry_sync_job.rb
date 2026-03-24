@@ -27,11 +27,7 @@ class Airtable::JournalEntrySyncJob < Airtable::BaseSyncJob
   private
 
   def update_projects_total_hours
-    totals_by_project_id = JournalEntry.group(:project_id).sum(:hours_worked)
-
-    Project.where(id: totals_by_project_id.keys).find_each do |project|
-      total_hours = totals_by_project_id[project.id] || 0
-      project.update!(total_hours: total_hours)
-    end
+    project_ids = JournalEntry.where.not(project_id: nil).distinct.pluck(:project_id)
+    Project.where(id: project_ids).find_each(&:update_total_hours)
   end
 end
