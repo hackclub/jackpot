@@ -22,6 +22,7 @@
             <div
                class="card-slot card-slot-filled"
                data-index="<%= i %>"
+               data-project-id="<%= project["id"] %>"
                data-project-name="<%= project["name"] %>"
                data-project-description="<%= project["description"] %>"
                data-project-type="<%= project["project_type"] %>"
@@ -657,7 +658,11 @@ function initDeck() {
 
    function loadDetailJournalEntries(projectId) {
      if (!detailJournalEntriesList) return;
-     fetch('/deck/journal_entries/' + projectId)
+     if (projectId == null || projectId === '') {
+       detailJournalEntriesList.innerHTML = '<p class="detail-journal-empty">No journal entries yet.</p>';
+       return;
+     }
+     fetch('/deck/journal_entries/' + encodeURIComponent(projectId))
        .then(function(r) { return r.json(); })
        .then(function(entries) {
          detailJournalEntriesList.innerHTML = '';
@@ -727,7 +732,7 @@ function initDeck() {
      }
      if (detailMainPanel) detailMainPanel.hidden = false;
      
-     loadDetailJournalEntries(data.index);
+     loadDetailJournalEntries(data.id);
 
      detailModal.classList.add('active');
      detailModal.setAttribute('aria-hidden', 'false');
@@ -959,6 +964,7 @@ function initDeck() {
   filledCards.forEach(function(card) {
     card.addEventListener('click', function() {
       openDetailModal({
+        id: card.dataset.projectId,
         index: card.dataset.index,
         name: card.dataset.projectName,
         description: card.dataset.projectDescription,
@@ -1020,7 +1026,12 @@ function initDeck() {
   }
 
   function loadJournalEntries(projectId) {
-    fetch('/deck/journal_entries/' + projectId)
+    if (!journalEntriesList) return;
+    if (projectId == null || projectId === '') {
+      journalEntriesList.innerHTML = '<p class="journal-empty">Unable to load journal (refresh the page if this persists).</p>';
+      return;
+    }
+    fetch('/deck/journal_entries/' + encodeURIComponent(projectId))
       .then(function(r) { return r.json(); })
       .then(function(entries) {
         journalEntriesList.innerHTML = '';
