@@ -220,11 +220,16 @@ class AdminController < ApplicationController
 
          @projects_for_review << project_item
        end
+
+       @ship_sort = %w[asc desc].include?(params[:ship_sort].to_s) ? params[:ship_sort] : "desc"
+       sort_review_items_by_shipped_at!(@all_projects, @ship_sort)
+       sort_review_items_by_shipped_at!(@projects_for_review, @ship_sort)
      rescue => e
        Rails.logger.error("FATAL ERROR in review action: #{e.class} - #{e.message}")
        Rails.logger.error(e.backtrace.join("\n"))
        @projects_for_review = []
        @all_projects = []
+       @ship_sort = "desc"
      end
    end
 
@@ -275,6 +280,24 @@ class AdminController < ApplicationController
   end
 
   private
+
+  # Unshipped / missing shipped_at sort after shipped rows for both asc and desc.
+  def sort_review_items_by_shipped_at!(items, direction)
+    dir = direction.to_s == "asc" ? :asc : :desc
+    items.sort_by! do |item|
+      raw = item.dig(:project, "shipped_at")
+      t =
+        begin
+          Time.zone.parse(raw.to_s) if raw.present?
+        rescue ArgumentError, TypeError
+          nil
+        end
+      group = t ? 0 : 1
+      key = t ? t.to_f : 0.0
+      key = -key if dir == :desc
+      [ group, key ]
+    end
+  end
 
   def cleanup_corrupted_projects
     User.where("projects IS NOT NULL AND projects != '[]'").find_each do |user|
