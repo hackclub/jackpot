@@ -136,6 +136,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_140000) do
     t.decimal "past_approved_hours", precision: 10, scale: 2, default: "0.0", null: false
     t.string "playable_url"
     t.integer "position", default: 0
+    t.decimal "shipping_queue_snapshot_total_hours", precision: 10, scale: 2
     t.string "project_type"
     t.boolean "reviewed", default: false, null: false
     t.datetime "reviewed_at"
@@ -144,7 +145,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_140000) do
     t.string "shipped_airtable_id"
     t.datetime "shipped_at"
     t.date "shipped_synced_at"
-    t.decimal "shipping_queue_snapshot_total_hours", precision: 10, scale: 2
     t.string "status", default: "pending"
     t.date "synced_at"
     t.decimal "total_hours", precision: 10, scale: 2, default: "0.0"

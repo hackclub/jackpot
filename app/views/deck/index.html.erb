@@ -227,11 +227,6 @@
             <span class="detail-label">Hackatime</span>
             <span class="detail-value" id="detailHackatime">—</span>
           </div>
-
-         <div class="detail-stat-row" id="detailUnshippedHoursRow" style="display: none;">
-           <span class="detail-label">Unshipped hours</span>
-           <span class="detail-value" id="detailUnshippedHours">0.0</span>
-         </div>
          
          <div class="detail-stat-row" id="detailShippedRow" style="display: none;">
            <span class="detail-label">Status</span>
@@ -247,13 +242,19 @@
 
      </div>
 
-     <div class="project-form-actions">
-       <input type="hidden" id="shipProjectIndex" name="project_index">
-       <button type="button" class="project-cancel-btn" id="detailJournalBtn">Journal</button>
-       <button type="button" class="project-cancel-btn" id="detailSaveBtn">Save Changes</button>
-       <button type="button" class="project-ship-btn" id="detailShipBtn">Ship It</button>
-       <button type="button" class="project-cancel-btn" id="detailUnshipBtn" style="display: none;">Remove from review queue</button>
-       <button type="button" class="project-delete-btn" id="detailDeleteBtn">Delete</button>
+     <div class="project-form-actions project-detail-form-actions">
+       <div class="project-detail-actions-start">
+         <input type="hidden" id="shipProjectIndex" name="project_index">
+         <button type="button" class="project-cancel-btn" id="detailJournalBtn">Journal</button>
+         <button type="button" class="project-cancel-btn" id="detailSaveBtn">Save Changes</button>
+         <button type="button" class="project-ship-btn" id="detailShipBtn">Ship It</button>
+         <button type="button" class="project-cancel-btn" id="detailUnshipBtn" style="display: none;">Remove from review queue</button>
+         <button type="button" class="project-delete-btn" id="detailDeleteBtn">Delete</button>
+       </div>
+       <div class="detail-unshipped-hours-inline" id="detailUnshippedHoursRow" style="display: none;" aria-live="polite">
+         <span class="detail-unshipped-hours-label">Unshipped hours</span>
+         <span class="detail-unshipped-hours-value" id="detailUnshippedHours">0.0</span>
+       </div>
      </div>
    </div>
  </div>
@@ -799,6 +800,11 @@ function initDeck() {
        if (isNaN(pr)) pr = 0;
        detailUnshippedHours.textContent = pr.toFixed(1);
        detailUnshippedHoursRow.style.display = (lockedAfterShip || isShipped) ? 'flex' : 'none';
+     }
+
+     if (bannerUploadArea) {
+       var bannerVisuallyLocked = lockedAfterShip && !detailCanEditPlayableBanner();
+       bannerUploadArea.classList.toggle('banner-upload-area--locked', bannerVisuallyLocked);
      }
 
      detailShippedRow.style.display = isShipped ? 'flex' : 'none';
