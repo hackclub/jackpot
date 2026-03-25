@@ -113,6 +113,43 @@ class Project < ApplicationRecord
     user.unship_project_after_rejection!(idx, admin_feedback: combined_feedback) if idx.present?
   end
 
+  # Shipped but still waiting on admin (not approved): user may leave the queue voluntarily.
+  def withdrawable_from_shipping_queue?
+    shipped? && status.to_s == "in-review" && !reviewed?
+  end
+
+  # Remove from YSWS / Airtable queue and return to editable deck state (pending, not shipped).
+  def withdraw_from_shipping_queue!
+    raise ArgumentError, "Project cannot be withdrawn from the queue in its current state" unless withdrawable_from_shipping_queue?
+
+    submission = ysws_project_submission
+    attrs = {
+      shipped: false,
+      shipped_at: nil,
+      shipped_airtable_id: nil,
+      shipped_synced_at: nil,
+      status: "pending",
+      reviewed: false,
+      reviewed_at: nil,
+      reviewed_by_user_id: nil,
+      approver_display_name: nil,
+      approved_hours: nil,
+      chips_earned: nil,
+      hour_justification: nil,
+      admin_feedback: nil
+    }
+
+    if submission
+      submission.delete_remote_airtable_record!
+      transaction do
+        submission.destroy!
+        update!(attrs)
+      end
+    else
+      update!(attrs)
+    end
+  end
+
   # Admin rejected a shipped submission: delete Airtable row first (avoid orphans), then remove YSWS row and return project to deck.
   def unship_return_to_deck_after_rejection!(admin_feedback: nil)
     submission = ysws_project_submission

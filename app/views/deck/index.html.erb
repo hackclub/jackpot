@@ -30,6 +30,8 @@
                data-hackatime-hours="<%= project["hackatime_hours"] || 0 %>"
                data-journal-hours="<%= project["journal_hours"] || 0 %>"
                data-project-shipped="<%= project["shipped"] ? "true" : "false" %>"
+               data-project-status="<%= project["status"].to_s %>"
+               data-project-reviewed="<%= project["reviewed"] ? "true" : "false" %>"
                data-playable-url="<%= project["playable_url"] %>"
                data-code-url="<%= project["code_url"] %>"
                data-github-username="<%= project["github_username"].to_s %>"
@@ -240,6 +242,7 @@
        <button type="button" class="project-cancel-btn" id="detailJournalBtn">Journal</button>
        <button type="button" class="project-cancel-btn" id="detailSaveBtn">Save Changes</button>
        <button type="button" class="project-ship-btn" id="detailShipBtn">Ship It</button>
+       <button type="button" class="project-cancel-btn" id="detailUnshipBtn" style="display: none;">Remove from review queue</button>
        <button type="button" class="project-delete-btn" id="detailDeleteBtn">Delete</button>
      </div>
    </div>
@@ -635,6 +638,7 @@ function initDeck() {
    var detailSaveBtn = document.getElementById('detailSaveBtn');
    var detailJournalBtn = document.getElementById('detailJournalBtn');
    var detailShipBtn = document.getElementById('detailShipBtn');
+   var detailUnshipBtn = document.getElementById('detailUnshipBtn');
    var detailDeleteBtn = document.getElementById('detailDeleteBtn');
    var detailMainPanel = document.getElementById('detailMainPanel');
    var detailPlayableUrl = document.getElementById('detailPlayableUrl');
@@ -720,8 +724,10 @@ function initDeck() {
      }
 
      var isShipped = data.shipped === 'true';
+     var canUnship = isShipped && data.status === 'in-review' && data.reviewed !== 'true';
      detailShippedRow.style.display = isShipped ? 'flex' : 'none';
      detailShipBtn.style.display = isShipped ? 'none' : 'inline-block';
+     if (detailUnshipBtn) detailUnshipBtn.style.display = canUnship ? 'inline-block' : 'none';
      detailDeleteBtn.style.display = isShipped ? 'none' : 'inline-block';
      detailSaveBtn.style.display = 'none';
      if (detailBannerRow) detailBannerRow.style.display = isShipped ? 'none' : 'flex';
@@ -913,6 +919,33 @@ function initDeck() {
      });
    }
 
+   if (detailUnshipBtn) {
+     detailUnshipBtn.addEventListener('click', function() {
+       if (!currentDetailData) return;
+       if (!confirm('Remove this project from the review queue? You can ship it again later.')) return;
+
+       var formData = new FormData();
+       formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').content);
+       formData.append('project_index', currentDetailData.index);
+
+       fetch('<%= unship_project_path %>', {
+         method: 'POST',
+         body: formData,
+         headers: { 'X-Requested-With': 'XMLHttpRequest' }
+       })
+       .then(function(r) { return r.json(); })
+       .then(function(data) {
+         if (data.success) {
+           closeDetailModal();
+           location.reload();
+         } else {
+           alert('Error: ' + (data.error || 'Unknown error'));
+         }
+       })
+       .catch(function(e) { console.error('Error removing from queue:', e); alert('Failed to remove from queue'); });
+     });
+   }
+
    if (detailJournalBtn) {
      detailJournalBtn.addEventListener('click', function() {
        closeDetailModal();
@@ -973,6 +1006,8 @@ function initDeck() {
         hackatimeHours: card.dataset.hackatimeHours,
         journalHours: card.dataset.journalHours,
         shipped: card.dataset.projectShipped,
+        status: card.dataset.projectStatus || '',
+        reviewed: card.dataset.projectReviewed || 'false',
         playableUrl: card.dataset.playableUrl,
         codeUrl: card.dataset.codeUrl,
         githubUsername: card.dataset.githubUsername,

@@ -169,6 +169,34 @@ class User < ApplicationRecord
     update!(projects: projects)
   end
 
+  # Keep legacy jsonb `users.projects` in sync when the user removes a shipped-but-not-approved project from the review queue.
+  def unship_project_voluntary_from_queue!(project_index)
+    raw = read_attribute(:projects)
+    return false unless raw.is_a?(Array)
+
+    idx = project_index.to_i
+    return false if idx.negative?
+
+    arr = raw.deep_dup
+    while arr.length <= idx
+      arr << {}
+    end
+
+    slot = arr[idx]
+    slot = slot.is_a?(Hash) ? slot.stringify_keys.dup : {}
+    slot["shipped"] = false
+    slot.delete("shipped_at")
+    slot["status"] = "pending"
+    slot["reviewed"] = false
+    slot.delete("reviewed_at")
+    slot.delete("approved_hours")
+    slot.delete("chips_earned")
+    slot.delete("hour_justification")
+    slot.delete("admin_feedback")
+    arr[idx] = slot
+    update_columns(projects: arr, updated_at: Time.current)
+  end
+
   # Keep legacy jsonb `users.projects` column in sync when a shipped project is rejected (not the has_many :projects association).
   def unship_project_after_rejection!(project_index, admin_feedback: nil)
     raw = read_attribute(:projects)

@@ -201,6 +201,56 @@ class DeckController < ApplicationController
     end
   end
 
+  def unship_project
+    project_index = params[:project_index].to_i
+    project = current_user.projects.order(position: :asc)[project_index]
+
+    unless project
+      if request.xhr?
+        return render json: { error: "Project not found" }, status: :unprocessable_entity
+      else
+        flash[:alert] = "Project not found"
+        return redirect_to deck_path
+      end
+    end
+
+    unless project.withdrawable_from_shipping_queue?
+      msg = "Only projects still waiting for review can be removed from the queue. Approved submissions can’t be taken back."
+      if request.xhr?
+        return render json: { error: msg }, status: :unprocessable_entity
+      else
+        flash[:alert] = msg
+        return redirect_to deck_path
+      end
+    end
+
+    project.withdraw_from_shipping_queue!
+    idx = current_user.projects.order(position: :asc).pluck(:id).index(project.id)
+    current_user.unship_project_voluntary_from_queue!(idx) if idx.present?
+
+    if request.xhr?
+      render json: { success: true }
+    else
+      redirect_to deck_path
+    end
+  rescue ArgumentError => e
+    Rails.logger.warn("unship_project: #{e.message}")
+    if request.xhr?
+      render json: { error: e.message }, status: :unprocessable_entity
+    else
+      flash[:alert] = e.message
+      redirect_to deck_path
+    end
+  rescue StandardError => e
+    Rails.logger.error("Error unshipping project: #{e.message}\n#{e.backtrace.join("\n")}")
+    if request.xhr?
+      render json: { error: "Could not remove project from the review queue." }, status: :unprocessable_entity
+    else
+      flash[:alert] = "Could not remove project from the review queue."
+      redirect_to deck_path
+    end
+  end
+
    def delete_project
      project_index = params[:project_index].to_i
      project = current_user.projects.order(position: :asc)[project_index]
