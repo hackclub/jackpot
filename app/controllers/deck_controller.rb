@@ -2,9 +2,22 @@ class DeckController < ApplicationController
    before_action :authenticate_user!
    before_action :authenticate_admin!, only: [ :approve_project_admin, :reject_project_admin, :comment_review_project_admin ]
 
+  MAIN_HC_RESHIP_BLOCKED_MSG = "This project has already been submitted to the main HC database - please contact @Emma".freeze
+  ZERO_HOURS_SHIP_MSG = "You need logged hours (Hackatime + journal) before you can ship.".freeze
+
   def index
-    projects = current_user.projects.order(position: :asc).to_a
+    projects = current_user.projects.includes(:ysws_project_submission).order(position: :asc).to_a
     project_ids = projects.map(&:id)
+
+    @hackatime_owner_by_name = {}
+    projects.each do |p|
+      (p.hackatime_projects || []).each do |n|
+        k = n.to_s.strip.downcase
+        next if k.blank?
+
+        @hackatime_owner_by_name[k] = p.id
+      end
+    end
 
     all_journal_entries = project_ids.present? ? current_user.journal_entries.where(project_id: project_ids).to_a : []
     journal_by_project_id = all_journal_entries.group_by(&:project_id)
@@ -48,6 +61,7 @@ class DeckController < ApplicationController
          "past_approved_hours" => project.past_approved_hours.to_f,
          "first_shipped_at" => project.first_shipped_at&.iso8601,
          "reshippable" => project.reshippable?,
+         "main_hc_reship_locked" => project.reship_blocked_by_main_hc_database?,
          "shipped" => project.shipped,
          "shipped_at" => project.shipped_at&.iso8601,
          "status" => project.status,
@@ -86,6 +100,30 @@ class DeckController < ApplicationController
     github_username = params[:github_username].to_s.strip.delete_prefix("@")
     banner_url = params[:banner_url].to_s.strip
     hackatime_projects = Array(params[:hackatime_projects]).map(&:strip).reject(&:blank?)
+    project_index = params[:project_index].to_i
+
+    will_change_hackatime = true
+    if params[:project_index].present? && project_index >= 0
+      ex_proj = current_user.projects.order(position: :asc)[project_index]
+      will_change_hackatime = false if ex_proj&.first_shipped_at.present?
+    end
+
+    if will_change_hackatime
+      exclude_pid = if params[:project_index].present? && project_index >= 0
+                      current_user.projects.order(position: :asc)[project_index]&.id
+      else
+                      nil
+      end
+      if (hit = hackatime_first_conflict_with_other_project(current_user, exclude_pid, hackatime_projects))
+        msg = "The Hackatime project \"#{hit}\" is already linked to another deck project. Remove it from the other project first."
+        if request.xhr?
+          return render json: { error: msg }, status: :unprocessable_entity
+        else
+          flash[:alert] = msg
+          return redirect_to deck_path
+        end
+      end
+    end
 
     if code_url.start_with?("[") || code_url.start_with?("{")
       return render json: { error: "Code URL is invalid" }, status: :unprocessable_entity
@@ -94,7 +132,6 @@ class DeckController < ApplicationController
       return render json: { error: "Playable URL is invalid" }, status: :unprocessable_entity
     end
 
-    project_index = params[:project_index].to_i
     is_new = false
     project = nil
     projects_count = current_user.projects.count
@@ -159,6 +196,15 @@ class DeckController < ApplicationController
     project = current_user.projects.order(position: :asc)[project_index]
 
     if project
+      if project.total_hours.to_f <= 1e-6
+        if request.xhr?
+          return render json: { error: ZERO_HOURS_SHIP_MSG }, status: :unprocessable_entity
+        else
+          flash[:alert] = ZERO_HOURS_SHIP_MSG
+          return redirect_to deck_path
+        end
+      end
+
       if project.shipped? && project.status.to_s != "rejected"
         if project.status.to_s == "in-review"
           msg = "This project is already waiting for review."
@@ -169,13 +215,23 @@ class DeckController < ApplicationController
             return redirect_to deck_path
           end
         end
-        if project.reviewed? && project.status.to_s == "approved" && !project.reshippable?
-          msg = "Log more time (beyond what was already approved) before shipping an update."
-          if request.xhr?
-            return render json: { error: msg }, status: :unprocessable_entity
-          else
-            flash[:alert] = msg
-            return redirect_to deck_path
+        if project.reviewed? && project.status.to_s == "approved"
+          if project.pending_review_hours > 1e-6 && project.reship_blocked_by_main_hc_database?
+            if request.xhr?
+              return render json: { error: MAIN_HC_RESHIP_BLOCKED_MSG }, status: :unprocessable_entity
+            else
+              flash[:alert] = MAIN_HC_RESHIP_BLOCKED_MSG
+              return redirect_to deck_path
+            end
+          end
+          if !project.reshippable?
+            msg = "Log more time (beyond what was already approved) before shipping an update."
+            if request.xhr?
+              return render json: { error: msg }, status: :unprocessable_entity
+            else
+              flash[:alert] = msg
+              return redirect_to deck_path
+            end
           end
         end
       end
@@ -595,6 +651,21 @@ class DeckController < ApplicationController
   end
 
   private
+
+  def hackatime_first_conflict_with_other_project(user, exclude_project_id, names)
+    norm = Array(names).map { |s| s.to_s.strip.downcase }.reject(&:blank?)
+    return nil if norm.empty?
+
+    scope = user.projects
+    scope = scope.where.not(id: exclude_project_id) if exclude_project_id.present?
+
+    scope.find_each do |other|
+      other_set = (other.hackatime_projects || []).map { |s| s.to_s.strip.downcase }.reject(&:blank?)
+      hit = (norm & other_set).first
+      return hit if hit
+    end
+    nil
+  end
 
   def authenticate_admin!
     redirect_to root_path, alert: "Admin access required" unless admin?

@@ -35,6 +35,7 @@
                data-first-shipped-at="<%= project["first_shipped_at"].to_s %>"
                data-pending-review-hours="<%= project["pending_review_hours"].to_f %>"
                data-reshippable="<%= project["reshippable"] ? "true" : "false" %>"
+               data-main-hc-reship-locked="<%= project["main_hc_reship_locked"] ? "true" : "false" %>"
                data-playable-url="<%= project["playable_url"] %>"
                data-code-url="<%= project["code_url"] %>"
                data-github-username="<%= project["github_username"].to_s %>"
@@ -295,8 +296,21 @@
    </div>
  </div>
 
+<style>
+.hackatime-option--locked { opacity: 0.55; }
+.hackatime-option--locked .hackatime-option-name { font-style: italic; }
+</style>
+<script type="application/json" id="deckHackatimeClaimed"><%= raw @hackatime_owner_by_name.to_json %></script>
+
 <script>
 function initDeck() {
+  var deckHackatimeClaimed = {};
+  (function() {
+    var el = document.getElementById('deckHackatimeClaimed');
+    if (!el || !el.textContent) return;
+    try { deckHackatimeClaimed = JSON.parse(el.textContent); } catch (e) { console.warn(e); }
+  })();
+
   function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -414,6 +428,23 @@ function initDeck() {
    var projectDescriptionInput = document.getElementById('projectDescriptionInput');
    var projectModalTitle = document.getElementById('projectModalTitle');
 
+   function applyHackatimeCheckboxLocks(editingProjectId) {
+     var claimed = deckHackatimeClaimed && typeof deckHackatimeClaimed === 'object' ? deckHackatimeClaimed : {};
+     var editId = editingProjectId != null && editingProjectId !== '' ? String(editingProjectId) : null;
+     document.querySelectorAll('#hackatimePicker .hackatime-checkbox').forEach(function(cb) {
+       var key = (cb.value || '').toLowerCase();
+       var owner = claimed[key];
+       var takenByOther = owner != null && String(owner) !== editId;
+       cb.disabled = takenByOther;
+       var label = cb.closest('.hackatime-option');
+       if (label) {
+         label.classList.toggle('hackatime-option--locked', takenByOther);
+         label.title = takenByOther ? 'Already linked to another deck project.' : '';
+       }
+       if (takenByOther) cb.checked = false;
+     });
+   }
+
    function openProjectModal(data) {
      if (!projectModal) return;
      projectIndexInput.value = data.index;
@@ -437,8 +468,15 @@ function initDeck() {
     var linked = (data.hackatimeProjects || '').split(',').filter(function(s) { return s.length > 0; });
     var checkboxes = document.querySelectorAll('#hackatimePicker .hackatime-checkbox');
     checkboxes.forEach(function(cb) {
+      cb.disabled = false;
+      var lbl = cb.closest('.hackatime-option');
+      if (lbl) {
+        lbl.classList.remove('hackatime-option--locked');
+        lbl.title = '';
+      }
       cb.checked = linked.indexOf(cb.value) !== -1;
     });
+    applyHackatimeCheckboxLocks(data.id);
 
     projectModal.classList.add('active');
     projectModal.setAttribute('aria-hidden', 'false');
@@ -625,6 +663,8 @@ function initDeck() {
           } else {
             location.reload();
           }
+        } else if (data.error) {
+          alert(data.error);
         }
       })
       .catch(function(e) { console.error('Error saving project:', e); })
@@ -744,8 +784,12 @@ function initDeck() {
      var isShipped = data.shipped === 'true';
      var lockedAfterShip = !!(data.firstShippedAt && String(data.firstShippedAt).trim().length > 0);
      var canReship = data.reshippable === 'true';
+     var mainHcLocked = data.mainHcReshipLocked === 'true';
+     var pendingHrsModal = parseFloat(data.pendingReviewHours, 10);
+     if (isNaN(pendingHrsModal)) pendingHrsModal = 0;
+     var showShipUpdateLocked = isShipped && data.status === 'approved' && pendingHrsModal > 0 && mainHcLocked;
      var canUnship = isShipped && data.status === 'in-review' && data.reviewed !== 'true';
-     var showShipBtn = !isShipped || canReship;
+     var showShipBtn = !isShipped || canReship || showShipUpdateLocked;
 
      if (detailUnshippedHoursRow && detailUnshippedHours) {
        var pr = parseFloat(data.pendingReviewHours, 10);
@@ -756,8 +800,20 @@ function initDeck() {
 
      detailShippedRow.style.display = isShipped ? 'flex' : 'none';
      if (detailShipBtn) {
-       detailShipBtn.style.display = showShipBtn ? 'inline-block' : 'none';
-       detailShipBtn.textContent = canReship ? 'Ship update' : 'Ship It';
+       detailShipBtn.classList.toggle('ship-update--main-hc-locked', showShipUpdateLocked);
+       if (showShipUpdateLocked) {
+         detailShipBtn.style.display = 'inline-block';
+         detailShipBtn.textContent = 'Ship update';
+         detailShipBtn.style.opacity = '0.65';
+         detailShipBtn.style.cursor = 'not-allowed';
+         detailShipBtn.title = 'This project has already been submitted to the main HC database - please contact @Emma';
+       } else {
+         detailShipBtn.style.opacity = '';
+         detailShipBtn.style.cursor = '';
+         detailShipBtn.title = '';
+         detailShipBtn.style.display = showShipBtn ? 'inline-block' : 'none';
+         detailShipBtn.textContent = canReship ? 'Ship update' : 'Ship It';
+       }
      }
      if (detailUnshipBtn) detailUnshipBtn.style.display = canUnship ? 'inline-block' : 'none';
      detailDeleteBtn.style.display = isShipped ? 'none' : 'inline-block';
@@ -925,7 +981,18 @@ function initDeck() {
    if (detailShipBtn) {
      detailShipBtn.addEventListener('click', function() {
        if (!currentDetailData) return;
-       
+
+       var totalShipHrs = parseFloat(currentDetailData.hours || 0, 10) || 0;
+       if (totalShipHrs <= 0) {
+         alert('You need logged hours (Hackatime + journal) before you can ship.');
+         return;
+       }
+       var pendShip = parseFloat(currentDetailData.pendingReviewHours || 0, 10) || 0;
+       if (currentDetailData.shipped === 'true' && currentDetailData.status === 'approved' && pendShip > 0 && currentDetailData.mainHcReshipLocked === 'true') {
+         alert('This project has already been submitted to the main HC database - please contact @Emma');
+         return;
+       }
+
        if (!detailPlayableUrl.value.trim()) {
          alert('Playable URL is required to ship');
          return;
@@ -1065,6 +1132,7 @@ function initDeck() {
         firstShippedAt: card.dataset.firstShippedAt || '',
         pendingReviewHours: card.dataset.pendingReviewHours || '0',
         reshippable: card.dataset.reshippable || 'false',
+        mainHcReshipLocked: card.dataset.mainHcReshipLocked || 'false',
         playableUrl: card.dataset.playableUrl,
         codeUrl: card.dataset.codeUrl,
         githubUsername: card.dataset.githubUsername,

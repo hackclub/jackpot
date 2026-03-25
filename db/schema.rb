@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_25_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -390,6 +390,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_190000) do
     t.string "address_line_2"
     t.string "airtable_id"
     t.decimal "approved_hours", precision: 10, scale: 2
+    t.datetime "automation_first_submitted_at"
     t.string "banner_url"
     t.string "birthday"
     t.string "city"

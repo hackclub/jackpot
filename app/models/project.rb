@@ -28,8 +28,12 @@ class Project < ApplicationRecord
     raw.negative? ? 0.0 : raw
   end
 
+  def reship_blocked_by_main_hc_database?
+    ysws_project_submission&.automation_first_submitted_at.present?
+  end
+
   def reshippable?
-    shipped? && reviewed? && status.to_s == "approved" && pending_review_hours > 1e-6
+    shipped? && reviewed? && status.to_s == "approved" && pending_review_hours > 1e-6 && !reship_blocked_by_main_hc_database?
   end
 
   def hackatime_ship_names
