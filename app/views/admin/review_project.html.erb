@@ -510,24 +510,25 @@
               <tr>
                 <th>Project</th>
                 <th>Raw Hours</th>
-                <th>Approved</th>
+                <th>New hours to approve</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><%= @project["name"] %></td>
                 <td><%= @total_hours.to_f.round(2) %></td>
-                <td class="hours-approved"><input type="number" class="review-hours-input" value="<%= @total_hours.to_f.round(2) %>" step="0.5" style="width: 100%; background: transparent; border: 1px solid #8b6914; color: #d4a017; padding: 0.3rem;"></td>
+                <td rowspan="3" class="hours-approved" style="vertical-align: middle;">
+                  <div style="font-size: 0.75rem; color: #a08030; margin-bottom: 0.35rem;">Previously banked: <strong><%= @banked_hours.round(2) %></strong> h · Pending this round: <strong><%= @pending_review_hours.round(2) %></strong> h max</div>
+                  <input type="number" class="review-hours-input" value="<%= @pending_review_hours.to_f.round(2) %>" step="0.5" min="0" max="<%= @pending_review_hours.to_f.round(2) %>" style="width: 100%; background: transparent; border: 1px solid #8b6914; color: #d4a017; padding: 0.3rem;">
+                </td>
               </tr>
               <tr>
                 <td>Journal entries</td>
                 <td><%= @journal_entries.length > 0 ? @journal_entries.sum(&:hours_worked).to_f.round(2) : '0.00' %></td>
-                <td class="hours-approved">0.00</td>
               </tr>
               <tr>
                 <td><strong>Total</strong></td>
                 <td><%= @total_hours.to_f.round(2) %></td>
-                <td class="hours-approved">0.00</td>
               </tr>
             </tbody>
           </table>
@@ -586,7 +587,7 @@
             <strong>Approve</strong> keeps the project in the shipped queue with approved status.
             <strong>Reject</strong> returns it to the participant’s deck (they cannot remove it from the queue themselves once shipped) — you <strong>must</strong> explain what to fix.
             <strong>Comment</strong> adds a note only; the project stays shipped with its current status (usually pending review).
-            Participants cannot ship the same GitHub repository twice while another shipped project uses that repo.
+            Participants cannot ship twice while another submission shares the same Hackatime-linked project or GitHub repository.
           </div>
 
           <div class="review-controls">
@@ -632,8 +633,12 @@
         preview.appendChild(strong);
         preview.appendChild(document.createElement('br'));
 
-        const hoursText = document.createTextNode('Hours: ' + hours);
-        preview.appendChild(hoursText);
+        const banked = <%= @banked_hours.to_f %>;
+        const newH = parseFloat(hours, 10) || 0;
+        const totalAfter = (banked + newH).toFixed(2);
+        preview.appendChild(document.createTextNode('New hours this round: ' + newH));
+        preview.appendChild(document.createElement('br'));
+        preview.appendChild(document.createTextNode('Total approved after (banked + new): ' + totalAfter));
         preview.appendChild(document.createElement('br'));
 
         if (feedback) {

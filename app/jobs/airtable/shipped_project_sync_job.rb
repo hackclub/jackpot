@@ -66,6 +66,7 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     identity = fetch_identity(project.user)
     record.apply_mirror_fields!(identity, justification_text(project))
     super(record, index, raise_on_error: raise_on_error)
+    record.pull_automation_first_submitted_at_from_airtable!
   end
 
   def fetch_identity(user)
@@ -83,28 +84,44 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
       return approved_override_hours_justification(project)
     end
 
-    parts = [ "EDIT ME" ]
-    parts << "Hour Justification: #{project.hour_justification}" if project.hour_justification.present?
-    parts << "Reviewed by: #{project.reviewed_by.name}"         if project.reviewed_by.present?
-    parts << "Reviewed at: #{project.reviewed_at&.strftime('%Y-%m-%d %H:%M UTC')}" if project.reviewed_at.present?
+    # In review (or other non-approved shipped states): no duplicate row — same YSWS record, status Pending.
+    parts = []
+    banked = project.past_approved_hours.to_f
+    raw = project.total_hours.to_f
+    pending = project.pending_review_hours
+    parts << "Total logged (Hackatime + journal): #{format_hours_justification(raw)} h."
+    if banked.positive?
+      parts << "Total hours already approved (banked): #{format_hours_justification(banked)} h."
+      parts << "Hours in scope for this review round (logged minus banked): #{format_hours_justification(pending)} h."
+    else
+      parts << "Hours in scope for this review (no prior approval on this project): #{format_hours_justification(pending)} h."
+    end
+    parts << "Hour justification from participant: #{project.hour_justification}" if project.hour_justification.present?
     parts.join("\n")
   end
 
   # Default copy for Airtable "Optional - Override Hours Spent Justification" when the submission is approved.
   def approved_override_hours_justification(project)
     mention = reviewer_mention_for_justification(project)
-    approved = project.approved_hours.to_f
+    approved_total = project.approved_hours.to_f
     raw = project.total_hours.to_f
-    reduced = raw > approved
-    body =
-      if reduced
-        "Project reviewed by #{mention}. Approved reduced #{format_hours_justification(raw)} to #{format_hours_justification(approved)} hours, as the timing didn't seem fair, and both the demo and repository looked solid, including the heartbeats."
-      else
-        "Project reviewed by #{mention}. Approved #{format_hours_justification(approved)} hours, as the timing seems reasonable, and both the demo and repository looked solid, including the heartbeats."
-      end
+    delta = raw - approved_total
+    reduced = delta > 0.02
+
+    lines = []
+    lines << "Total hours approved (cumulative on this project): #{format_hours_justification(approved_total)} h."
+    lines << "Total logged at review (Hackatime + journal): #{format_hours_justification(raw)} h."
+    if reduced
+      lines << "Reduction from logged: #{format_hours_justification(delta)} h less approved than logged."
+    else
+      lines << "Approved total matches or exceeds logged time (no reduction)."
+    end
+    lines << "Project reviewed by #{mention}. Demo and repository looked solid, including heartbeats."
+    body = lines.join("\n")
+
     comment = project.admin_feedback.to_s.strip
     if comment.present?
-      body += "\n\nReviewer-User comment: #{comment}."
+      body += "\n\nReviewer note: #{comment}"
     end
     body
   end

@@ -137,13 +137,20 @@ class User < ApplicationRecord
     super
   end
 
-  def approve_project(project_index, approved_hours, justification = nil, feedback = nil)
+  # approved_hours is total approved hours on the project. Pass new_chip_award when only a *delta* of hours
+  # was approved this round (re-ship); chip_am increases by that delta only.
+  def approve_project(project_index, approved_hours, justification = nil, feedback = nil, new_chip_award: nil)
      return false unless projects && projects[project_index.to_i]
 
      idx = project_index.to_i
      approved_hours_float = approved_hours.to_f
 
-     chips_earned = (approved_hours_float * 50).round(2)
+     delta_chips =
+       if new_chip_award.nil?
+         (approved_hours_float * 50).round(2)
+       else
+         new_chip_award.to_f.round(2)
+       end
 
      projects[idx]["reviewed"] = true
      projects[idx]["status"] = "approved"
@@ -151,9 +158,15 @@ class User < ApplicationRecord
      projects[idx]["hour_justification"] = justification
      projects[idx]["admin_feedback"] = feedback
      projects[idx]["reviewed_at"] = Time.current.iso8601
-     projects[idx]["chips_earned"] = chips_earned
+     prev_slot_chips = projects[idx]["chips_earned"].to_f
+     projects[idx]["chips_earned"] =
+       if new_chip_award.nil?
+         delta_chips
+       else
+         (prev_slot_chips + delta_chips).round(2)
+       end
 
-     self.chip_am = (chip_am || 0) + chips_earned
+     self.chip_am = (chip_am || 0) + delta_chips
 
      update!(projects: projects, chip_am: chip_am)
    end
@@ -169,8 +182,36 @@ class User < ApplicationRecord
     update!(projects: projects)
   end
 
+  # Keep legacy jsonb `users.projects` in sync when the user removes a shipped-but-not-approved project from the review queue.
+  def unship_project_voluntary_from_queue!(project_index)
+    raw = read_attribute(:projects)
+    return false unless raw.is_a?(Array)
+
+    idx = project_index.to_i
+    return false if idx.negative?
+
+    arr = raw.deep_dup
+    while arr.length <= idx
+      arr << {}
+    end
+
+    slot = arr[idx]
+    slot = slot.is_a?(Hash) ? slot.stringify_keys.dup : {}
+    slot["shipped"] = false
+    slot.delete("shipped_at")
+    slot["status"] = "pending"
+    slot["reviewed"] = false
+    slot.delete("reviewed_at")
+    slot.delete("approved_hours")
+    slot.delete("chips_earned")
+    slot.delete("hour_justification")
+    slot.delete("admin_feedback")
+    arr[idx] = slot
+    update_columns(projects: arr, updated_at: Time.current)
+  end
+
   # Keep legacy jsonb `users.projects` column in sync when a shipped project is rejected (not the has_many :projects association).
-  def unship_project_after_rejection!(project_index, admin_feedback: nil)
+  def unship_project_after_rejection!(project_index, admin_feedback: nil, restore_approved_hours: nil)
     raw = read_attribute(:projects)
     return false unless raw.is_a?(Array)
 
@@ -189,7 +230,11 @@ class User < ApplicationRecord
     slot["status"] = "rejected"
     slot["reviewed"] = false
     slot.delete("reviewed_at")
-    slot.delete("approved_hours")
+    if restore_approved_hours.present?
+      slot["approved_hours"] = restore_approved_hours.to_f
+    else
+      slot.delete("approved_hours")
+    end
     slot.delete("chips_earned")
     slot.delete("hour_justification")
     slot["admin_feedback"] = admin_feedback if admin_feedback.present?

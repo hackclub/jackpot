@@ -229,13 +229,16 @@ class AdminController < ApplicationController
         return
       end
 
-      # Find the project index for this user
-      @project_index = @project_db.position
+      # Index aligned with deck / approve endpoints (ordered slots), not raw position column alone
+      ordered_ids = @user.projects.order(position: :asc).pluck(:id)
+      @project_index = ordered_ids.index(@project_db.id) || @project_db.position
 
       # Get journal entries
       @journal_entries = @project_db.journal_entries || []
       # Use the project's canonical total_hours so combined hours match what users reported
       @total_hours = (@project_db.total_hours || 0).to_f
+      @banked_hours = @project_db.past_approved_hours.to_f
+      @pending_review_hours = @project_db.pending_review_hours
 
       # Project comments (from status page) so admin can see user comments in review
       @project_comments = @project_db.project_comments.includes(:user).order(created_at: :asc)

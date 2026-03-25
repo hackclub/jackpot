@@ -137,6 +137,47 @@ class YswsProjectSubmission < ApplicationRecord
     nil
   end
 
+  def self.automation_first_submitted_airtable_field_name
+    ENV.fetch("AIRTABLE_YSWS_AUTOMATION_FIRST_SUBMITTED_AT_FIELD", "Automation - First Submitted At")
+  end
+
+  def self.parse_airtable_datetime(raw)
+    case raw
+    when Time, ActiveSupport::TimeWithZone
+      raw
+    when Date
+      raw.beginning_of_day.in_time_zone
+    when String
+      Time.zone.parse(raw)
+    else
+      Time.zone.parse(raw.to_s)
+    end
+  rescue ArgumentError, TypeError
+    nil
+  end
+
+  # Filled by Airtable automation after submission to main HC DB; used to block re-ship in Jackpot.
+  def pull_automation_first_submitted_at_from_airtable!
+    aid = airtable_id
+    return if aid.blank?
+
+    token, base_id = self.class.airtable_api_credentials
+    return unless token.present? && base_id.present?
+
+    field = self.class.automation_first_submitted_airtable_field_name
+    tbl = Norairrecord.table(token, base_id, self.class.airtable_shipped_table_name)
+    rec = tbl.find(aid)
+    raw = rec[field]
+    return if raw.blank?
+
+    parsed = self.class.parse_airtable_datetime(raw)
+    return if parsed.blank?
+
+    update_column(:automation_first_submitted_at, parsed) if automation_first_submitted_at != parsed
+  rescue StandardError => e
+    Rails.logger.warn("YswsProjectSubmission##{id} pull automation timestamp: #{e.message}")
+  end
+
   def self.github_from_code_url(code_url)
     return nil if code_url.blank?
 

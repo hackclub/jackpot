@@ -23,6 +23,7 @@ Rails.application.routes.draw do
   get "/deck", to: "deck#index", as: :deck
    post "/deck/save_project", to: "deck#save_project", as: :save_project
    post "/deck/ship_project", to: "deck#ship_project", as: :ship_project
+   post "/deck/unship_project", to: "deck#unship_project", as: :unship_project
    delete "/deck/delete_project", to: "deck#delete_project", as: :delete_project
    post "/deck/complete_tutorial", to: "deck#complete_tutorial", as: :complete_tutorial
    post "/deck/journal_entries", to: "deck#create_journal_entry", as: :create_journal_entry
