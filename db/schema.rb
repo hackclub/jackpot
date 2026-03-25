@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_26_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_163100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -136,7 +136,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_140000) do
     t.decimal "past_approved_hours", precision: 10, scale: 2, default: "0.0", null: false
     t.string "playable_url"
     t.integer "position", default: 0
-    t.decimal "shipping_queue_snapshot_total_hours", precision: 10, scale: 2
     t.string "project_type"
     t.boolean "reviewed", default: false, null: false
     t.datetime "reviewed_at"
@@ -145,6 +144,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_140000) do
     t.string "shipped_airtable_id"
     t.datetime "shipped_at"
     t.date "shipped_synced_at"
+    t.decimal "shipping_queue_snapshot_total_hours", precision: 10, scale: 2
     t.string "status", default: "pending"
     t.date "synced_at"
     t.decimal "total_hours", precision: 10, scale: 2, default: "0.0"
@@ -232,7 +232,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_140000) do
     t.datetime "created_at", null: false
     t.string "item_name", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
+    t.decimal "price_usd_items_snapshot", precision: 10, scale: 2
+    t.decimal "price_usd_shipping_snapshot", precision: 10, scale: 2
+    t.decimal "price_usd_total_snapshot", precision: 10, scale: 2
     t.integer "quantity", default: 1, null: false
+    t.integer "shipping_chips_snapshot", default: 0, null: false
     t.bigint "shop_item_id"
     t.string "slack_id"
     t.string "status", default: "pending", null: false

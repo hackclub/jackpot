@@ -1,0 +1,196 @@
+<% content_for(:title) { "Admin — Shop orders" } %>
+<% content_for(:head) do %>
+  <%= stylesheet_link_tag "admin_shop_orders", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="admin-shop-orders-page">
+  <%= link_to "← Shop catalog & items", admin_shop_path, class: "admin-shop-orders-back" %>
+
+  <h1>Shop orders</h1>
+  <p class="admin-shop-orders-sub">
+    Prices and item names are taken from the order snapshot at purchase time (changing the catalog later does not rewrite history).
+    Pending lines for the same user and same item are combined into one card; if they already had a <strong>fulfilled</strong> order for that item, the new request is labeled as a repeat.
+  </p>
+
+  <div class="admin-shop-orders-top">
+    <%= form_with url: admin_shop_orders_path, method: :get, local: true, class: "admin-shop-orders-filters", id: "adminShopOrdersFilterForm" do %>
+      <div>
+        <label for="filter_status">Status</label><br>
+        <%= select_tag :status,
+          options_for_select(
+            [
+              [ "Pending (queue)", "pending" ],
+              [ "Fulfilled", "sent" ],
+              [ "Rejected / refunded", "refunded" ],
+              [ "All", "all" ]
+            ],
+            @status_filter
+          ),
+          id: "filter_status",
+          onchange: "this.form.submit()" %>
+      </div>
+      <div>
+        <label for="filter_group_by">Group by</label><br>
+        <%= select_tag :group_by,
+          options_for_select(
+            [
+              [ "Flat list", "flat" ],
+              [ "User", "user" ],
+              [ "Item", "item" ]
+            ],
+            @group_by
+          ),
+          id: "filter_group_by",
+          onchange: "this.form.submit()",
+          disabled: @status_filter != "pending",
+          title: (@status_filter != "pending" ? "Grouping applies to the pending queue only." : nil) %>
+      </div>
+    <% end %>
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
+      <% if @status_filter == "pending" %>
+        <span class="admin-shop-orders-count"><%= @pending_card_count %> cards · <%= @pending_line_count %> DB rows</span>
+      <% end %>
+      <% if @shop_purchases_locked %>
+        <span class="admin-shop-orders-lock">Purchases locked</span>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @status_filter == "pending" %>
+    <% if @virtual_cards.blank? %>
+      <p class="asoc-empty">No pending orders.</p>
+    <% elsif @group_by == "user" %>
+      <% @cards_by_user.sort_by { |(uid, _)| uid.to_i }.each do |user_id, cards| %>
+        <% u = cards.first&.user %>
+        <div class="admin-shop-orders-group-title">
+          <%= u&.leaderboard_name || u&.name || "User ##{user_id}" %>
+        </div>
+        <% cards.sort_by { |c| -c.earliest_at.to_i }.each do |card| %>
+          <%= render "virtual_order_card", card: card %>
+        <% end %>
+      <% end %>
+    <% elsif @group_by == "item" %>
+      <% @cards_by_item.sort_by { |_k, list| list.first.item_name.to_s.downcase }.each do |_key, cards| %>
+        <div class="admin-shop-orders-group-title"><%= cards.first.item_name %></div>
+        <% cards.sort_by { |c| -c.earliest_at.to_i }.each do |card| %>
+          <%= render "virtual_order_card", card: card %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <% @virtual_cards.each do |card| %>
+        <%= render "virtual_order_card", card: card %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <div style="overflow-x:auto;">
+      <table class="asoc-history-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>User</th>
+            <th>Item (snapshot)</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @history_orders.blank? %>
+            <tr><td colspan="7" class="asoc-empty" style="border:none;">No orders in this view.</td></tr>
+          <% else %>
+            <% @history_orders.each do |order| %>
+              <tr id="asoc-history-row-<%= order.id %>">
+                <td><%= order.created_at.strftime("%m/%d/%Y %l:%M:%S %p").strip %></td>
+                <td>
+                  <%= order.user&.leaderboard_name || order.user&.name || "—" %><br>
+                  <span style="font-size:0.78rem;color:#8a7a68;"><%= order.user&.email %></span>
+                </td>
+                <td><%= order.item_name %></td>
+                <td><%= order.quantity %></td>
+                <td>
+                  <%= shop_order_chips_and_usd(order) %>
+                  <%= shop_order_usd_breakdown_html(order) %>
+                </td>
+                <td>
+                  <% st = order.status %>
+                  <% pill = case st
+                    when "sent" then { bg: "rgba(76,175,80,0.22)", fg: "#a5d6a7", label: "Fulfilled" }
+                    when "refunded" then { bg: "rgba(239,83,80,0.18)", fg: "#ef9a9a", label: "Rejected" }
+                    else { bg: "rgba(255,193,7,0.2)", fg: "#ffc107", label: st.capitalize }
+                    end %>
+                  <span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.72rem;font-weight:800;background:<%= pill[:bg] %>;color:<%= pill[:fg] %>;border:1px solid rgba(255,255,255,0.08);"><%= pill[:label] %></span>
+                </td>
+                <td>
+                  <div class="asoc-history-actions">
+                    <% if order.status != "sent" %>
+                      <button type="button" data-bulk-status data-order-ids="<%= order.id %>" data-next-status="sent">Fulfilled</button>
+                    <% end %>
+                    <% if order.status != "refunded" %>
+                      <button type="button" data-bulk-status data-order-ids="<%= order.id %>" data-next-status="refunded">Reject</button>
+                    <% end %>
+                    <% if order.status != "pending" %>
+                      <button type="button" data-bulk-status data-order-ids="<%= order.id %>" data-next-status="pending">Pending</button>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <p class="asoc-note">
+    <strong>Reject</strong> restores chips to the participant’s profile (same as the previous admin behavior). The status page lists fulfilled and rejected orders from these snapshots.
+  </p>
+</div>
+
+<script>
+(function() {
+  var csrf = document.querySelector('meta[name="csrf-token"]');
+  var token = csrf ? csrf.content : '';
+
+  function parseIds(raw) {
+    return String(raw || '').split(',').map(function(s) { return parseInt(s, 10); }).filter(function(n) { return n > 0; });
+  }
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-bulk-status]');
+    if (!btn) return;
+    var ids = parseIds(btn.getAttribute('data-order-ids'));
+    var status = btn.getAttribute('data-next-status');
+    var customConfirm = btn.getAttribute('data-confirm');
+    if (!ids.length) { alert('No orders selected.'); return; }
+    if (customConfirm) {
+      if (!window.confirm(customConfirm)) return;
+    } else {
+      var msg = status === 'refunded'
+        ? 'Refund chips and mark these order(s) as rejected?'
+        : (status === 'sent' ? 'Mark these order(s) as fulfilled?' : 'Set these order(s) back to pending?');
+      if (!window.confirm(msg)) return;
+    }
+
+    fetch('<%= admin_shop_bulk_order_status_path %>', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': token,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ order_ids: ids, status: status })
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, d: d }; }); })
+    .then(function(x) {
+      if (x.ok && x.d.success) {
+        window.location.reload();
+      } else {
+        alert(x.d.error || 'Update failed');
+      }
+    })
+    .catch(function(err) { console.error(err); alert('Request failed'); });
+  });
+})();
+</script>

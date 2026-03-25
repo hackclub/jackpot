@@ -984,6 +984,8 @@
     itemModalPurchase.textContent = 'Processing...';
     if (itemModalError) itemModalError.hidden = true;
 
+    var shipChips = Math.max(0, Math.ceil(toNumber(itemModalShipping && itemModalShipping.value)));
+
     fetch('<%= buy_shop_item_path(":id") %>'.replace('%3Aid', itemModalCurrent.id).replace(':id', itemModalCurrent.id), {
       method: 'POST',
       headers: {
@@ -991,7 +993,7 @@
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
         'X-Requested-With': 'XMLHttpRequest'
       },
-      body: JSON.stringify({ quantity: qty })
+      body: JSON.stringify({ quantity: qty, shipping_chips: shipChips })
     })
     .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
     .then(function(result) {
@@ -1081,7 +1083,7 @@
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
           'X-Requested-With': 'XMLHttpRequest'
         },
-        body: JSON.stringify({ quantity: 1 })
+        body: JSON.stringify({ quantity: 1, shipping_chips: 0 })
       })
       .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
       .then(function(result) {

@@ -49,8 +49,13 @@ class ShopController < ApplicationController
     item = ShopItem.active.find(params[:id])
     quantity = params[:quantity].to_i
     quantity = 1 if quantity < 1
+    shipping_chips = params[:shipping_chips].presence || params[:shipping]
+    shipping_chips = shipping_chips.to_i
+    shipping_chips = 0 if shipping_chips.negative?
+    shipping_chips = [ shipping_chips, 500_000 ].min
+
     unit_price = item.price.to_d.ceil
-    total_cost = (unit_price * quantity).to_d
+    total_cost = (unit_price * quantity).to_d + shipping_chips.to_d
     already = current_user.shop_orders.where(shop_item_id: item.id, status: %w[pending sent]).sum(:quantity).to_i
     if item.max_per_person.present? && (already + quantity) > item.max_per_person.to_i
       remaining = [ item.max_per_person.to_i - already, 0 ].max
@@ -77,6 +82,15 @@ class ShopController < ApplicationController
 
       current_user.update!(chip_am: current_user.chip_am.to_d - total_cost)
 
+      items_usd = item.price_usd.to_d * quantity
+      shipping_usd =
+        if shipping_chips.positive? && item.dollar_per_hour.present? && item.dollar_per_hour.to_d.positive?
+          ((shipping_chips.to_d / 50) * item.dollar_per_hour.to_d).round(2)
+        else
+          0.to_d
+        end
+      total_usd = (items_usd + shipping_usd).round(2)
+
       current_user.shop_orders.create!(
         shop_item: item,
         item_name: item.name,
@@ -84,6 +98,10 @@ class ShopController < ApplicationController
         slack_id: current_user.slack_id,
         quantity: quantity,
         price: total_cost,
+        shipping_chips_snapshot: shipping_chips,
+        price_usd_items_snapshot: items_usd,
+        price_usd_shipping_snapshot: shipping_usd,
+        price_usd_total_snapshot: total_usd,
         status: "pending"
       )
     end

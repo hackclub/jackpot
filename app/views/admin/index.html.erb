@@ -17,7 +17,15 @@
         <span class="admin-link-icon">🛒</span>
         <div>
           Shop Admin
-          <span class="admin-link-desc">Manage items and orders</span>
+          <span class="admin-link-desc">Manage catalog, categories, and pricing</span>
+        </div>
+      <% end %>
+
+      <%= link_to admin_shop_orders_path, class: "admin-link" do %>
+        <span class="admin-link-icon">📦</span>
+        <div>
+          Shop orders
+          <span class="admin-link-desc">Fulfillment queue, group by user or item, refunds</span>
         </div>
       <% end %>
 

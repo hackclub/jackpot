@@ -467,6 +467,11 @@
   margin-bottom: 0;
 }
 
+.status-purchase-row .shop-order-usd-breakdown {
+  flex-basis: 100%;
+  margin-top: 4px;
+}
+
 .status-purchase-item-name {
   font-family: Georgia, serif;
   color: #e8ddc8;
