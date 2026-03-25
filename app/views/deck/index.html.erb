@@ -34,6 +34,7 @@
                data-project-reviewed="<%= project["reviewed"] ? "true" : "false" %>"
                data-first-shipped-at="<%= project["first_shipped_at"].to_s %>"
                data-pending-review-hours="<%= project["pending_review_hours"].to_f %>"
+               data-hours-logged-beyond-queue-submission="<%= (project["hours_logged_beyond_queue_submission"] || 0).to_f %>"
                data-reshippable="<%= project["reshippable"] ? "true" : "false" %>"
                data-main-hc-reship-locked="<%= project["main_hc_reship_locked"] ? "true" : "false" %>"
                data-playable-url="<%= project["playable_url"] %>"
@@ -788,8 +789,10 @@ function initDeck() {
      var pendingHrsModal = parseFloat(data.pendingReviewHours, 10);
      if (isNaN(pendingHrsModal)) pendingHrsModal = 0;
      var showShipUpdateLocked = isShipped && data.status === 'approved' && pendingHrsModal > 0 && mainHcLocked;
+     var hoursBeyondQueue = parseFloat(data.hoursLoggedBeyondQueueSubmission || 0, 10) || 0;
+     var pendingQueueShipUpdate = isShipped && data.status === 'in-review' && data.reviewed !== 'true' && hoursBeyondQueue > 1e-6;
      var canUnship = isShipped && data.status === 'in-review' && data.reviewed !== 'true';
-     var showShipBtn = !isShipped || canReship || showShipUpdateLocked;
+     var showShipBtn = !isShipped || canReship || showShipUpdateLocked || pendingQueueShipUpdate;
 
      if (detailUnshippedHoursRow && detailUnshippedHours) {
        var pr = parseFloat(data.pendingReviewHours, 10);
@@ -810,9 +813,9 @@ function initDeck() {
        } else {
          detailShipBtn.style.opacity = '';
          detailShipBtn.style.cursor = '';
-         detailShipBtn.title = '';
+         detailShipBtn.title = pendingQueueShipUpdate ? 'Add new logged hours to your pending submission and move to the back of the review queue' : '';
          detailShipBtn.style.display = showShipBtn ? 'inline-block' : 'none';
-         detailShipBtn.textContent = canReship ? 'Ship update' : 'Ship It';
+         detailShipBtn.textContent = (pendingQueueShipUpdate || canReship) ? 'Ship update' : 'Ship It';
        }
      }
      if (detailUnshipBtn) detailUnshipBtn.style.display = canUnship ? 'inline-block' : 'none';
@@ -993,6 +996,14 @@ function initDeck() {
          return;
        }
 
+       var beyondQ = parseFloat(currentDetailData.hoursLoggedBeyondQueueSubmission || 0, 10) || 0;
+       if (currentDetailData.shipped === 'true' && currentDetailData.status === 'in-review' && currentDetailData.reviewed !== 'true') {
+         if (beyondQ <= 1e-6) {
+           alert('Log more hours on this project, then use Ship update to add them to your pending submission and move it to the back of the queue.');
+           return;
+         }
+       }
+
        if (!detailPlayableUrl.value.trim()) {
          alert('Playable URL is required to ship');
          return;
@@ -1131,6 +1142,7 @@ function initDeck() {
         reviewed: card.dataset.projectReviewed || 'false',
         firstShippedAt: card.dataset.firstShippedAt || '',
         pendingReviewHours: card.dataset.pendingReviewHours || '0',
+        hoursLoggedBeyondQueueSubmission: card.dataset.hoursLoggedBeyondQueueSubmission || '0',
         reshippable: card.dataset.reshippable || 'false',
         mainHcReshipLocked: card.dataset.mainHcReshipLocked || 'false',
         playableUrl: card.dataset.playableUrl,

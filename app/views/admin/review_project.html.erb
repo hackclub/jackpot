@@ -505,6 +505,11 @@
 
         <div class="project-status-section">
           <div class="project-status-title">Time Tracking</div>
+          <% if @project_db.shipped? && @project_db.status.to_s == "in-review" && !@project_db.reviewed? && @hours_beyond_submission > 0.02 %>
+            <p style="font-size: 0.85rem; color: #c9a227; margin-bottom: 0.75rem; line-height: 1.45;">
+              Participant has logged <strong><%= @hours_beyond_submission.round(2) %></strong> h since the last Ship update. That time is <strong>not</strong> part of this queued submission until they tap Ship update (which also moves them to the back of the queue).
+            </p>
+          <% end %>
           <table class="time-tracking-table">
             <thead>
               <tr>
@@ -516,9 +521,9 @@
             <tbody>
               <tr>
                 <td><%= @project["name"] %></td>
-                <td><%= @total_hours.to_f.round(2) %></td>
+                <td><%= @all_logged_total_hours.round(2) %></td>
                 <td rowspan="3" class="hours-approved" style="vertical-align: middle;">
-                  <div style="font-size: 0.75rem; color: #a08030; margin-bottom: 0.35rem;">Previously banked: <strong><%= @banked_hours.round(2) %></strong> h · Pending this round: <strong><%= @pending_review_hours.round(2) %></strong> h max</div>
+                  <div style="font-size: 0.75rem; color: #a08030; margin-bottom: 0.35rem;">Previously banked: <strong><%= @banked_hours.round(2) %></strong> h · Pending this round (capped to queued submission): <strong><%= @pending_review_hours.round(2) %></strong> h max</div>
                   <input type="number" class="review-hours-input" value="<%= @pending_review_hours.to_f.round(2) %>" step="0.5" min="0" max="<%= @pending_review_hours.to_f.round(2) %>" style="width: 100%; background: transparent; border: 1px solid #8b6914; color: #d4a017; padding: 0.3rem;">
                 </td>
               </tr>
@@ -528,7 +533,7 @@
               </tr>
               <tr>
                 <td><strong>Total</strong></td>
-                <td><%= @total_hours.to_f.round(2) %></td>
+                <td><%= @all_logged_total_hours.round(2) %></td>
               </tr>
             </tbody>
           </table>

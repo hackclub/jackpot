@@ -235,8 +235,8 @@ class AdminController < ApplicationController
 
       # Get journal entries
       @journal_entries = @project_db.journal_entries || []
-      # Use the project's canonical total_hours so combined hours match what users reported
-      @total_hours = (@project_db.total_hours || 0).to_f
+      @all_logged_total_hours = (@project_db.total_hours || 0).to_f
+      @hours_beyond_submission = @project_db.hours_logged_beyond_current_queue_submission.to_f
       @banked_hours = @project_db.past_approved_hours.to_f
       @pending_review_hours = @project_db.pending_review_hours
 

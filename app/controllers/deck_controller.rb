@@ -44,6 +44,12 @@ class DeckController < ApplicationController
        project.update_column(:total_hours, total_hours) if project.total_hours != total_hours
        Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
+       if project.shipped? && project.status.to_s == "in-review" && !project.reviewed? &&
+           project.read_attribute(:shipping_queue_snapshot_total_hours).blank?
+         project.update_column(:shipping_queue_snapshot_total_hours, total_hours)
+         project.reload
+       end
+
        pending_review = project.pending_review_hours
        project_hash = {
          "id" => project.id,
@@ -58,6 +64,7 @@ class DeckController < ApplicationController
          "hackatime_hours" => hackatime_hours,
          "journal_hours" => journal_hours,
          "pending_review_hours" => pending_review,
+         "hours_logged_beyond_queue_submission" => project.hours_logged_beyond_current_queue_submission.to_f,
          "past_approved_hours" => project.past_approved_hours.to_f,
          "first_shipped_at" => project.first_shipped_at&.iso8601,
          "reshippable" => project.reshippable?,
@@ -196,6 +203,57 @@ class DeckController < ApplicationController
     project = current_user.projects.order(position: :asc)[project_index]
 
     if project
+      refresh_logged_totals_for_project!(project, current_user)
+      project.reload
+
+      # Pending in queue: Ship update commits new logged time into this submission and moves to the back of the queue.
+      if project.shipped? && project.status.to_s == "in-review" && !project.reviewed?
+        if project.read_attribute(:shipping_queue_snapshot_total_hours).blank?
+          project.update_column(:shipping_queue_snapshot_total_hours, project.total_hours.to_f)
+          project.reload
+        end
+        if project.playable_url.blank? || project.code_url.blank? || project.banner_url.blank? || project.github_username.blank?
+          if request.xhr?
+            return render json: { error: "Playable URL, Code URL, GitHub username, and Banner image are required to ship" }, status: :unprocessable_entity
+          else
+            flash[:alert] = "Playable URL, Code URL, GitHub username, and Banner image are required to ship"
+            return redirect_to deck_path
+          end
+        end
+        if project.total_hours.to_f <= 1e-6
+          if request.xhr?
+            return render json: { error: ZERO_HOURS_SHIP_MSG }, status: :unprocessable_entity
+          else
+            flash[:alert] = ZERO_HOURS_SHIP_MSG
+            return redirect_to deck_path
+          end
+        end
+        if project.hours_logged_beyond_current_queue_submission <= 1e-6
+          msg = "Log more hours on this project, then use Ship update to add them to your pending submission and move it to the back of the queue."
+          if request.xhr?
+            return render json: { error: msg }, status: :unprocessable_entity
+          else
+            flash[:alert] = msg
+            return redirect_to deck_path
+          end
+        end
+        project.move_to_last_deck_position!
+        project.reload
+        project.update!(
+          shipped: true,
+          status: "in-review",
+          shipped_at: Time.current,
+          shipping_queue_snapshot_total_hours: project.total_hours.to_f
+        )
+        project.ysws_project_submission&.update_columns(ship_status: "Pending", updated_at: Time.current)
+
+        if request.xhr?
+          return render json: { success: true }
+        else
+          return redirect_to deck_path
+        end
+      end
+
       if project.total_hours.to_f <= 1e-6
         if request.xhr?
           return render json: { error: ZERO_HOURS_SHIP_MSG }, status: :unprocessable_entity
@@ -206,15 +264,6 @@ class DeckController < ApplicationController
       end
 
       if project.shipped? && project.status.to_s != "rejected"
-        if project.status.to_s == "in-review"
-          msg = "This project is already waiting for review."
-          if request.xhr?
-            return render json: { error: msg }, status: :unprocessable_entity
-          else
-            flash[:alert] = msg
-            return redirect_to deck_path
-          end
-        end
         if project.reviewed? && project.status.to_s == "approved"
           if project.pending_review_hours > 1e-6 && project.reship_blocked_by_main_hc_database?
             if request.xhr?
@@ -279,7 +328,8 @@ class DeckController < ApplicationController
         shipped: true,
         status: "in-review",
         shipped_at: now,
-        first_shipped_at: project.first_shipped_at || now
+        first_shipped_at: project.first_shipped_at || now,
+        shipping_queue_snapshot_total_hours: project.total_hours.to_f
       }
       if reship_from_approved
         attrs.merge!(
@@ -651,6 +701,22 @@ class DeckController < ApplicationController
   end
 
   private
+
+  def refresh_logged_totals_for_project!(project, user)
+    service = HackatimeService.new
+    start_date = Date.new(2026, 2, 14)
+    hackatime_id = user.slack_id || user.hack_club_id
+    linked = project.hackatime_projects || []
+    hackatime_hours_raw = linked.sum do |hp_name|
+      (service.get_project_hours(hackatime_id, hp_name, start_date: start_date) || 0).to_f
+    end
+    hackatime_hours = hackatime_hours_raw.round
+    project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours != hackatime_hours
+
+    journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
+    total = hackatime_hours + journal_hours
+    project.update_column(:total_hours, total) if project.total_hours != total
+  end
 
   def hackatime_first_conflict_with_other_project(user, exclude_project_id, names)
     norm = Array(names).map { |s| s.to_s.strip.downcase }.reject(&:blank?)

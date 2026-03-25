@@ -87,12 +87,20 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     # In review (or other non-approved shipped states): no duplicate row — same YSWS record, status Pending.
     parts = []
     banked = project.past_approved_hours.to_f
-    raw = project.total_hours.to_f
+    all_logged = project.total_hours.to_f
+    basis = project.total_hours_basis_for_queue_review.to_f
     pending = project.pending_review_hours
-    parts << "Total logged (Hackatime + journal): #{format_hours_justification(raw)} h."
+    beyond = project.hours_logged_beyond_current_queue_submission.to_f
+
+    parts << "Submission total (Hackatime + journal, as of last ship / Ship update): #{format_hours_justification(basis)} h."
+    if beyond > 0.02
+      parts << "Additional time logged since then (#{format_hours_justification(beyond)} h) is not part of this submission until they tap Ship update."
+    elsif (all_logged - basis).abs > 0.02
+      parts << "Current all-time logged on deck: #{format_hours_justification(all_logged)} h."
+    end
     if banked.positive?
       parts << "Total hours already approved (banked): #{format_hours_justification(banked)} h."
-      parts << "Hours in scope for this review round (logged minus banked): #{format_hours_justification(pending)} h."
+      parts << "Hours in scope for this review round (submission total minus banked): #{format_hours_justification(pending)} h."
     else
       parts << "Hours in scope for this review (no prior approval on this project): #{format_hours_justification(pending)} h."
     end

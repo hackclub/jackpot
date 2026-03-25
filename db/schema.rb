@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_26_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -144,6 +144,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_120000) do
     t.string "shipped_airtable_id"
     t.datetime "shipped_at"
     t.date "shipped_synced_at"
+    t.decimal "shipping_queue_snapshot_total_hours", precision: 10, scale: 2
     t.string "status", default: "pending"
     t.date "synced_at"
     t.decimal "total_hours", precision: 10, scale: 2, default: "0.0"
