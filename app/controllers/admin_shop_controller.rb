@@ -19,8 +19,10 @@ class AdminShopController < ApplicationController
     @shop_purchases_locked = shop_purchases_locked?
     @status_filter = params[:status].presence_in(%w[pending sent refunded all]) || "pending"
     @group_by = params[:group_by].presence_in(%w[flat user item]) || "flat"
+    @pending_sort = %w[asc desc].include?(params[:pending_sort].to_s) ? params[:pending_sort] : "desc"
 
     pending_cards = AdminShop::VirtualOrderCards.pending_cards
+    AdminShop::VirtualOrderCards.sort_cards_by_queue_time!(pending_cards, @pending_sort)
     @pending_card_count = pending_cards.size
     @pending_line_count = ShopOrder.pending.count
 

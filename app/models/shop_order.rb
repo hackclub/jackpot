@@ -19,7 +19,14 @@ class ShopOrder < ApplicationRecord
   scope :refunded, -> { where(status: "refunded") }
 
   def usd_items_at_purchase
-    read_attribute(:price_usd_items_snapshot).presence || price_usd_total_snapshot
+    items = read_attribute(:price_usd_items_snapshot)
+    return items.to_d if items.present?
+
+    total = read_attribute(:price_usd_total_snapshot)
+    return 0.to_d if total.blank?
+
+    ship = read_attribute(:price_usd_shipping_snapshot).to_d
+    [ total.to_d - ship, 0.to_d ].max
   end
 
   def usd_shipping_at_purchase
@@ -27,13 +34,19 @@ class ShopOrder < ApplicationRecord
   end
 
   def usd_total_at_purchase
-    price_usd_total_snapshot.to_d
+    snap = read_attribute(:price_usd_total_snapshot)
+    return snap.to_d if snap.present?
+
+    items = read_attribute(:price_usd_items_snapshot)
+    ship = read_attribute(:price_usd_shipping_snapshot)
+    combined = items.to_d + ship.to_d
+    combined.positive? ? combined : 0.to_d
   end
 
   # Multi-line copy for admin / status (amounts in USD at checkout).
   def usd_amount_description
     total = usd_total_at_purchase
-    return "" if total.blank? || total <= 0
+    return "" if total <= 0
 
     items = usd_items_at_purchase.to_d
     ship = usd_shipping_at_purchase

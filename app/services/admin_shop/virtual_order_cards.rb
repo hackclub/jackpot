@@ -17,6 +17,8 @@ module AdminShop
       :usd_total,
       :already_repeat,
       :earliest_at,
+      # Last pending row time for this user+item (re-order same item bumps this → back of queue when oldest-first).
+      :latest_at,
       keyword_init: true
     )
 
@@ -54,13 +56,22 @@ module AdminShop
           shop_item_id: first.shop_item_id,
           quantity: group.sum(&:quantity),
           chip_total: group.sum { |o| o.price.to_d },
-          usd_items: group.sum { |o| (o.price_usd_items_snapshot.presence || o.price_usd_total_snapshot || 0).to_d },
-          usd_shipping: group.sum { |o| (o.price_usd_shipping_snapshot || 0).to_d },
-          usd_total: group.sum { |o| (o.price_usd_total_snapshot || 0).to_d },
+          usd_items: group.sum { |o| o.usd_items_at_purchase.to_d },
+          usd_shipping: group.sum { |o| o.usd_shipping_at_purchase.to_d },
+          usd_total: group.sum { |o| o.usd_total_at_purchase.to_d },
           already_repeat: sent[uid].include?(k),
-          earliest_at: group.map(&:created_at).min
+          earliest_at: group.map(&:created_at).min,
+          latest_at: group.map(&:created_at).max
         )
-      end.sort_by { |c| -c.earliest_at.to_i }
+      end
+    end
+
+    # Same pattern as admin review `ship_sort`: asc = oldest first, desc = newest first.
+    # Order uses `latest_at` so an extra pending line for the same user+item moves the card like a new ship update.
+    def sort_cards_by_queue_time!(cards, direction)
+      dir = direction.to_s == "asc" ? :asc : :desc
+      cards.sort_by! { |c| dir == :asc ? c.latest_at.to_i : -c.latest_at.to_i }
+      cards
     end
 
     def group_cards_by_item(cards)

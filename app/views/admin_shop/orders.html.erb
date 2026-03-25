@@ -10,6 +10,7 @@
   <p class="admin-shop-orders-sub">
     Prices and item names are taken from the order snapshot at purchase time (changing the catalog later does not rewrite history).
     Pending lines for the same user and same item are combined into one card; if they already had a <strong>fulfilled</strong> order for that item, the new request is labeled as a repeat.
+    Queue order uses the <strong>latest</strong> pending row for that card (same idea as shipping): ordering oldest-first, buying the same item again moves that card to the back.
   </p>
 
   <div class="admin-shop-orders-top">
@@ -45,6 +46,22 @@
           disabled: @status_filter != "pending",
           title: (@status_filter != "pending" ? "Grouping applies to the pending queue only." : nil) %>
       </div>
+      <div class="admin-shop-orders-queue-sort">
+        <label for="filter_pending_sort">Queue order</label><br>
+        <%= select_tag :pending_sort,
+          options_for_select(
+            [
+              [ "Oldest first", "asc" ],
+              [ "Newest first", "desc" ]
+            ],
+            @pending_sort
+          ),
+          id: "filter_pending_sort",
+          onchange: "this.form.submit()",
+          disabled: @status_filter != "pending",
+          title: (@status_filter != "pending" ? "Queue order applies to the pending list only." : nil),
+          aria: { label: "Sort pending queue by last activity on each card" } %>
+      </div>
     <% end %>
     <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
       <% if @status_filter == "pending" %>
@@ -65,14 +82,15 @@
         <div class="admin-shop-orders-group-title">
           <%= u&.leaderboard_name || u&.name || "User ##{user_id}" %>
         </div>
-        <% cards.sort_by { |c| -c.earliest_at.to_i }.each do |card| %>
+        <% cards.each do |card| %>
           <%= render "virtual_order_card", card: card %>
         <% end %>
       <% end %>
     <% elsif @group_by == "item" %>
       <% @cards_by_item.sort_by { |_k, list| list.first.item_name.to_s.downcase }.each do |_key, cards| %>
         <div class="admin-shop-orders-group-title"><%= cards.first.item_name %></div>
-        <% cards.sort_by { |c| -c.earliest_at.to_i }.each do |card| %>
+        <% AdminShop::VirtualOrderCards.sort_cards_by_queue_time!(cards, @pending_sort) %>
+        <% cards.each do |card| %>
           <%= render "virtual_order_card", card: card %>
         <% end %>
       <% end %>
