@@ -1019,6 +1019,48 @@
   flex-shrink: 0;
 }
 
+.project-detail-form-actions {
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.project-detail-actions-start {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.detail-unshipped-hours-inline {
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: auto;
+  text-align: right;
+  min-width: 5.5rem;
+}
+
+.detail-unshipped-hours-label {
+  font-family: 'Georgia', serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1a4538;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.88;
+}
+
+.detail-unshipped-hours-value {
+  font-family: 'Georgia', serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #2c4a3e;
+  line-height: 1.15;
+}
+
 .project-history-btn {
   order: -1;
 }
@@ -1134,6 +1176,7 @@
   cursor: default;
   border-bottom-color: rgba(139, 37, 0, 0.4);
   color: #8b2500;
+  opacity: 0.65;
 }
 
 .detail-journal-row {
@@ -1171,6 +1214,21 @@
   background: rgba(234, 225, 200, 0.95);
 }
 
+.detail-description-edit[readonly],
+.detail-url-input[readonly] {
+  opacity: 0.62;
+  cursor: not-allowed;
+  background: rgba(234, 225, 200, 0.42);
+  border-color: rgba(44, 60, 58, 0.42);
+}
+
+.detail-description-edit[readonly]:focus,
+.detail-url-input[readonly]:focus {
+  background: rgba(234, 225, 200, 0.48);
+  box-shadow: none;
+  border-color: rgba(44, 60, 58, 0.5);
+}
+
 .banner-upload-area {
   width: 100%;
   min-height: 120px;
@@ -1183,6 +1241,16 @@
 }
 .banner-upload-area:hover {
   border-color: #d4a017;
+}
+
+.banner-upload-area--locked {
+  opacity: 0.58;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.banner-upload-area--locked:hover {
+  border-color: #2c3c3a;
 }
 .banner-preview {
   width: 100%;

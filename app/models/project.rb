@@ -22,9 +22,28 @@ class Project < ApplicationRecord
   # Shipped rows that count as “the same repo already in the queue” (not displaced by a rejected resubmit).
   ACTIVE_SHIP_QUEUE_STATUSES = %w[in-review approved].freeze
 
+  # While waiting for review, only hours captured at the last ship / "Ship update" count toward this submission.
+  # Additional Hackatime/journal time is ignored until the participant taps Ship update again.
+  def total_hours_basis_for_queue_review
+    if shipped? && status.to_s == "in-review" && !reviewed? &&
+        read_attribute(:shipping_queue_snapshot_total_hours).present?
+      shipping_queue_snapshot_total_hours.to_f
+    else
+      total_hours.to_f
+    end
+  end
+
+  def hours_logged_beyond_current_queue_submission
+    return 0.0 unless shipped? && status.to_s == "in-review" && !reviewed?
+    return 0.0 if read_attribute(:shipping_queue_snapshot_total_hours).blank?
+
+    extra = total_hours.to_f - shipping_queue_snapshot_total_hours.to_f
+    extra.negative? ? 0.0 : extra
+  end
+
   # Hours not yet covered by an approval (for display / admin review of new work).
   def pending_review_hours
-    raw = total_hours.to_f - past_approved_hours.to_f
+    raw = total_hours_basis_for_queue_review - past_approved_hours.to_f
     raw.negative? ? 0.0 : raw
   end
 
@@ -140,6 +159,7 @@ class Project < ApplicationRecord
       approver_display_name: nil,
       approved_hours: nil,
       past_approved_hours: 0,
+      shipping_queue_snapshot_total_hours: nil,
       chips_earned: nil,
       hour_justification: nil,
       admin_feedback: combined_feedback
@@ -177,7 +197,8 @@ class Project < ApplicationRecord
       approved_hours: nil,
       chips_earned: nil,
       hour_justification: nil,
-      admin_feedback: nil
+      admin_feedback: nil,
+      shipping_queue_snapshot_total_hours: nil
     }
 
     if submission
@@ -207,7 +228,8 @@ class Project < ApplicationRecord
       approver_display_name: nil,
       admin_feedback: admin_feedback,
       approved_hours: banked.positive? ? banked : nil,
-      hour_justification: nil
+      hour_justification: nil,
+      shipping_queue_snapshot_total_hours: nil
     }
 
     if submission
