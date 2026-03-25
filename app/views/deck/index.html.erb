@@ -32,6 +32,9 @@
                data-project-shipped="<%= project["shipped"] ? "true" : "false" %>"
                data-project-status="<%= project["status"].to_s %>"
                data-project-reviewed="<%= project["reviewed"] ? "true" : "false" %>"
+               data-first-shipped-at="<%= project["first_shipped_at"].to_s %>"
+               data-pending-review-hours="<%= project["pending_review_hours"].to_f %>"
+               data-reshippable="<%= project["reshippable"] ? "true" : "false" %>"
                data-playable-url="<%= project["playable_url"] %>"
                data-code-url="<%= project["code_url"] %>"
                data-github-username="<%= project["github_username"].to_s %>"
@@ -222,6 +225,11 @@
             <span class="detail-label">Hackatime</span>
             <span class="detail-value" id="detailHackatime">—</span>
           </div>
+
+         <div class="detail-stat-row" id="detailUnshippedHoursRow" style="display: none;">
+           <span class="detail-label">Unshipped hours</span>
+           <span class="detail-value" id="detailUnshippedHours">0.0</span>
+         </div>
          
          <div class="detail-stat-row" id="detailShippedRow" style="display: none;">
            <span class="detail-label">Status</span>
@@ -657,8 +665,18 @@ function initDeck() {
    var bannerPlaceholder = document.getElementById('bannerPlaceholder');
    var bannerFileInput = document.getElementById('bannerFileInput');
    var detailBannerRow = document.getElementById('detailBannerRow');
+   var detailUnshippedHoursRow = document.getElementById('detailUnshippedHoursRow');
+   var detailUnshippedHours = document.getElementById('detailUnshippedHours');
    var currentBannerUrl = '';
    var currentDetailData = null;
+
+   function detailCanEditPlayableBanner() {
+     if (!currentDetailData) return false;
+     if (currentDetailData.shipped !== 'true') return true;
+     var locked = currentDetailData.firstShippedAt && String(currentDetailData.firstShippedAt).trim().length > 0;
+     var st = currentDetailData.status || '';
+     return locked && (st === 'approved' || st === 'in-review');
+   }
 
    function loadDetailJournalEntries(projectId) {
      if (!detailJournalEntriesList) return;
@@ -724,17 +742,48 @@ function initDeck() {
      }
 
      var isShipped = data.shipped === 'true';
+     var lockedAfterShip = !!(data.firstShippedAt && String(data.firstShippedAt).trim().length > 0);
+     var canReship = data.reshippable === 'true';
      var canUnship = isShipped && data.status === 'in-review' && data.reviewed !== 'true';
+     var showShipBtn = !isShipped || canReship;
+
+     if (detailUnshippedHoursRow && detailUnshippedHours) {
+       var pr = parseFloat(data.pendingReviewHours, 10);
+       if (isNaN(pr)) pr = 0;
+       detailUnshippedHours.textContent = pr.toFixed(1);
+       detailUnshippedHoursRow.style.display = (lockedAfterShip || isShipped) ? 'flex' : 'none';
+     }
+
      detailShippedRow.style.display = isShipped ? 'flex' : 'none';
-     detailShipBtn.style.display = isShipped ? 'none' : 'inline-block';
+     if (detailShipBtn) {
+       detailShipBtn.style.display = showShipBtn ? 'inline-block' : 'none';
+       detailShipBtn.textContent = canReship ? 'Ship update' : 'Ship It';
+     }
      if (detailUnshipBtn) detailUnshipBtn.style.display = canUnship ? 'inline-block' : 'none';
      detailDeleteBtn.style.display = isShipped ? 'none' : 'inline-block';
      detailSaveBtn.style.display = 'none';
-     if (detailBannerRow) detailBannerRow.style.display = isShipped ? 'none' : 'flex';
-     if (detailGithubRow) detailGithubRow.style.display = isShipped ? 'none' : 'flex';
+
+     if (lockedAfterShip) {
+       if (detailBannerRow) detailBannerRow.style.display = 'flex';
+       if (detailGithubRow) detailGithubRow.style.display = 'flex';
+       if (detailCodeRow) detailCodeRow.style.display = 'flex';
+       if (detailPlayableRow) detailPlayableRow.style.display = 'flex';
+       if (detailCodeUrl) detailCodeUrl.readOnly = true;
+       if (detailGithubUsername) detailGithubUsername.readOnly = true;
+       if (detailDescription) detailDescription.readOnly = true;
+     } else {
+       if (detailCodeUrl) detailCodeUrl.readOnly = false;
+       if (detailGithubUsername) detailGithubUsername.readOnly = false;
+       if (detailDescription) detailDescription.readOnly = false;
+       if (detailBannerRow) detailBannerRow.style.display = isShipped ? 'none' : 'flex';
+       if (detailGithubRow) detailGithubRow.style.display = isShipped ? 'none' : 'flex';
+       if (detailCodeRow) detailCodeRow.style.display = isShipped ? 'none' : 'flex';
+       if (detailPlayableRow) detailPlayableRow.style.display = 'flex';
+     }
+
      if (detailTitle) {
-       detailTitle.readOnly = isShipped;
-       detailTitle.classList.toggle('modal-title-input--readonly', isShipped);
+       detailTitle.readOnly = false;
+       detailTitle.classList.toggle('modal-title-input--readonly', false);
      }
      if (detailMainPanel) detailMainPanel.hidden = false;
      
@@ -756,7 +805,8 @@ function initDeck() {
    }
 
    function showSaveBtn() {
-     if (detailSaveBtn && currentDetailData && currentDetailData.shipped !== 'true') {
+     if (!detailSaveBtn || !currentDetailData) return;
+     if (currentDetailData.shipped !== 'true' || detailCanEditPlayableBanner()) {
        detailSaveBtn.style.display = 'inline-block';
      }
    }
@@ -804,7 +854,9 @@ function initDeck() {
 
    if (bannerUploadArea) {
      bannerUploadArea.addEventListener('click', function() {
-       if (currentDetailData && currentDetailData.shipped !== 'true') bannerFileInput.click();
+       if (detailCanEditPlayableBanner() || (currentDetailData && currentDetailData.shipped !== 'true')) {
+         bannerFileInput.click();
+       }
      });
      bannerUploadArea.addEventListener('dragover', function(e) {
        e.preventDefault();
@@ -816,7 +868,9 @@ function initDeck() {
      bannerUploadArea.addEventListener('drop', function(e) {
        e.preventDefault();
        bannerUploadArea.style.borderColor = '';
-       if (e.dataTransfer.files.length > 0) uploadBannerFile(e.dataTransfer.files[0]);
+       if (e.dataTransfer.files.length > 0 && (detailCanEditPlayableBanner() || (currentDetailData && currentDetailData.shipped !== 'true'))) {
+         uploadBannerFile(e.dataTransfer.files[0]);
+       }
      });
    }
    if (bannerFileInput) {
@@ -1008,6 +1062,9 @@ function initDeck() {
         shipped: card.dataset.projectShipped,
         status: card.dataset.projectStatus || '',
         reviewed: card.dataset.projectReviewed || 'false',
+        firstShippedAt: card.dataset.firstShippedAt || '',
+        pendingReviewHours: card.dataset.pendingReviewHours || '0',
+        reshippable: card.dataset.reshippable || 'false',
         playableUrl: card.dataset.playableUrl,
         codeUrl: card.dataset.codeUrl,
         githubUsername: card.dataset.githubUsername,

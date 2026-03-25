@@ -31,6 +31,7 @@ class DeckController < ApplicationController
        project.update_column(:total_hours, total_hours) if project.total_hours != total_hours
        Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
+       pending_review = project.pending_review_hours
        project_hash = {
          "id" => project.id,
          "name" => project.name,
@@ -43,6 +44,10 @@ class DeckController < ApplicationController
          "hours" => total_hours,
          "hackatime_hours" => hackatime_hours,
          "journal_hours" => journal_hours,
+         "pending_review_hours" => pending_review,
+         "past_approved_hours" => project.past_approved_hours.to_f,
+         "first_shipped_at" => project.first_shipped_at&.iso8601,
+         "reshippable" => project.reshippable?,
          "shipped" => project.shipped,
          "shipped_at" => project.shipped_at&.iso8601,
          "status" => project.status,
@@ -97,16 +102,25 @@ class DeckController < ApplicationController
     if params[:project_index].present? && project_index >= 0
       project = current_user.projects.order(position: :asc)[project_index]
       if project
-        project.update!(
-          name: project_name.presence || "Project #{projects_count + 1}",
-          description: project_description,
-          project_type: project_type,
-          playable_url: playable_url,
-          code_url: code_url,
-          github_username: github_username,
-          banner_url: banner_url,
-          hackatime_projects: hackatime_projects
-        )
+        base_name = project_name.presence || "Project #{projects_count + 1}"
+        if project.first_shipped_at.present?
+          project.update!(
+            name: base_name,
+            playable_url: playable_url,
+            banner_url: banner_url
+          )
+        else
+          project.update!(
+            name: base_name,
+            description: project_description,
+            project_type: project_type,
+            playable_url: playable_url,
+            code_url: code_url,
+            github_username: github_username,
+            banner_url: banner_url,
+            hackatime_projects: hackatime_projects
+          )
+        end
       end
     end
 
@@ -145,6 +159,27 @@ class DeckController < ApplicationController
     project = current_user.projects.order(position: :asc)[project_index]
 
     if project
+      if project.shipped? && project.status.to_s != "rejected"
+        if project.status.to_s == "in-review"
+          msg = "This project is already waiting for review."
+          if request.xhr?
+            return render json: { error: msg }, status: :unprocessable_entity
+          else
+            flash[:alert] = msg
+            return redirect_to deck_path
+          end
+        end
+        if project.reviewed? && project.status.to_s == "approved" && !project.reshippable?
+          msg = "Log more time (beyond what was already approved) before shipping an update."
+          if request.xhr?
+            return render json: { error: msg }, status: :unprocessable_entity
+          else
+            flash[:alert] = msg
+            return redirect_to deck_path
+          end
+        end
+      end
+
       if project.playable_url.blank? || project.code_url.blank? || project.banner_url.blank? || project.github_username.blank?
         if request.xhr?
           return render json: { error: "Playable URL, Code URL, GitHub username, and Banner image are required to ship" }, status: :unprocessable_entity
@@ -154,36 +189,56 @@ class DeckController < ApplicationController
         end
       end
 
-      repo_key = Project.github_repository_key(project.code_url)
-      if repo_key.present?
-        if project.status.to_s == "rejected"
-          # Only for a returned project: clear stale ship rows and replace any active queue entry for this repo.
-          project.clear_stale_ysws_submission_if_any!
-          project.displace_conflicting_shipped_same_repo!
-        else
-          conflict = current_user.projects.shipped.where.not(id: project.id).detect do |p|
-            Project.github_repository_key(p.code_url) == repo_key &&
-              Project::ACTIVE_SHIP_QUEUE_STATUSES.include?(p.status.to_s)
-          end
-          if conflict
-            msg = "Another project (“#{conflict.name}”) is already in the review queue with this GitHub repository. You can’t submit the same repo again while that review is pending or approved."
-            if request.xhr?
-              return render json: { error: msg }, status: :unprocessable_entity
-            else
-              flash[:alert] = msg
-              return redirect_to deck_path
-            end
+      reship_from_approved = project.shipped? && project.reviewed? && project.status.to_s == "approved" && project.reshippable?
+
+      if project.status.to_s == "rejected"
+        project.clear_stale_ysws_submission_if_any!
+        project.displace_conflicting_shipped_same_repo!
+      else
+        conflict = current_user.projects.shipped.where.not(id: project.id).detect do |p|
+          project.ship_queue_conflict?(p) &&
+            Project::ACTIVE_SHIP_QUEUE_STATUSES.include?(p.status.to_s)
+        end
+        if conflict
+          msg = "Another project (“#{conflict.name}”) is already in the review queue with the same Hackatime link or GitHub repository. Wait for that review or use a different project."
+          if request.xhr?
+            return render json: { error: msg }, status: :unprocessable_entity
+          else
+            flash[:alert] = msg
+            return redirect_to deck_path
           end
         end
       end
 
-      project.reload if repo_key.present? && project.status.to_s == "rejected"
+      project.reload if project.status.to_s == "rejected"
 
-      project.update!(
+      if reship_from_approved
+        project.displace_conflicting_shipped_same_repo!
+        project.move_to_last_deck_position!
+        project.reload
+      end
+
+      now = Time.current
+      attrs = {
         shipped: true,
         status: "in-review",
-        shipped_at: Time.current
-      )
+        shipped_at: now,
+        first_shipped_at: project.first_shipped_at || now
+      }
+      if reship_from_approved
+        attrs.merge!(
+          reviewed: false,
+          reviewed_at: nil,
+          reviewed_by_user_id: nil,
+          approver_display_name: nil,
+          approved_hours: nil,
+          hour_justification: nil,
+          admin_feedback: nil
+        )
+      end
+
+      project.update!(attrs)
+      project.ysws_project_submission&.update_columns(ship_status: "Pending", updated_at: Time.current)
     end
 
     if request.xhr?
@@ -383,7 +438,7 @@ class DeckController < ApplicationController
     feedback = params[:feedback]
 
     user = User.find(user_id)
-    chips_earned = (approved_hours * 50).round(2)
+    new_hours = approved_hours.to_f
 
     # Resolve project by id (status page sync) or by index
     project = if project_id.present?
@@ -401,10 +456,23 @@ class DeckController < ApplicationController
       return render json: { error: "Project is not in the review queue" }, status: :unprocessable_entity
     end
 
+    pending_cap = project.pending_review_hours
+    if new_hours <= 0
+      return render json: { error: "Enter a positive number of new hours to approve for this submission." }, status: :unprocessable_entity
+    end
+    if new_hours > pending_cap + 0.02
+      return render json: { error: "Cannot approve more new hours than the participant has logged beyond prior approvals (#{pending_cap.round(2)} h max)." }, status: :unprocessable_entity
+    end
+
+    floor = project.past_approved_hours.to_f
+    new_total = (floor + new_hours).round(2)
+    chips_delta = (new_hours * 50).round(2)
+    new_cumulative_chips = (project.chips_earned.to_f + chips_delta).round(2)
+
     # Derive index from project position for User#approve_project (chip_am / legacy jsonb)
     resolved_index = user.projects.order(position: :asc).pluck(:id).index(project.id)
 
-    Rails.logger.info "Approving project for user #{user_id} project_id=#{project.id}: #{approved_hours} hours = #{chips_earned} chips"
+    Rails.logger.info "Approving project for user #{user_id} project_id=#{project.id}: +#{new_hours} h (total #{new_total}) = +#{chips_delta} chips"
 
     begin
       # Always update the Project record so status page shows review (single source of truth)
@@ -412,20 +480,21 @@ class DeckController < ApplicationController
         reviewed: true,
         reviewed_at: Time.current,
         status: "approved",
-        approved_hours: approved_hours,
+        approved_hours: new_total,
+        past_approved_hours: new_total,
         hour_justification: justification,
         admin_feedback: feedback,
-        chips_earned: chips_earned,
+        chips_earned: new_cumulative_chips,
         reviewed_by_user_id: current_user.id,
         approver_display_name: current_user.jackpot_profile_name
       )
 
-      user.approve_project(resolved_index, approved_hours, justification, feedback) if resolved_index.present?
+      user.approve_project(resolved_index, new_total, justification, feedback, new_chip_award: chips_delta) if resolved_index.present?
 
       project.ysws_project_submission&.update_column(:ship_status, "Approved")
 
-      Rails.logger.info "Project approved. User #{user_id} earned #{chips_earned} chips. New balance: #{user.chip_am}"
-      render json: { success: true, message: "Project approved", chips_earned: chips_earned }
+      Rails.logger.info "Project approved. User #{user_id} earned #{chips_delta} chips (delta). New balance: #{user.reload.chip_am}"
+      render json: { success: true, message: "Project approved", chips_earned: chips_delta }
     rescue => e
       Rails.logger.error "Error approving project: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
@@ -467,15 +536,15 @@ class DeckController < ApplicationController
     Rails.logger.info "Rejecting project for user #{user_id} project_id=#{project.id}"
 
     begin
-      chips_to_reverse = project.chips_earned.to_f
+      banked_hours = project.past_approved_hours.to_f
       # Return project to the deck (not shipped) and drop the YSWS submission row; clear approval fields; keep feedback.
       project.unship_return_to_deck_after_rejection!(admin_feedback: feedback_text)
-      user.unship_project_after_rejection!(resolved_index, admin_feedback: feedback_text) if resolved_index.present?
-
-      if chips_to_reverse.positive?
-        user.reload
-        new_balance = [ user.chip_am.to_f - chips_to_reverse, 0.0 ].max
-        user.update_column(:chip_am, new_balance)
+      if resolved_index.present?
+        user.unship_project_after_rejection!(
+          resolved_index,
+          admin_feedback: feedback_text,
+          restore_approved_hours: (banked_hours.positive? ? banked_hours : nil)
+        )
       end
 
       project.reload

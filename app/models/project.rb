@@ -22,6 +22,45 @@ class Project < ApplicationRecord
   # Shipped rows that count as “the same repo already in the queue” (not displaced by a rejected resubmit).
   ACTIVE_SHIP_QUEUE_STATUSES = %w[in-review approved].freeze
 
+  # Hours not yet covered by an approval (for display / admin review of new work).
+  def pending_review_hours
+    raw = total_hours.to_f - past_approved_hours.to_f
+    raw.negative? ? 0.0 : raw
+  end
+
+  def reshippable?
+    shipped? && reviewed? && status.to_s == "approved" && pending_review_hours > 1e-6
+  end
+
+  def hackatime_ship_names
+    Array(hackatime_projects).map { |s| s.to_s.strip.downcase }.reject(&:blank?)
+  end
+
+  def hackatime_ship_conflict?(other)
+    a = hackatime_ship_names
+    b = other.hackatime_ship_names
+    return false if a.empty? || b.empty?
+
+    (a & b).any?
+  end
+
+  # Same participant: overlapping linked Hackatime project names, or same GitHub repo when URLs parse.
+  def ship_queue_conflict?(other)
+    return false unless other.user_id == user_id
+
+    return true if hackatime_ship_conflict?(other)
+
+    k1 = self.class.github_repository_key(code_url)
+    k2 = self.class.github_repository_key(other.code_url)
+    k1.present? && k2.present? && k1 == k2
+  end
+
+  def move_to_last_deck_position!
+    max_pos = user.projects.where.not(id: id).maximum(:position)
+    next_pos = max_pos.nil? ? 0 : max_pos + 1
+    update!(position: next_pos)
+  end
+
   before_create :set_position
 
   def set_position
@@ -60,14 +99,11 @@ class Project < ApplicationRecord
     reload
   end
 
-  # When this (rejected) project is shipped again, remove any other shipped submission for the same GitHub repo
-  # that is still in-review or approved so the new ship is the only active queue entry.
+  # When this project is shipped, remove any other active queue entry for the same participant that shares
+  # Hackatime linkage or the same GitHub repository.
   def displace_conflicting_shipped_same_repo!
-    key = self.class.github_repository_key(code_url)
-    return if key.blank?
-
     user.projects.shipped.where.not(id: id).find_each do |other|
-      next unless self.class.github_repository_key(other.code_url) == key
+      next unless ship_queue_conflict?(other)
       next unless ACTIVE_SHIP_QUEUE_STATUSES.include?(other.status.to_s)
 
       other.displaced_by_same_repo_resubmit!
@@ -99,6 +135,7 @@ class Project < ApplicationRecord
       reviewed_by_user_id: nil,
       approver_display_name: nil,
       approved_hours: nil,
+      past_approved_hours: 0,
       chips_earned: nil,
       hour_justification: nil,
       admin_feedback: combined_feedback
@@ -153,6 +190,7 @@ class Project < ApplicationRecord
   # Admin rejected a shipped submission: delete Airtable row first (avoid orphans), then remove YSWS row and return project to deck.
   def unship_return_to_deck_after_rejection!(admin_feedback: nil)
     submission = ysws_project_submission
+    banked = past_approved_hours.to_f
     attrs = {
       shipped: false,
       shipped_at: nil,
@@ -164,8 +202,7 @@ class Project < ApplicationRecord
       reviewed_by_user_id: nil,
       approver_display_name: nil,
       admin_feedback: admin_feedback,
-      approved_hours: nil,
-      chips_earned: nil,
+      approved_hours: banked.positive? ? banked : nil,
       hour_justification: nil
     }
 
@@ -202,6 +239,8 @@ class Project < ApplicationRecord
         p.hour_justification = project_data["hour_justification"]
         p.admin_feedback = project_data["admin_feedback"]
         p.chips_earned = project_data["chips_earned"]
+        p.past_approved_hours = project_data["past_approved_hours"] if project_data.key?("past_approved_hours")
+        p.first_shipped_at = project_data["first_shipped_at"] if project_data.key?("first_shipped_at")
         p.position = index
       end
       project.save! if project.changed?
