@@ -39,6 +39,26 @@
               <span class="status-total-chips-value"><%= @total_chips %></span>
             </div>
           </div>
+          <section class="status-purchase-section" aria-label="Pending purchases">
+            <h3 class="status-purchase-section-title">Pending [<%= @pending_orders.size %>]</h3>
+            <ul class="status-purchase-list">
+              <% if @pending_orders.empty? %>
+                <li class="status-purchase-row" style="font-style:italic;color:#a89878;">No pending purchases.</li>
+              <% end %>
+              <% @pending_orders.each do |order| %>
+                <li class="status-purchase-row">
+                  <span class="status-purchase-item-name"><%= order.item_name %></span>
+                  <span class="status-purchase-qty">Qty: <%= order.quantity %></span>
+                  <span class="status-purchase-chips">
+                    <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "status-chip-icon-inline", aria: { hidden: true } %>
+                    <%= shop_order_chips_and_usd(order) %>
+                  </span>
+                  <span class="status-purchase-at"><%= order.created_at.strftime("%m/%d/%y - %l:%M %P").strip %></span>
+                  <%= shop_order_usd_breakdown_html(order) %>
+                </li>
+              <% end %>
+            </ul>
+          </section>
           <section class="status-purchase-section" aria-label="Fulfilled purchases">
             <h3 class="status-purchase-section-title">Fulfilled [<%= @fulfilled_orders.size %>]</h3>
             <ul class="status-purchase-list">
@@ -48,9 +68,10 @@
                   <span class="status-purchase-qty">Qty: <%= order.quantity %></span>
                   <span class="status-purchase-chips">
                     <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "status-chip-icon-inline", aria: { hidden: true } %>
-                    <%= number_with_precision(order.price.to_f, precision: 0) %>
+                    <%= shop_order_chips_and_usd(order) %>
                   </span>
                   <span class="status-purchase-at"><%= order.created_at.strftime("%m/%d/%y - %l:%M %P").strip %></span>
+                  <%= shop_order_usd_breakdown_html(order) %>
                 </li>
               <% end %>
             </ul>
@@ -64,9 +85,10 @@
                   <span class="status-purchase-qty">Qty: <%= order.quantity %></span>
                   <span class="status-purchase-chips">
                     <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "status-chip-icon-inline", aria: { hidden: true } %>
-                    <%= number_with_precision(order.price.to_f, precision: 0) %>
+                    <%= shop_order_chips_and_usd(order) %>
                   </span>
                   <span class="status-purchase-at"><%= order.created_at.strftime("%m/%d/%y - %l:%M %P").strip %></span>
+                  <%= shop_order_usd_breakdown_html(order) %>
                 </li>
               <% end %>
             </ul>

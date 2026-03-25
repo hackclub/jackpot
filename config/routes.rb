@@ -41,6 +41,8 @@ Rails.application.routes.draw do
   post "/req_item", to: "req_item#create"
 
   get "/admin/shop", to: "admin_shop#index", as: :admin_shop
+  get "/admin/shop/orders", to: "admin_shop#orders", as: :admin_shop_orders
+  post "/admin/shop/orders/bulk_status", to: "admin_shop#bulk_update_order_status", as: :admin_shop_bulk_order_status
   post "/admin/shop/items", to: "admin_shop#create_item", as: :admin_shop_create_item
   post "/admin/shop/categories", to: "admin_shop#create_category", as: :admin_shop_create_category
   post "/admin/shop/grant_types", to: "admin_shop#create_grant_type", as: :admin_shop_create_grant_type

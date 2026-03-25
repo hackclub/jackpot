@@ -4,6 +4,13 @@
 
   <h1 style="color: #d4a017; margin-bottom: 2rem;">Shop Admin</h1>
 
+  <div style="margin-bottom: 1.5rem;">
+    <%= link_to admin_shop_orders_path, style: "display: inline-flex; align-items: center; gap: 0.5rem; padding: 12px 20px; background: rgba(30, 20, 10, 0.9); border: 2px solid #8b6914; border-radius: 10px; color: #d4a017; font-weight: 700; text-decoration: none; font-size: 1.05rem;" do %>
+      <span>📦</span> Shop orders queue
+    <% end %>
+    <span style="color: #a89878; font-size: 0.9rem; margin-left: 12px;">Fulfill purchases, refunds, and grouped pending lines.</span>
+  </div>
+
   <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 16px 24px; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
     <div style="display: flex; align-items: center; gap: 10px;">
       <label class="admin-shop-lock-toggle-label" for="adminShopPurchasesLockToggle" style="color: #c4b89a; font-weight: 700; cursor: pointer;">Lock purchases</label>
@@ -304,59 +311,6 @@
     </div>
   </div>
 
-  <div style="background: rgba(30, 20, 10, 0.8); border: 2px solid #8b6914; border-radius: 12px; padding: 24px;">
-    <h2 style="color: #d4a017; margin: 0 0 16px;">Recent Orders (<%= @orders.count %>)</h2>
-    <div style="overflow-x: auto;">
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-        <thead>
-          <tr style="border-bottom: 2px solid #8b6914;">
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">ID</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">User</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Email</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Slack ID</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Item</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Qty</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Price</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Status</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Date</th>
-            <th style="text-align: left; padding: 8px; color: #c4b89a;">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @orders.each do |order| %>
-            <tr style="border-bottom: 1px solid rgba(139,105,20,0.3);" id="order-row-<%= order.id %>">
-              <td style="padding: 8px;"><%= order.id %></td>
-              <td style="padding: 8px;"><%= order.user&.leaderboard_name || "Unknown" %></td>
-              <td style="padding: 8px;"><%= order.user_email %></td>
-              <td style="padding: 8px;"><%= order.slack_id %></td>
-              <td style="padding: 8px;"><%= order.item_name %></td>
-              <td style="padding: 8px;"><%= order.quantity %></td>
-              <td style="padding: 8px;"><%= order.price.to_f %></td>
-              <td style="padding: 8px;" id="order-status-<%= order.id %>">
-                <span style="padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700;
-                  background: <%= case order.status; when 'pending' then 'rgba(255,193,7,0.2)'; when 'sent' then 'rgba(76,175,80,0.2)'; when 'refunded' then 'rgba(239,83,80,0.2)'; end %>;
-                  color: <%= case order.status; when 'pending' then '#ffc107'; when 'sent' then '#4caf50'; when 'refunded' then '#ef5350'; end %>;">
-                  <%= order.status.capitalize %>
-                </span>
-              </td>
-              <td style="padding: 8px;"><%= order.created_at.strftime("%b %d, %H:%M") %></td>
-              <td style="padding: 8px; white-space: nowrap;">
-                <% %w[pending sent refunded].each do |st| %>
-                  <% next if order.status == st %>
-                  <button onclick="updateOrderStatus(<%= order.id %>, '<%= st %>')" style="background: none; border: 1px solid #8b6914; color: #d4a017; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-family: Georgia, serif; font-size: 0.75rem; margin-right: 2px;">
-                    <%= st.capitalize %>
-                  </button>
-                <% end %>
-              </td>
-            </tr>
-          <% end %>
-          <% if @orders.empty? %>
-            <tr><td colspan="10" style="padding: 16px; text-align: center; color: #a89878;">No orders yet.</td></tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -1081,14 +1035,4 @@ function toggleItem(id, active) {
   .catch(function(e) { alert('Error.'); console.error(e); });
 }
 
-function updateOrderStatus(id, status) {
-  fetch('<%= admin_shop_update_order_path(":id") %>'.replace('%3Aid', id).replace(':id', id), {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
-    body: JSON.stringify({ status: status })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) { if (d.success) location.reload(); else alert(d.error); })
-  .catch(function(e) { alert('Error.'); console.error(e); });
-}
 </script>

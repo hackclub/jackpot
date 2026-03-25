@@ -6,7 +6,6 @@ class AdminShopController < ApplicationController
   def index
     @items = ShopItem.includes(shop_grant_type: :shop_category).order(created_at: :desc)
     @shop_purchases_locked = shop_purchases_locked?
-    @orders = ShopOrder.includes(:user, :shop_item).order(created_at: :desc).limit(100)
     # Only show categories/types that actually have items in them, so the
     # admin UI doesn't list empty groups.
     @categories = ShopCategory
@@ -14,6 +13,28 @@ class AdminShopController < ApplicationController
       .distinct
       .includes(:shop_grant_types)
       .order(:name)
+  end
+
+  def orders
+    @shop_purchases_locked = shop_purchases_locked?
+    @status_filter = params[:status].presence_in(%w[pending sent refunded all]) || "pending"
+    @group_by = params[:group_by].presence_in(%w[flat user item]) || "flat"
+    @pending_sort = %w[asc desc].include?(params[:pending_sort].to_s) ? params[:pending_sort] : "desc"
+
+    pending_cards = AdminShop::VirtualOrderCards.pending_cards
+    AdminShop::VirtualOrderCards.sort_cards_by_queue_time!(pending_cards, @pending_sort)
+    @pending_card_count = pending_cards.size
+    @pending_line_count = ShopOrder.pending.count
+
+    if @status_filter == "pending"
+      @virtual_cards = pending_cards
+      @cards_by_user = AdminShop::VirtualOrderCards.group_cards_by_user(pending_cards)
+      @cards_by_item = AdminShop::VirtualOrderCards.group_cards_by_item(pending_cards)
+    else
+      scope = ShopOrder.includes(:user, :shop_item).order(created_at: :desc)
+      scope = scope.where(status: @status_filter) unless @status_filter == "all"
+      @history_orders = scope.limit(500)
+    end
   end
 
   def create_item
@@ -165,44 +186,95 @@ class AdminShopController < ApplicationController
 
   def update_order_status
     order = ShopOrder.find(params[:id])
-    new_status = params[:status]
-
-    unless %w[pending sent refunded].include?(new_status)
-      return render json: { error: "Invalid status" }, status: :unprocessable_entity
-    end
-
+    new_status = params[:status].to_s
+    success = false
     ActiveRecord::Base.transaction do
-      order.lock!
-      order.user.reload.lock!
-
-      # If refunding, give chips back
-      if new_status == "refunded" && order.status != "refunded"
-        order.user.update!(chip_am: order.user.chip_am.to_f + order.price.to_f)
-      end
-
-      # If un-refunding (changing from refunded to something else), deduct chips again
-      if order.status == "refunded" && new_status != "refunded"
-        if order.user.chip_am.to_f < order.price.to_f
-          raise ActiveRecord::Rollback
-        end
-        order.user.update!(chip_am: order.user.chip_am.to_f - order.price.to_f)
-      end
-
-      order.update!(status: new_status)
+      success = transition_shop_order_status!(order, new_status)
+      raise ActiveRecord::Rollback unless success
     end
+    order.reload
 
-    unless order.status == new_status
-      return render json: { error: "User doesn't have enough chips to un-refund." }, status: :unprocessable_entity
+    unless success
+      return render json: { error: failure_message_for_order_transition(order, new_status) }, status: :unprocessable_entity
     end
 
     if request.xhr?
       render json: { success: true }
     else
-      redirect_to admin_shop_path
+      redirect_back fallback_location: admin_shop_orders_path, notice: "Order updated."
     end
   end
 
+  def bulk_update_order_status
+    ids = Array(params[:order_ids]).map(&:to_i).uniq.reject(&:zero?)
+    new_status = params[:status].to_s
+
+    if ids.empty?
+      return render json: { error: "No orders selected" }, status: :unprocessable_entity
+    end
+
+    unless %w[pending sent refunded].include?(new_status)
+      return render json: { error: "Invalid status" }, status: :unprocessable_entity
+    end
+
+    orders = ShopOrder.where(id: ids).includes(:user).order(:id).to_a
+    if orders.size != ids.size
+      return render json: { error: "One or more orders were not found" }, status: :not_found
+    end
+
+    failed = nil
+    ActiveRecord::Base.transaction do
+      orders.each do |o|
+        next if o.status == new_status
+
+        unless transition_shop_order_status!(o, new_status)
+          failed = failure_message_for_order_transition(o, new_status)
+          raise ActiveRecord::Rollback
+        end
+      end
+    end
+
+    if failed.present?
+      return render json: { error: failed }, status: :unprocessable_entity
+    end
+
+    render json: { success: true }
+  end
+
   private
+
+  # Caller must wrap in ActiveRecord::Base.transaction when needed (single or bulk).
+  def transition_shop_order_status!(order, new_status)
+    return false unless %w[pending sent refunded].include?(new_status)
+    return true if order.status == new_status
+
+    order.lock!
+    order.user.reload.lock!
+
+    if new_status == "refunded" && order.status != "refunded"
+      order.user.update!(chip_am: order.user.chip_am.to_f + order.price.to_f)
+    end
+
+    if order.status == "refunded" && new_status != "refunded"
+      return false if order.user.chip_am.to_f < order.price.to_f
+
+      order.user.update!(chip_am: order.user.chip_am.to_f - order.price.to_f)
+    end
+
+    order.update!(status: new_status)
+    order.reload.status == new_status
+  end
+
+  def failure_message_for_order_transition(order, new_status)
+    return "Invalid status" unless %w[pending sent refunded].include?(new_status)
+
+    order.reload
+    if order.status == "refunded" && new_status != "refunded"
+      return "User doesn't have enough chips to un-refund."
+    end
+
+    "Could not update order."
+  end
 
   def item_params
     source = params[:admin_shop].presence || params

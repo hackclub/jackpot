@@ -1,0 +1,28 @@
+<% card = local_assigns[:card] %>
+<% return unless card %>
+<% user = card.user %>
+<div class="asoc-card" data-virtual-order-card>
+  <div class="asoc-card-main">
+    <div class="asoc-badges">
+      <span class="asoc-badge asoc-badge--pending">Pending</span>
+      <% if card.already_repeat %>
+        <span class="asoc-badge asoc-badge--repeat" title="This participant already received this item (fulfilled) before this new request.">Repeat after prior fulfill</span>
+      <% end %>
+    </div>
+    <h2 class="asoc-card-title"><%= card.item_name %></h2>
+    <div class="asoc-card-meta">
+      <%= admin_shop_virtual_card_price_line(card) %>
+      <%= admin_shop_virtual_card_usd_block(card) %>
+    </div>
+    <div class="asoc-customer">
+      <div><strong>Customer</strong></div>
+      <div>Name: <%= user&.leaderboard_name || user&.name || "—" %></div>
+      <div>Email: <%= user&.email.presence || "—" %></div>
+    </div>
+    <div class="asoc-card-ids">DB rows: <%= card.order_ids.map { |id| "##{id}" }.join(", ") %></div>
+  </div>
+  <div class="asoc-actions">
+    <button type="button" class="asoc-btn asoc-btn--fulfill" data-bulk-status data-order-ids="<%= card.order_ids.join(",") %>" data-next-status="sent">✓ Mark fulfilled</button>
+    <button type="button" class="asoc-btn asoc-btn--reject" data-bulk-status data-order-ids="<%= card.order_ids.join(",") %>" data-next-status="refunded">✕ Reject (refund chips)</button>
+  </div>
+</div>

@@ -13,6 +13,7 @@ class StatusController < ApplicationController
         created_at: :desc
       )
     @total_chips = current_user.chip_am.to_i
+    @pending_orders = current_user.shop_orders.pending.order(created_at: :desc)
     @fulfilled_orders = current_user.shop_orders.sent.order(created_at: :desc)
     @rejected_orders = current_user.shop_orders.refunded.order(created_at: :desc)
   end

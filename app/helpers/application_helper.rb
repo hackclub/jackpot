@@ -46,4 +46,49 @@ module ApplicationHelper
     result << ERB::Util.html_escape(remainder)
     result.html_safe
   end
+
+  # Chips charged at checkout (includes item line + optional shipping/tax chips).
+  def shop_order_chips_and_usd(order)
+    chips = number_with_precision(order.price.to_f, precision: 0, strip_insignificant_zeros: true)
+    "#{chips} chips"
+  end
+
+  # Aggregated pending card (merged pending rows for same user + catalog item).
+  def admin_shop_virtual_card_price_line(card)
+    total_chips = number_with_precision(card.chip_total.to_f, precision: 0, strip_insignificant_zeros: true)
+    "Qty: #{card.quantity} · Total: #{total_chips} chips"
+  end
+
+  # USD grant breakdown at purchase (admin virtual card).
+  def admin_shop_virtual_card_usd_block(card)
+    total = card.usd_total.to_f
+    return "".html_safe unless total.positive?
+
+    items = card.usd_items.to_f
+    ship = card.usd_shipping.to_f
+    fmt = ->(x) { number_with_precision(x, precision: 2) }
+    content_tag(:div, class: "asoc-usd-desc") do
+      safe_join([
+        content_tag(:div, "Total: $#{fmt.call(total)}"),
+        content_tag(:div, "Items-only: $#{fmt.call(items)}"),
+        content_tag(:div, "Shipping: $#{fmt.call(ship)}")
+      ])
+    end
+  end
+
+  # Plain-text USD breakdown for a single order (e.g. tooltips); see also #shop_order_usd_breakdown_html.
+  def shop_order_usd_amount_description(order)
+    order.usd_amount_description
+  end
+
+  def shop_order_usd_breakdown_html(order)
+    desc = order.usd_amount_description
+    return "".html_safe if desc.blank?
+
+    content_tag(:div, class: "shop-order-usd-breakdown") do
+      safe_join(
+        desc.split("\n").map { |line| content_tag(:div, line.strip, class: "shop-order-usd-breakdown__line") }
+      )
+    end
+  end
 end
