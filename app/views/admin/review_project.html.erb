@@ -452,7 +452,7 @@
 
     <div class="page-header">
       <h1 class="page-title"><%= @project["name"] %></h1>
-      <p class="page-meta">by <%= @user.display_name || @user.email %> (<%= @user.email %>)</p>
+      <p class="page-meta">by <%= @user.jackpot_profile_name %> (<%= @user.email %>)</p>
     </div>
 
     <div class="review-page-screenshot">
@@ -499,8 +499,9 @@
           <% if @project["playable_url"].present? && @project["playable_url"].match?(/\Ahttps?:\/\//i) %>
             <a href="<%= @project["playable_url"] %>" target="_blank" class="quick-link-btn">▶ Live Demo</a>
           <% end %>
-          <button class="quick-link-btn" onclick="alert('Fraud link placeholder')">⚠ Report Fraud (Title)</button>
-          <button class="quick-link-btn" onclick="alert('Fraud link placeholder')">⚠ Report Fraud (Open)</button>
+          <% if @user.slack_id.present? %>
+            <a href="https://joe.fraud.hackclub.com/profile/<%= ERB::Util.url_encode(@user.slack_id.to_s) %>" target="_blank" class="quick-link-btn">Fraud Check</a>
+          <% end %>
         </div>
 
         <div class="project-status-section">
@@ -563,7 +564,7 @@
             <% @project_comments.each do |c| %>
               <div class="review-project-comment">
                 <div class="review-project-comment-head">
-                  <span class="review-project-comment-author"><%= c.user&.display_name || c.user&.email || 'Unknown' %></span>
+                  <span class="review-project-comment-author"><%= c.user&.jackpot_profile_name || 'Unknown' %></span>
                   <span><%= c.created_at.strftime("%m/%d/%y %l:%M %P").strip %></span>
                 </div>
                 <div class="review-project-comment-body"><%= c.body %></div>
