@@ -37,6 +37,7 @@
                data-unshipped-hours-display="<%= (project["unshipped_hours_display"] || project["pending_review_hours"]).to_f %>"
                data-hours-logged-beyond-queue-submission="<%= (project["hours_logged_beyond_current_queue_submission"] || 0).to_f %>"
                data-reshippable="<%= project["reshippable"] ? "true" : "false" %>"
+               data-user-has-other-pending-ship="<%= project["user_has_other_pending_ship"] ? "true" : "false" %>"
                data-main-hc-reship-locked="<%= project["main_hc_reship_locked"] ? "true" : "false" %>"
                data-playable-url="<%= project["playable_url"] %>"
                data-code-url="<%= project["code_url"] %>"
@@ -717,6 +718,11 @@ function initDeck() {
    var detailUnshippedHours = document.getElementById('detailUnshippedHours');
    var currentBannerUrl = '';
    var currentDetailData = null;
+   var SHIP_BLOCKED_OTHER_PENDING_MSG = [
+     "Shipping a project means submitting a working and complete demo (even if only partial) of your project. From there, it will enter the review queue.",
+     "The ship button shouldn't be used for every single change, but only a couple of times to submit meaningful project updates.",
+     "You already have an update in the queue, and removing it would place you back at the end (the queue is long…). Are you sure that, compared to the previously submitted version of your project, you've added extremely significant improvements (for example, an entirely new demo)? If not, it's better to wait before submitting again."
+   ].join("\n\n");
 
    function detailCanEditPlayableBanner() {
      if (!currentDetailData) return false;
@@ -799,7 +805,12 @@ function initDeck() {
      var hoursBeyondQueue = parseFloat(data.hoursLoggedBeyondQueueSubmission || 0, 10) || 0;
      var pendingQueueShipUpdate = isShipped && data.status === 'in-review' && data.reviewed !== 'true' && hoursBeyondQueue > 1e-6;
      var canUnship = isShipped && data.status === 'in-review' && data.reviewed !== 'true';
-     var showShipBtn = !isShipped || canReship || showShipUpdateLocked || pendingQueueShipUpdate;
+     var shipUpdateSameProject = isShipped && data.status === 'in-review' && data.reviewed !== 'true';
+     var inReviewQueue = shipUpdateSameProject;
+     var otherPending = data.userHasOtherPendingShip === 'true';
+     var blockShipOtherPending = otherPending && !shipUpdateSameProject;
+     // Always show Ship while waiting for review (not only when there are hours beyond the queue snapshot)
+     var showShipBtn = !isShipped || canReship || showShipUpdateLocked || pendingQueueShipUpdate || inReviewQueue;
 
      if (detailUnshippedHoursRow && detailUnshippedHours) {
        var unshipped = parseFloat(data.unshippedHoursDisplay, 10);
@@ -811,7 +822,7 @@ function initDeck() {
      var detailShipSubmissionNoteRow = document.getElementById('detailShipSubmissionNoteRow');
      var detailShipSubmissionNote = document.getElementById('detailShipSubmissionNote');
      if (detailShipSubmissionNoteRow && detailShipSubmissionNote) {
-       var showShipNote = showShipBtn && !showShipUpdateLocked;
+       var showShipNote = showShipBtn && !showShipUpdateLocked && !blockShipOtherPending && (!inReviewQueue || pendingQueueShipUpdate);
        detailShipSubmissionNoteRow.style.display = showShipNote ? 'flex' : 'none';
        if (showShipNote) detailShipSubmissionNote.value = '';
        detailShipSubmissionNote.required = !!showShipNote;
@@ -825,20 +836,37 @@ function initDeck() {
      detailShippedRow.style.display = isShipped ? 'flex' : 'none';
      if (detailShipBtn) {
        detailShipBtn.classList.toggle('ship-update--main-hc-locked', showShipUpdateLocked);
+       var needMoreHoursForQueueUpdate = !!(inReviewQueue && !pendingQueueShipUpdate && !showShipUpdateLocked && !blockShipOtherPending);
+       detailShipBtn.classList.toggle('ship-btn--other-pending', !!(blockShipOtherPending && !showShipUpdateLocked));
+       detailShipBtn.classList.toggle('ship-btn--need-more-hours', needMoreHoursForQueueUpdate);
        if (showShipUpdateLocked) {
          detailShipBtn.style.display = 'inline-block';
          detailShipBtn.textContent = 'Ship update';
          detailShipBtn.style.opacity = '0.65';
          detailShipBtn.style.cursor = 'not-allowed';
          detailShipBtn.title = 'This project has already been submitted to the main HC database - please contact @Emma';
+       } else if (blockShipOtherPending) {
+         // Always show Ship (same as when nothing blocks); only the popup stops the action
+         detailShipBtn.style.display = 'inline-block';
+         detailShipBtn.textContent = (inReviewQueue || pendingQueueShipUpdate || canReship) ? 'Ship update' : 'Ship It';
+         detailShipBtn.style.opacity = '';
+         detailShipBtn.style.cursor = '';
+         detailShipBtn.title = 'You already have an update in the queue — click for the full message';
+       } else if (needMoreHoursForQueueUpdate) {
+         detailShipBtn.style.display = 'inline-block';
+         detailShipBtn.textContent = 'Ship update';
+         detailShipBtn.style.opacity = '';
+         detailShipBtn.style.cursor = '';
+         detailShipBtn.title = SHIP_BLOCKED_OTHER_PENDING_MSG;
        } else {
          detailShipBtn.style.opacity = '';
          detailShipBtn.style.cursor = '';
          detailShipBtn.title = pendingQueueShipUpdate ? 'Add new logged hours to your pending submission and move to the back of the review queue' : '';
          detailShipBtn.style.display = showShipBtn ? 'inline-block' : 'none';
-         detailShipBtn.textContent = (pendingQueueShipUpdate || canReship) ? 'Ship update' : 'Ship It';
+         detailShipBtn.textContent = (inReviewQueue || pendingQueueShipUpdate || canReship) ? 'Ship update' : 'Ship It';
        }
      }
+     if (currentDetailData) currentDetailData.blockShipOtherPending = blockShipOtherPending;
      if (detailUnshipBtn) detailUnshipBtn.style.display = canUnship ? 'inline-block' : 'none';
      detailDeleteBtn.style.display = isShipped ? 'none' : 'inline-block';
      detailSaveBtn.style.display = 'none';
@@ -1005,6 +1033,10 @@ function initDeck() {
    if (detailShipBtn) {
      detailShipBtn.addEventListener('click', function() {
        if (!currentDetailData) return;
+       if (currentDetailData.blockShipOtherPending) {
+         alert(SHIP_BLOCKED_OTHER_PENDING_MSG);
+         return;
+       }
 
        var totalShipHrs = parseFloat(currentDetailData.hours || 0, 10) || 0;
        if (totalShipHrs <= 0) {
@@ -1020,7 +1052,7 @@ function initDeck() {
        var beyondQ = parseFloat(currentDetailData.hoursLoggedBeyondQueueSubmission || 0, 10) || 0;
        if (currentDetailData.shipped === 'true' && currentDetailData.status === 'in-review' && currentDetailData.reviewed !== 'true') {
          if (beyondQ <= 1e-6) {
-           alert('Log more hours on this project, then use Ship update to add them to your pending submission and move it to the back of the queue.');
+           alert(SHIP_BLOCKED_OTHER_PENDING_MSG);
            return;
          }
        }
@@ -1175,6 +1207,7 @@ function initDeck() {
         unshippedHoursDisplay: card.dataset.unshippedHoursDisplay || '0',
         hoursLoggedBeyondQueueSubmission: card.dataset.hoursLoggedBeyondQueueSubmission || '0',
         reshippable: card.dataset.reshippable || 'false',
+        userHasOtherPendingShip: card.dataset.userHasOtherPendingShip || 'false',
         mainHcReshipLocked: card.dataset.mainHcReshipLocked || 'false',
         playableUrl: card.dataset.playableUrl,
         codeUrl: card.dataset.codeUrl,
