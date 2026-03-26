@@ -2,7 +2,7 @@
   <section class="page-section page-section--hero ext-section--0" id="section-0">
     <div class="hero-overlays">
       <%= image_tag "title.PNG", alt: "Jackpot Title", class: "hero-title" %>
-      <%= image_tag "centralmg.png", alt: "Center Art", class: "hero-center" %>
+      <%= image_tag "https://user-cdn.hackclub-assets.com/019d2a63-7408-7245-8d63-3d235c8d486c/centralmg-123ccef9.png", alt: "Center Art", class: "hero-center" %>
       <%= link_to image_tag("HC_logo.png", alt: "Hack Club Logo", class: "hero-logo"), "https://hackclub.com", class: "hero-logo-link" %>
       <div class="hero-dateline-stack">
         <div class="hero-event-warning" role="alert">
@@ -23,41 +23,41 @@
     <%= render "home/rsvp" %>
   </section>
 
-  <div id="steps" class="ext-content">
+  <div id="steps" class="ext-content" style="content-visibility: auto; contain-intrinsic-size: auto 5000px;">
     <div class="ext-content__lighty-line--top"></div>
     <%# Section 1: How does it work %>
     <section class="ext-section ext-section--1">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_1.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_1.png", alt: "", class: "ext-section__bkg", loading: "lazy", aria: { hidden: true } %>
       <div class="ext-section__inner ext-section__inner--1">
         <h2 class="section-title section-title--center">How does it work</h2>
         <div class="section-1__panel">
-          <%= image_tag "RSVP_comp/first_section/yellow_box.png", alt: "", class: "section-1__panel-bg", aria: { hidden: true } %>
+          <%= image_tag "RSVP_comp/first_section/yellow_box.png", alt: "", class: "section-1__panel-bg", loading: "lazy", aria: { hidden: true } %>
           <div class="section-1__panel-content">
             <div class="section-1__step">
-              <%= image_tag "RSVP_comp/first_section/icon1_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/first_section/icon1_box.png", alt: "", class: "section-1__step-icon", loading: "lazy", aria: { hidden: true } %>
               <p class="section-1__step-text">Work on a <span class="section-1__step-accent">software/hardware/art</span> project and track your time with <%= link_to "Hackatime", "https://hackatime.hackclub.com", target: "_blank", rel: "noopener", class: "section-1__step-accent section-1__step-link" %>.</p>
             </div>
             <div class="section-1__step">
-              <%= image_tag "RSVP_comp/first_section/icon2_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/first_section/icon2_box.png", alt: "", class: "section-1__step-icon", loading: "lazy", aria: { hidden: true } %>
               <p class="section-1__step-text">Post your project on <%= link_to "GitHub", "https://github.com", target: "_blank", rel: "noopener", class: "section-1__step-accent section-1__step-link" %> as an open-source project and ship it on the <span class="section-1__step-accent">Jackpot website</span>.</p>
             </div>
             <div class="section-1__step">
-              <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/first_section/icon3_box.png", alt: "", class: "section-1__step-icon", loading: "lazy", aria: { hidden: true } %>
               <p class="section-1__step-text">Wait for a <span class="section-1__step-accent">review</span> from our team and redeem poker chips (<span class="section-1__step-accent">points</span>).</p>
             </div>
             <div class="section-1__step">
-              <%= image_tag "RSVP_comp/first_section/icon4_box.png", alt: "", class: "section-1__step-icon", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/first_section/icon4_box.png", alt: "", class: "section-1__step-icon", loading: "lazy", aria: { hidden: true } %>
               <p class="section-1__step-text">Spend your points on <span class="section-1__step-accent">free prizes</span> or use them to get an official invitation to the <span class="section-1__step-accent section-1__step-accent--yellow">Las Vegas Hackathon</span>.</p>
             </div>
           </div>
         </div>
         <div class="section-1__join-wrap">
           <%= button_to "/auth/hack_club", method: :post, data: { turbo: false }, class: "section-1__join-link" do %>
-            <%= image_tag "RSVP_comp/first_section/join_button.png", alt: "Join", class: "section-1__join-btn" %>
+            <%= image_tag "RSVP_comp/first_section/join_button.png", alt: "Join", class: "section-1__join-btn", loading: "lazy" %>
           <% end %>
         </div>
         <div class="section-1__carousel-wrap">
-          <%= image_tag "RSVP_comp/first_section/subtitle_carousel.png", alt: "", class: "section-1__carousel-subtitle", aria: { hidden: true } %>
+          <%= image_tag "RSVP_comp/first_section/subtitle_carousel.png", alt: "", class: "section-1__carousel-subtitle", loading: "lazy", aria: { hidden: true } %>
           <div class="section-1__carousel">
           <div class="section-1__carousel-viewport">
             <div class="section-1__carousel-track">
@@ -77,8 +77,8 @@
               ] %>
               <% (carousel_images + carousel_images).each do |img_path| %>
                 <div class="section-1__carousel-box">
-                  <%= image_tag "RSVP_comp/first_section/carousel_box.png", alt: "", class: "section-1__carousel-box-bg", aria: { hidden: true } %>
-                  <%= image_tag img_path, alt: "", class: "section-1__carousel-item", aria: { hidden: true } %>
+                  <%= image_tag "RSVP_comp/first_section/carousel_box.png", alt: "", class: "section-1__carousel-box-bg", loading: "lazy", aria: { hidden: true } %>
+                  <%= image_tag img_path, alt: "", class: "section-1__carousel-item", loading: "lazy", aria: { hidden: true } %>
                 </div>
               <% end %>
             </div>
@@ -91,16 +91,16 @@
 
     <%# Section 2: About Hack Club / Jackpot Trailer %>
     <section class="ext-section ext-section--2">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_2.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_2.png", alt: "", class: "ext-section__bkg", loading: "lazy", aria: { hidden: true } %>
       <div class="ext-section__inner ext-section__inner--2">
         <div class="section-2__about">
           <%= link_to "https://hackclub.com", target: "_blank", rel: "noopener noreferrer", class: "section-2__about-link" do %>
-            <%= image_tag "RSVP_comp/second_section/hackclub_box.png", alt: "About Hack Club", class: "section-2__hackclub-box" %>
+            <%= image_tag "RSVP_comp/second_section/hackclub_box.png", alt: "About Hack Club", class: "section-2__hackclub-box", loading: "lazy" %>
           <% end %>
         </div>
         <div class="section-2__trailer">
           <%= link_to "https://www.youtube.com/watch?v=4pV9bcxCTDo", target: "_blank", rel: "noopener", class: "section-2__trailer-link" do %>
-            <%= image_tag "RSVP_comp/second_section/jackpottrailer_box.png", alt: "Jackpot Trailer", class: "section-2__trailer-box" %>
+            <%= image_tag "RSVP_comp/second_section/jackpottrailer_box.png", alt: "Jackpot Trailer", class: "section-2__trailer-box", loading: "lazy" %>
           <% end %>
         </div>
       </div>
@@ -109,20 +109,20 @@
 
     <%# Section 3: You can create EVERYTHING! %>
     <section class="ext-section ext-section--3">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_3.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_3.png", alt: "", class: "ext-section__bkg", loading: "lazy", aria: { hidden: true } %>
       <div class="ext-section__inner ext-section__inner--3">
         <div class="section-3__title-row">
-          <%= image_tag "RSVP_comp/third_section/card_draw.png", alt: "", class: "section-3__title-card-draw", aria: { hidden: true } %>
-          <%= image_tag "RSVP_comp/third_section/title_section_3.png", alt: "You can create everything", class: "section-3__title-image" %>
+          <%= image_tag "RSVP_comp/third_section/card_draw.png", alt: "", class: "section-3__title-card-draw", loading: "lazy", aria: { hidden: true } %>
+          <%= image_tag "RSVP_comp/third_section/title_section_3.png", alt: "You can create everything", class: "section-3__title-image", loading: "lazy" %>
         </div>
         <div class="section-3__cards">
-          <%= image_tag "RSVP_comp/third_section/prj_card_1.png", alt: "Project card", class: "section-3__prj-card" %>
-          <%= image_tag "RSVP_comp/third_section/prj_card_2.png", alt: "Project card", class: "section-3__prj-card" %>
-          <%= image_tag "RSVP_comp/third_section/prj_card_3.png", alt: "Project card", class: "section-3__prj-card" %>
+          <%= image_tag "RSVP_comp/third_section/prj_card_1.png", alt: "Project card", class: "section-3__prj-card", loading: "lazy" %>
+          <%= image_tag "RSVP_comp/third_section/prj_card_2.png", alt: "Project card", class: "section-3__prj-card", loading: "lazy" %>
+          <%= image_tag "RSVP_comp/third_section/prj_card_3.png", alt: "Project card", class: "section-3__prj-card", loading: "lazy" %>
         </div>
-        <%= link_to image_tag("RSVP_comp/third_section/seeMoreButton.png", alt: "See your projects", class: "section-3__see-more"), "https://scrapbook.hackclub.com/", target: "_blank", rel: "noopener", class: "section-3__see-more-link" %>
+        <%= link_to image_tag("RSVP_comp/third_section/seeMoreButton.png", alt: "See your projects", class: "section-3__see-more", loading: "lazy"), "https://scrapbook.hackclub.com/", target: "_blank", rel: "noopener", class: "section-3__see-more-link" %>
         <div class="section-3__where-start">
-          <%= image_tag "RSVP_comp/third_section/where_to_start_box.png", alt: "Get started", class: "section-3__where-start-box" %>
+          <%= image_tag "RSVP_comp/third_section/where_to_start_box.png", alt: "Get started", class: "section-3__where-start-box", loading: "lazy" %>
           <div class="section-3__where-start-content">
             <a class="section-3__where-start-item" href="https://workshops.hackclub.com/personal_website/" target="_blank" rel="noopener">
               <span class="section-3__where-start-label"><span class="section-3__where-start-symbol">♧</span> Personal website</span>
@@ -144,68 +144,68 @@
 
     <%# Section 4: Past Events %>
     <section class="ext-section ext-section--4">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_4.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_4.png", alt: "", class: "ext-section__bkg", loading: "lazy", aria: { hidden: true } %>
       <div class="ext-section__inner ext-section__inner--4">
-        <%= image_tag "RSVP_comp/fourth_section/title_section_4.png", alt: "Past Events", class: "section-4__title-image" %>
+        <%= image_tag "RSVP_comp/fourth_section/title_section_4.png", alt: "Past Events", class: "section-4__title-image", loading: "lazy" %>
         <div class="section-5__intro">
           <%= link_to "https://emmaborghi.tech/", target: "_blank", rel: "noopener noreferrer", class: "section-5__emma-box-link" do %>
-            <%= image_tag "RSVP_comp/fourth_section/emma_box.png", alt: "Past events intro", class: "section-5__emma-box" %>
+            <%= image_tag "RSVP_comp/fourth_section/emma_box.png", alt: "Past events intro", class: "section-5__emma-box", loading: "lazy" %>
           <% end %>
         </div>
         <div class="section-5__events">
           <div class="section-5__event section-5__event--juice">
             <%= link_to "https://www.youtube.com/watch?v=fuTlToZ1SX8&t=2s&pp=ygUPaGFjayBjbHViIGp1aWNl", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
-              <%= image_tag "RSVP_comp/fourth_section/juice_img.png", alt: "Juice event", class: "section-5__event-img" %>
+              <%= image_tag "RSVP_comp/fourth_section/juice_img.png", alt: "Juice event", class: "section-5__event-img", loading: "lazy" %>
             <% end %>
-            <%= image_tag "RSVP_comp/fourth_section/juice_txt.png", alt: "Juice", class: "section-5__event-txt" %>
+            <%= image_tag "RSVP_comp/fourth_section/juice_txt.png", alt: "Juice", class: "section-5__event-txt", loading: "lazy" %>
           </div>
           <div class="section-5__event section-5__event--moonshot">
-            <%= image_tag "RSVP_comp/fourth_section/moonshot_txt.png", alt: "Moonshot", class: "section-5__event-txt" %>
+            <%= image_tag "RSVP_comp/fourth_section/moonshot_txt.png", alt: "Moonshot", class: "section-5__event-txt", loading: "lazy" %>
             <%= link_to "https://moonshot.hackclub.com/", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
-              <%= image_tag "RSVP_comp/fourth_section/moonshot_img.png", alt: "Moonshot event", class: "section-5__event-img" %>
+              <%= image_tag "RSVP_comp/fourth_section/moonshot_img.png", alt: "Moonshot event", class: "section-5__event-img", loading: "lazy" %>
             <% end %>
           </div>
           <div class="section-5__event section-5__event--overglade">
             <%= link_to "https://overglade.hackclub.com/", target: "_blank", rel: "noopener noreferrer", class: "section-5__event-img-link" do %>
-              <%= image_tag "RSVP_comp/fourth_section/overglade_img.png", alt: "Overglade event", class: "section-5__event-img" %>
+              <%= image_tag "RSVP_comp/fourth_section/overglade_img.png", alt: "Overglade event", class: "section-5__event-img", loading: "lazy" %>
             <% end %>
-            <%= image_tag "RSVP_comp/fourth_section/overglade_txt.png", alt: "Overglade", class: "section-5__event-txt" %>
+            <%= image_tag "RSVP_comp/fourth_section/overglade_txt.png", alt: "Overglade", class: "section-5__event-txt", loading: "lazy" %>
           </div>
         </div>
-        <%= link_to image_tag("RSVP_comp/fourth_section/seeMoreHackathonsButton.png", alt: "See more hackathons", class: "section-5__see-more"), "https://hackclub.com/hackathons/", target: "_blank", rel: "noopener noreferrer", class: "section-5__see-more-link" %>
+        <%= link_to image_tag("RSVP_comp/fourth_section/seeMoreHackathonsButton.png", alt: "See more hackathons", class: "section-5__see-more", loading: "lazy"), "https://hackclub.com/hackathons/", target: "_blank", rel: "noopener noreferrer", class: "section-5__see-more-link" %>
       </div>
       <div class="ext-section__lighty-line"></div>
     </section>
 
     <%# Section 5: Info / Footer %>
     <section class="ext-section ext-section--5">
-      <%= image_tag "RSVP_comp/bkgs/extBkg_section_5.png", alt: "", class: "ext-section__bkg", aria: { hidden: true } %>
+      <%= image_tag "RSVP_comp/bkgs/extBkg_section_5.png", alt: "", class: "ext-section__bkg", loading: "lazy", aria: { hidden: true } %>
       <div class="ext-section__inner ext-section__inner--5">
         <h2 class="section-title section-title--center section-title--info">info</h2>
         <div class="section-6__cards">
           <div class="section-6__comm-buttons">
             <%= link_to "https://hackclub.enterprise.slack.com/archives/C0AEQ8ZJ7EU", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
-              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_1.png", alt: "Ask a question", class: "section-6__comm-card", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_1.png", alt: "Ask a question", class: "section-6__comm-card", loading: "lazy", aria: { hidden: true } %>
             <% end %>
             <%= link_to "https://hackclub.enterprise.slack.com/archives/C0ADEGZL5HD", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
-              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_2.png", alt: "Updates and News", class: "section-6__comm-card", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_2.png", alt: "Updates and News", class: "section-6__comm-card", loading: "lazy", aria: { hidden: true } %>
             <% end %>
             <%= link_to "https://hackclub.enterprise.slack.com/archives/C0AEQ8VAPA4", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
-              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_3.png", alt: "Join the community", class: "section-6__comm-card", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityCard_3.png", alt: "Join the community", class: "section-6__comm-card", loading: "lazy", aria: { hidden: true } %>
             <% end %>
           </div>
-          <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityBox_bkg.png", alt: "Ask a question, Updates and News, Join the community", class: "section-6__comm-box" %>
+          <%= image_tag "RSVP_comp/fifth_section/joinComm_box/communityBox_bkg.png", alt: "Ask a question, Updates and News, Join the community", class: "section-6__comm-box", loading: "lazy" %>
         </div>
         <div class="section-6__questions">
           <div class="section-6__questions-buttons">
             <%= link_to "https://jackpot.hackclub.com/faq", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
-              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/FAQ_card_1.png", alt: "FAQ", class: "section-6__question-card", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/FAQ_card_1.png", alt: "FAQ", class: "section-6__question-card", loading: "lazy", aria: { hidden: true } %>
             <% end %>
             <%= link_to "https://jackpot.hackclub.com/rules", target: "_blank", rel: "noopener noreferrer", class: "section-6__card-link" do %>
-              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/rules_card_2.png", alt: "Rules", class: "section-6__question-card", aria: { hidden: true } %>
+              <%= image_tag "RSVP_comp/fifth_section/joinComm_box/rules_card_2.png", alt: "Rules", class: "section-6__question-card", loading: "lazy", aria: { hidden: true } %>
             <% end %>
           </div>
-          <%= image_tag "RSVP_comp/fifth_section/joinComm_box/questionBox_bkg.png", alt: "Questions FAQ Rules", class: "section-6__questions-box" %>
+          <%= image_tag "RSVP_comp/fifth_section/joinComm_box/questionBox_bkg.png", alt: "Questions FAQ Rules", class: "section-6__questions-box", loading: "lazy" %>
         </div>
         <footer class="section-6__footer">
           <div class="section-6__footer-line"></div>
@@ -299,7 +299,7 @@ body {
   height: var(--first-section-height);
   min-height: var(--first-section-height);
   margin: 0;
-  background: url(<%= image_path "first_bkg.jpg" %>) no-repeat top center #000;
+  background: url('https://cdn.hackclub.com/019d2a6b-2cc9-7513-a9b7-54485c82f1e0/first_bkg-c69fb828.jpg') no-repeat top center #000;
   background-size: 100% auto;
 }
 
