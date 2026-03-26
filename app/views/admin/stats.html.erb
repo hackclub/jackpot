@@ -1,0 +1,286 @@
+<% content_for(:title) { "Platform Statistics" } %>
+
+<div class="admin-page">
+  <div class="admin-content" style="max-width: 1100px;">
+    <h1>Platform Statistics</h1>
+
+    <h2 class="stats-section-title">Projects</h2>
+    <div class="stats-row stats-row--5">
+      <div class="stats-card">
+        <span class="stats-value"><%= @total_projects %></span>
+        <span class="stats-label">Total Projects</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--orange"><%= @pending_projects %></span>
+        <span class="stats-label">Pending</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value"><%= @in_review_projects %></span>
+        <span class="stats-label">In Review</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--green"><%= @approved_projects %></span>
+        <span class="stats-label">Approved</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--red"><%= @rejected_projects %></span>
+        <span class="stats-label">Rejected</span>
+      </div>
+    </div>
+
+    <h2 class="stats-section-title">Hours</h2>
+    <div class="stats-row stats-row--4">
+      <div class="stats-card">
+        <span class="stats-value"><%= number_with_precision(@total_logged_hours, precision: 1) %></span>
+        <span class="stats-label">Total Logged Hours</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--green"><%= number_with_precision(@approved_hours, precision: 1) %></span>
+        <span class="stats-label">Approved Hours</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--green"><%= number_with_precision(@pending_review_hours, precision: 1) %></span>
+        <span class="stats-label">Pending Review Hours</span>
+      </div>
+      <div class="stats-card stats-card--highlight">
+        <span class="stats-value stats-value--gold"><%= number_with_precision(@journal_hours_total, precision: 1) %></span>
+        <span class="stats-label">Journal Hours (<%= number_with_delimiter(@journal_entries_count) %> entries)</span>
+      </div>
+    </div>
+
+    <h2 class="stats-section-title">Bolts (Currency)</h2>
+    <div class="stats-row stats-row--3">
+      <div class="stats-card">
+        <span class="stats-value stats-value--green"><%= number_with_delimiter(@total_bolts_awarded.round) %></span>
+        <span class="stats-label">Total Bolts Awarded</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--green"><%= number_with_delimiter(@bolts_in_wallets.round) %></span>
+        <span class="stats-label">Bolts in User Wallets</span>
+      </div>
+      <div class="stats-card stats-card--highlight">
+        <span class="stats-value stats-value--red"><%= number_with_delimiter(@bolts_spent.round) %></span>
+        <span class="stats-label">Bolts Spent</span>
+      </div>
+    </div>
+
+    <h2 class="stats-section-title">Users</h2>
+    <div class="stats-row stats-row--5">
+      <div class="stats-card">
+        <span class="stats-value"><%= number_with_delimiter(@total_users) %></span>
+        <span class="stats-label">Total Users</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value"><%= @admin_users %></span>
+        <span class="stats-label">Admins</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value"><%= @users_with_projects %></span>
+        <span class="stats-label">With Projects</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--green"><%= @users_with_approved %></span>
+        <span class="stats-label">With Approved Projects</span>
+      </div>
+    </div>
+
+    <h2 class="stats-section-title">Shop &amp; Grants</h2>
+    <div class="stats-row stats-row--4">
+      <div class="stats-card">
+        <span class="stats-value"><%= number_with_delimiter(@total_orders) %></span>
+        <span class="stats-label">Total Orders</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--orange"><%= @pending_orders %></span>
+        <span class="stats-label">Pending Orders</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--green"><%= @fulfilled_orders %></span>
+        <span class="stats-label">Fulfilled Orders</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value"><%= number_to_currency(@total_grant_value, precision: 0) %></span>
+        <span class="stats-label">Total Grant Value</span>
+      </div>
+    </div>
+
+    <h2 class="stats-section-title" style="font-size: 1rem;">Orders by Category</h2>
+    <div class="stats-tags">
+      <% @orders_by_category.each do |category, count| %>
+        <span class="stats-tag"><%= category %>: <%= count %></span>
+      <% end %>
+    </div>
+
+    <div class="stats-tables-row">
+      <div class="stats-table-wrap">
+        <h2 class="stats-section-title">Top Users by Approved Hours</h2>
+        <table class="stats-table">
+          <thead>
+            <tr><th>#</th><th>User</th><th>Hours</th></tr>
+          </thead>
+          <tbody>
+            <% @top_users_by_hours.each_with_index do |user, i| %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= user.leaderboard_name %></td>
+                <td><%= number_with_precision(user.total_approved_hours.to_f, precision: 1) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="stats-table-wrap">
+        <h2 class="stats-section-title">Top Users by Bolt Balance</h2>
+        <table class="stats-table">
+          <thead>
+            <tr><th>#</th><th>User</th><th>Balance</th></tr>
+          </thead>
+          <tbody>
+            <% @top_users_by_bolts.each_with_index do |user, i| %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= user.leaderboard_name %></td>
+                <td><%= number_with_delimiter(user.chip_am.to_i) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.stats-section-title {
+  font-size: 1.2rem;
+  color: #c4b89a;
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  margin: 2rem 0 0.75rem;
+}
+
+.stats-section-title:first-of-type {
+  margin-top: 0;
+}
+
+.stats-row {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.stats-row--3 { grid-template-columns: repeat(3, 1fr); }
+.stats-row--4 { grid-template-columns: repeat(4, 1fr); }
+.stats-row--5 { grid-template-columns: repeat(5, 1fr); }
+
+.stats-card {
+  background: rgba(30, 20, 10, 0.8);
+  border: 2px solid #8b6914;
+  border-radius: 12px;
+  padding: 1rem 0.75rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stats-card--highlight {
+  background: rgba(50, 40, 20, 0.7);
+  border-color: #d4a017;
+}
+
+.stats-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-family: 'Georgia', serif;
+  color: #f0e6d2;
+}
+
+.stats-value--green  { color: #3cb043; }
+.stats-value--orange { color: #d4a017; }
+.stats-value--red    { color: #d42b2b; }
+.stats-value--gold   { color: #d4a017; }
+
+.stats-label {
+  font-size: 0.78rem;
+  color: #8a7e6a;
+  font-style: italic;
+  font-family: 'Georgia', serif;
+}
+
+.stats-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.stats-tag {
+  background: rgba(30, 20, 10, 0.8);
+  border: 1px solid #8b6914;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  color: #c4b89a;
+  font-family: 'Georgia', serif;
+}
+
+.stats-tables-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.stats-table-wrap {
+  background: rgba(20, 14, 8, 0.6);
+  border: 2px solid #8b6914;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.stats-table-wrap .stats-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Georgia', serif;
+  font-size: 0.9rem;
+}
+
+.stats-table th {
+  color: #d4a017;
+  font-weight: 700;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid rgba(139, 105, 20, 0.4);
+  font-size: 0.8rem;
+}
+
+.stats-table td {
+  color: #f0e6d2;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(139, 105, 20, 0.15);
+}
+
+.stats-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 900px) {
+  .stats-row--5 { grid-template-columns: repeat(3, 1fr); }
+  .stats-row--4 { grid-template-columns: repeat(2, 1fr); }
+  .stats-tables-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .stats-row--5,
+  .stats-row--4,
+  .stats-row--3 { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
