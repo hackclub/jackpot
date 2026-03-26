@@ -499,8 +499,9 @@
           <% if @project["playable_url"].present? && @project["playable_url"].match?(/\Ahttps?:\/\//i) %>
             <a href="<%= @project["playable_url"] %>" target="_blank" class="quick-link-btn">▶ Live Demo</a>
           <% end %>
-          <button class="quick-link-btn" onclick="alert('Fraud link placeholder')">⚠ Report Fraud (Title)</button>
-          <button class="quick-link-btn" onclick="alert('Fraud link placeholder')">⚠ Report Fraud (Open)</button>
+          <% if @user.slack_id.present? %>
+            <a href="https://joe.fraud.hackclub.com/profile/<%= @user.slack_id %>" target="_blank" class="quick-link-btn">Fraud Check</a>
+          <% end %>
         </div>
 
         <div class="project-status-section">
