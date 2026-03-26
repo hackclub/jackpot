@@ -52,6 +52,11 @@ class DeckController < ApplicationController
        end
 
        pending_review = project.pending_review_hours
+       other_pending_ship = current_user.projects.where.not(id: project.id).where(
+         shipped: true,
+         status: "in-review",
+         reviewed: false
+       ).exists?
        project_hash = {
          "id" => project.id,
          "name" => project.name,
@@ -70,6 +75,7 @@ class DeckController < ApplicationController
          "past_approved_hours" => project.past_approved_hours.to_f,
          "first_shipped_at" => project.first_shipped_at&.iso8601,
          "reshippable" => project.reshippable?,
+         "user_has_other_pending_ship" => other_pending_ship,
          "main_hc_reship_locked" => project.reship_blocked_by_main_hc_database?,
          "shipped" => project.shipped,
          "shipped_at" => project.shipped_at&.iso8601,

@@ -628,6 +628,28 @@
   filter: brightness(1.1);
 }
 
+/* Another project is in the review queue — faded but clearly visible; click shows explanation */
+.project-ship-btn.ship-btn--other-pending {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.project-ship-btn.ship-btn--other-pending:hover {
+  filter: none;
+  opacity: 0.72;
+}
+
+/* In review queue but no new hours beyond snapshot yet — Ship update visible, click explains */
+.project-ship-btn.ship-btn--need-more-hours {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.project-ship-btn.ship-btn--need-more-hours:hover {
+  filter: none;
+  opacity: 0.72;
+}
+
 .project-delete-btn {
   border: 1px solid #5c2a2a;
   border-radius: 6px;
