@@ -4,6 +4,7 @@ class DeckController < ApplicationController
 
   MAIN_HC_RESHIP_BLOCKED_MSG = "This project has already been submitted to the main HC database - please contact @Emma".freeze
   ZERO_HOURS_SHIP_MSG = "You need logged hours (Hackatime + journal) before you can ship.".freeze
+  SHIP_SUBMISSION_NOTE_REQUIRED_MSG = "Describe what changed in this submission (Update for reviewers) before shipping.".freeze
 
   def index
     projects = current_user.projects.includes(:ysws_project_submission).order(position: :asc).to_a
@@ -64,6 +65,7 @@ class DeckController < ApplicationController
          "hackatime_hours" => hackatime_hours,
          "journal_hours" => journal_hours,
          "pending_review_hours" => pending_review,
+         "unshipped_hours_display" => project.unshipped_hours_for_deck_display.to_f,
          "hours_logged_beyond_queue_submission" => project.hours_logged_beyond_current_queue_submission.to_f,
          "past_approved_hours" => project.past_approved_hours.to_f,
          "first_shipped_at" => project.first_shipped_at&.iso8601,
@@ -201,10 +203,20 @@ class DeckController < ApplicationController
   def ship_project
     project_index = params[:project_index].to_i
     project = current_user.projects.order(position: :asc)[project_index]
+    ship_note = params[:ship_submission_note].to_s.strip.presence
 
     if project
       refresh_logged_totals_for_project!(project, current_user)
       project.reload
+
+      unless ship_note
+        if request.xhr?
+          return render json: { error: SHIP_SUBMISSION_NOTE_REQUIRED_MSG }, status: :unprocessable_entity
+        else
+          flash[:alert] = SHIP_SUBMISSION_NOTE_REQUIRED_MSG
+          return redirect_to deck_path
+        end
+      end
 
       # Pending in queue: Ship update commits new logged time into this submission and moves to the back of the queue.
       if project.shipped? && project.status.to_s == "in-review" && !project.reviewed?
@@ -243,7 +255,8 @@ class DeckController < ApplicationController
           shipped: true,
           status: "in-review",
           shipped_at: Time.current,
-          shipping_queue_snapshot_total_hours: project.total_hours.to_f
+          shipping_queue_snapshot_total_hours: project.total_hours.to_f,
+          hour_justification: ship_note
         )
         project.ysws_project_submission&.update_columns(ship_status: "Pending", updated_at: Time.current)
 
@@ -329,7 +342,8 @@ class DeckController < ApplicationController
         status: "in-review",
         shipped_at: now,
         first_shipped_at: project.first_shipped_at || now,
-        shipping_queue_snapshot_total_hours: project.total_hours.to_f
+        shipping_queue_snapshot_total_hours: project.total_hours.to_f,
+        hour_justification: ship_note
       }
       if reship_from_approved
         attrs.merge!(
@@ -338,7 +352,6 @@ class DeckController < ApplicationController
           reviewed_by_user_id: nil,
           approver_display_name: nil,
           approved_hours: nil,
-          hour_justification: nil,
           admin_feedback: nil
         )
       end
@@ -540,7 +553,7 @@ class DeckController < ApplicationController
     project_index = params[:project_index].to_i
     project_id = params[:project_id]
     approved_hours = params[:approved_hours].to_f
-    justification = params[:hour_justification]
+    justification = params[:hour_justification].to_s.strip
     feedback = params[:feedback]
 
     user = User.find(user_id)
@@ -581,6 +594,8 @@ class DeckController < ApplicationController
     Rails.logger.info "Approving project for user #{user_id} project_id=#{project.id}: +#{new_hours} h (total #{new_total}) = +#{chips_delta} chips"
 
     begin
+      merged_justification = justification.presence || project.hour_justification
+
       # Always update the Project record so status page shows review (single source of truth)
       project.update!(
         reviewed: true,
@@ -588,14 +603,14 @@ class DeckController < ApplicationController
         status: "approved",
         approved_hours: new_total,
         past_approved_hours: new_total,
-        hour_justification: justification,
+        hour_justification: merged_justification,
         admin_feedback: feedback,
         chips_earned: new_cumulative_chips,
         reviewed_by_user_id: current_user.id,
         approver_display_name: current_user.jackpot_profile_name
       )
 
-      user.approve_project(resolved_index, new_total, justification, feedback, new_chip_award: chips_delta) if resolved_index.present?
+      user.approve_project(resolved_index, new_total, merged_justification, feedback, new_chip_award: chips_delta) if resolved_index.present?
 
       project.ysws_project_submission&.update_column(:ship_status, "Approved")
 

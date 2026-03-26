@@ -49,8 +49,19 @@ class ShopController < ApplicationController
     item = ShopItem.active.find(params[:id])
     quantity = params[:quantity].to_i
     quantity = 1 if quantity < 1
-    shipping_chips = params[:shipping_chips].presence || params[:shipping]
-    shipping_chips = shipping_chips.to_i
+    shipping_usd_requested = parse_shipping_usd_param(item)
+    shipping_usd_recorded = shipping_usd_requested.round(2, BigDecimal::ROUND_HALF_UP)
+    max_ship_usd = item.max_shipping_usd_for_quantity(quantity)
+    if shipping_usd_recorded > max_ship_usd
+      msg = "Shipping/tax cannot be more than 60% of the dollar value of the items in this order (maximum $#{format('%.2f', max_ship_usd.to_f)} for this quantity)."
+      if request.xhr?
+        return render json: { error: msg }, status: :unprocessable_entity
+      else
+        flash[:alert] = msg
+        return redirect_to shop_path
+      end
+    end
+    shipping_chips = item.shipping_chips_for_usd(shipping_usd_recorded)
     shipping_chips = 0 if shipping_chips.negative?
     shipping_chips = [ shipping_chips, 500_000 ].min
 
@@ -83,12 +94,7 @@ class ShopController < ApplicationController
       current_user.update!(chip_am: current_user.chip_am.to_d - total_cost)
 
       items_usd = item.price_usd.to_d * quantity
-      shipping_usd =
-        if shipping_chips.positive? && item.dollar_per_hour.present? && item.dollar_per_hour.to_d.positive?
-          ((shipping_chips.to_d / 50) * item.dollar_per_hour.to_d).round(2)
-        else
-          0.to_d
-        end
+      shipping_usd = shipping_usd_recorded
       total_usd = (items_usd + shipping_usd).round(2)
 
       current_user.shop_orders.create!(
@@ -130,6 +136,29 @@ class ShopController < ApplicationController
   end
 
   private
+
+  # Checkout "Shipping/Tax $" is submitted as `shipping_usd` (USD). Legacy `shipping_chips` is still accepted.
+  def parse_shipping_usd_param(item)
+    usd = begin
+      if params.key?(:shipping_usd)
+        BigDecimal(params[:shipping_usd].to_s)
+      elsif params[:shipping_chips].present? || params[:shipping].present?
+        chips = (params[:shipping_chips].presence || params[:shipping]).to_i
+        chips = 0 if chips.negative?
+        dph = item.dollar_per_hour.to_d
+        if chips.positive? && item.dollar_per_hour.present? && dph.positive?
+          ((chips.to_d / 50) * dph).round(2)
+        else
+          0.to_d
+        end
+      else
+        0.to_d
+      end
+    rescue ArgumentError
+      0.to_d
+    end
+    usd.negative? ? 0.to_d : usd
+  end
 
   def require_admin_for_shop
     return if admin?

@@ -75,6 +75,8 @@
                     data-item-desc="<%= @pinned_item.description.to_s %>"
                     data-item-link="<%= @pinned_item.item_link.to_s %>"
                     data-item-price="<%= @pinned_item.price.to_f %>"
+                    data-item-price-usd="<%= @pinned_item.price_usd.to_f if @pinned_item.price_usd.present? %>"
+                    data-item-dollar-per-hour="<%= @pinned_item.dollar_per_hour.to_f if @pinned_item.dollar_per_hour.present? %>"
                     data-item-image="<%= image_path("ticket Background Removed.png") %>"
                     data-item-max-per-person="<%= @pinned_item.max_per_person.to_i if @pinned_item.max_per_person.present? %>"
                     data-item-purchased-qty="<%= pinned_qty %>"
@@ -159,6 +161,8 @@
                                   data-item-desc="<%= item.description.to_s %>"
                                   data-item-link="<%= item.item_link.to_s %>"
                                   data-item-price="<%= item.price.to_f %>"
+                                  data-item-price-usd="<%= item.price_usd.to_f if item.price_usd.present? %>"
+                                  data-item-dollar-per-hour="<%= item.dollar_per_hour.to_f if item.dollar_per_hour.present? %>"
                                   data-item-image="<%= item.image_url.to_s %>"
                                   data-item-max-per-person="<%= item.max_per_person.to_i if item.max_per_person.present? %>"
                                   data-item-purchased-qty="<%= purchased_qty %>"
@@ -238,7 +242,7 @@
           <strong>THIS IS THE CURRENCY THAT WILL BE GIVEN IN THE FINAL GRANT!!!</strong>
         </li>
         <li>
-          If you need a top-up for shipping/customs/taxes, or if you simply need a higher amount to purchase the item in your country, you can request an additional amount using the <strong>“Shipping/Tax (Optional)”</strong> field at checkout.
+          If you need a top-up for shipping/customs/taxes, or if you simply need a higher amount to purchase the item in your country, you can request an additional amount using the <strong>“Shipping/Tax $ (Optional)”</strong> field at checkout (amounts are in US dollars).
         </li>
       </ul>
     </div>
@@ -276,14 +280,14 @@
             <div class="shop-item-divider"></div>
 
             <div class="shop-item-form-row shop-item-form-row--shipping">
-              <label class="shop-item-label shop-item-label--stacked" for="shopItemModalShipping">
-                <span>Shipping/Tax</span>
-                <span class="shop-item-label-sub">(Optional)</span>
+              <label class="shop-item-label shop-item-label--stacked" for="shopItemModalShippingUsd">
+                <span>Shipping/Tax $</span>
+                <span class="shop-item-label-sub">(Optional, USD)</span>
               </label>
               <div class="shop-item-shipping">
-                <span class="shop-item-currency">+</span>
-                <input class="shop-item-input shop-item-input--shipping" id="shopItemModalShipping" type="number" min="0" value="0">
-                <span class="shop-item-hint">(50 Chips = $6)</span>
+                <span class="shop-item-currency">$</span>
+                <input class="shop-item-input shop-item-input--shipping" id="shopItemModalShippingUsd" type="number" min="0" step="0.01" value="0" inputmode="decimal">
+                <span class="shop-item-hint" id="shopItemModalShippingMaxHint"></span>
               </div>
             </div>
           </div>
@@ -648,26 +652,53 @@
   var itemModalDesc = document.getElementById('shopItemModalDesc');
   var itemModalQty = document.getElementById('shopItemModalQty');
   var itemModalLimit = document.getElementById('shopItemModalLimit');
-  var itemModalShipping = document.getElementById('shopItemModalShipping');
+  var itemModalShippingUsd = document.getElementById('shopItemModalShippingUsd');
   var itemModalTotal = document.getElementById('shopItemModalTotal');
   var itemModalError = document.getElementById('shopItemModalError');
   var itemModalPurchase = document.getElementById('shopItemModalPurchase');
 
-  var itemModalCurrent = { id: null, name: null, link: null, basePrice: 0 };
+  var itemModalCurrent = { id: null, name: null, link: null, basePrice: 0, priceUsd: 0, dollarPerHour: 0 };
+  var itemModalShippingMaxHint = document.getElementById('shopItemModalShippingMaxHint');
 
   function toNumber(v) {
     var n = parseFloat(String(v || '').replace(/,/g, ''));
     return Number.isFinite(n) ? n : 0;
   }
 
+  function roundUsd2(n) {
+    return Math.round(Math.max(0, n) * 100) / 100;
+  }
+
+  function maxShippingUsdForItemModal() {
+    var qty = Math.max(1, parseInt(itemModalQty && itemModalQty.value, 10) || 1);
+    var itemsUsd = toNumber(itemModalCurrent.priceUsd) * qty;
+    return roundUsd2(itemsUsd * 0.6);
+  }
+
+  function shippingChipsFromUsd(usd) {
+    var dph = toNumber(itemModalCurrent.dollarPerHour);
+    if (usd <= 0 || dph <= 0) return 0;
+    return Math.ceil((usd / dph) * 50);
+  }
+
   function updateItemModalTotals() {
     if (!itemModalTotal) return;
     var qty = Math.max(1, parseInt(itemModalQty && itemModalQty.value, 10) || 1);
     if (itemModalQty) itemModalQty.value = String(qty);
-    var shipping = Math.max(0, toNumber(itemModalShipping && itemModalShipping.value));
-    shipping = Math.ceil(shipping);
-    if (itemModalShipping) itemModalShipping.value = String(shipping);
-    var total = (itemModalCurrent.basePrice * qty) + shipping;
+    var maxUsd = maxShippingUsdForItemModal();
+    if (itemModalShippingMaxHint) {
+      itemModalShippingMaxHint.textContent = 'Max $' + maxUsd.toFixed(2) + ' (60% of item value for this quantity). Total below is chips (items + shipping).';
+    }
+    var rawUsd = Math.max(0, toNumber(itemModalShippingUsd && itemModalShippingUsd.value));
+    var usd = Math.min(rawUsd, maxUsd);
+    if (rawUsd > maxUsd + 1e-6) {
+      alert('Shipping/tax cannot be more than 60% of the dollar value of the items in this order (maximum $' + maxUsd.toFixed(2) + ' for this quantity).');
+      usd = maxUsd;
+      if (itemModalShippingUsd) itemModalShippingUsd.value = maxUsd.toFixed(2);
+    }
+    var shipChips = shippingChipsFromUsd(usd);
+    if (shipChips > 500000) shipChips = 500000;
+    var total = (itemModalCurrent.basePrice * qty) + shipChips;
     total = Math.ceil(total);
     itemModalTotal.textContent = String(total);
   }
@@ -680,6 +711,8 @@
      itemModalCurrent.name = data.name || '';
      itemModalCurrent.link = data.link || '';
      itemModalCurrent.basePrice = Math.ceil(toNumber(data.price));
+     itemModalCurrent.priceUsd = toNumber(data.priceUsd);
+     itemModalCurrent.dollarPerHour = toNumber(data.dollarPerHour);
 
      if (itemModalLimit) {
        var maxPerPerson = parseInt(data.maxPerPerson || "", 10);
@@ -701,7 +734,7 @@
      }
 
      if (itemModalQty) itemModalQty.value = '1';
-     if (itemModalShipping) itemModalShipping.value = '0';
+     if (itemModalShippingUsd) itemModalShippingUsd.value = '0';
      if (itemModalError) itemModalError.hidden = true;
      updateItemModalTotals();
 
@@ -726,6 +759,8 @@
         desc: btn.dataset.itemDesc,
         link: btn.dataset.itemLink,
         price: btn.dataset.itemPrice || '0',
+        priceUsd: btn.dataset.itemPriceUsd || '0',
+        dollarPerHour: btn.dataset.itemDollarPerHour || '0',
         image: btn.dataset.itemImage,
         maxPerPerson: btn.dataset.itemMaxPerPerson,
         purchasedQty: btn.dataset.itemPurchasedQty
@@ -942,7 +977,7 @@
   };
 
   if (itemModalQty) itemModalQty.addEventListener('input', updateItemModalTotals);
-  if (itemModalShipping) itemModalShipping.addEventListener('input', updateItemModalTotals);
+  if (itemModalShippingUsd) itemModalShippingUsd.addEventListener('input', updateItemModalTotals);
 
   var shopRulesAcceptOverlay = document.getElementById('shopRulesAcceptOverlay');
   var shopRulesAcceptCheckbox = document.getElementById('shopRulesAcceptCheckbox');
@@ -980,11 +1015,18 @@
   function doItemModalPurchase() {
     if (!itemModalCurrent.id) return;
     var qty = Math.max(1, parseInt(itemModalQty && itemModalQty.value, 10) || 1);
+    var maxUsd = maxShippingUsdForItemModal();
+    var shipUsd = roundUsd2(toNumber(itemModalShippingUsd && itemModalShippingUsd.value));
+    if (shipUsd > maxUsd + 1e-6) {
+      alert('Shipping/tax cannot be more than 60% of the dollar value of the items in this order (maximum $' + maxUsd.toFixed(2) + ' for this quantity).');
+      if (itemModalShippingUsd) itemModalShippingUsd.value = maxUsd.toFixed(2);
+      updateItemModalTotals();
+      return;
+    }
+
     itemModalPurchase.disabled = true;
     itemModalPurchase.textContent = 'Processing...';
     if (itemModalError) itemModalError.hidden = true;
-
-    var shipChips = Math.max(0, Math.ceil(toNumber(itemModalShipping && itemModalShipping.value)));
 
     fetch('<%= buy_shop_item_path(":id") %>'.replace('%3Aid', itemModalCurrent.id).replace(':id', itemModalCurrent.id), {
       method: 'POST',
@@ -993,7 +1035,7 @@
         'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
         'X-Requested-With': 'XMLHttpRequest'
       },
-      body: JSON.stringify({ quantity: qty, shipping_chips: shipChips })
+      body: JSON.stringify({ quantity: qty, shipping_usd: shipUsd })
     })
     .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
     .then(function(result) {
@@ -1083,7 +1125,7 @@
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
           'X-Requested-With': 'XMLHttpRequest'
         },
-        body: JSON.stringify({ quantity: 1, shipping_chips: 0 })
+        body: JSON.stringify({ quantity: 1, shipping_usd: 0 })
       })
       .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
       .then(function(result) {

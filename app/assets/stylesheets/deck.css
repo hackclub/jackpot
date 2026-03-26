@@ -588,6 +588,12 @@
   margin-right: 1rem;
 }
 
+.detail-label-required {
+  color: #c0392b;
+  font-weight: 800;
+  margin-left: 0.15rem;
+}
+
 .detail-value {
   color: #1e1e1e;
   font-size: 0.95rem;
