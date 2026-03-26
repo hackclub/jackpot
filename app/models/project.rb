@@ -47,6 +47,16 @@ class Project < ApplicationRecord
     raw.negative? ? 0.0 : raw
   end
 
+  # Deck "Unshipped hours": only time not yet committed to a shipped submission. While waiting for
+  # review, excludes hours already captured in the queue snapshot (those count as "in submission").
+  def unshipped_hours_for_deck_display
+    if shipped? && status.to_s == "in-review" && !reviewed?
+      hours_logged_beyond_current_queue_submission
+    else
+      pending_review_hours
+    end
+  end
+
   def reship_blocked_by_main_hc_database?
     ysws_project_submission&.automation_first_submitted_at.present?
   end

@@ -492,6 +492,13 @@
       </div>
 
       <div class="review-project-column">
+        <% if @project_db.hour_justification.present? %>
+          <div class="participant-ship-note" style="background: rgba(40, 55, 35, 0.45); padding: 1rem; border-radius: 8px; border: 1px solid #4a7c4a; margin-bottom: 1.25rem;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #7dd87d; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.03em;">Participant — update for this submission</div>
+            <div style="color: #e8dcc8; font-size: 0.95rem; white-space: pre-wrap; line-height: 1.5;"><%= @project_db.hour_justification %></div>
+          </div>
+        <% end %>
+
         <div class="quick-links">
           <% if @project["code_url"].present? && @project["code_url"].match?(/\Ahttps?:\/\//i) %>
             <a href="<%= @project["code_url"] %>" target="_blank" class="quick-link-btn">📂 Code Repository</a>

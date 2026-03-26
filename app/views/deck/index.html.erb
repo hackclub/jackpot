@@ -34,7 +34,8 @@
                data-project-reviewed="<%= project["reviewed"] ? "true" : "false" %>"
                data-first-shipped-at="<%= project["first_shipped_at"].to_s %>"
                data-pending-review-hours="<%= project["pending_review_hours"].to_f %>"
-               data-hours-logged-beyond-queue-submission="<%= (project["hours_logged_beyond_queue_submission"] || 0).to_f %>"
+               data-unshipped-hours-display="<%= (project["unshipped_hours_display"] || project["pending_review_hours"]).to_f %>"
+               data-hours-logged-beyond-queue-submission="<%= (project["hours_logged_beyond_current_queue_submission"] || 0).to_f %>"
                data-reshippable="<%= project["reshippable"] ? "true" : "false" %>"
                data-main-hc-reship-locked="<%= project["main_hc_reship_locked"] ? "true" : "false" %>"
                data-playable-url="<%= project["playable_url"] %>"
@@ -236,6 +237,11 @@
          <div class="detail-journal-entries-section">
            <span class="detail-label">Journal Entries</span>
            <div id="detailJournalEntriesList" class="detail-journal-entries-list"></div>
+         </div>
+
+         <div class="detail-stat-row" id="detailShipSubmissionNoteRow" style="display: none;">
+           <span class="detail-label">Update for reviewers <span class="detail-label-required" aria-hidden="true">*</span></span>
+           <textarea class="detail-value detail-description-edit" id="detailShipSubmissionNote" rows="3" maxlength="10000" placeholder="Describe what changed in this submission — this does not replace your project description." aria-required="true"></textarea>
          </div>
          </div>
 
@@ -796,10 +802,19 @@ function initDeck() {
      var showShipBtn = !isShipped || canReship || showShipUpdateLocked || pendingQueueShipUpdate;
 
      if (detailUnshippedHoursRow && detailUnshippedHours) {
-       var pr = parseFloat(data.pendingReviewHours, 10);
-       if (isNaN(pr)) pr = 0;
-       detailUnshippedHours.textContent = pr.toFixed(1);
+       var unshipped = parseFloat(data.unshippedHoursDisplay, 10);
+       if (isNaN(unshipped)) unshipped = 0;
+       detailUnshippedHours.textContent = unshipped.toFixed(1);
        detailUnshippedHoursRow.style.display = (lockedAfterShip || isShipped) ? 'flex' : 'none';
+     }
+
+     var detailShipSubmissionNoteRow = document.getElementById('detailShipSubmissionNoteRow');
+     var detailShipSubmissionNote = document.getElementById('detailShipSubmissionNote');
+     if (detailShipSubmissionNoteRow && detailShipSubmissionNote) {
+       var showShipNote = showShipBtn && !showShipUpdateLocked;
+       detailShipSubmissionNoteRow.style.display = showShipNote ? 'flex' : 'none';
+       if (showShipNote) detailShipSubmissionNote.value = '';
+       detailShipSubmissionNote.required = !!showShipNote;
      }
 
      if (bannerUploadArea) {
@@ -1032,10 +1047,19 @@ function initDeck() {
          alert('Please click "Save Changes" before shipping your project');
          return;
        }
-       
+
+       var shipNoteEl = document.getElementById('detailShipSubmissionNote');
+       var shipNoteTrim = shipNoteEl ? shipNoteEl.value.trim() : '';
+       if (!shipNoteTrim) {
+         alert('Describe what changed in this submission (Update for reviewers) before shipping.');
+         if (shipNoteEl) shipNoteEl.focus();
+         return;
+       }
+
        var formData = new FormData();
        formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').content);
        formData.append('project_index', currentDetailData.index);
+       formData.append('ship_submission_note', shipNoteTrim);
        
        fetch('<%= ship_project_path %>', {
          method: 'POST',
@@ -1148,6 +1172,7 @@ function initDeck() {
         reviewed: card.dataset.projectReviewed || 'false',
         firstShippedAt: card.dataset.firstShippedAt || '',
         pendingReviewHours: card.dataset.pendingReviewHours || '0',
+        unshippedHoursDisplay: card.dataset.unshippedHoursDisplay || '0',
         hoursLoggedBeyondQueueSubmission: card.dataset.hoursLoggedBeyondQueueSubmission || '0',
         reshippable: card.dataset.reshippable || 'false',
         mainHcReshipLocked: card.dataset.mainHcReshipLocked || 'false',

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_26_172000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -131,7 +131,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_26_172000) do
     t.string "hackatime_project"
     t.json "hackatime_projects", default: [], null: false
     t.datetime "hackatime_synced_at"
-    t.string "hour_justification"
+    t.text "hour_justification"
     t.string "name"
     t.decimal "past_approved_hours", precision: 10, scale: 2, default: "0.0", null: false
     t.string "playable_url"

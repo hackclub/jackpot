@@ -47,6 +47,27 @@ class ShopItem < ApplicationRecord
     user.shop_orders.where(shop_item_id: id, status: %w[pending sent]).sum(:quantity).to_i
   end
 
+  # "Shipping/Tax $" at checkout is entered in USD; max is 60% of (qty × price_usd).
+  def max_shipping_usd_for_quantity(quantity)
+    qty = quantity.to_i
+    qty = 1 if qty < 1
+    items_usd = (price_usd.presence || 0).to_d * qty
+    return 0.to_d if items_usd <= 0
+
+    (items_usd * 0.6r).round(2, BigDecimal::ROUND_HALF_UP)
+  end
+
+  # Chips charged for a shipping/tax dollar amount (same rate as catalog: price_usd ↔ chips via dollar_per_hour).
+  def shipping_chips_for_usd(usd_amount)
+    usd = usd_amount.to_d
+    return 0 if usd <= 0
+
+    dph = dollar_per_hour.present? ? dollar_per_hour.to_d : 0.to_d
+    return 0 unless dph.positive?
+
+    ((usd / dph) * 50).ceil
+  end
+
   private
 
   def compute_price_from_usd
