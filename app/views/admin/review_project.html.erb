@@ -500,7 +500,7 @@
             <a href="<%= @project["playable_url"] %>" target="_blank" class="quick-link-btn">▶ Live Demo</a>
           <% end %>
           <% if @user.slack_id.present? %>
-            <a href="https://joe.fraud.hackclub.com/profile/<%= @user.slack_id %>" target="_blank" class="quick-link-btn">Fraud Check</a>
+            <a href="https://joe.fraud.hackclub.com/profile/<%= ERB::Util.url_encode(@user.slack_id.to_s) %>" target="_blank" class="quick-link-btn">Fraud Check</a>
           <% end %>
         </div>
 
