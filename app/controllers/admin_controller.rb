@@ -8,6 +8,48 @@ class AdminController < ApplicationController
     cleanup_corrupted_projects
   end
 
+  def stats
+    @total_projects = Project.count
+    @pending_projects = Project.where(status: "pending").count
+    @in_review_projects = Project.where(status: "in-review").count
+    @approved_projects = Project.where(status: "approved").count
+    @rejected_projects = Project.where(status: "rejected").count
+
+    @total_logged_hours = Project.sum(:total_hours).to_f
+    @approved_hours = Project.where(status: "approved").sum(:approved_hours).to_f
+    @pending_review_hours = Project.where(status: "in-review").sum(:total_hours).to_f
+    @journal_hours_total = JournalEntry.sum(:hours_worked).to_f
+    @journal_entries_count = JournalEntry.count
+
+    @total_bolts_awarded = Project.where(status: "approved").sum(:chips_earned).to_f
+    @bolts_in_wallets = User.sum(:chip_am).to_f
+    @bolts_spent = @total_bolts_awarded - @bolts_in_wallets
+
+    @total_users = User.count
+    @admin_users = User.where(role: :admin).count
+    @users_with_projects = User.joins(:projects).distinct.count
+    @users_with_approved = User.joins(:projects).where(projects: { status: "approved" }).distinct.count
+
+    @total_orders = ShopOrder.count
+    @pending_orders = ShopOrder.where(status: "pending").count
+    @fulfilled_orders = ShopOrder.where(status: "fulfilled").count
+    @total_grant_value = ShopOrder.sum(:price_usd_total_snapshot).to_f
+
+    @orders_by_category = ShopOrder.joins("LEFT JOIN shop_items ON shop_items.id = shop_orders.shop_item_id")
+      .group("COALESCE(shop_items.category, 'Uncategorized')")
+      .count
+      .sort_by { |_, v| -v }
+
+    @top_users_by_hours = User.joins(:projects)
+      .where(projects: { status: "approved" })
+      .select("users.*, SUM(projects.approved_hours) AS total_approved_hours")
+      .group("users.id")
+      .order("total_approved_hours DESC")
+      .limit(10)
+
+    @top_users_by_bolts = User.where("chip_am > 0").order(chip_am: :desc).limit(10)
+  end
+
   def console
   end
 

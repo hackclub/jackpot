@@ -5,6 +5,14 @@
     <h1>Admin Panel</h1>
 
     <div class="admin-links">
+      <%= link_to admin_stats_path, class: "admin-link" do %>
+        <span class="admin-link-icon"></span>
+        <div>
+          Platform Statistics
+          <span class="admin-link-desc">Overview of projects, hours, users, and shop activity</span>
+        </div>
+      <% end %>
+
       <%= link_to admin_review_path, class: "admin-link" do %>
         <span class="admin-link-icon">📋</span>
         <div>
@@ -38,7 +46,7 @@
       <% end %>
 
       <%= link_to "/admin/blazer", class: "admin-link" do %>
-        <span class="admin-link-icon">📊</span>
+        <span class="admin-link-icon">🔍</span>
         <div>
           Blazer
           <span class="admin-link-desc">Database queries and dashboards</span>
