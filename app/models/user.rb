@@ -113,7 +113,7 @@ class User < ApplicationRecord
 
   # Name shown next to the profile photo in Jackpot (admin review / deck UI).
   def jackpot_profile_name
-    display_name.presence || email.to_s.split("@").first.presence || hack_club_id.presence || "Admin"
+    slack_username.presence || display_name.presence || email.to_s.split("@").first.presence || hack_club_id.presence || "Admin"
   end
 
   def eligible_hackatime_projects
