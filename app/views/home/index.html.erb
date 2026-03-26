@@ -1,9 +1,9 @@
 <div class="main">
   <section class="page-section page-section--hero ext-section--0" id="section-0">
-    <div class="hero-overlays">
-      <%= image_tag "https://cdn.hackclub.com/019d2a76-3e9d-7adb-be27-076c12ddeca3/title-6ae9cd2e.png", alt: "Jackpot Title", class: "hero-title" %>
-      <%= image_tag "https://user-cdn.hackclub-assets.com/019d2a63-7408-7245-8d63-3d235c8d486c/centralmg-123ccef9.png", alt: "Center Art", class: "hero-center" %>
       <%= link_to image_tag("HC_logo.png", alt: "Hack Club Logo", class: "hero-logo"), "https://hackclub.com", class: "hero-logo-link" %>
+    <div class="hero-overlays">
+      <%= image_tag "title.PNG", alt: "Jackpot Title", class: "hero-title" %>
+      <%= image_tag "centralmg.png", alt: "Center Art", class: "hero-center" %>
       <div class="hero-dateline-stack">
         <div class="hero-event-warning" role="alert">
           <div class="hero-event-warning__hazard" aria-hidden="true"></div>
@@ -380,8 +380,8 @@ body {
 
 .hero-logo-link {
   position: absolute;
-  top: max(-3px, env(safe-area-inset-top));
-  left: max(12px, env(safe-area-inset-left));
+  top: 0;
+  left: 50px;
   pointer-events: auto;
   display: block;
   line-height: 0;
@@ -1722,7 +1722,6 @@ body {
     max-width: 90vw;
   }
 
-  .hero-logo-link { top: max(6px, env(safe-area-inset-top)); }
   .hero-logo { width: 130px; }
 
   .ext-content {
