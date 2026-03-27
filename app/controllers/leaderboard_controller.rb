@@ -14,10 +14,38 @@ class LeaderboardController < ApplicationController
     )
   SQL
 
+  # Sum of reviewer-approved hours (approved projects only). 1 hr = 50 chips in Jackpot.
+  APPROVED_HOURS_TOTAL_SQL = <<~SQL.squish.freeze
+    (
+      COALESCE(
+        (
+          SELECT SUM(COALESCE(p.approved_hours, 0)::numeric)
+          FROM projects p
+          WHERE p.user_id = users.id AND p.status = 'approved'
+        ),
+        0
+      )
+    )
+  SQL
+
+  # Lifetime chips awarded on approved projects (sum of chips_earned). Wallet balance is `chip_am` (current chips).
+  CHIPS_EARNED_TOTAL_SQL = <<~SQL.squish.freeze
+    (
+      COALESCE(
+        (
+          SELECT SUM(COALESCE(p.chips_earned, 0)::numeric)
+          FROM projects p
+          WHERE p.user_id = users.id AND p.status = 'approved'
+        ),
+        0
+      )
+    )
+  SQL
+
   def index
     @page = [ params.fetch(:page, 1).to_i, 1 ].max
     @sort = params[:sort].presence_in(SORT_OPTIONS) || "chips"
-    scope = User.select("#{User.table_name}.*, #{LOGGED_HOURS_TOTAL_SQL} AS logged_hours_total")
+    scope = User.select("#{User.table_name}.*, #{LOGGED_HOURS_TOTAL_SQL} AS logged_hours_total, #{APPROVED_HOURS_TOTAL_SQL} AS approved_hours_total, #{CHIPS_EARNED_TOTAL_SQL} AS chips_earned_total")
     scope = if @sort == "hours"
               scope.order(Arel.sql("logged_hours_total DESC NULLS LAST, #{User.table_name}.id ASC"))
     else
