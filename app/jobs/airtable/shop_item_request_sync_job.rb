@@ -14,7 +14,8 @@ class Airtable::ShopItemRequestSyncJob < Airtable::BaseSyncJob
       "id" => request.id.to_s,
       "Reference Link" => request.reference_link,
       "Approved" => request.approved,
-      "Created At" => request.created_at&.iso8601
+      "Created At" => request.created_at&.iso8601,
+      "Week" => request.week
     }
   end
 end
