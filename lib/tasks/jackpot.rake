@@ -6,38 +6,41 @@ namespace :jackpot do
   task sync_roles_from_env: :environment do
     dry = ENV["DRY_RUN"].present?
 
-    puts "Environment seen by this process (must be non-nil on the host that runs this task):"
-    puts "  JACKPOT_REVIEWER_EMAILS=#{ENV['JACKPOT_REVIEWER_EMAILS'].inspect}"
-    puts "  JACKPOT_ADMIN_EMAILS=#{ENV['JACKPOT_ADMIN_EMAILS'].inspect}"
-    puts "  JACKPOT_SUPER_ADMIN_EMAILS=#{ENV['JACKPOT_SUPER_ADMIN_EMAILS'].inspect}"
+    rev = ENV["JACKPOT_REVIEWER_EMAILS"]
+    adm = ENV["JACKPOT_ADMIN_EMAILS"]
+    sup = ENV["JACKPOT_SUPER_ADMIN_EMAILS"]
+
+    puts "ENV in this process (nil means unset here):"
+    puts "  REVIEWER=#{rev.inspect}"
+    puts "  ADMIN=#{adm.inspect}"
+    puts "  SUPER_ADMIN=#{sup.inspect}"
     puts ""
 
-    result = Jackpot::RolesFromEnvSync.call(dry_run: dry)
-
-    listed = [
-      ENV["JACKPOT_REVIEWER_EMAILS"],
-      ENV["JACKPOT_ADMIN_EMAILS"],
-      ENV["JACKPOT_SUPER_ADMIN_EMAILS"]
-    ].compact.join(",").strip
-
-    if listed.blank?
-      puts "Nothing to do: all JACKPOT_*_EMAILS are empty. Set them in Coolify (or .env) and run this again on the same machine."
-      puts "Tip: Coolify env is only available inside the deployed container — run this via Coolify exec / SSH to the app, not on your laptop unless you export the vars."
-    elsif result.updated.empty? && result.missing.empty?
-      puts(dry ? "[DRY RUN] No changes needed." : "Updated 0 user(s): every listed email already has the target role.")
+    if [ rev, adm, sup ].all? { |v| v.blank? }
+      puts "Nothing to do: all three JACKPOT_*_EMAILS are empty."
+      puts "Add them in Coolify (production) or .env (dev: dotenv-rails loads .env automatically)."
+      puts "Run this task on the same host as the app (e.g. Coolify exec) so those vars exist."
+      puts "Or export in your shell: export JACKPOT_ADMIN_EMAILS=you@example.com"
+      puts "\nUse DRY_RUN=1 to preview. Example: DRY_RUN=1 bin/rails jackpot:sync_roles_from_env"
     else
-      puts(dry ? "[DRY RUN] No database changes." : "Updated #{result.updated.size} user(s).")
-    end
+      result = Jackpot::RolesFromEnvSync.call(dry_run: dry)
 
-    result.updated.each do |row|
-      puts "  - #{row[:email]} (id=#{row[:user_id]}): #{row[:from]} → #{row[:to]}"
-    end
+      if result.updated.empty? && result.missing.empty?
+        puts(dry ? "[DRY RUN] No changes needed." : "Updated 0 user(s): every listed email already has the target role.")
+      else
+        puts(dry ? "[DRY RUN] No database changes." : "Updated #{result.updated.size} user(s).")
+      end
 
-    if result.missing.any?
-      puts "\nNo matching user in DB (email must match users.email exactly — check OAuth / Hack Club address):"
-      result.missing.each { |m| puts "  - #{m[:email]} → #{m[:role]}" }
-    end
+      result.updated.each do |row|
+        puts "  - #{row[:email]} (id=#{row[:user_id]}): #{row[:from]} → #{row[:to]}"
+      end
 
-    puts "\nSet DRY_RUN=1 to preview without saving." unless dry
+      if result.missing.any?
+        puts "\nNo matching user in DB (email must match users.email exactly — check OAuth / Hack Club address):"
+        result.missing.each { |m| puts "  - #{m[:email]} → #{m[:role]}" }
+      end
+
+      puts "\nSet DRY_RUN=1 to preview without saving." unless dry
+    end
   end
 end
