@@ -16,7 +16,9 @@
             <th class="col-rank">#</th>
             <th class="col-player">User</th>
             <th class="col-hours">Hours logged</th>
-            <th class="col-chips">Chips</th>
+            <th class="col-approved-hours">Approved hours</th>
+            <th class="col-current-chips">Current chips</th>
+            <th class="col-total-chips">Total chips</th>
           </tr>
         </thead>
         <tbody>
@@ -46,8 +48,14 @@
               <td class="col-hours">
                 <span class="hours-count"><%= number_with_precision(user.total_logged_hours, precision: 1) %></span>
               </td>
-              <td class="col-chips">
-                <span class="chip-count"><%= user.chip_am.to_f %></span>
+              <td class="col-approved-hours">
+                <span class="approved-hours-count"><%= number_with_precision(user.total_approved_hours, precision: 2) %></span>
+              </td>
+              <td class="col-current-chips">
+                <span class="chip-count chip-count--current"><%= number_with_precision(user.current_chips, precision: 0, strip_insignificant_zeros: true) %></span>
+              </td>
+              <td class="col-total-chips">
+                <span class="chip-count chip-count--total"><%= number_with_precision(user.total_chips, precision: 0, strip_insignificant_zeros: true) %></span>
               </td>
             </tr>
           <% end %>

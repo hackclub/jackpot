@@ -132,9 +132,15 @@
   width: 100px;
 }
 
-.leaderboard-table th.col-chips {
+.leaderboard-table th.col-approved-hours {
   text-align: right;
-  width: 100px;
+  width: 110px;
+}
+
+.leaderboard-table th.col-current-chips,
+.leaderboard-table th.col-total-chips {
+  text-align: right;
+  width: 108px;
 }
 
 .leaderboard-table tbody tr {
@@ -226,7 +232,18 @@
   color: #c4b89a;
 }
 
-.col-chips {
+.col-approved-hours {
+  text-align: right;
+}
+
+.approved-hours-count {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #a8c4a0;
+}
+
+.col-current-chips,
+.col-total-chips {
   text-align: right;
 }
 
@@ -235,6 +252,10 @@
   font-weight: 700;
   color: #d4a017;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.chip-count--total {
+  color: #e8c766;
 }
 
 .pagination {

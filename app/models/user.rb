@@ -253,6 +253,29 @@ class User < ApplicationRecord
     end
   end
 
+  # Sum of approved_hours on approved projects (matches reviewer totals; 1 hr → 50 chips when awarded).
+  def total_approved_hours
+    if has_attribute?(:approved_hours_total)
+      read_attribute(:approved_hours_total).to_f
+    else
+      projects.where(status: "approved").sum(:approved_hours).to_f
+    end
+  end
+
+  # Wallet balance (after shop spend, refunds, etc.).
+  def current_chips
+    chip_am.to_f
+  end
+
+  # Sum of chips_earned on approved projects (lifetime awarded; differs from current when user has spent chips).
+  def total_chips
+    if has_attribute?(:chips_earned_total)
+      read_attribute(:chips_earned_total).to_f
+    else
+      projects.where(status: "approved").sum(Arel.sql("COALESCE(chips_earned, 0)")).to_f
+    end
+  end
+
   private
 
   def safe_profile_photo_url
