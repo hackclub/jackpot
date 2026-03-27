@@ -120,7 +120,7 @@ class DeckController < ApplicationController
     will_change_hackatime = true
     if params[:project_index].present? && project_index >= 0
       ex_proj = current_user.projects.order(position: :asc)[project_index]
-      will_change_hackatime = false if ex_proj&.first_shipped_at.present?
+      will_change_hackatime = false if ex_proj&.first_shipped_at.present? && ex_proj.shipped?
     end
 
     if will_change_hackatime
@@ -155,7 +155,7 @@ class DeckController < ApplicationController
       project = current_user.projects.order(position: :asc)[project_index]
       if project
         base_name = project_name.presence || "Project #{projects_count + 1}"
-        if project.first_shipped_at.present?
+        if project.first_shipped_at.present? && project.shipped?
           project.update!(
             name: base_name,
             playable_url: playable_url,

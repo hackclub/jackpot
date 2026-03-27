@@ -723,6 +723,7 @@ function initDeck() {
      "The ship button shouldn't be used for every single change, but only a couple of times to submit meaningful project updates.",
      "You already have an update in the queue, and removing it would place you back at the end (the queue is long…). Are you sure that, compared to the previously submitted version of your project, you've added extremely significant improvements (for example, an entirely new demo)? If not, it's better to wait before submitting again."
    ].join("\n\n");
+   var SHIP_NEED_HOURS_BEYOND_QUEUE_MSG = 'Log more hours on this project since your last ship, then use Ship update to add them to your pending submission and move it to the back of the queue.';
 
    function detailCanEditPlayableBanner() {
      if (!currentDetailData) return false;
@@ -796,7 +797,8 @@ function initDeck() {
      }
 
      var isShipped = data.shipped === 'true';
-     var lockedAfterShip = !!(data.firstShippedAt && String(data.firstShippedAt).trim().length > 0);
+     var hasFirstShippedAt = !!(data.firstShippedAt && String(data.firstShippedAt).trim().length > 0);
+     var lockedAfterShip = isShipped && hasFirstShippedAt;
      var canReship = data.reshippable === 'true';
      var mainHcLocked = data.mainHcReshipLocked === 'true';
      var pendingHrsModal = parseFloat(data.pendingReviewHours, 10);
@@ -808,7 +810,7 @@ function initDeck() {
      var shipUpdateSameProject = isShipped && data.status === 'in-review' && data.reviewed !== 'true';
      var inReviewQueue = shipUpdateSameProject;
      var otherPending = data.userHasOtherPendingShip === 'true';
-     var blockShipOtherPending = otherPending && !shipUpdateSameProject;
+     var blockShipOtherPending = otherPending && !shipUpdateSameProject && isShipped && !(data.status === 'approved' && canReship);
      // Always show Ship while waiting for review (not only when there are hours beyond the queue snapshot)
      var showShipBtn = !isShipped || canReship || showShipUpdateLocked || pendingQueueShipUpdate || inReviewQueue;
 
@@ -857,7 +859,7 @@ function initDeck() {
          detailShipBtn.textContent = 'Ship update';
          detailShipBtn.style.opacity = '';
          detailShipBtn.style.cursor = '';
-         detailShipBtn.title = SHIP_BLOCKED_OTHER_PENDING_MSG;
+         detailShipBtn.title = SHIP_NEED_HOURS_BEYOND_QUEUE_MSG;
        } else {
          detailShipBtn.style.opacity = '';
          detailShipBtn.style.cursor = '';
@@ -1052,7 +1054,7 @@ function initDeck() {
        var beyondQ = parseFloat(currentDetailData.hoursLoggedBeyondQueueSubmission || 0, 10) || 0;
        if (currentDetailData.shipped === 'true' && currentDetailData.status === 'in-review' && currentDetailData.reviewed !== 'true') {
          if (beyondQ <= 1e-6) {
-           alert(SHIP_BLOCKED_OTHER_PENDING_MSG);
+           alert(SHIP_NEED_HOURS_BEYOND_QUEUE_MSG);
            return;
          }
        }
