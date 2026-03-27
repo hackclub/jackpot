@@ -1,6 +1,6 @@
 class AdminController < ApplicationController
   skip_before_action :check_access_flipper
-  before_action :authenticate_admin!
+  before_action :authenticate_admin_area!
 
   def index
     Rails.logger.info "Current user hack_club_id: #{current_user&.hack_club_id}"
@@ -26,7 +26,8 @@ class AdminController < ApplicationController
     @bolts_spent = @total_bolts_awarded - @bolts_in_wallets
 
     @total_users = User.count
-    @admin_users = User.where(role: :admin).count
+    @reviewer_users = User.where(role: :reviewer).count
+    @full_admin_users = User.where(role: [ :admin, :super_admin ]).count
     @users_with_projects = User.joins(:projects).distinct.count
     @users_with_approved = User.joins(:projects).where(projects: { status: "approved" }).distinct.count
 
@@ -401,8 +402,18 @@ class AdminController < ApplicationController
     end
   end
 
-  def authenticate_admin!
-    unless admin?
+  def authenticate_admin_area!
+    unless user_signed_in?
+      redirect_to "/auth/hackclub", alert: "Please sign in."
+      return
+    end
+
+    if %w[stats review review_project].include?(action_name)
+      unless current_user.review_privileged?
+        Rails.logger.warn "Non-staff tried to access admin review/stats. User: #{current_user.hack_club_id}"
+        redirect_to root_path, alert: "Access denied."
+      end
+    elsif !current_user.full_admin?
       Rails.logger.warn "Non-admin tried to access admin panel. User: #{current_user&.hack_club_id || 'not logged in'}"
       redirect_to root_path, alert: "Access denied. Admin only."
     end

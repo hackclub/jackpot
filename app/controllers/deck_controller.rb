@@ -1,6 +1,6 @@
 class DeckController < ApplicationController
    before_action :authenticate_user!
-   before_action :authenticate_admin!, only: [ :approve_project_admin, :reject_project_admin, :comment_review_project_admin ]
+   before_action :authenticate_review_privileged!, only: [ :approve_project_admin, :reject_project_admin, :comment_review_project_admin ]
 
   MAIN_HC_RESHIP_BLOCKED_MSG = "This project has already been submitted to the main HC database - please contact @Emma".freeze
   ZERO_HOURS_SHIP_MSG = "You need logged hours (Hackatime + journal) before you can ship.".freeze
@@ -754,7 +754,7 @@ class DeckController < ApplicationController
     nil
   end
 
-  def authenticate_admin!
-    redirect_to root_path, alert: "Admin access required" unless admin?
+  def authenticate_review_privileged!
+    redirect_to root_path, alert: "Access denied." unless review_privileged?
   end
 end

@@ -84,6 +84,16 @@
           <span class="admin-link-desc">Execute Ruby code on the server</span>
         </div>
       <% end %>
+
+      <% if current_user.role_super_admin? %>
+        <div class="admin-link" style="opacity: 0.8; cursor: default;">
+          <span class="admin-link-icon">✦</span>
+          <div>
+            Super admin
+            <span class="admin-link-desc">Additional tools — coming soon</span>
+          </div>
+        </div>
+      <% end %>
     </div>
 
     <div class="admin-silly">

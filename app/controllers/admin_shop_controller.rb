@@ -292,7 +292,7 @@ class AdminShopController < ApplicationController
   end
 
   def authenticate_admin!
-    unless admin?
+    unless full_admin?
       redirect_to root_path, alert: "Access denied. Admin only."
     end
   end

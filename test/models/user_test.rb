@@ -73,9 +73,19 @@ class UserTest < ActiveSupport::TestCase
     assert_equal "user", user.role
     assert user.role_user?
 
+    user.role = :reviewer
+    assert_equal "reviewer", user.role
+    assert user.role_reviewer?
+
     user.role = :admin
     assert_equal "admin", user.role
     assert user.role_admin?
+    assert user.full_admin?
+
+    user.role = :super_admin
+    assert_equal "super_admin", user.role
+    assert user.role_super_admin?
+    assert user.full_admin?
   end
 
   test "from_omniauth creates new user" do

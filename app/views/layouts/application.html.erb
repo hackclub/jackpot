@@ -19,7 +19,7 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "shop", "data-turbo-track": "reload" if controller_name == "shop" %>
-    <%= stylesheet_link_tag "admin", "data-turbo-track": "reload" if controller_name == "admin" %>
+    <%= stylesheet_link_tag "admin", "data-turbo-track": "reload" if controller_name.in?(%w[admin reviewer]) %>
     <%= stylesheet_link_tag "req_item", "data-turbo-track": "reload" if controller_name == "req_item" %>
     <%= stylesheet_link_tag "status", "data-turbo-track": "reload" if controller_name == "status" %>
     <%= javascript_importmap_tags %>
@@ -37,8 +37,12 @@
             <%= link_to "FAQ", faq_path, class: "nav-item #{'nav-active' if controller_name == 'home' && action_name == 'faq'}" %>
             <%= link_to "Status", status_path, class: "nav-item #{'nav-active' if controller_name == 'status'}" %>
             <%= link_to "Leaderboard", leaderboard_path, class: "nav-item #{'nav-active' if controller_name == 'leaderboard'}" %>
-            <% if admin? %>
-              <%= link_to "Admin", admin_path, class: "nav-item nav-admin" %>
+            <% if review_privileged? %>
+              <% if full_admin? %>
+                <%= link_to "Admin", admin_path, class: "nav-item nav-admin" %>
+              <% else %>
+                <%= link_to "Reviewer", reviewer_path, class: "nav-item nav-admin" %>
+              <% end %>
             <% end %>
           </div>
           <div class="toolbar-right">
