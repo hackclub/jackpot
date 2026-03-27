@@ -1,4 +1,11 @@
 module ApplicationHelper
+  # Home for staff navigation (reviewer hub vs full admin panel).
+  def staff_home_path
+    return admin_path unless user_signed_in?
+
+    current_user.full_admin? ? admin_path : reviewer_path
+  end
+
   # Returns per-request cache hit/miss counts from thread-local storage
   def cache_stats
     hits = Thread.current[:cache_hits] || 0

@@ -54,6 +54,8 @@ Rails.application.routes.draw do
   delete "/admin/shop/items/:id", to: "admin_shop#delete_item", as: :admin_shop_delete_item
   patch "/admin/shop/orders/:id", to: "admin_shop#update_order_status", as: :admin_shop_update_order
 
+  get "/reviewer", to: "reviewer#index", as: :reviewer
+
   get "/admin", to: "admin#index", as: :admin
   get "/admin/stats", to: "admin#stats", as: :admin_stats
   get "/admin/items_request", to: "admin#items_request", as: :admin_items_request

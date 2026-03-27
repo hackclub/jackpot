@@ -1,0 +1,28 @@
+<% content_for(:title) { "Reviewer" } %>
+
+<div class="admin-page">
+  <div class="admin-content">
+    <h1>Reviewer</h1>
+    <p style="color: #c4b89a; font-family: Georgia, serif; margin-bottom: 1.5rem;">
+      Review shipped projects and view platform statistics.
+    </p>
+
+    <div class="admin-links">
+      <%= link_to admin_stats_path, class: "admin-link" do %>
+        <span class="admin-link-icon"></span>
+        <div>
+          Platform Statistics
+          <span class="admin-link-desc">Overview of projects, hours, users, and shop activity</span>
+        </div>
+      <% end %>
+
+      <%= link_to admin_review_path, class: "admin-link" do %>
+        <span class="admin-link-icon">📋</span>
+        <div>
+          Project Review
+          <span class="admin-link-desc">Review shipped projects and approve hours</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -5,7 +5,7 @@ class ProjectCommentsController < ApplicationController
 
   def create
     project = Project.find(params[:project_id])
-    unless project.user_id == current_user.id || admin?
+    unless project.user_id == current_user.id || review_privileged?
       return redirect_to status_path, alert: "You can't comment on that project."
     end
 

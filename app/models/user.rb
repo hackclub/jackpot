@@ -9,7 +9,7 @@ class User < ApplicationRecord
   has_many :shop_orders, dependent: :destroy
   has_many :shop_item_requests, dependent: :destroy
   has_many :project_comments, dependent: :destroy
-  enum :role, { user: 0, admin: 1 }, prefix: true
+  enum :role, { user: 0, reviewer: 1, admin: 2, super_admin: 3 }, prefix: true
 
   validates :hack_club_id, presence: true, uniqueness: true
   validates :email, presence: true
@@ -135,6 +135,16 @@ class User < ApplicationRecord
 
   def role_admin?
     super
+  end
+
+  # Review queue + stats + deck review endpoints (not shop / console / Blazer).
+  def review_privileged?
+    role_reviewer? || role_admin? || role_super_admin?
+  end
+
+  # Full admin panel: shop, items request, console, engines, etc.
+  def full_admin?
+    role_admin? || role_super_admin?
   end
 
   # approved_hours is total approved hours on the project. Pass new_chip_award when only a *delta* of hours
