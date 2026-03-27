@@ -11,6 +11,7 @@ class Airtable::ShopItemRequestSyncJob < Airtable::BaseSyncJob
     {
       "Item Name" => request.item_name,
       "Price" => request.price.to_f,
+      "Email" => request.user&.email,
       "id" => request.id.to_s,
       "Reference Link" => request.reference_link,
       "Approved" => request.approved,
