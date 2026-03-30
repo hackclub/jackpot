@@ -2,6 +2,17 @@ class ShopItem < ApplicationRecord
   include AirtablePushOnChange
 
   PINNED_INVITATION_NAME = "Jackpot Official Invitation"
+  # Shop grid card that gets the same soft glow as the pinned ticket (e.g. trip / Vegas prize).
+  SPOTLIGHT_NAME_SUBSTRING = "las vegas"
+
+  # Category / grant tiles and shop cards: soft glow when the label references Vegas.
+  # Normalizes keys like "las_vegas" / "las-vegas" so they match.
+  def self.spotlight_label?(label)
+    s = label.to_s.strip.downcase.tr("_", " ").tr("-", " ")
+    return false if s.blank?
+
+    s.include?(SPOTLIGHT_NAME_SUBSTRING) || s.match?(/\bvegas\b/)
+  end
 
   has_many :shop_orders, dependent: :nullify
   belongs_to :shop_grant_type, optional: true
@@ -66,6 +77,12 @@ class ShopItem < ApplicationRecord
     return 0 unless dph.positive?
 
     ((usd / dph) * 50).ceil
+  end
+
+  def spotlight_shop_card?
+    return false if pinned_invitation?
+
+    self.class.spotlight_label?(name)
   end
 
   private
