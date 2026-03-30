@@ -86,5 +86,5 @@ gem "norairrecord"
 gem "faraday-net_http_persistent", "~> 2.0"
 gem "aws-sdk-s3", "~> 1.0"
 
-# Pin to fix stored XSS vulnerability (GHSA-qmpg-8xg6-ph5q)
-gem "action_text-trix", ">= 2.1.17"
+# Pin trix for security (e.g. GHSA-qmpg-8xg6-ph5q, GHSA-53p3-c7vp-4mcc)
+gem "action_text-trix", ">= 2.1.18"
