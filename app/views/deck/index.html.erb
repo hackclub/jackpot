@@ -148,8 +148,8 @@
 
        <div class="project-form-field">
          <label>Hackatime projects (optional)</label>
-         <p class="hackatime-field-hint">Link your Hackatime projects to track hours.</p>
-         <div class="hackatime-picker" id="hackatimePicker">
+         <p id="hackatimePickerHint" class="hackatime-field-hint">Link your Hackatime projects to track hours.</p>
+         <div class="hackatime-picker" id="hackatimePicker" data-single-select="false">
            <% if @hackatime_projects.present? %>
              <% @hackatime_projects.each do |hp_name| %>
                <label class="hackatime-option">
@@ -454,6 +454,21 @@ function initDeck() {
      });
    }
 
+   var hackatimePickerEl = document.getElementById('hackatimePicker');
+   var hackatimePickerHintEl = document.getElementById('hackatimePickerHint');
+   if (hackatimePickerEl) {
+     hackatimePickerEl.addEventListener('change', function(e) {
+       if (hackatimePickerEl.dataset.singleSelect !== 'true') return;
+       var t = e.target;
+       if (!t || !t.classList || !t.classList.contains('hackatime-checkbox')) return;
+       if (t.checked) {
+         document.querySelectorAll('#hackatimePicker .hackatime-checkbox').forEach(function(cb) {
+           if (cb !== t) cb.checked = false;
+         });
+       }
+     });
+   }
+
    function openProjectModal(data) {
      if (!projectModal) return;
      projectIndexInput.value = data.index;
@@ -486,6 +501,15 @@ function initDeck() {
       cb.checked = linked.indexOf(cb.value) !== -1;
     });
     applyHackatimeCheckboxLocks(data.id);
+
+    if (hackatimePickerEl) {
+      hackatimePickerEl.dataset.singleSelect = data.isNew ? 'true' : 'false';
+    }
+    if (hackatimePickerHintEl) {
+      hackatimePickerHintEl.textContent = data.isNew
+        ? 'New projects: choose at most one Hackatime project (optional).'
+        : 'Link your Hackatime projects to track hours.';
+    }
 
     projectModal.classList.add('active');
     projectModal.setAttribute('aria-hidden', 'false');
@@ -524,7 +548,7 @@ function initDeck() {
     { getEl: function() { return document.getElementById('githubUsernameInput'); },
       text: 'GitHub username — required before you ship' },
     { getEl: function() { return document.getElementById('hackatimePicker'); },
-      text: 'Link any Hackatime projects to track your hours' },
+      text: 'Pick one Hackatime project to track your hours (new projects only)' },
     { getEl: function() { return document.getElementById('projectModalSubmit'); },
       text: 'All set — save your project!', isLast: true }
   ];
@@ -640,7 +664,13 @@ function initDeck() {
       formData.append('code_url', document.getElementById('codeUrlInput').value);
       formData.append('github_username', document.getElementById('githubUsernameInput').value);
 
+      var hackatimePickerForSubmit = document.getElementById('hackatimePicker');
+      var singleHack = hackatimePickerForSubmit && hackatimePickerForSubmit.dataset.singleSelect === 'true';
       var hackatimeCheckboxes = document.querySelectorAll('#hackatimePicker .hackatime-checkbox:checked');
+      if (singleHack && hackatimeCheckboxes.length > 1) {
+        alert('New projects can only have one Hackatime project linked. Uncheck one of them.');
+        return;
+      }
       hackatimeCheckboxes.forEach(function(cb) {
         formData.append('hackatime_projects[]', cb.value);
       });
@@ -724,6 +754,50 @@ function initDeck() {
      "You already have an update in the queue, and removing it would place you back at the end (the queue is long…). Are you sure that, compared to the previously submitted version of your project, you've added extremely significant improvements (for example, an entirely new demo)? If not, it's better to wait before submitting again."
    ].join("\n\n");
    var SHIP_NEED_HOURS_BEYOND_QUEUE_MSG = 'Log more hours on this project since your last ship, then use Ship update to add them to your pending submission and move it to the back of the queue.';
+
+   function applyDeckProjectTotalsFromServer(project) {
+     if (!project || project.id == null) return;
+     var card = document.querySelector('.card-slot-filled[data-project-id="' + project.id + '"]');
+     if (card) {
+       var hrs = project.hours != null ? project.hours : 0;
+       var hoursEl = card.querySelector('.card-hours');
+       if (hoursEl) hoursEl.textContent = parseFloat(hrs, 10).toFixed(1);
+       card.dataset.projectHours = String(hrs);
+       card.dataset.hackatimeHours = String(project.hackatime_hours != null ? project.hackatime_hours : 0);
+       card.dataset.journalHours = String(project.journal_hours != null ? project.journal_hours : 0);
+       card.dataset.pendingReviewHours = String(project.pending_review_hours != null ? project.pending_review_hours : 0);
+       card.dataset.unshippedHoursDisplay = String(project.unshipped_hours_display != null ? project.unshipped_hours_display : 0);
+       card.dataset.hoursLoggedBeyondQueueSubmission = String(project.hours_logged_beyond_queue_submission != null ? project.hours_logged_beyond_queue_submission : 0);
+       card.dataset.reshippable = project.reshippable ? 'true' : 'false';
+       card.dataset.userHasOtherPendingShip = project.user_has_other_pending_ship ? 'true' : 'false';
+       card.dataset.mainHcReshipLocked = project.main_hc_reship_locked ? 'true' : 'false';
+     }
+     function mergeHoursInto(data) {
+       if (!data) return;
+       data.hours = String(project.hours);
+       data.hackatimeHours = String(project.hackatime_hours || 0);
+       data.journalHours = String(project.journal_hours || 0);
+       data.pendingReviewHours = String(project.pending_review_hours || 0);
+       data.unshippedHoursDisplay = String(project.unshipped_hours_display || 0);
+       data.hoursLoggedBeyondQueueSubmission = String(project.hours_logged_beyond_queue_submission || 0);
+       data.reshippable = project.reshippable ? 'true' : 'false';
+       data.userHasOtherPendingShip = project.user_has_other_pending_ship ? 'true' : 'false';
+       data.mainHcReshipLocked = project.main_hc_reship_locked ? 'true' : 'false';
+     }
+     if (currentJournalData && String(currentJournalData.id) === String(project.id)) mergeHoursInto(currentJournalData);
+     if (currentDetailData && String(currentDetailData.id) === String(project.id)) {
+       mergeHoursInto(currentDetailData);
+       if (detailModal && detailModal.classList.contains('active')) {
+         var totalHrs = parseFloat(project.hours || 0).toFixed(1);
+         if (detailHours) detailHours.textContent = totalHrs + ' hrs';
+         if (detailUnshippedHoursRow && detailUnshippedHours) {
+           var unsh = parseFloat(project.unshipped_hours_display, 10);
+           if (isNaN(unsh)) unsh = 0;
+           detailUnshippedHours.textContent = unsh.toFixed(1);
+         }
+       }
+     }
+   }
 
    function detailCanEditPlayableBanner() {
      if (!currentDetailData) return false;
@@ -1322,12 +1396,13 @@ function initDeck() {
         })
       })
       .then(function(r) { return r.json(); })
-      .then(function(entry) {
+      .then(function(data) {
+        var entry = data.entry != null ? data.entry : data;
+        if (data.project) applyDeckProjectTotalsFromServer(data.project);
         journalTimeDone.value = '';
         journalHoursWorked.value = '';
         journalDescription.value = '';
         journalToolsUsed.value = '';
-        // Use the project id from the saved entry when refreshing, fallback to currentJournalData.id
         loadJournalEntries(entry.project_id || currentJournalData.id);
       })
       .catch(function(e) { console.error('Failed to save journal entry:', e); });

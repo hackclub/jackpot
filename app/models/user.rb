@@ -157,7 +157,7 @@ class User < ApplicationRecord
 
      delta_chips =
        if new_chip_award.nil?
-         (approved_hours_float * 50).round(2)
+         JackpotHours.chips_from_approved_hours(approved_hours_float)
        else
          new_chip_award.to_f.round(2)
        end
