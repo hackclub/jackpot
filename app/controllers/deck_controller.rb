@@ -35,9 +35,11 @@ class DeckController < ApplicationController
          Rails.logger.info("  project[#{index}] #{hp_name}: #{hours}h from hackatime")
          hours
        end
-       hackatime_hours = hackatime_hours_raw.round
+       hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
 
-       project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours != hackatime_hours
+       if (project.hackatime_hours.to_d - hackatime_hours.to_d).abs > 0.000_05
+         project.update_column(:hackatime_hours, hackatime_hours)
+       end
 
        project_journals = journal_by_project_id[project.id] || []
        journal_hours = project_journals.sum(&:hours_worked).to_f
@@ -601,7 +603,7 @@ class DeckController < ApplicationController
 
     floor = project.past_approved_hours.to_f
     new_total = (floor + new_hours).round(2)
-    chips_delta = (new_hours * 50).round(2)
+    chips_delta = JackpotHours.chips_from_approved_hours(new_hours)
     new_cumulative_chips = (project.chips_earned.to_f + chips_delta).round(2)
 
     # Derive index from project position for User#approve_project (chip_am / legacy jsonb)
@@ -766,8 +768,10 @@ class DeckController < ApplicationController
     hackatime_hours_raw = linked.sum do |hp_name|
       (service.get_project_hours(hackatime_id, hp_name, start_date: start_date) || 0).to_f
     end
-    hackatime_hours = hackatime_hours_raw.round
-    project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours != hackatime_hours
+    hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
+    if (project.hackatime_hours.to_d - hackatime_hours.to_d).abs > 0.000_05
+      project.update_column(:hackatime_hours, hackatime_hours)
+    end
 
     journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
     total = hackatime_hours + journal_hours
