@@ -148,8 +148,8 @@
 
        <div class="project-form-field">
          <label>Hackatime projects (optional)</label>
-         <p class="hackatime-field-hint">Link your Hackatime projects to track hours.</p>
-         <div class="hackatime-picker" id="hackatimePicker">
+         <p id="hackatimePickerHint" class="hackatime-field-hint">Link your Hackatime projects to track hours.</p>
+         <div class="hackatime-picker" id="hackatimePicker" data-single-select="false">
            <% if @hackatime_projects.present? %>
              <% @hackatime_projects.each do |hp_name| %>
                <label class="hackatime-option">
@@ -454,6 +454,21 @@ function initDeck() {
      });
    }
 
+   var hackatimePickerEl = document.getElementById('hackatimePicker');
+   var hackatimePickerHintEl = document.getElementById('hackatimePickerHint');
+   if (hackatimePickerEl) {
+     hackatimePickerEl.addEventListener('change', function(e) {
+       if (hackatimePickerEl.dataset.singleSelect !== 'true') return;
+       var t = e.target;
+       if (!t || !t.classList || !t.classList.contains('hackatime-checkbox')) return;
+       if (t.checked) {
+         document.querySelectorAll('#hackatimePicker .hackatime-checkbox').forEach(function(cb) {
+           if (cb !== t) cb.checked = false;
+         });
+       }
+     });
+   }
+
    function openProjectModal(data) {
      if (!projectModal) return;
      projectIndexInput.value = data.index;
@@ -486,6 +501,15 @@ function initDeck() {
       cb.checked = linked.indexOf(cb.value) !== -1;
     });
     applyHackatimeCheckboxLocks(data.id);
+
+    if (hackatimePickerEl) {
+      hackatimePickerEl.dataset.singleSelect = data.isNew ? 'true' : 'false';
+    }
+    if (hackatimePickerHintEl) {
+      hackatimePickerHintEl.textContent = data.isNew
+        ? 'New projects: choose at most one Hackatime project (optional).'
+        : 'Link your Hackatime projects to track hours.';
+    }
 
     projectModal.classList.add('active');
     projectModal.setAttribute('aria-hidden', 'false');
@@ -524,7 +548,7 @@ function initDeck() {
     { getEl: function() { return document.getElementById('githubUsernameInput'); },
       text: 'GitHub username — required before you ship' },
     { getEl: function() { return document.getElementById('hackatimePicker'); },
-      text: 'Link any Hackatime projects to track your hours' },
+      text: 'Pick one Hackatime project to track your hours (new projects only)' },
     { getEl: function() { return document.getElementById('projectModalSubmit'); },
       text: 'All set — save your project!', isLast: true }
   ];
@@ -640,7 +664,13 @@ function initDeck() {
       formData.append('code_url', document.getElementById('codeUrlInput').value);
       formData.append('github_username', document.getElementById('githubUsernameInput').value);
 
+      var hackatimePickerForSubmit = document.getElementById('hackatimePicker');
+      var singleHack = hackatimePickerForSubmit && hackatimePickerForSubmit.dataset.singleSelect === 'true';
       var hackatimeCheckboxes = document.querySelectorAll('#hackatimePicker .hackatime-checkbox:checked');
+      if (singleHack && hackatimeCheckboxes.length > 1) {
+        alert('New projects can only have one Hackatime project linked. Uncheck one of them.');
+        return;
+      }
       hackatimeCheckboxes.forEach(function(cb) {
         formData.append('hackatime_projects[]', cb.value);
       });

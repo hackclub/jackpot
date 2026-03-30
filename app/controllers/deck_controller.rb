@@ -50,7 +50,9 @@ class DeckController < ApplicationController
        project_journals = journal_by_project_id[project.id] || []
        journal_hours = project_journals.sum(&:hours_worked).to_f
        total_hours = hackatime_hours + journal_hours
-       project.update_column(:total_hours, total_hours) if project.total_hours != total_hours
+       if (project.total_hours.to_d - total_hours.to_d).abs > 0.000_05
+         project.update_column(:total_hours, total_hours)
+       end
        Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
        if project.shipped? && project.status.to_s == "in-review" && !project.reviewed? &&
@@ -185,6 +187,16 @@ class DeckController < ApplicationController
     end
 
     if project.nil?
+      if hackatime_projects.size > 1
+        msg = "New projects can link at most one Hackatime project. Remove extra selections and save again."
+        if request.xhr?
+          return render json: { error: msg }, status: :unprocessable_entity
+        else
+          flash[:alert] = msg
+          return redirect_to deck_path
+        end
+      end
+
       project = current_user.projects.create!(
         name: project_name.presence || "Project #{projects_count + 1}",
         description: project_description,
@@ -609,7 +621,7 @@ class DeckController < ApplicationController
 
     floor = project.past_approved_hours.to_f
     new_total = (floor + new_hours).round(2)
-    chips_delta = (new_hours * 50).round(2)
+    chips_delta = JackpotHours.chips_from_approved_hours(new_hours)
     new_cumulative_chips = (project.chips_earned.to_f + chips_delta).round(2)
 
     # Derive index from project position for User#approve_project (chip_am / legacy jsonb)
@@ -745,7 +757,7 @@ class DeckController < ApplicationController
   def deck_project_payload_hash(project, user)
     hackatime_hours = project.hackatime_hours.to_f
     journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
-    total_hours = project.total_hours.to_f
+    total_hours = hackatime_hours + journal_hours
     other_pending_ship = user.projects.where.not(id: project.id).where(
       shipped: true,
       status: "in-review",
@@ -767,26 +779,28 @@ class DeckController < ApplicationController
   end
 
   def refresh_logged_totals_for_project!(project, user)
-    service = HackatimeService.new
-    start_date = Date.new(2026, 2, 14)
-    hackatime_id = user.slack_id || user.hack_club_id
-    linked = project.hackatime_projects || []
-    hackatime_hours_raw =
-      if linked.empty? || hackatime_id.blank?
-        0.0
-      else
-        hours_map = service.hours_by_project_name(hackatime_id, start_date: start_date)
-        linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }
-      end
-    hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
-    if JackpotHours.hackatime_hours_differ?(project.hackatime_hours, hackatime_hours)
-      project.update_column(:hackatime_hours, hackatime_hours)
+  service = HackatimeService.new
+  start_date = Date.new(2026, 2, 14)
+  hackatime_id = user.slack_id || user.hack_club_id
+  linked = project.hackatime_projects || []
+  hackatime_hours_raw =
+    if linked.empty? || hackatime_id.blank?
+      0.0
+    else
+      hours_map = service.hours_by_project_name(hackatime_id, start_date: start_date)
+      linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }
     end
-
-    journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
-    total = hackatime_hours + journal_hours
-    project.update_column(:total_hours, total) if project.total_hours != total
+  hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
+  if JackpotHours.hackatime_hours_differ?(project.hackatime_hours, hackatime_hours)
+    project.update_column(:hackatime_hours, hackatime_hours)
   end
+
+  journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
+  total = hackatime_hours + journal_hours
+  if (project.total_hours.to_d - total.to_d).abs > 0.000_05
+    project.update_column(:total_hours, total)
+  end
+end
 
   def hackatime_first_conflict_with_other_project(user, exclude_project_id, names)
     norm = Array(names).map { |s| s.to_s.strip.downcase }.reject(&:blank?)
