@@ -25,7 +25,7 @@ class HackatimeHoursSyncJob < ApplicationJob
           end
         project_total = JackpotHours.hackatime_hours_from_api_total(project_total_raw)
 
-        if (project.hackatime_hours.to_d - project_total.to_d).abs > 0.000_05
+        if JackpotHours.hackatime_hours_differ?(project.hackatime_hours, project_total)
           project.update_column(:hackatime_hours, project_total)
           Airtable::PushRecordJob.enqueue_if_configured(Airtable::ProjectSyncJob, project.id)
         end
@@ -34,7 +34,7 @@ class HackatimeHoursSyncJob < ApplicationJob
         Rails.logger.error("HackatimeHoursSync failed for Project##{project.id}: #{e.message}")
       end
 
-      if (user.hackatime_hours.to_d - user_total.to_d).abs > 0.000_05
+      if JackpotHours.hackatime_hours_differ?(user.hackatime_hours, user_total)
         user.update_column(:hackatime_hours, user_total)
         Airtable::PushRecordJob.enqueue_if_configured(Airtable::UserSyncJob, user.id)
       end

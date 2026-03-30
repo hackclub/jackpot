@@ -43,7 +43,7 @@ class DeckController < ApplicationController
          Rails.logger.info("  project[#{index}] #{hp_name}: #{hours_map[hp_name.to_s.strip.downcase].to_f}h from hackatime (aggregate)")
        end
 
-       if (project.hackatime_hours.to_d - hackatime_hours.to_d).abs > 0.000_05
+       if JackpotHours.hackatime_hours_differ?(project.hackatime_hours, hackatime_hours)
          project.update_column(:hackatime_hours, hackatime_hours)
        end
 
@@ -791,7 +791,7 @@ class DeckController < ApplicationController
         linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }
       end
     hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
-    if (project.hackatime_hours.to_d - hackatime_hours.to_d).abs > 0.000_05
+    if JackpotHours.hackatime_hours_differ?(project.hackatime_hours, hackatime_hours)
       project.update_column(:hackatime_hours, hackatime_hours)
     end
 
