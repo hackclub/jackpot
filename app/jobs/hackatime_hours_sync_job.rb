@@ -14,17 +14,18 @@ class HackatimeHoursSyncJob < ApplicationJob
 
       user.projects.each do |project|
         linked = project.hackatime_projects || []
-        project_total =
+        project_total_raw =
           if linked.empty?
             0.0
           else
             linked.sum do |hp_name|
               key = hp_name.to_s.strip.downcase
               hours_map[key].to_f
-            end.round(2)
+            end
           end
+        project_total = JackpotHours.hackatime_hours_from_api_total(project_total_raw)
 
-        if project.hackatime_hours.to_f.round(2) != project_total.to_f.round(2)
+        if JackpotHours.hackatime_hours_differ?(project.hackatime_hours, project_total)
           project.update_column(:hackatime_hours, project_total)
           Airtable::PushRecordJob.enqueue_if_configured(Airtable::ProjectSyncJob, project.id)
         end
@@ -33,7 +34,7 @@ class HackatimeHoursSyncJob < ApplicationJob
         Rails.logger.error("HackatimeHoursSync failed for Project##{project.id}: #{e.message}")
       end
 
-      if user.hackatime_hours.to_f.round(2) != user_total.to_f.round(2)
+      if JackpotHours.hackatime_hours_differ?(user.hackatime_hours, user_total)
         user.update_column(:hackatime_hours, user_total)
         Airtable::PushRecordJob.enqueue_if_configured(Airtable::UserSyncJob, user.id)
       end

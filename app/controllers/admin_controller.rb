@@ -375,7 +375,8 @@ class AdminController < ApplicationController
         linked = project["hackatime_projects"] || []
         Rails.logger.info("        [calculate_project_hours] Getting hours for #{linked.length} hackatime projects: #{linked.inspect}")
         hours_map = service.hours_by_project_name(hackatime_id, start_date: start_date)
-        hackatime_hours = linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }.round(2)
+        hackatime_hours_raw = linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }
+        hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
         linked.each do |hp_name|
           Rails.logger.info("        [calculate_project_hours]   #{hp_name}: #{hours_map[hp_name.to_s.strip.downcase].to_f} (aggregate)")
         end
