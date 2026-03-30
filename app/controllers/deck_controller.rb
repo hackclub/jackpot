@@ -28,16 +28,21 @@ class DeckController < ApplicationController
     hackatime_id = current_user.slack_id || current_user.hack_club_id
     Rails.logger.info("DeckController#index: user=#{current_user.id}, slack_id=#{current_user.slack_id}, hack_club_id=#{current_user.hack_club_id}, hackatime_id=#{hackatime_id}")
 
+    hours_map = hackatime_id.present? ? service.hours_by_project_name(hackatime_id, start_date: start_date) : {}
+
      @projects = projects.map.with_index do |project, index|
        linked = project.hackatime_projects || []
-       hackatime_hours_raw = linked.sum do |hp_name|
-         hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
-         Rails.logger.info("  project[#{index}] #{hp_name}: #{hours}h from hackatime")
-         hours
+       hackatime_hours =
+         if linked.empty? || hackatime_id.blank?
+           0.0
+         else
+           linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }.round(2)
+         end
+       linked.each do |hp_name|
+         Rails.logger.info("  project[#{index}] #{hp_name}: #{hours_map[hp_name.to_s.strip.downcase].to_f}h from hackatime (aggregate)")
        end
-       hackatime_hours = hackatime_hours_raw.round
 
-       project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours != hackatime_hours
+       project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours.to_f.round(2) != hackatime_hours.to_f.round(2)
 
        project_journals = journal_by_project_id[project.id] || []
        journal_hours = project_journals.sum(&:hours_worked).to_f
@@ -763,11 +768,14 @@ class DeckController < ApplicationController
     start_date = Date.new(2026, 2, 14)
     hackatime_id = user.slack_id || user.hack_club_id
     linked = project.hackatime_projects || []
-    hackatime_hours_raw = linked.sum do |hp_name|
-      (service.get_project_hours(hackatime_id, hp_name, start_date: start_date) || 0).to_f
-    end
-    hackatime_hours = hackatime_hours_raw.round
-    project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours != hackatime_hours
+    hackatime_hours =
+      if linked.empty? || hackatime_id.blank?
+        0.0
+      else
+        hours_map = service.hours_by_project_name(hackatime_id, start_date: start_date)
+        linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }.round(2)
+      end
+    project.update_column(:hackatime_hours, hackatime_hours) if project.hackatime_hours.to_f.round(2) != hackatime_hours.to_f.round(2)
 
     journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
     total = hackatime_hours + journal_hours

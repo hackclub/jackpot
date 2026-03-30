@@ -374,11 +374,10 @@ class AdminController < ApplicationController
       if hackatime_id && project["hackatime_projects"]
         linked = project["hackatime_projects"] || []
         Rails.logger.info("        [calculate_project_hours] Getting hours for #{linked.length} hackatime projects: #{linked.inspect}")
-        hackatime_hours = linked.sum do |hp_name|
-          hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
-          Rails.logger.info("        [calculate_project_hours]   #{hp_name}: #{hours.inspect} (class: #{hours.class})")
-          hours = 0.0 if hours.nil?
-          hours
+        hours_map = service.hours_by_project_name(hackatime_id, start_date: start_date)
+        hackatime_hours = linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }.round(2)
+        linked.each do |hp_name|
+          Rails.logger.info("        [calculate_project_hours]   #{hp_name}: #{hours_map[hp_name.to_s.strip.downcase].to_f} (aggregate)")
         end
         Rails.logger.info("        [calculate_project_hours] Total hackatime_hours: #{hackatime_hours.inspect} (class: #{hackatime_hours.class})")
       else

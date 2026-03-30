@@ -32,6 +32,27 @@ class HackatimeService
     nil
   end
 
+  # One stats response per user: map normalized project name (strip + downcase) → hours.
+  # Matches how the deck lists projects; avoids N API calls and keeps names aligned with aggregate totals.
+  def hours_by_project_name(slack_id, start_date: nil, end_date: nil)
+    stats = get_user_project_stats(slack_id, start_date: start_date, end_date: end_date)
+    return {} if stats.nil?
+
+    totals = Hash.new(0.0)
+    stats.each do |p|
+      next unless p.is_a?(Hash)
+
+      name = p["name"].to_s
+      next if name.blank? || name == "Other"
+
+      secs = p["total_seconds"].to_f
+      key = name.strip.downcase
+      totals[key] += secs
+    end
+
+    totals.transform_values { |secs| (secs / 3600.0).round(4) }
+  end
+
   def get_user_projects(slack_id, start_date: nil)
     return [] unless slack_id.present?
 
