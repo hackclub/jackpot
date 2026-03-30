@@ -93,7 +93,7 @@
 
           <% @shop_categories.each do |entry| %>
             <% cat = entry[:category] %>
-            <button type="button" class="shop-category-tile" data-shop-category="<%= cat.key %>">
+            <button type="button" class="<%= class_names("shop-category-tile", "shop-category-tile--spotlight": ShopItem.spotlight_label?(cat.name) || ShopItem.spotlight_label?(cat.key)) %>" data-shop-category="<%= cat.key %>">
               <span class="shop-tile-title"><%= cat.name %></span>
               <% if cat.logo_url.present? %>
                 <img class="shop-tile-logo" src="<%= cat.logo_url %>" alt="" loading="lazy">
@@ -116,17 +116,44 @@
             <% cat = entry[:category] %>
             <% grant_types = entry[:grant_types] %>
             <div class="shop-category-panel" data-shop-category-panel="<%= cat.key %>" hidden>
-              <div class="shop-grant-selector" data-shop-grant-selector>
-                <% grant_types.each do |gt_entry| %>
-                  <% gt = gt_entry[:grant_type] %>
-                  <button type="button" class="shop-grant-tile" data-shop-grant-type="<%= gt.key %>">
-                    <span class="shop-tile-title"><%= gt.name %></span>
-                    <% if gt.logo_url.present? %>
-                      <img class="shop-tile-logo" src="<%= gt.logo_url %>" alt="" loading="lazy">
+              <% vegas_category = ShopItem.spotlight_label?(cat.name) || ShopItem.spotlight_label?(cat.key) %>
+              <% if vegas_category %>
+                <div class="shop-grant-stage shop-grant-stage--vegas" data-shop-grant-selector>
+                  <div class="shop-grant-selector">
+                    <% grant_types.each do |gt_entry| %>
+                      <% gt = gt_entry[:grant_type] %>
+                      <button type="button" class="<%= class_names("shop-grant-tile", "shop-grant-tile--spotlight": ShopItem.spotlight_label?(gt.name) || ShopItem.spotlight_label?(gt.key)) %>" data-shop-grant-type="<%= gt.key %>">
+                        <span class="shop-tile-title"><%= gt.name %></span>
+                        <% if gt.logo_url.present? %>
+                          <img class="shop-tile-logo" src="<%= gt.logo_url %>" alt="" loading="lazy">
+                        <% end %>
+                      </button>
                     <% end %>
-                  </button>
-                <% end %>
-              </div>
+                  </div>
+                  <aside class="shop-grant-cta-column" aria-label="Las Vegas Hackathon signup">
+                    <div class="shop-grant-cta-column-inner">
+                      <span class="shop-grant-cta-kicker">Free signup</span>
+                      <h3 class="shop-grant-cta-title">Las Vegas Hackathon</h3>
+                      <p class="shop-grant-cta-text">Wanna join for <strong>FREE</strong>? Grab your spot.</p>
+                      <%= link_to "https://forms.hackclub.com/t/dLwpqJseLMus", class: "rsvp-button", target: "_blank", rel: "noopener noreferrer" do %>
+                        <span class="rsvp-button__label">Signup</span>
+                      <% end %>
+                    </div>
+                  </aside>
+                </div>
+              <% else %>
+                <div class="shop-grant-selector" data-shop-grant-selector>
+                  <% grant_types.each do |gt_entry| %>
+                    <% gt = gt_entry[:grant_type] %>
+                    <button type="button" class="<%= class_names("shop-grant-tile", "shop-grant-tile--spotlight": ShopItem.spotlight_label?(gt.name) || ShopItem.spotlight_label?(gt.key)) %>" data-shop-grant-type="<%= gt.key %>">
+                      <span class="shop-tile-title"><%= gt.name %></span>
+                      <% if gt.logo_url.present? %>
+                        <img class="shop-tile-logo" src="<%= gt.logo_url %>" alt="" loading="lazy">
+                      <% end %>
+                    </button>
+                  <% end %>
+                </div>
+              <% end %>
 
               <div class="shop-grant-view" data-shop-grant-view hidden aria-hidden="true">
                 <% grant_types.each do |gt_entry| %>
@@ -138,7 +165,7 @@
                         <% items.each do |item| %>
                           <% purchased_qty = @purchased_qty_by_item_id[item.id].to_i %>
                           <% limit_reached = item.max_per_person.present? && purchased_qty >= item.max_per_person.to_i %>
-                          <div class="shop-card" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
+                          <div class="<%= class_names("shop-card", "shop-card--spotlight": item.spotlight_shop_card?) %>" data-item-id="<%= item.id %>" data-item-price="<%= item.price.to_f %>">
                             <div class="shop-card-inner">
                               <% if item.image_url.present? %>
                                 <div class="shop-card-image" style="background-image: url('<%= item.image_url %>');"></div>

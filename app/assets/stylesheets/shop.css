@@ -52,7 +52,7 @@
   left: 1px;
   bottom: 0;
   width: min(42vw, 560px);
-  max-height: calc(100vh - 84px);
+  max-height: calc(100vh - 100px);
   z-index: 2;
   pointer-events: none;
   user-select: none;
@@ -324,6 +324,7 @@
   width: 100%;
   max-width: 980px;
   margin-top: 110px;
+  overflow-x: visible;
 }
 
 .shop-category-view-header {
@@ -331,6 +332,11 @@
   align-items: center;
   gap: 14px;
   margin: 0 0 10px;
+}
+
+/* Vegas grant step: tuck the signup strip under the breadcrumb row without extra air */
+.shop-category-view:has(.shop-grant-stage--vegas) .shop-category-view-header {
+  margin-bottom: 4px;
 }
 
 .shop-breadcrumb {
@@ -403,7 +409,7 @@
   background: rgba(20, 16, 12, 0.65);
 }
 
-/* Grant type (2nd layer) */
+/* Grant type (2nd layer): sub-group tiles (e.g. Travel) */
 .shop-grant-selector {
   width: 100%;
   display: grid;
@@ -411,6 +417,310 @@
   gap: 18px;
   align-items: stretch;
   max-width: 980px;
+}
+
+/* Las Vegas: grant tiles (left) + full-height black/red strip (right), home-style RSVP button */
+.shop-grant-stage {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  max-width: 980px;
+  min-height: 0;
+}
+
+/*
+ * Vegas: CTA strip to the right; inset from viewport edge on desktop (grant tiles unchanged).
+ */
+.shop-grant-stage--vegas {
+  position: relative;
+  max-width: none;
+  /* Desktop: more air from the viewport right edge (was too tight) */
+  --shop-vegas-inset-right: clamp(32px, 5vw, 72px);
+  /* Pull the row up so the CTA strip sits under the nav; same value on selector keeps Travel tiles from moving up */
+  --shop-vegas-lift: clamp(64px, 8vh, 112px);
+  width: calc(100% + 30px + max(0px, (100vw - 1200px) / 2) - var(--shop-vegas-inset-right));
+  margin-right: calc(-30px - max(0px, (100vw - 1200px) / 2) + var(--shop-vegas-inset-right));
+  margin-top: calc(-1 * var(--shop-vegas-lift));
+  min-height: 0;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+.shop-grant-stage .shop-grant-selector {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  padding-right: 18px;
+  box-sizing: border-box;
+}
+
+.shop-grant-stage--vegas .shop-grant-selector {
+  padding-right: 16px;
+  min-height: 0;
+  align-self: flex-start;
+  margin-top: var(--shop-vegas-lift);
+}
+
+.shop-grant-cta-column {
+  flex: 0 0 clamp(180px, 21vw, 270px);
+  max-width: 100%;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-left: 4px solid #b91c1c;
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, #050505 0%, #0a0a0a 40%, #050505 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(185, 28, 28, 0.35),
+    -8px 0 24px rgba(0, 0, 0, 0.5);
+  min-height: 0;
+}
+
+.shop-grant-stage--vegas .shop-grant-cta-column {
+  flex: 0 0 clamp(200px, 22vw, 300px);
+  align-self: stretch;
+  height: auto;
+  min-height: clamp(560px, 78vh, 920px);
+  border-right: none;
+  border-radius: 0;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    inset 0 0 0 1px rgba(185, 28, 28, 0.35),
+    -4px 0 20px rgba(0, 0, 0, 0.4);
+  animation: shopVegasCtaPulse 4.5s ease-in-out infinite;
+}
+
+/* Drifting warmth + sheen on the black strip (below text; see .shop-grant-cta-column-inner z-index) */
+.shop-grant-stage--vegas .shop-grant-cta-column::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 52% 44% at 22% 18%, rgba(160, 45, 55, 0.34) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 40% at 82% 28%, rgba(110, 50, 62, 0.22) 0%, transparent 52%),
+    radial-gradient(ellipse 58% 50% at 48% 88%, rgba(55, 45, 78, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 35% 30% at 65% 55%, rgba(185, 60, 70, 0.14) 0%, transparent 50%);
+  animation: shopVegasCtaBgDrift 11s ease-in-out infinite;
+}
+
+.shop-grant-stage--vegas .shop-grant-cta-column::after {
+  content: "";
+  position: absolute;
+  inset: -5%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      125deg,
+      transparent 0%,
+      rgba(255, 248, 240, 0.09) 38%,
+      transparent 62%
+    ),
+    linear-gradient(
+      210deg,
+      transparent 0%,
+      rgba(248, 113, 113, 0.06) 45%,
+      transparent 70%
+    );
+  mix-blend-mode: soft-light;
+  animation: shopVegasCtaBgSheen 9s ease-in-out infinite;
+}
+
+@keyframes shopVegasCtaBgDrift {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 0.55;
+  }
+
+  22% {
+    transform: translate(9%, -7%) rotate(1.4deg) scale(1.09);
+    opacity: 0.98;
+  }
+
+  48% {
+    transform: translate(-6%, 11%) rotate(-1deg) scale(0.92);
+    opacity: 0.62;
+  }
+
+  72% {
+    transform: translate(-11%, -9%) rotate(1.8deg) scale(1.06);
+    opacity: 0.9;
+  }
+}
+
+@keyframes shopVegasCtaBgSheen {
+  0%, 100% {
+    opacity: 0.28;
+    transform: translate(-8%, 5%) rotate(0deg) scale(1);
+  }
+
+  33% {
+    opacity: 0.78;
+    transform: translate(14%, -8%) rotate(0.6deg) scale(1.04);
+  }
+
+  66% {
+    opacity: 0.4;
+    transform: translate(2%, 12%) rotate(-0.5deg) scale(0.97);
+  }
+}
+
+@keyframes shopVegasCtaPulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(185, 28, 28, 0.35),
+      -4px 0 20px rgba(0, 0, 0, 0.42),
+      0 0 0 rgba(248, 113, 113, 0);
+    filter: brightness(1);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(239, 68, 68, 0.55),
+      -4px 0 32px rgba(0, 0, 0, 0.48),
+      0 0 36px rgba(185, 28, 28, 0.28);
+    filter: brightness(1.06);
+  }
+}
+
+.shop-grant-cta-column-inner {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  min-height: 0;
+  width: 100%;
+  padding: clamp(20px, 5vh, 48px) 14px;
+  margin: 0;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.shop-grant-cta-column-inner .shop-grant-cta-title,
+.shop-grant-cta-column-inner .shop-grant-cta-text {
+  width: 100%;
+  max-width: 22ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.shop-grant-cta-column-inner .rsvp-button {
+  margin-top: 4px;
+}
+
+.shop-grant-cta-kicker {
+  display: inline-block;
+  align-self: center;
+  width: auto;
+  max-width: 100%;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: 'Georgia', serif;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fecaca;
+  background: rgba(185, 28, 28, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+
+.shop-grant-cta-title {
+  margin: 0;
+  font-family: 'Georgia', serif;
+  font-weight: 800;
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  line-height: 1.25;
+  letter-spacing: 0.3px;
+  color: #fafafa;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  text-align: center;
+}
+
+.shop-grant-cta-text {
+  margin: 0;
+  font-family: 'Georgia', serif;
+  font-size: clamp(0.82rem, 1.6vw, 0.92rem);
+  line-height: 1.45;
+  color: rgba(250, 250, 250, 0.88);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  text-align: center;
+}
+
+.shop-grant-cta-text strong {
+  color: #f87171;
+  font-weight: 800;
+}
+
+/* Same RSVP control as home hero (see home/_rsvp.html.erb), scaled for narrow column */
+.shop-grant-cta-column .rsvp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  padding: 0.55rem 0.75rem 0.7rem;
+  transition: transform 0.15s ease;
+  background: #d9cbab;
+  border-radius: 14px;
+  position: relative;
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.35),
+    inset 0 0 24px rgba(0, 0, 0, 0.06);
+  text-decoration: none;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.shop-grant-cta-column .rsvp-button::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 2px solid #2a2019;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.shop-grant-cta-column .rsvp-button::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid #2a2019;
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.shop-grant-cta-column .rsvp-button:hover {
+  transform: scale(1.04);
+}
+
+.shop-grant-cta-column .rsvp-button__label {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.1rem, 3.2vw, 1.45rem);
+  font-weight: 700;
+  font-style: italic;
+  color: #5a1f16;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  position: relative;
+  top: 0.12em;
+  line-height: 1;
 }
 
 .shop-grant-tile {
@@ -508,6 +818,11 @@
 .shop-grant-view {
   width: 100%;
   max-width: 980px;
+}
+
+.shop-grant-panel {
+  width: 100%;
+  min-width: 0;
 }
 
 .shop-grant-view-header {
@@ -716,6 +1031,45 @@
   }
   50% {
     box-shadow: 0 0 18px rgba(212, 160, 23, 0.55);
+  }
+}
+
+/* Category grid: same soft glow as ticket (pinned) for spotlight items (e.g. Las Vegas). */
+.shop-card--spotlight .shop-card-inner {
+  animation: pinnedGlow 2.2s ease-in-out infinite;
+}
+
+.shop-card--spotlight .shop-buy-btn {
+  animation: pinnedButtonGlow 2.2s ease-in-out infinite;
+}
+
+/* Category / grant picker tiles (e.g. "Las Vegas" box on the main shop screen). */
+.shop-category-tile--spotlight:not(:hover):not(:active),
+.shop-grant-tile--spotlight:not(:hover):not(:active) {
+  animation: pinnedGlow 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-card--spotlight .shop-card-inner,
+  .shop-card--spotlight .shop-buy-btn,
+  .shop-category-tile--spotlight:not(:hover):not(:active),
+  .shop-grant-tile--spotlight:not(:hover):not(:active),
+  .shop-grant-stage--vegas .shop-grant-cta-column {
+    animation: none;
+  }
+
+  .shop-grant-stage--vegas .shop-grant-cta-column::before,
+  .shop-grant-stage--vegas .shop-grant-cta-column::after {
+    animation: none;
+    transform: none;
+  }
+
+  .shop-grant-stage--vegas .shop-grant-cta-column::before {
+    opacity: 0.72;
+  }
+
+  .shop-grant-stage--vegas .shop-grant-cta-column::after {
+    opacity: 0.48;
   }
 }
 
@@ -1619,6 +1973,69 @@
   .shop-category-tile {
     min-height: 160px;
     font-size: 1.8rem;
+  }
+
+  .shop-grant-stage {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .shop-grant-stage--vegas {
+    width: 100%;
+    max-width: 100%;
+    margin-right: 0;
+    margin-top: 0;
+    --shop-vegas-lift: 0px;
+    min-height: 0;
+    padding-right: 10px;
+    box-sizing: border-box;
+  }
+
+  .shop-grant-stage--vegas .shop-grant-selector {
+    margin-top: 0;
+  }
+
+  .shop-grant-stage .shop-grant-selector {
+    padding-right: 0;
+    padding-bottom: 14px;
+  }
+
+  .shop-grant-cta-column {
+    flex: 1 1 auto;
+    width: 100%;
+    border-left: none;
+    border-top: 4px solid #b91c1c;
+    box-shadow:
+      inset 0 0 0 1px rgba(185, 28, 28, 0.35),
+      0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .shop-grant-stage--vegas .shop-grant-cta-column {
+    margin-top: 0;
+    min-height: clamp(280px, 48vh, 520px);
+    animation-name: shopVegasCtaPulseMobile;
+  }
+
+  @keyframes shopVegasCtaPulseMobile {
+    0%, 100% {
+      box-shadow:
+        inset 0 0 0 1px rgba(185, 28, 28, 0.35),
+        0 8px 24px rgba(0, 0, 0, 0.45),
+        0 0 0 rgba(248, 113, 113, 0);
+      filter: brightness(1);
+    }
+
+    50% {
+      box-shadow:
+        inset 0 0 0 1px rgba(239, 68, 68, 0.55),
+        0 12px 36px rgba(0, 0, 0, 0.52),
+        0 0 32px rgba(185, 28, 28, 0.3);
+      filter: brightness(1.06);
+    }
+  }
+
+  .shop-grant-cta-column-inner {
+    padding: 20px 14px 22px;
   }
 
   .shop-grant-selector {
