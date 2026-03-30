@@ -28,14 +28,20 @@ class DeckController < ApplicationController
     hackatime_id = current_user.slack_id || current_user.hack_club_id
     Rails.logger.info("DeckController#index: user=#{current_user.id}, slack_id=#{current_user.slack_id}, hack_club_id=#{current_user.hack_club_id}, hackatime_id=#{hackatime_id}")
 
+    hours_map = hackatime_id.present? ? service.hours_by_project_name(hackatime_id, start_date: start_date) : {}
+
      @projects = projects.map.with_index do |project, index|
        linked = project.hackatime_projects || []
-       hackatime_hours_raw = linked.sum do |hp_name|
-         hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
-         Rails.logger.info("  project[#{index}] #{hp_name}: #{hours}h from hackatime")
-         hours
-       end
+       hackatime_hours_raw =
+         if linked.empty? || hackatime_id.blank?
+           0.0
+         else
+           linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }
+         end
        hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
+       linked.each do |hp_name|
+         Rails.logger.info("  project[#{index}] #{hp_name}: #{hours_map[hp_name.to_s.strip.downcase].to_f}h from hackatime (aggregate)")
+       end
 
        if (project.hackatime_hours.to_d - hackatime_hours.to_d).abs > 0.000_05
          project.update_column(:hackatime_hours, hackatime_hours)
@@ -70,8 +76,8 @@ class DeckController < ApplicationController
         "github_username" => project.github_username,
         "playable_url" => project.playable_url,
          "hackatime_projects" => project.hackatime_projects || [],
-         "hours" => total_hours,
-         "hackatime_hours" => hackatime_hours,
+         "hours" => total_hours.to_f,
+         "hackatime_hours" => hackatime_hours.to_f,
          "journal_hours" => journal_hours,
          "pending_review_hours" => pending_review,
          "unshipped_hours_display" => project.unshipped_hours_for_deck_display.to_f,
@@ -777,9 +783,13 @@ class DeckController < ApplicationController
     start_date = Date.new(2026, 2, 14)
     hackatime_id = user.slack_id || user.hack_club_id
     linked = project.hackatime_projects || []
-    hackatime_hours_raw = linked.sum do |hp_name|
-      (service.get_project_hours(hackatime_id, hp_name, start_date: start_date) || 0).to_f
-    end
+    hackatime_hours_raw =
+      if linked.empty? || hackatime_id.blank?
+        0.0
+      else
+        hours_map = service.hours_by_project_name(hackatime_id, start_date: start_date)
+        linked.sum { |hp_name| hours_map[hp_name.to_s.strip.downcase].to_f }
+      end
     hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
     if (project.hackatime_hours.to_d - hackatime_hours.to_d).abs > 0.000_05
       project.update_column(:hackatime_hours, hackatime_hours)
