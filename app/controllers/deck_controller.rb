@@ -489,9 +489,19 @@ class DeckController < ApplicationController
       tools_used: Array(params[:tools_used]).map(&:strip).reject(&:blank?)
     )
 
-    project.update_total_hours
+    project.reload
+    refresh_logged_totals_for_project!(project, current_user)
+    project.reload
+    if project.shipped? && project.status.to_s == "in-review" && !project.reviewed? &&
+        project.read_attribute(:shipping_queue_snapshot_total_hours).blank?
+      project.update_column(:shipping_queue_snapshot_total_hours, project.total_hours.to_f)
+    end
+    project.reload
 
-    render json: entry
+    render json: {
+      entry: entry,
+      project: deck_project_payload_hash(project, current_user)
+    }
   rescue => e
     Rails.logger.error("Error creating journal entry: #{e.message}\n#{e.backtrace.join("\n")}")
     render json: { error: "Error creating journal entry: #{e.message}" }, status: :unprocessable_entity
@@ -722,6 +732,31 @@ class DeckController < ApplicationController
   end
 
   private
+
+  # Single-project deck stats (matches DeckController#index math) for JSON responses after journal saves.
+  def deck_project_payload_hash(project, user)
+    hackatime_hours = project.hackatime_hours.to_f
+    journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
+    total_hours = project.total_hours.to_f
+    other_pending_ship = user.projects.where.not(id: project.id).where(
+      shipped: true,
+      status: "in-review",
+      reviewed: false
+    ).exists?
+
+    {
+      "id" => project.id,
+      "hours" => total_hours,
+      "hackatime_hours" => hackatime_hours,
+      "journal_hours" => journal_hours,
+      "pending_review_hours" => project.pending_review_hours,
+      "unshipped_hours_display" => project.unshipped_hours_for_deck_display.to_f,
+      "hours_logged_beyond_queue_submission" => project.hours_logged_beyond_current_queue_submission.to_f,
+      "reshippable" => project.reshippable?,
+      "user_has_other_pending_ship" => other_pending_ship,
+      "main_hc_reship_locked" => project.reship_blocked_by_main_hc_database?
+    }
+  end
 
   def refresh_logged_totals_for_project!(project, user)
     service = HackatimeService.new

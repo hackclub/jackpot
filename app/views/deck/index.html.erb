@@ -725,6 +725,50 @@ function initDeck() {
    ].join("\n\n");
    var SHIP_NEED_HOURS_BEYOND_QUEUE_MSG = 'Log more hours on this project since your last ship, then use Ship update to add them to your pending submission and move it to the back of the queue.';
 
+   function applyDeckProjectTotalsFromServer(project) {
+     if (!project || project.id == null) return;
+     var card = document.querySelector('.card-slot-filled[data-project-id="' + project.id + '"]');
+     if (card) {
+       var hrs = project.hours != null ? project.hours : 0;
+       var hoursEl = card.querySelector('.card-hours');
+       if (hoursEl) hoursEl.textContent = parseFloat(hrs, 10).toFixed(1);
+       card.dataset.projectHours = String(hrs);
+       card.dataset.hackatimeHours = String(project.hackatime_hours != null ? project.hackatime_hours : 0);
+       card.dataset.journalHours = String(project.journal_hours != null ? project.journal_hours : 0);
+       card.dataset.pendingReviewHours = String(project.pending_review_hours != null ? project.pending_review_hours : 0);
+       card.dataset.unshippedHoursDisplay = String(project.unshipped_hours_display != null ? project.unshipped_hours_display : 0);
+       card.dataset.hoursLoggedBeyondQueueSubmission = String(project.hours_logged_beyond_queue_submission != null ? project.hours_logged_beyond_queue_submission : 0);
+       card.dataset.reshippable = project.reshippable ? 'true' : 'false';
+       card.dataset.userHasOtherPendingShip = project.user_has_other_pending_ship ? 'true' : 'false';
+       card.dataset.mainHcReshipLocked = project.main_hc_reship_locked ? 'true' : 'false';
+     }
+     function mergeHoursInto(data) {
+       if (!data) return;
+       data.hours = String(project.hours);
+       data.hackatimeHours = String(project.hackatime_hours || 0);
+       data.journalHours = String(project.journal_hours || 0);
+       data.pendingReviewHours = String(project.pending_review_hours || 0);
+       data.unshippedHoursDisplay = String(project.unshipped_hours_display || 0);
+       data.hoursLoggedBeyondQueueSubmission = String(project.hours_logged_beyond_queue_submission || 0);
+       data.reshippable = project.reshippable ? 'true' : 'false';
+       data.userHasOtherPendingShip = project.user_has_other_pending_ship ? 'true' : 'false';
+       data.mainHcReshipLocked = project.main_hc_reship_locked ? 'true' : 'false';
+     }
+     if (currentJournalData && String(currentJournalData.id) === String(project.id)) mergeHoursInto(currentJournalData);
+     if (currentDetailData && String(currentDetailData.id) === String(project.id)) {
+       mergeHoursInto(currentDetailData);
+       if (detailModal && detailModal.classList.contains('active')) {
+         var totalHrs = parseFloat(project.hours || 0).toFixed(1);
+         if (detailHours) detailHours.textContent = totalHrs + ' hrs';
+         if (detailUnshippedHoursRow && detailUnshippedHours) {
+           var unsh = parseFloat(project.unshipped_hours_display, 10);
+           if (isNaN(unsh)) unsh = 0;
+           detailUnshippedHours.textContent = unsh.toFixed(1);
+         }
+       }
+     }
+   }
+
    function detailCanEditPlayableBanner() {
      if (!currentDetailData) return false;
      if (currentDetailData.shipped !== 'true') return true;
@@ -1322,12 +1366,13 @@ function initDeck() {
         })
       })
       .then(function(r) { return r.json(); })
-      .then(function(entry) {
+      .then(function(data) {
+        var entry = data.entry != null ? data.entry : data;
+        if (data.project) applyDeckProjectTotalsFromServer(data.project);
         journalTimeDone.value = '';
         journalHoursWorked.value = '';
         journalDescription.value = '';
         journalToolsUsed.value = '';
-        // Use the project id from the saved entry when refreshing, fallback to currentJournalData.id
         loadJournalEntries(entry.project_id || currentJournalData.id);
       })
       .catch(function(e) { console.error('Failed to save journal entry:', e); });
