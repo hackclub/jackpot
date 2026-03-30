@@ -13,12 +13,15 @@ class HackatimeHoursSyncJob < ApplicationJob
 
       user.projects.each do |project|
         linked = project.hackatime_projects || []
-        next if linked.empty?
-
-        project_total_raw = linked.sum do |hp_name|
-          service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
-        end
-        project_total = JackpotHours.hackatime_hours_from_api_total(project_total_raw)
+        project_total =
+          if linked.empty?
+            0
+          else
+            project_total_raw = linked.sum do |hp_name|
+              service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
+            end
+            JackpotHours.hackatime_hours_from_api_total(project_total_raw)
+          end
 
         if (project.hackatime_hours.to_d - project_total.to_d).abs > 0.000_05
           project.update_column(:hackatime_hours, project_total)

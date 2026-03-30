@@ -44,7 +44,9 @@ class DeckController < ApplicationController
        project_journals = journal_by_project_id[project.id] || []
        journal_hours = project_journals.sum(&:hours_worked).to_f
        total_hours = hackatime_hours + journal_hours
-       project.update_column(:total_hours, total_hours) if project.total_hours != total_hours
+       if (project.total_hours.to_d - total_hours.to_d).abs > 0.000_05
+         project.update_column(:total_hours, total_hours)
+       end
        Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
        if project.shipped? && project.status.to_s == "in-review" && !project.reviewed? &&
@@ -739,7 +741,7 @@ class DeckController < ApplicationController
   def deck_project_payload_hash(project, user)
     hackatime_hours = project.hackatime_hours.to_f
     journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
-    total_hours = project.total_hours.to_f
+    total_hours = hackatime_hours + journal_hours
     other_pending_ship = user.projects.where.not(id: project.id).where(
       shipped: true,
       status: "in-review",
@@ -775,7 +777,9 @@ class DeckController < ApplicationController
 
     journal_hours = JournalEntry.where(user_id: user.id, project_id: project.id).sum(:hours_worked).to_f
     total = hackatime_hours + journal_hours
-    project.update_column(:total_hours, total) if project.total_hours != total
+    if (project.total_hours.to_d - total.to_d).abs > 0.000_05
+      project.update_column(:total_hours, total)
+    end
   end
 
   def hackatime_first_conflict_with_other_project(user, exclude_project_id, names)
