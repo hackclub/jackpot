@@ -81,6 +81,13 @@ Rails.application.routes.draw do
   get "/faq", to: "home#faq", as: :faq
   get "/rules", to: "home#rules", as: :rules
 
+  # Public hackathon info (same page at main site or under deck)
+  get "/hackathon_info", to: "hackathon_info#index", as: :hackathon_info
+  get "/deck/hackathon_info", to: "hackathon_info#index", as: :deck_hackathon_info
+
+  get "jackpot/hackathon_info", to: redirect("/hackathon_info")
+  get "jackpot/hackathonInfo", to: redirect("/hackathon_info")
+
   root "home#index"
   # Defines the root path route ("/")
   # root "posts#index"
