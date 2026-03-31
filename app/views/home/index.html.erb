@@ -2,7 +2,20 @@
   <section class="page-section page-section--hero ext-section--0" id="section-0">
     <div class="hero-overlays">
       <%= image_tag "https://cdn.hackclub.com/019d2a76-3e9d-7adb-be27-076c12ddeca3/title-6ae9cd2e.png", alt: "Jackpot Title", class: "hero-title" %>
-      <%= image_tag "https://user-cdn.hackclub-assets.com/019d2a63-7408-7245-8d63-3d235c8d486c/centralmg-123ccef9.png", alt: "Center Art", class: "hero-center" %>
+      <div class="hero-main-stack">
+        <%= image_tag "https://user-cdn.hackclub-assets.com/019d2a63-7408-7245-8d63-3d235c8d486c/centralmg-123ccef9.png", alt: "Center Art", class: "hero-center" %>
+        <div class="hero-signup-wrap">
+          <%= link_to hackathon_info_path, class: "hero-signup-link" do %>
+            <%= image_tag "buttons/signup_hack.png", alt: "Signup", class: "hero-signup-btn", loading: "lazy" %>
+          <% end %>
+        </div>
+      </div>
+      <%# Signup (z-index 250) stacks above this chevron (z-index 180) %>
+      <a href="#steps" class="scroll-down-v hero-scroll-down" aria-label="Scroll down">
+        <svg class="scroll-down-v__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M2.99854 7.00153L12.0006 17.0027L21.0027 7.00153" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
       <%= link_to image_tag("HC_logo.png", alt: "Hack Club Logo", class: "hero-logo"), "https://hackclub.com", class: "hero-logo-link" %>
     </div>
     <%= render "home/rsvp" %>
@@ -293,6 +306,7 @@ body {
   inset: 0;
   pointer-events: none;
   transform: translateY(2vh);
+  z-index: 220;
   max-width: 100vw;
   overflow: hidden;
 }
@@ -320,18 +334,75 @@ body {
   animation: title-sheen 5.75s infinite;
 }
 
-.hero-center {
+/* Center art + Signup: stacked so the Signup image sits directly under the main art */
+.hero-main-stack {
   position: absolute;
   left: 50%;
   top: clamp(-28vh, 9vh, 42vh);
-  transform: translateX(-51%);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 0.9vw, 12px);
+  pointer-events: none;
+  z-index: 240;
   max-width: min(92vw, 1200px);
   width: clamp(520px, 200vw, 1210px);
+}
+
+.hero-main-stack .hero-center {
+  position: static;
+  display: block;
+  width: 100%;
+  max-width: 100%;
   height: auto;
+  transform: none;
   filter:
     drop-shadow(0 0 18px rgba(255, 230, 170, 0.35))
     drop-shadow(0 0 48px rgba(255, 170, 60, 0.22));
   animation: center-glow 2.8s ease-in-out infinite;
+}
+
+.hero-signup-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  pointer-events: auto;
+  line-height: 0;
+  z-index: 250;
+  /* Pull Signup up + nudge slightly left */
+  transform: translate(clamp(-28px, -1.8vw, -12px), clamp(-220px, -32vh, -150px));
+}
+
+/* Chevron sits in the same stacking context as hero art; below Signup */
+.hero-overlays .hero-scroll-down {
+  z-index: 180;
+}
+
+.hero-signup-link {
+  display: inline-block;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s ease;
+}
+
+.hero-signup-link:hover .hero-signup-btn,
+.hero-signup-link:focus-visible .hero-signup-btn {
+  transform: scale(1.08);
+}
+
+.hero-signup-btn {
+  width: clamp(140px, 24vw, 320px);
+  height: auto;
+  display: block;
+  transition: transform 0.25s ease;
+  filter: drop-shadow(0 0 12px rgba(255, 200, 100, 0.5)) drop-shadow(0 0 28px rgba(255, 180, 60, 0.35));
 }
 
 @keyframes title-sheen {
@@ -385,7 +456,7 @@ body {
     width: clamp(250px, 40vw, 520px);
   }
 
-  .hero-center {
+  .hero-main-stack {
     top: clamp(-22vh, 13vh, 44vh);
     width: clamp(540px, 80vw, 1100px);
   }
@@ -1479,7 +1550,7 @@ body {
 
 @media (max-width: 1023px) {
   .hero-title { width: clamp(260px, 46vw, 450px); }
-  .hero-center { width: clamp(300px, 90vw, 720px); }
+  .hero-main-stack { width: clamp(300px, 90vw, 720px); }
   .hero-logo { width: clamp(100px, 18vw, 160px); }
 
   /* "and enjoy our prizes" subtitle scales down on tablets/phones */
@@ -1544,7 +1615,7 @@ body {
 
   .hero-overlays { transform: translateY(0); }
   .hero-title { top: clamp(6vh, 10vh, 13vh); width: clamp(220px, 56vw, 360px); }
-  .hero-center { top: clamp(28vh, 34vh, 40vh); width: clamp(280px, 88vw, 560px); }
+  .hero-main-stack { top: clamp(28vh, 34vh, 40vh); width: clamp(280px, 88vw, 560px); }
 
   .hero-logo-link { top: max(6px, env(safe-area-inset-top)); }
   .hero-logo { width: 130px; }
@@ -1589,7 +1660,7 @@ body {
   }
 
   .hero-title { top: clamp(7vh, 11vh, 14vh); width: 84vw; }
-  .hero-center { top: clamp(27vh, 33vh, 38vh); width: 94vw; max-width: 460px; }
+  .hero-main-stack { top: clamp(27vh, 33vh, 38vh); width: 94vw; max-width: 460px; }
 
   .hero-logo { width: 100px; }
 
@@ -1716,7 +1787,7 @@ body {
   fixes hero sizing/position and lifts final section content on common phone ratios.
 */
 @media (max-width: 600px) and (min-height: 800px) and (orientation: portrait) {
-  .hero-center {
+  .hero-main-stack {
     top: 35vh !important;
     width: min(96vw, 480px) !important;
   }
@@ -1752,7 +1823,7 @@ body {
     width: 82vw !important;
   }
 
-  .hero-center {
+  .hero-main-stack {
     top: 33vh !important;
     width: 95vw !important;
     max-width: 430px !important;
@@ -1779,7 +1850,7 @@ body {
     width: 84vw !important;
   }
 
-  .hero-center {
+  .hero-main-stack {
     top: 34vh !important;
     width: 96vw !important;
     max-width: 460px !important;
@@ -1792,7 +1863,7 @@ body {
 
 /* iPhone Safari portrait around ~390–520px (Pro, Pro Max, Plus) */
 @media (min-width: 375px) and (max-width: 540px) and (min-height: 700px) and (max-height: 1000px) {
-  .hero-center {
+  .hero-main-stack {
     top: 32vh !important;
     width: min(100vw, 520px) !important;
     max-width: 100vw !important;
@@ -1815,11 +1886,14 @@ body {
     width: 78vw !important;
   }
 
-  .page-section--hero .hero-center {
+  .page-section--hero .hero-main-stack {
+    top: 29vh !important;
     width: min(118vw, 880px) !important;
     max-width: none !important;
-    top: 29vh !important;
-    transform: translateX(-51%) scale(1.24) !important;
+  }
+
+  .page-section--hero .hero-main-stack .hero-center {
+    transform: scale(1.24) !important;
     transform-origin: center top !important;
   }
 
@@ -1834,10 +1908,14 @@ body {
     width: 80vw !important;
   }
 
-  .page-section--hero .hero-center {
+  .page-section--hero .hero-main-stack {
     width: 120vw !important;
     top: 30vh !important;
-    transform: translateX(-51%) scale(1.3) !important;
+  }
+
+  .page-section--hero .hero-main-stack .hero-center {
+    transform: scale(1.3) !important;
+    transform-origin: center top !important;
   }
 
   .scroll-down-v {
@@ -1845,16 +1923,51 @@ body {
   }
 }
 
-/* iOS Safari-specific phone tuning: keep hero art and scroll affordance positioned cleanly */
-@supports (-webkit-touch-callout: none) {
-  @media (max-width: 767px) and (orientation: portrait) {
-    .page-section--hero .hero-center {
-      top: 26vh !important;
-    }
+/*
+  Phone portrait: desktop signup translate is too strong; ease the lift, scale the button,
+  and sit the chevron higher in the frame. Pin stack to 100vw so the signup aligns with the
+  screen center (wide ratio hacks like 118vw throw off flex centering).
 
-    .scroll-down-v {
-      bottom: 1.8vh !important;
-    }
+  Main art: smaller `top` = cluster sits higher — keep below title, above scroll affordance.
+*/
+@media (max-width: 767px) and (orientation: portrait) {
+  .page-section--hero .hero-main-stack {
+    top: clamp(22vh, 28vh, 36vh) !important;
+    gap: clamp(0px, 0.6vw, 8px);
+    width: 100% !important;
+    max-width: 100vw !important;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+  }
+
+  .page-section--hero .hero-main-stack .hero-center {
+    transform: scale(1.42) !important;
+    transform-origin: center top !important;
+  }
+
+  .page-section--hero .hero-signup-wrap {
+    align-self: stretch;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    /* slight left nudge (optical balance vs. asset) + vertical lift */
+    transform: translate(clamp(-22px, -2.4vw, -12px), clamp(-72px, -12vh, -36px)) !important;
+  }
+
+  .page-section--hero .hero-signup-link {
+    margin-inline: auto;
+  }
+
+  .page-section--hero .hero-signup-btn {
+    width: clamp(200px, 68vw, 300px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .page-section--hero .scroll-down-v.hero-scroll-down,
+  .page-section--hero .scroll-down-v {
+    bottom: clamp(8vh, 11vh, 16vh) !important;
   }
 }
 </style>

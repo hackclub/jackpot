@@ -36,3 +36,7 @@
 /config/*.key
 *.keep
 vendor
+app/.DS_Store
+app/assets/.DS_Store
+app/assets/images/.DS_Store
+app/assets/images/RSVP_comp/.DS_Store

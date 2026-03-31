@@ -1,11 +1,4 @@
-<%# Scroll-down arrow (old Join button position) — wiggle animation %>
-<a href="#steps" class="scroll-down-v" aria-label="Scroll down">
-  <svg class="scroll-down-v__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M2.99854 7.00153L12.0006 17.0027L21.0027 7.00153" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</a>
-
-  <%# Modal Overlay %>
+  <%# Modal Overlay (scroll-down arrow lives in home/index hero-overlays for correct stacking with Join) %>
   <div id="rsvp-overlay" class="rsvp-modal" onclick="if(event.target===this){this.classList.remove('rsvp-modal--visible'); document.body.style.overflow='';}">
     <div class="rsvp-modal__card vintage-card">
       <div class="rsvp-modal__content">
@@ -206,6 +199,8 @@
   justify-content: center;
   border: none;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   /* adjusted for smaller layout */
   padding: 24px 80px;
   transition: transform 0.15s ease;
