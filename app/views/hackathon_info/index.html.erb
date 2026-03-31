@@ -1,0 +1,1032 @@
+<% content_for :title, "Jackpot Hackathon - Info" %>
+
+<% signup_pct = @signup_goal.positive? ? [(@signup_count.to_f / @signup_goal * 100).round(1), 100.0].min : 0 %>
+<% back_href = user_signed_in? ? deck_path : root_path %>
+
+<div class="faq-page">
+  <div class="faq-floating-icons" aria-hidden="true">
+    <%= image_tag "icons/chip.png", class: "faq-icon faq-icon--1", alt: "" %>
+    <%= image_tag "icons/cherry.png", class: "faq-icon faq-icon--2", alt: "" %>
+    <%= image_tag "icons/cards.png", class: "faq-icon faq-icon--3", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--4", alt: "" %>
+    <%= image_tag "icons/chip.png", class: "faq-icon faq-icon--5", alt: "" %>
+    <%= image_tag "icons/cherry.png", class: "faq-icon faq-icon--6", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--7", alt: "" %>
+    <%= image_tag "icons/cards.png", class: "faq-icon faq-icon--8", alt: "" %>
+    <%= image_tag "icons/cherry.png", class: "faq-icon faq-icon--9", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--10", alt: "" %>
+    <%= image_tag "icons/chip.png", class: "faq-icon faq-icon--11", alt: "" %>
+    <%= image_tag "icons/cards.png", class: "faq-icon faq-icon--12", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--13", alt: "" %>
+    <%= image_tag "icons/cherry.png", class: "faq-icon faq-icon--14", alt: "" %>
+    <%= image_tag "icons/chip.png", class: "faq-icon faq-icon--15", alt: "" %>
+    <%= image_tag "icons/diamond.png", class: "faq-icon faq-icon--16", alt: "" %>
+  </div>
+  <div class="faq-content">
+    <%= link_to back_href, class: "faq-back-btn" do %>
+      <%= image_tag "back_button.png", alt: "Back", class: "faq-back-btn-img" %>
+    <% end %>
+
+    <div class="hackathon-faq-title-row">
+      <h1 class="hackathon-faq-main-title">Jackpot Hackathon - Info</h1>
+      <%= image_tag "bunny_handwritten.png", alt: "", class: "hackathon-faq-bunny", loading: "lazy", aria: { hidden: true } %>
+    </div>
+
+    <p class="faq-disclaimer hackathon-faq-intro">
+      A free, beginner-friendly weekend coding event. Build your own project and compete for tech prizes.
+    </p>
+
+    <section class="faq-section">
+      <h2 class="faq-section-heading">— Before starting</h2>
+      <div class="hackathon-before-intro">
+        <p class="hackathon-before-intro__p">
+          The event will be confirmed when signups reach <strong>25</strong> (deadline <strong>April 10th</strong>). Your participation directly helps us make it happen.
+          Please fill out the signup form only if you are genuinely interested and at least 80% sure you can attend.
+        </p>
+      </div>
+
+      <div class="hackathon-signup-counter-bare" role="region" aria-label="Signup progress toward goal">
+        <div class="hackathon-signup-progress hackathon-signup-progress--vegas">
+          <div class="hackathon-signup-progress-head">
+            <span class="hackathon-signup-label">Signups</span>
+            <span class="hackathon-signup-count"><%= @signup_count %> / <%= @signup_goal %></span>
+          </div>
+          <div class="hackathon-progress-track hackathon-progress-track--vegas">
+            <div class="hackathon-progress-fill hackathon-progress-fill--vegas" style="width: <%= signup_pct %>%"></div>
+          </div>
+          <% if @signup_count >= @signup_goal %>
+            <p class="hackathon-deadline-line hackathon-deadline-line--vegas">We have reached the signup goal—next steps will be shared by email.</p>
+          <% else %>
+            <p class="hackathon-deadline-line hackathon-deadline-line--vegas">We need <%= @signup_goal - @signup_count %> more by April 10th to confirm the event.</p>
+          <% end %>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq-section">
+      <h2 class="faq-section-heading">— Location</h2>
+      <div class="faq-static-block hackathon-location-split">
+        <div class="hackathon-location-split__text">
+          <ul class="faq-list hackathon-faq-list--tight">
+            <li><%= link_to "UNLV", "https://www.unlv.edu/", target: "_blank", rel: "noopener noreferrer", class: "faq-link" %> — Las Vegas Downtown</li>
+            <li>May 9–10</li>
+            <li>9am–7pm both days (no overnight)</li>
+          </ul>
+        </div>
+        <div class="hackathon-location-split__logo">
+          <%= image_tag "UNLV_logo.png", alt: "UNLV", class: "hackathon-unlv-logo" %>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq-section">
+      <h2 class="faq-section-heading">— General info</h2>
+      <div class="faq-static-block hackathon-general-info-split">
+        <div class="hackathon-general-info-split__text">
+          <ul class="faq-list hackathon-faq-list--tight">
+            <li>No hours required</li>
+            <li>Free merch at the event (hoodies, shirts, stickers…)</li>
+            <li>Build whatever you want</li>
+            <li>Tech prizes for the final podium</li>
+            <li>Included meals and snacks</li>
+            <li>We will give you <strong>$20</strong> for each friend you invite who attends both days</li>
+          </ul>
+        </div>
+        <div class="hackathon-general-info-split__visual">
+          <%= image_tag "vegas.png", alt: "Welcome to Fabulous Hack Club Nevada", class: "hackathon-vegas-img" %>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq-section">
+      <h2 class="faq-section-heading">— Hack Club</h2>
+      <div class="faq-static-block">
+        <p class="faq-a">
+          <%= link_to "Hack Club", "https://hackclub.com/", target: "_blank", rel: "noopener noreferrer", class: "faq-link" %>, a nonprofit and the world’s largest open-source community of teenagers passionate about coding and building technology. In this specific event:
+        </p>
+        <ul class="faq-list hackathon-faq-list--tight hackathon-hc-event-list">
+          <li>
+            Flight and hotel are not included, but you can request financial support in the
+            <%= link_to "Jackpot Shop", shop_path, class: "faq-link" %>
+            (you are 100% responsible for booking and managing travel; we only reimburse approved requests).
+          </li>
+          <li>Hack Club does not cover personal health insurance.</li>
+          <li>If you request a travel or hotel stipend from Jackpot, you must participate on both days of the event—otherwise your reimbursement will not be issued.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="faq-section faq-section--cta">
+      <%= link_to "https://forms.hackclub.com/t/dLwpqJseLMus",
+          target: "_blank",
+          rel: "noopener noreferrer",
+          class: "hackathon-faq-signup hackathon-faq-signup--asset",
+          aria: { label: "Sign up for the Jackpot Hackathon" } do %>
+        <%= image_tag "buttons/signup_girl.png", alt: "", class: "hackathon-faq-signup-img" %>
+      <% end %>
+    </section>
+
+    <section class="faq-section hackathon-section--questions">
+      <h2 class="faq-section-heading">— Questions? We got you!</h2>
+      <div class="hackathon-questions">
+        <p class="hackathon-questions__lead">Write us here—our team will reply right away.</p>
+        <p class="hackathon-questions__line">
+          Email:
+          <%= link_to "emmaborghi@hackclub.com", "mailto:emmaborghi@hackclub.com", class: "faq-link" %>
+        </p>
+        <p class="hackathon-questions__line">
+          Slack:
+          <%= link_to "@Emma", "https://hackclub.enterprise.slack.com/team/U078DFX40A2", target: "_blank", rel: "noopener noreferrer", class: "faq-link" %>
+        </p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<style>
+@font-face {
+  font-family: "Katibeh";
+  src: url(<%= asset_path "Katibeh/Katibeh-Regular.ttf" %>) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.faq-page {
+  min-height: 100vh;
+  color: #fff;
+  padding: 2rem 2rem 4rem;
+  max-width: 920px;
+  margin: 0 auto;
+  font-family: "Katibeh", serif;
+  position: relative;
+}
+
+.faq-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #000 url('<%= image_path("faq_bkg.jpg") %>') center center no-repeat;
+  background-size: cover;
+}
+
+.faq-floating-icons {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.faq-icon {
+  position: absolute;
+  object-fit: contain;
+  opacity: 0.5;
+}
+
+.faq-icon--1 { left: 3%;   top: 8%;   width: 56px;  animation: faq-float-1 42s ease-in-out infinite; animation-delay: 0s; }
+.faq-icon--2 { left: 90%; top: 14%; width: 72px;  animation: faq-float-2 46s ease-in-out infinite; animation-delay: -4s; }
+.faq-icon--3 { left: 12%; top: 48%; width: 44px;  animation: faq-float-3 38s ease-in-out infinite; animation-delay: -8s; }
+.faq-icon--4 { left: 85%; top: 58%; width: 64px;  animation: faq-float-4 48s ease-in-out infinite; animation-delay: -12s; }
+.faq-icon--5 { left: 92%; top: 32%; width: 40px;  animation: faq-float-5 40s ease-in-out infinite; animation-delay: -2s; }
+.faq-icon--6 { left: 2%;  top: 75%; width: 68px;  animation: faq-float-6 52s ease-in-out infinite; animation-delay: -6s; }
+.faq-icon--7 { left: 75%; top: 4%;  width: 48px;  animation: faq-float-7 44s ease-in-out infinite; animation-delay: -10s; }
+.faq-icon--8 { left: 38%; top: 18%; width: 52px;  animation: faq-float-8 46s ease-in-out infinite; animation-delay: -15s; }
+.faq-icon--9 { left: 22%; top: 68%; width: 60px;  animation: faq-float-9 50s ease-in-out infinite; animation-delay: -3s; }
+.faq-icon--10 { left: 58%; top: 88%; width: 46px; animation: faq-float-10 42s ease-in-out infinite; animation-delay: -7s; }
+.faq-icon--11 { left: 6%;  top: 32%; width: 50px;  animation: faq-float-11 45s ease-in-out infinite; animation-delay: -5s; }
+.faq-icon--12 { left: 94%; top: 72%; width: 58px;  animation: faq-float-12 40s ease-in-out infinite; animation-delay: -11s; }
+.faq-icon--13 { left: 48%; top: 6%;  width: 42px;  animation: faq-float-13 48s ease-in-out infinite; animation-delay: -9s; }
+.faq-icon--14 { left: 65%; top: 42%; width: 66px;  animation: faq-float-14 44s ease-in-out infinite; animation-delay: -1s; }
+.faq-icon--15 { left: 30%; top: 92%; width: 54px;  animation: faq-float-15 46s ease-in-out infinite; animation-delay: -13s; }
+.faq-icon--16 { left: 82%; top: 82%; width: 48px;  animation: faq-float-16 38s ease-in-out infinite; animation-delay: -14s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-icon { animation: none; }
+}
+
+@keyframes faq-float-1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(45px, -50px) rotate(12deg); }
+  50% { transform: translate(-35px, 40px) rotate(-10deg); }
+  75% { transform: translate(55px, 30px) rotate(8deg); }
+}
+@keyframes faq-float-2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-55px, 45px) rotate(-14deg); }
+  66% { transform: translate(40px, -65px) rotate(12deg); }
+}
+@keyframes faq-float-3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(70px, 55px) rotate(18deg); }
+}
+@keyframes faq-float-4 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-45px, -35px) rotate(-12deg); }
+  50% { transform: translate(25px, 60px) rotate(8deg); }
+  75% { transform: translate(-55px, 20px) rotate(5deg); }
+}
+@keyframes faq-float-5 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-40px, -48px) rotate(-10deg); }
+}
+@keyframes faq-float-6 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(55px, -40px) rotate(14deg); }
+  66% { transform: translate(-70px, 35px) rotate(-12deg); }
+}
+@keyframes faq-float-7 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(35px, 55px) rotate(9deg); }
+}
+@keyframes faq-float-8 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-52px, 28px) rotate(-9deg); }
+  75% { transform: translate(58px, -35px) rotate(11deg); }
+}
+@keyframes faq-float-9 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-65px, -52px) rotate(-16deg); }
+}
+@keyframes faq-float-10 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(42px, 48px) rotate(10deg); }
+  66% { transform: translate(-48px, -28px) rotate(-8deg); }
+}
+@keyframes faq-float-11 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(50px, 35px) rotate(10deg); }
+  75% { transform: translate(-40px, -45px) rotate(-12deg); }
+}
+@keyframes faq-float-12 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-60px, 50px) rotate(-14deg); }
+}
+@keyframes faq-float-13 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-45px, 40px) rotate(-10deg); }
+  66% { transform: translate(55px, -35px) rotate(12deg); }
+}
+@keyframes faq-float-14 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(60px, -45px) rotate(14deg); }
+  75% { transform: translate(-50px, 55px) rotate(-11deg); }
+}
+@keyframes faq-float-15 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(48px, -55px) rotate(15deg); }
+}
+@keyframes faq-float-16 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-55px, -40px) rotate(-13deg); }
+  66% { transform: translate(40px, 45px) rotate(9deg); }
+}
+
+.faq-content {
+  position: relative;
+  z-index: 1;
+  padding-top: 5.25rem;
+}
+
+.faq-back-btn {
+  position: absolute;
+  top: 0.5rem;
+  left: -0.75rem;
+  display: inline-block;
+  line-height: 0;
+  text-decoration: none;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.faq-back-btn:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 12px rgba(255, 180, 80, 0.3));
+}
+
+.faq-back-btn-img {
+  display: block;
+  height: auto;
+  max-height: 96px;
+  width: auto;
+  object-fit: contain;
+}
+
+.faq-disclaimer {
+  margin: 0 auto 2rem;
+  max-width: 520px;
+  padding: 0.75rem 1rem;
+  font-size: 1.15rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.88);
+  text-align: center;
+  animation: faq-disclaimer-in 0.6s ease-out, faq-disclaimer-pulse 3s ease-in-out 0.6s infinite;
+}
+
+.faq-disclaimer strong {
+  font-style: normal;
+  color: rgba(255, 220, 140, 0.95);
+}
+
+.hackathon-faq-intro {
+  max-width: min(95vw, 44rem);
+  font-size: clamp(1.3rem, 3.5vw, 1.85rem);
+  line-height: 1.5;
+  padding: 0.9rem 1.15rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  /* Solid red fill; keep stroke very thin so the red stays visible */
+  color: #e01530;
+  -webkit-text-fill-color: #e01530;
+  -webkit-text-stroke: 0.45px #ffffff;
+  text-shadow:
+    0 2px 14px rgba(0, 0, 0, 0.55),
+    0 0 18px rgba(236, 55, 80, 0.35);
+}
+
+@keyframes faq-disclaimer-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes faq-disclaimer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.9; }
+}
+
+.hackathon-faq-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem 1.25rem;
+  margin: 0 auto 2rem;
+  max-width: 100%;
+}
+
+.hackathon-faq-main-title {
+  font-size: clamp(1.95rem, 5.5vw, 2.95rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 100, 0.95);
+  text-align: center;
+  margin: 0;
+  max-width: min(95vw, 36ch);
+  line-height: 1.15;
+}
+
+.hackathon-faq-bunny {
+  flex: 0 0 auto;
+  width: clamp(88px, 24vw, 175px);
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.faq-title {
+  display: block;
+  max-width: 100%;
+  width: clamp(280px, 50vw, 420px);
+  height: auto;
+  margin: 0 auto 2.5rem;
+  object-fit: contain;
+}
+
+.faq-section {
+  margin-bottom: 2.5rem;
+}
+
+.faq-section-heading {
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 200, 100, 0.95);
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 200, 100, 0.25);
+}
+
+.faq-static-block {
+  padding: 1rem 1.25rem 1.25rem;
+  border: 1px solid rgba(255, 200, 100, 0.45);
+  border-radius: 10px;
+  background: rgba(14, 10, 8, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.faq-static-block .faq-a,
+.faq-static-block .faq-list {
+  color: rgba(255, 252, 248, 0.97);
+}
+
+.faq-static-block .faq-a strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.faq-static-block .faq-a:last-child {
+  margin-bottom: 0;
+}
+
+.hackathon-before-intro {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto 1.75rem;
+  padding: 0;
+  text-align: center;
+}
+
+.hackathon-before-intro__p {
+  margin: 0;
+  font-size: clamp(1.35rem, 3.4vw, 1.9rem);
+  line-height: 1.65;
+  color: rgba(255, 252, 248, 0.96);
+  max-width: none;
+}
+
+.hackathon-before-intro__p strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.hackathon-signup-counter-bare {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0.5rem 0 0;
+}
+
+.hackathon-faq-list--tight {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.hackathon-faq-list--tight li {
+  margin-bottom: 0.35rem;
+}
+
+.hackathon-faq-list--tight li:last-child {
+  margin-bottom: 0;
+}
+
+.hackathon-location-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.75rem;
+}
+
+.hackathon-location-split__text {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.hackathon-location-split__logo {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hackathon-unlv-logo {
+  display: block;
+  width: clamp(110px, 26vw, 200px);
+  height: auto;
+  object-fit: contain;
+}
+
+.hackathon-general-info-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+}
+
+.hackathon-general-info-split__text {
+  flex: 1 1 17rem;
+  min-width: 0;
+}
+
+.hackathon-general-info-split__text .faq-list {
+  margin-top: 0;
+}
+
+.hackathon-general-info-split__visual {
+  flex: 0 1 300px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hackathon-vegas-img {
+  display: block;
+  width: 100%;
+  max-width: min(340px, 100%);
+  height: auto;
+  object-fit: contain;
+}
+
+.hackathon-section--questions .faq-section-heading {
+  text-align: center;
+}
+
+.hackathon-questions {
+  text-align: center;
+  padding: 0.25rem 0.5rem 0;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.hackathon-questions__lead,
+.hackathon-questions__line {
+  margin: 0 0 0.75rem;
+  font-size: 1.45rem;
+  line-height: 1.6;
+  color: rgba(255, 252, 248, 0.96);
+}
+
+.hackathon-questions__line:last-child {
+  margin-bottom: 0;
+}
+
+.hackathon-signup-progress--vegas {
+  margin: 0;
+  padding: 0;
+}
+
+.hackathon-signup-label {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 160, 160, 0.95);
+}
+
+.hackathon-signup-progress-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.hackathon-signup-count {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2rem, 5vw, 2.85rem);
+  font-weight: 800;
+  color: #fff;
+  text-shadow:
+    0 0 14px rgba(255, 80, 90, 0.9),
+    0 0 36px rgba(255, 40, 50, 0.5);
+  animation: hackathon-count-pulse 2s ease-in-out infinite;
+}
+
+@keyframes hackathon-count-pulse {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow:
+      0 0 12px rgba(255, 80, 90, 0.85),
+      0 0 28px rgba(255, 40, 50, 0.45);
+  }
+  50% {
+    transform: scale(1.03);
+    text-shadow:
+      0 0 18px rgba(255, 120, 120, 0.95),
+      0 0 36px rgba(255, 60, 70, 0.55);
+  }
+}
+
+.hackathon-progress-track--vegas {
+  position: relative;
+  height: clamp(20px, 4.5vw, 28px);
+  border-radius: 999px;
+  margin-top: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(180, 40, 50, 0.65);
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hackathon-progress-fill--vegas {
+  position: relative;
+  height: 100%;
+  border-radius: inherit;
+  min-width: 0;
+  background: linear-gradient(
+    90deg,
+    #7f0a14 0%,
+    #c41e3a 25%,
+    #ff2d4a 55%,
+    #ff6b7a 100%
+  );
+  background-size: 200% 100%;
+  transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: hackathon-bar-shimmer 2.2s ease-in-out infinite;
+  box-shadow: 0 0 14px rgba(255, 60, 70, 0.65);
+}
+
+.hackathon-progress-fill--vegas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 48%,
+    rgba(255, 220, 220, 0.2) 52%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: hackathon-bar-sheen 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hackathon-bar-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: brightness(1.12);
+  }
+}
+
+@keyframes hackathon-bar-sheen {
+  0% {
+    background-position: 200% 0;
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    background-position: -200% 0;
+    opacity: 0.35;
+  }
+}
+
+.hackathon-deadline-line--vegas {
+  margin: 1.15rem 0 0 !important;
+  font-size: clamp(1.2rem, 2.8vw, 1.45rem);
+  line-height: 1.45;
+  color: rgba(255, 210, 210, 0.95);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hackathon-signup-count {
+    animation: none;
+  }
+
+  .hackathon-progress-fill--vegas,
+  .hackathon-progress-fill--vegas::after {
+    animation: none;
+  }
+
+  .hackathon-progress-fill--vegas {
+    background: linear-gradient(90deg, #9a1420, #e12d42, #ff5a6a);
+    background-size: 100% 100%;
+  }
+
+  .hackathon-progress-fill--vegas::after {
+    display: none;
+  }
+}
+
+.faq-item {
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(255, 200, 100, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-family: inherit;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.faq-q:hover {
+  background: rgba(255, 200, 100, 0.08);
+}
+
+.faq-q-text {
+  flex: 1;
+}
+
+.faq-q-icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-right: 2px solid rgba(255, 200, 100, 0.9);
+  border-bottom: 2px solid rgba(255, 200, 100, 0.9);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.35s ease;
+}
+
+.faq-item.is-open .faq-q-icon {
+  transform: rotate(-135deg) translateY(2px);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+}
+
+.faq-item.is-open .faq-answer {
+  max-height: 800px;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.faq-item.is-open .faq-answer .faq-a:first-child {
+  padding-top: 0.5rem;
+}
+
+.faq-a {
+  margin: 0 0 0.75rem;
+  font-size: 1.45rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.faq-list {
+  margin: 0.5rem 0 0 1.5rem;
+  padding: 0;
+  font-size: 1.45rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+.faq-link {
+  color: rgba(255, 200, 100, 0.95);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 200, 100, 0.4);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.faq-link:hover {
+  color: #ffc864;
+  border-bottom-color: rgba(255, 200, 100, 0.8);
+}
+
+.faq-link--channel {
+  font-family: ui-monospace, monospace;
+  font-size: 0.98em;
+}
+
+.faq-section--cta {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.hackathon-faq-signup--asset {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  line-height: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+}
+
+.hackathon-faq-signup-img {
+  display: block;
+  width: clamp(200px, 58vw, 340px);
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.hackathon-faq-signup--asset:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 10px 28px rgba(255, 180, 80, 0.5));
+}
+
+.hackathon-faq-signup--asset:active {
+  transform: scale(1.02);
+}
+
+.faq-cta-card-link {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+
+.faq-cta-card-link:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 8px 20px rgba(255, 180, 80, 0.35));
+}
+
+.faq-cta-card {
+  display: block;
+  max-width: 320px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (min-width: 900px) {
+  .faq-page {
+    max-width: 1200px;
+    padding: 3rem 4rem 5rem;
+  }
+
+  .faq-content {
+    padding-top: 6.25rem;
+  }
+
+  .faq-back-btn {
+    top: 0.75rem;
+    left: -15rem;
+  }
+
+  .faq-back-btn-img {
+    max-height: 112px;
+  }
+
+  .faq-disclaimer {
+    max-width: 580px;
+    margin-bottom: 2.5rem;
+    font-size: 1.25rem;
+    padding: 0.85rem 1.25rem;
+  }
+
+  .hackathon-faq-intro {
+    max-width: min(92vw, 50rem);
+    font-size: clamp(1.45rem, 2.6vw, 2rem);
+    line-height: 1.55;
+    padding: 1rem 1.35rem;
+    color: #e01530;
+    -webkit-text-fill-color: #e01530;
+    -webkit-text-stroke: 0.20px #ffffff;
+  }
+
+  .hackathon-faq-title-row {
+    margin-bottom: 2.5rem;
+    gap: 0.85rem 2rem;
+  }
+
+  .hackathon-faq-main-title {
+    font-size: clamp(2.45rem, 4.5vw, 3.5rem);
+    max-width: min(92vw, 48rem);
+  }
+
+  .hackathon-faq-bunny {
+    width: clamp(110px, 18vw, 210px);
+  }
+
+  .faq-title {
+    width: clamp(320px, 45vw, 520px);
+    margin-bottom: 3rem;
+  }
+
+  .faq-section-heading {
+    font-size: 1.65rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .faq-q {
+    font-size: 1.85rem;
+    padding: 1.15rem 1.5rem;
+  }
+
+  .faq-a {
+    font-size: 1.65rem;
+    line-height: 1.65;
+  }
+
+  .faq-list {
+    font-size: 1.65rem;
+    line-height: 1.65;
+    margin-left: 1.75rem;
+  }
+
+  .faq-static-block {
+    padding: 1.15rem 1.5rem 1.5rem;
+  }
+
+  .hackathon-before-intro__p {
+    font-size: clamp(1.65rem, 2.4vw, 2.05rem);
+    line-height: 1.7;
+  }
+
+  .hackathon-signup-counter-bare {
+    max-width: 52rem;
+  }
+
+  .hackathon-signup-label {
+    font-size: 1.35rem;
+  }
+
+  .hackathon-deadline-line--vegas {
+    font-size: 1.5rem;
+  }
+
+  .hackathon-questions__lead,
+  .hackathon-questions__line {
+    font-size: 1.65rem;
+    line-height: 1.65;
+  }
+
+  .hackathon-faq-signup-img {
+    width: clamp(240px, 42vw, 380px);
+  }
+
+  .faq-cta-card {
+    max-width: 380px;
+  }
+
+  .faq-link--channel {
+    font-size: 1.05em;
+  }
+
+  .faq-section {
+    margin-bottom: 3rem;
+  }
+
+  .faq-item {
+    margin-bottom: 1rem;
+  }
+
+  .faq-item.is-open .faq-answer {
+    padding: 0 1.5rem 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hackathon-location-split,
+  .hackathon-general-info-split {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hackathon-location-split__logo,
+  .hackathon-general-info-split__visual {
+    order: 2;
+    align-self: center;
+  }
+
+  .hackathon-unlv-logo {
+    width: clamp(130px, 50vw, 200px);
+  }
+
+  .hackathon-vegas-img {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .hackathon-signup-progress-head {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.35rem;
+  }
+
+  .hackathon-signup-label {
+    font-size: 1.05rem;
+  }
+}
+</style>
