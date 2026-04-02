@@ -37,6 +37,7 @@
             <%= link_to "FAQ", faq_path, class: "nav-item #{'nav-active' if controller_name == 'home' && action_name == 'faq'}" %>
             <%= link_to "Status", status_path, class: "nav-item #{'nav-active' if controller_name == 'status'}" %>
             <%= link_to "Leaderboard", leaderboard_path, class: "nav-item #{'nav-active' if controller_name == 'leaderboard'}" %>
+            <%= link_to "Hackathon", hackathon_info_path, class: "nav-item #{'nav-active' if controller_name == 'hackathon_info'}" %>
             <% if review_privileged? %>
               <% if full_admin? %>
                 <%= link_to "Admin", admin_path, class: "nav-item nav-admin" %>
