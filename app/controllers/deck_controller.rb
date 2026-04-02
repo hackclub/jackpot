@@ -181,16 +181,6 @@ class DeckController < ApplicationController
     end
 
     if project.nil?
-      if hackatime_projects.size > 1
-        msg = "New projects can link at most one Hackatime project. Remove extra selections and save again."
-        if request.xhr?
-          return render json: { error: msg }, status: :unprocessable_entity
-        else
-          flash[:alert] = msg
-          return redirect_to deck_path
-        end
-      end
-
       project = current_user.projects.create!(
         name: project_name.presence || "Project #{projects_count + 1}",
         description: project_description,
