@@ -67,6 +67,7 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     record.apply_mirror_fields!(identity, justification_text(project))
     super(record, index, raise_on_error: raise_on_error)
     record.pull_automation_first_submitted_at_from_airtable!
+    record.pull_double_dip_from_airtable!
   end
 
   def fetch_identity(user)

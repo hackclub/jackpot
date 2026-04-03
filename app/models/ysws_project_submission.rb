@@ -118,6 +118,31 @@ class YswsProjectSubmission < ApplicationRecord
     ENV.fetch("AIRTABLE_YSWS_AUTOMATION_FIRST_SUBMITTED_AT_FIELD", "Automation - First Submitted At")
   end
 
+  def self.double_dip_airtable_field_name
+    ENV.fetch("AIRTABLE_YSWS_DOUBLE_DIP_FIELD", "Double-dip")
+  end
+
+  def self.parse_airtable_boolean(raw)
+    case raw
+    when true then true
+    when false then false
+    when nil then nil
+    when String
+      s = raw.to_s.strip
+      return nil if s.empty?
+
+      s = s.downcase
+      return true if %w[true yes 1 y on].include?(s)
+      return false if %w[false no 0 n off].include?(s)
+
+      nil
+    when Numeric
+      raw != 0
+    else
+      !!raw
+    end
+  end
+
   def self.parse_airtable_datetime(raw)
     case raw
     when Time, ActiveSupport::TimeWithZone
@@ -153,6 +178,51 @@ class YswsProjectSubmission < ApplicationRecord
     update_column(:automation_first_submitted_at, parsed) if automation_first_submitted_at != parsed
   rescue StandardError => e
     Rails.logger.warn("YswsProjectSubmission##{id} pull automation timestamp: #{e.message}")
+  end
+
+  # Checkbox lives on YSWS Project Submission in Airtable; mirror into PG + projects.double_dip for Jackpot UI.
+  def pull_double_dip_from_airtable!
+    aid = airtable_id
+    return if aid.blank?
+
+    token, base_id = self.class.airtable_api_credentials
+    return unless token.present? && base_id.present?
+
+    field = self.class.double_dip_airtable_field_name
+    tbl = Norairrecord.table(token, base_id, self.class.airtable_shipped_table_name)
+    rec = tbl.find(aid)
+    raw = rec[field]
+    return if raw.nil?
+
+    val = self.class.parse_airtable_boolean(raw)
+    return if val.nil?
+
+    if double_dip != val
+      update_column(:double_dip, val)
+    end
+    if project.double_dip != val
+      project.update_column(:double_dip, val)
+    end
+  rescue Norairrecord::RecordNotFoundError
+    Rails.logger.info("YswsProjectSubmission##{id}: Airtable record #{aid} missing for double-dip pull")
+  rescue StandardError => e
+    Rails.logger.warn("YswsProjectSubmission##{id} pull double-dip: #{e.message}")
+  end
+
+  def push_double_dip_to_airtable!
+    aid = airtable_id
+    return if aid.blank?
+
+    token, base_id = self.class.airtable_api_credentials
+    return unless token.present? && base_id.present?
+
+    field = self.class.double_dip_airtable_field_name
+    tbl = Norairrecord.table(token, base_id, self.class.airtable_shipped_table_name)
+    rec = tbl.find(aid)
+    rec[field] = double_dip?
+    rec.save
+  rescue StandardError => e
+    Rails.logger.error("YswsProjectSubmission##{id} push double-dip: #{e.class}: #{e.message}")
   end
 
   def self.github_from_code_url(code_url)

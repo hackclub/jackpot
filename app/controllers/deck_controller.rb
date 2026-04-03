@@ -92,7 +92,7 @@ class DeckController < ApplicationController
          "chips_earned" => project.chips_earned,
          "banner_url" => project.banner_url,
          "created_at" => project.created_at&.iso8601,
-         "double_dip" => project.double_dip
+         "double_dip" => project.double_dip_effective?
        }
        project_hash
      end
