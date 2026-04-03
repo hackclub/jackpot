@@ -20,7 +20,7 @@
             </div>
           <% else %>
             <div
-               class="card-slot card-slot-filled"
+               class="card-slot card-slot-filled<%= project["double_dip"] ? " card-slot--double-dip" : "" %>"
                data-index="<%= i %>"
                data-project-id="<%= project["id"] %>"
                data-project-name="<%= project["name"] %>"
@@ -44,7 +44,21 @@
                data-github-username="<%= project["github_username"].to_s %>"
                data-banner-url="<%= project["banner_url"] %>"
                data-hackatime-projects="<%= (project["hackatime_projects"] || []).join(",") %>"
+               data-double-dip="<%= project["double_dip"] ? "true" : "false" %>"
              >
+              <% if project["double_dip"] %>
+                <details class="card-double-dip-details">
+                  <summary class="card-double-dip-pill">
+                    <span class="card-double-dip-pill-title">Project Warning!</span>
+                    <span class="card-double-dip-pill-hint">(open to read)</span>
+                  </summary>
+                  <div class="card-double-dip-panel">
+                    <p class="card-double-dip-panel-lead">Project Warning!</p>
+                    <p>Your code URL has been matched with a project in another HC program. Make sure that the hours sent are different, or your account could be flagged for fraud.</p>
+                    <p>This project will be manually checked in both programs databases.</p>
+                  </div>
+                </details>
+              <% end %>
               <span class="card-project-name"><%= project["name"] %></span>
               <div class="card-stats">
                 <span class="card-hours"><%= "%.1f" % (project["total_hours"] || project["hours"] || 0) %></span>
@@ -186,6 +200,14 @@
            <span class="detail-value" id="detailHours">0.0 hrs</span>
          </div>
          
+         <div class="detail-stat-row" id="detailDoubleDipRow" style="display: none;">
+           <div class="detail-double-dip-notice">
+             <strong class="detail-double-dip-heading">Project Warning!</strong>
+             <p class="detail-double-dip-text">Your code URL has been matched with a project in another HC program. Make sure that the hours sent are different, or your account could be flagged for fraud.</p>
+             <p class="detail-double-dip-text">This project will be manually checked in both programs databases.</p>
+           </div>
+         </div>
+
          <div class="detail-stat-row">
            <span class="detail-label">Description</span>
            <textarea class="detail-value detail-description-edit" id="detailDescription" rows="3"></textarea>
@@ -721,6 +743,7 @@ function initDeck() {
    var detailBannerRow = document.getElementById('detailBannerRow');
    var detailUnshippedHoursRow = document.getElementById('detailUnshippedHoursRow');
    var detailUnshippedHours = document.getElementById('detailUnshippedHours');
+   var detailDoubleDipRow = document.getElementById('detailDoubleDipRow');
    var currentBannerUrl = '';
    var currentDetailData = null;
    var SHIP_BLOCKED_OTHER_PENDING_MSG = [
@@ -821,6 +844,9 @@ function initDeck() {
      var totalHrs = parseFloat(data.hours || 0).toFixed(1);
      detailHours.textContent = totalHrs + ' hrs';
      detailDescription.value = data.description || '';
+     if (detailDoubleDipRow) {
+       detailDoubleDipRow.style.display = (data.doubleDip === 'true') ? 'flex' : 'none';
+     }
      detailType.textContent = data.projectType || '—';
      detailPlayableUrl.value = data.playableUrl || '';
      detailCodeUrl.value = data.codeUrl || '';
@@ -1264,9 +1290,14 @@ function initDeck() {
         codeUrl: card.dataset.codeUrl,
         githubUsername: card.dataset.githubUsername,
         bannerUrl: card.dataset.bannerUrl,
-        hackatimeProjects: card.dataset.hackatimeProjects
+        hackatimeProjects: card.dataset.hackatimeProjects,
+        doubleDip: card.dataset.doubleDip || 'false'
       });
     });
+  });
+
+  document.querySelectorAll('.card-double-dip-details').forEach(function(d) {
+    d.addEventListener('click', function(e) { e.stopPropagation(); });
   });
 
   var addBtn = document.getElementById('addProjectBtn');

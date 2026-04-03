@@ -32,7 +32,8 @@ class Airtable::ProjectSyncJob < Airtable::BaseSyncJob
       "Updated At" => project.updated_at&.iso8601,
       "Created At" => project.created_at&.iso8601,
       "User Email" => project.user.email,
-      "User Slack ID" => project.user.slack_id
+      "User Slack ID" => project.user.slack_id,
+      "Double-dip" => project.double_dip
     }
   end
 end

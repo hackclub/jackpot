@@ -358,6 +358,120 @@
   font-weight: 700;
 }
 
+/* Reviewer-flagged: code URL matched another HC program (double-dip) */
+.card-slot--double-dip {
+  overflow: visible;
+  padding-top: 22px;
+}
+
+.card-double-dip-details {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: 112px;
+  margin: 0;
+}
+
+.card-double-dip-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.card-double-dip-pill {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f0e0a8, #d4c080);
+  border: 1px solid #8b6914;
+  border-radius: 999px;
+  padding: 4px 8px 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #3a2a1a;
+  line-height: 1.15;
+}
+
+.card-double-dip-pill-title {
+  font-size: 0.55rem;
+  font-weight: 800;
+}
+
+.card-double-dip-pill-hint {
+  font-size: 0.45rem;
+  font-weight: 600;
+  opacity: 0.92;
+}
+
+.card-double-dip-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  padding: 6px;
+  background: rgba(252, 248, 235, 0.98);
+  border: 1px solid #5c4033;
+  border-radius: 4px;
+  font-size: 0.5rem;
+  line-height: 1.35;
+  color: #2a1f15;
+  max-height: 92px;
+  overflow-y: auto;
+  text-align: left;
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.card-double-dip-panel-lead {
+  font-weight: 800;
+  margin: 0 0 4px;
+  font-size: 0.52rem;
+}
+
+.card-double-dip-panel p {
+  margin: 0 0 4px;
+}
+
+.card-double-dip-panel p:last-child {
+  margin-bottom: 0;
+}
+
+#detailDoubleDipRow {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(212, 160, 23, 0.35);
+}
+
+.detail-double-dip-notice {
+  background: rgba(60, 45, 20, 0.45);
+  border: 1px solid rgba(212, 160, 23, 0.55);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.detail-double-dip-heading {
+  display: block;
+  color: #f0c96a;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.detail-double-dip-text {
+  font-size: 0.9rem;
+  color: #e8dcc8;
+  line-height: 1.45;
+  margin: 0 0 8px;
+}
+
+.detail-double-dip-text:last-child {
+  margin-bottom: 0;
+}
+
 .card-slot-empty {
   background-image: none;
   background: rgba(30, 20, 10, 0.35);

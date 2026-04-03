@@ -62,6 +62,7 @@ Rails.application.routes.draw do
   patch "/admin/items_request/:id", to: "admin#update_item_request", as: :admin_update_item_request
   get "/admin/review", to: "admin#review", as: :admin_review
   get "/admin/review/project/:project_id", to: "admin#review_project", as: :admin_review_project
+  patch "/admin/review/project/:project_id/double_dip", to: "admin#update_review_project_double_dip", as: :admin_review_project_double_dip
   delete "/admin/review/project/:project_id", to: "admin#destroy_review_project", as: :admin_destroy_review_project
   get "/admin/console", to: "admin#console", as: :admin_console
   post "/admin/console", to: "admin#execute_console", as: :admin_console_execute

@@ -208,7 +208,8 @@ class AdminController < ApplicationController
            "reviewed_at" => db_project.reviewed_at&.iso8601,
            "created_at" => db_project.created_at&.iso8601,
            "total_hours" => db_project.total_hours || 0,
-           "hours" => db_project.total_hours || 0
+           "hours" => db_project.total_hours || 0,
+           "double_dip" => db_project.double_dip
          }
 
          project_item = {
@@ -240,7 +241,8 @@ class AdminController < ApplicationController
            "reviewed_at" => db_project.reviewed_at&.iso8601,
            "created_at" => db_project.created_at&.iso8601,
            "total_hours" => db_project.total_hours || 0,
-           "hours" => db_project.total_hours || 0
+           "hours" => db_project.total_hours || 0,
+           "double_dip" => db_project.double_dip
          }
 
          project_item = {
@@ -263,6 +265,20 @@ class AdminController < ApplicationController
        @ship_sort = "desc"
      end
    end
+
+  def update_review_project_double_dip
+    project = Project.find_by(id: params[:project_id])
+    unless project
+      return head :not_found
+    end
+
+    dip = ActiveModel::Type::Boolean.new.cast(params[:double_dip])
+    if project.update(double_dip: dip)
+      head :ok
+    else
+      render json: { error: project.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    end
+  end
 
   def review_project
     begin
@@ -304,7 +320,8 @@ class AdminController < ApplicationController
         "status" => @project_db.status,
         "reviewed" => @project_db.reviewed,
         "reviewed_at" => @project_db.reviewed_at&.iso8601,
-        "created_at" => @project_db.created_at&.iso8601
+        "created_at" => @project_db.created_at&.iso8601,
+        "double_dip" => @project_db.double_dip
       }
     rescue => e
       Rails.logger.error("Error loading review_project: #{e.class} - #{e.message}")
@@ -466,7 +483,7 @@ class AdminController < ApplicationController
       return
     end
 
-    if %w[stats review review_project].include?(action_name)
+    if %w[stats review review_project update_review_project_double_dip].include?(action_name)
       unless current_user.review_privileged?
         Rails.logger.warn "Non-staff tried to access admin review/stats. User: #{current_user.hack_club_id}"
         redirect_to root_path, alert: "Access denied."
