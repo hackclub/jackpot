@@ -445,6 +445,54 @@
       border-radius: 6px;
       border: 1px solid #3cb043;
     }
+
+    .review-superadmin-danger {
+      margin-top: 2rem;
+      padding: 1.25rem;
+      background: rgba(60, 15, 15, 0.45);
+      border: 2px solid #a04040;
+      border-radius: 8px;
+    }
+
+    .review-superadmin-danger-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #e88888;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .review-superadmin-danger-desc {
+      font-size: 0.88rem;
+      color: #d8c8b8;
+      line-height: 1.45;
+      margin-bottom: 1rem;
+    }
+
+    .review-superadmin-delete-form {
+      display: inline-block;
+      margin: 0;
+    }
+
+    .review-superadmin-delete-btn {
+      display: inline-block;
+      padding: 0.55rem 1rem;
+      background: linear-gradient(180deg, #b03030, #801818);
+      border: 2px solid #c04040;
+      border-radius: 6px;
+      color: #fff;
+      font-family: Georgia, serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .review-superadmin-delete-btn:hover {
+      background: linear-gradient(180deg, #c83838, #902020);
+      border-color: #e06060;
+    }
   </style>
 
   <div class="review-container">
@@ -621,6 +669,23 @@
             <div class="review-preview-content" id="reviewPreview">
               <span class="review-preview-empty">[Review preview will appear here]</span>
             </div>
+          </div>
+        <% end %>
+
+        <% if current_user.role_super_admin? %>
+          <div class="review-superadmin-danger">
+            <div class="review-superadmin-danger-title">Super-admin — database</div>
+            <p class="review-superadmin-danger-desc">
+              Permanently remove this project and its related rows in PostgreSQL and in Airtable (project, shipped submission if any, journal entries, and status comments that were synced). This cannot be undone.
+            </p>
+            <%= button_to "Delete project permanently",
+                  admin_destroy_review_project_path(project_id: @project_db.id),
+                  method: :delete,
+                  class: "review-superadmin-delete-btn",
+                  form: { class: "review-superadmin-delete-form" },
+                  data: {
+                    turbo_confirm: "Permanently delete this project from PostgreSQL and Airtable? This cannot be undone."
+                  } %>
           </div>
         <% end %>
       </div>

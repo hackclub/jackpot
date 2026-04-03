@@ -313,6 +313,40 @@ class AdminController < ApplicationController
     end
   end
 
+  def destroy_review_project
+    project = Project.find_by(id: params[:project_id])
+    unless project
+      redirect_to admin_review_path, alert: "Project not found."
+      return
+    end
+
+    name = project.name
+    owner = project.user
+
+    begin
+      project.purge_remote_airtable_rows!
+    rescue StandardError => e
+      # Airtable errors must not block PG delete (otherwise the project stays in Jackpot and the DB).
+      Rails.logger.error("destroy_review_project: Airtable purge failed (continuing with PG + legacy JSON cleanup): #{e.class} #{e.message}")
+    end
+
+    begin
+      owner&.remove_legacy_jsonb_slot_for_project!(project)
+    rescue StandardError => e
+      Rails.logger.error("destroy_review_project: legacy users.projects jsonb cleanup failed: #{e.class} #{e.message}")
+    end
+
+    if project.destroy
+      redirect_to admin_review_path, notice: "Project “#{name}” was permanently deleted from PostgreSQL and Airtable."
+    else
+      redirect_to admin_review_project_path(project_id: project.id),
+        alert: "Could not delete project: #{project.errors.full_messages.join(', ')}"
+    end
+  rescue => e
+    Rails.logger.error("destroy_review_project: #{e.class} #{e.message}\n#{e.backtrace&.join("\n")}")
+    redirect_to admin_review_path, alert: "Could not delete project."
+  end
+
   private
 
   # Distinct users with at least one project saved that calendar day (updated_at in app TZ).
@@ -421,6 +455,14 @@ class AdminController < ApplicationController
   def authenticate_admin_area!
     unless user_signed_in?
       redirect_to "/auth/hackclub", alert: "Please sign in."
+      return
+    end
+
+    if action_name == "destroy_review_project"
+      return if current_user.role_super_admin?
+
+      Rails.logger.warn "Non-super-admin tried destroy_review_project. User: #{current_user.hack_club_id}"
+      redirect_to admin_review_path, alert: "Only super-admins can delete projects."
       return
     end
 

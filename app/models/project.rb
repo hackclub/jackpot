@@ -1,6 +1,7 @@
 class Project < ApplicationRecord
   include GithubRepositoryKey
   include AirtablePushOnChange
+  include AirtableSyncedRowDeletion
 
   belongs_to :user
   belongs_to :reviewed_by, class_name: "User", optional: true
@@ -14,6 +15,19 @@ class Project < ApplicationRecord
   pushes_airtable_with Airtable::ProjectSyncJob
 
   after_commit :enqueue_shipped_ysws_airtable_push, on: %i[create update]
+
+  def self.airtable_sync_table_name
+    ENV.fetch("AIRTABLE_PROJECTS_TABLE", "_projects")
+  end
+
+  # Remove synced Airtable rows before destroying PG rows. Journal + comment rows use their own tables;
+  # the project row uses AIRTABLE_PROJECTS_TABLE; YSWS/shipped uses AIRTABLE_SHIPPED_PROJECTS_TABLE only when a submission exists.
+  def purge_remote_airtable_rows!
+    journal_entries.find_each(&:delete_remote_airtable_record!)
+    project_comments.find_each(&:delete_remote_airtable_record!)
+    ysws_project_submission&.delete_remote_airtable_record!
+    delete_remote_airtable_record!
+  end
 
   scope :shipped, -> { where(shipped: true) }
   scope :reviewed, -> { where(reviewed: true) }
