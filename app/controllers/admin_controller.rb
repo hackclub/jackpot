@@ -49,6 +49,9 @@ class AdminController < ApplicationController
       .limit(10)
 
     @top_users_by_bolts = User.where("chip_am > 0").order(chip_am: :desc).limit(10)
+
+    @project_active_users_today = project_active_users_count_for_day(Date.current)
+    @daily_project_active_user_series = daily_project_active_user_series(days: 30)
   end
 
   def console
@@ -205,7 +208,8 @@ class AdminController < ApplicationController
            "reviewed_at" => db_project.reviewed_at&.iso8601,
            "created_at" => db_project.created_at&.iso8601,
            "total_hours" => db_project.total_hours || 0,
-           "hours" => db_project.total_hours || 0
+           "hours" => db_project.total_hours || 0,
+           "double_dip" => db_project.double_dip
          }
 
          project_item = {
@@ -237,7 +241,8 @@ class AdminController < ApplicationController
            "reviewed_at" => db_project.reviewed_at&.iso8601,
            "created_at" => db_project.created_at&.iso8601,
            "total_hours" => db_project.total_hours || 0,
-           "hours" => db_project.total_hours || 0
+           "hours" => db_project.total_hours || 0,
+           "double_dip" => db_project.double_dip
          }
 
          project_item = {
@@ -260,6 +265,20 @@ class AdminController < ApplicationController
        @ship_sort = "desc"
      end
    end
+
+  def update_review_project_double_dip
+    project = Project.find_by(id: params[:project_id])
+    unless project
+      return head :not_found
+    end
+
+    dip = ActiveModel::Type::Boolean.new.cast(params[:double_dip])
+    if project.update(double_dip: dip)
+      head :ok
+    else
+      render json: { error: project.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    end
+  end
 
   def review_project
     begin
@@ -301,7 +320,8 @@ class AdminController < ApplicationController
         "status" => @project_db.status,
         "reviewed" => @project_db.reviewed,
         "reviewed_at" => @project_db.reviewed_at&.iso8601,
-        "created_at" => @project_db.created_at&.iso8601
+        "created_at" => @project_db.created_at&.iso8601,
+        "double_dip" => @project_db.double_dip
       }
     rescue => e
       Rails.logger.error("Error loading review_project: #{e.class} - #{e.message}")
@@ -310,7 +330,54 @@ class AdminController < ApplicationController
     end
   end
 
+  def destroy_review_project
+    project = Project.find_by(id: params[:project_id])
+    unless project
+      redirect_to admin_review_path, alert: "Project not found."
+      return
+    end
+
+    name = project.name
+    owner = project.user
+
+    begin
+      project.purge_remote_airtable_rows!
+    rescue StandardError => e
+      # Airtable errors must not block PG delete (otherwise the project stays in Jackpot and the DB).
+      Rails.logger.error("destroy_review_project: Airtable purge failed (continuing with PG + legacy JSON cleanup): #{e.class} #{e.message}")
+    end
+
+    begin
+      owner&.remove_legacy_jsonb_slot_for_project!(project)
+    rescue StandardError => e
+      Rails.logger.error("destroy_review_project: legacy users.projects jsonb cleanup failed: #{e.class} #{e.message}")
+    end
+
+    if project.destroy
+      redirect_to admin_review_path, notice: "Project “#{name}” was permanently deleted from PostgreSQL and Airtable."
+    else
+      redirect_to admin_review_project_path(project_id: project.id),
+        alert: "Could not delete project: #{project.errors.full_messages.join(', ')}"
+    end
+  rescue => e
+    Rails.logger.error("destroy_review_project: #{e.class} #{e.message}\n#{e.backtrace&.join("\n")}")
+    redirect_to admin_review_path, alert: "Could not delete project."
+  end
+
   private
+
+  # Distinct users with at least one project saved that calendar day (updated_at in app TZ).
+  def project_active_users_count_for_day(day)
+    Project.where(updated_at: day.in_time_zone.all_day).distinct.count(:user_id)
+  end
+
+  def daily_project_active_user_series(days:)
+    start_date = (days - 1).days.ago.to_date
+    end_date = Date.current
+    (start_date..end_date).map do |d|
+      [ d, project_active_users_count_for_day(d) ]
+    end
+  end
 
   # Unshipped / missing shipped_at sort after shipped rows for both asc and desc.
   def sort_review_items_by_shipped_at!(items, direction)
@@ -408,7 +475,15 @@ class AdminController < ApplicationController
       return
     end
 
-    if %w[stats review review_project].include?(action_name)
+    if action_name == "destroy_review_project"
+      return if current_user.role_super_admin?
+
+      Rails.logger.warn "Non-super-admin tried destroy_review_project. User: #{current_user.hack_club_id}"
+      redirect_to admin_review_path, alert: "Only super-admins can delete projects."
+      return
+    end
+
+    if %w[stats review review_project update_review_project_double_dip].include?(action_name)
       unless current_user.review_privileged?
         Rails.logger.warn "Non-staff tried to access admin review/stats. User: #{current_user.hack_club_id}"
         redirect_to root_path, alert: "Access denied."

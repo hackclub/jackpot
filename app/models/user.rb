@@ -192,6 +192,32 @@ class User < ApplicationRecord
     update!(projects: projects)
   end
 
+  # When a Project AR row is deleted, remove the matching slot from legacy jsonb `users.projects` (if any).
+  # Shipped and unshipped projects may still have entries here; leaving them causes stale data in admin tooling.
+  def remove_legacy_jsonb_slot_for_project!(project)
+    raw = read_attribute(:projects)
+    return unless raw.is_a?(Array) && raw.any?
+
+    ordered_ids = projects.order(position: :asc).pluck(:id)
+    idx = ordered_ids.index(project.id)
+    arr = raw.deep_dup
+    pid = project.id
+
+    if idx && idx < arr.length
+      slot = arr[idx]
+      slot_pid = slot.is_a?(Hash) ? (slot["id"] || slot[:id]) : nil
+      if slot_pid.blank? || slot_pid.to_i == pid
+        arr.delete_at(idx)
+      end
+    end
+
+    arr.reject! do |slot|
+      slot.is_a?(Hash) && (slot["id"] || slot[:id]).to_i == pid
+    end
+
+    update_columns(projects: arr, updated_at: Time.current)
+  end
+
   # Keep legacy jsonb `users.projects` in sync when the user removes a shipped-but-not-approved project from the review queue.
   def unship_project_voluntary_from_queue!(project_index)
     raw = read_attribute(:projects)

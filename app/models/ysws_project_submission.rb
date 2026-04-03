@@ -1,5 +1,6 @@
 class YswsProjectSubmission < ApplicationRecord
   include AirtablePushOnChange
+  include AirtableSyncedRowDeletion
 
   SHIP_STATUSES = %w[Pending Approved Rejected].freeze
 
@@ -43,32 +44,8 @@ class YswsProjectSubmission < ApplicationRecord
     rec
   end
 
-  # Removes the matching Airtable row (same table as ShippedProjectSyncJob). Call before destroying this row
-  # so a rejected submission does not leave an orphan in Airtable. Fails the request if the API errors (except 404).
-  def delete_remote_airtable_record!
-    aid = airtable_id
-    return if aid.blank?
-
-    token, base_id = self.class.airtable_api_credentials
-    unless token.present? && base_id.present?
-      if Rails.env.production?
-        raise StandardError, "Airtable is not configured; cannot remove synced submission #{aid.inspect} from Airtable."
-      end
-      Rails.logger.warn(
-        "YswsProjectSubmission id=#{id}: skip Airtable delete for #{aid.inspect} — credentials missing (non-production)"
-      )
-      return
-    end
-
-    tbl = Norairrecord.table(token, base_id, self.class.airtable_shipped_table_name)
-    rec = tbl.find(aid)
-    rec.destroy
-    Rails.logger.info("YswsProjectSubmission id=#{id}: deleted Airtable record #{aid}")
-  rescue Norairrecord::RecordNotFoundError
-    Rails.logger.info("YswsProjectSubmission id=#{id}: Airtable record #{aid} already gone (404)")
-  rescue Norairrecord::Error => e
-    Rails.logger.error("YswsProjectSubmission id=#{id}: Airtable delete failed: #{e.class}: #{e.message}")
-    raise
+  def self.airtable_sync_table_name
+    airtable_shipped_table_name
   end
 
   def self.airtable_shipped_table_name

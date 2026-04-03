@@ -91,7 +91,8 @@ class DeckController < ApplicationController
          "admin_feedback" => project.admin_feedback,
          "chips_earned" => project.chips_earned,
          "banner_url" => project.banner_url,
-         "created_at" => project.created_at&.iso8601
+         "created_at" => project.created_at&.iso8601,
+         "double_dip" => project.double_dip
        }
        project_hash
      end

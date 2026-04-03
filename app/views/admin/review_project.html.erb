@@ -55,6 +55,65 @@
       font-size: 1rem;
     }
 
+    .page-header-badges {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0 0 0.75rem;
+    }
+
+    .review-page-status-pill {
+      background: #8b6914;
+      color: #f0e6d2;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: Georgia, serif;
+      white-space: nowrap;
+    }
+
+    .review-double-dip-external-badge {
+      display: inline-block;
+      background: #b22222;
+      color: #fff;
+      padding: 0.4rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      font-family: Georgia, serif;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      white-space: nowrap;
+    }
+
+    .review-double-dip-staff-banner {
+      max-width: 52rem;
+      margin: 0 auto 1.75rem;
+      padding: 1rem 1.25rem;
+      background: rgba(100, 20, 20, 0.35);
+      border: 2px solid #b22222;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .review-double-dip-staff-lead {
+      display: block;
+      font-family: Georgia, serif;
+      font-size: 1.05rem;
+      color: #fff;
+      margin: 0 0 0.6rem;
+    }
+
+    .review-double-dip-staff-body {
+      font-size: 0.95rem;
+      color: #f0e0dc;
+      line-height: 1.5;
+      margin: 0;
+    }
+
     .review-page-screenshot {
       width: 100%;
       height: 350px;
@@ -200,6 +259,30 @@
     .hours-approved {
       color: #d4a017;
       font-weight: 700;
+    }
+
+    .review-double-dip-cell {
+      vertical-align: middle;
+      text-align: center;
+      width: 7rem;
+    }
+
+    .review-double-dip-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: #e8dcc8;
+      user-select: none;
+    }
+
+    .review-double-dip-label input {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: #d4a017;
+      cursor: pointer;
     }
 
     .review-info-banner {
@@ -445,6 +528,54 @@
       border-radius: 6px;
       border: 1px solid #3cb043;
     }
+
+    .review-superadmin-danger {
+      margin-top: 2rem;
+      padding: 1.25rem;
+      background: rgba(60, 15, 15, 0.45);
+      border: 2px solid #a04040;
+      border-radius: 8px;
+    }
+
+    .review-superadmin-danger-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #e88888;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .review-superadmin-danger-desc {
+      font-size: 0.88rem;
+      color: #d8c8b8;
+      line-height: 1.45;
+      margin-bottom: 1rem;
+    }
+
+    .review-superadmin-delete-form {
+      display: inline-block;
+      margin: 0;
+    }
+
+    .review-superadmin-delete-btn {
+      display: inline-block;
+      padding: 0.55rem 1rem;
+      background: linear-gradient(180deg, #b03030, #801818);
+      border: 2px solid #c04040;
+      border-radius: 6px;
+      color: #fff;
+      font-family: Georgia, serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .review-superadmin-delete-btn:hover {
+      background: linear-gradient(180deg, #c83838, #902020);
+      border-color: #e06060;
+    }
   </style>
 
   <div class="review-container">
@@ -452,8 +583,21 @@
 
     <div class="page-header">
       <h1 class="page-title"><%= @project["name"] %></h1>
+      <div class="page-header-badges">
+        <span class="review-page-status-pill"><%= @project["status"] || "pending" %></span>
+        <% if @project_db.double_dip? %>
+          <span class="review-double-dip-external-badge" role="status">Project Warning!</span>
+        <% end %>
+      </div>
       <p class="page-meta">by <%= @user.jackpot_profile_name %> (<%= @user.email %>)</p>
     </div>
+
+    <% if @project_db.double_dip? %>
+      <div class="review-double-dip-staff-banner">
+        <strong class="review-double-dip-staff-lead">Project Warning!</strong>
+        <p class="review-double-dip-staff-body">This code URL has been matched with a project in another HC program. If you don't have access to the HC Unified Database please don't review this project</p>
+      </div>
+    <% end %>
 
     <div class="review-page-screenshot">
       <% if @project["banner_url"].present? && @project["banner_url"].match?(/\Ahttps?:\/\//i) %>
@@ -524,6 +668,7 @@
                 <th>Project</th>
                 <th>Raw Hours</th>
                 <th>New hours to approve</th>
+                <th>Double-dip</th>
               </tr>
             </thead>
             <tbody>
@@ -533,6 +678,12 @@
                 <td rowspan="3" class="hours-approved" style="vertical-align: middle;">
                   <div style="font-size: 0.75rem; color: #a08030; margin-bottom: 0.35rem;">Previously banked: <strong><%= @banked_hours.round(2) %></strong> h · Pending this round (capped to queued submission): <strong><%= @pending_review_hours.round(2) %></strong> h max</div>
                   <input type="number" class="review-hours-input" value="<%= @pending_review_hours.to_f.round(2) %>" step="0.5" min="0" max="<%= @pending_review_hours.to_f.round(2) %>" style="width: 100%; background: transparent; border: 1px solid #8b6914; color: #d4a017; padding: 0.3rem;">
+                </td>
+                <td rowspan="3" class="review-double-dip-cell">
+                  <label class="review-double-dip-label">
+                    <input type="checkbox" id="reviewDoubleDipCheckbox" <%= @project_db.double_dip? ? "checked" : "" %> data-project-id="<%= @project_db.id %>">
+                    <span>Mark if code URL matches another HC program</span>
+                  </label>
                 </td>
               </tr>
               <tr>
@@ -621,6 +772,23 @@
             <div class="review-preview-content" id="reviewPreview">
               <span class="review-preview-empty">[Review preview will appear here]</span>
             </div>
+          </div>
+        <% end %>
+
+        <% if current_user.role_super_admin? %>
+          <div class="review-superadmin-danger">
+            <div class="review-superadmin-danger-title">Super-admin — database</div>
+            <p class="review-superadmin-danger-desc">
+              Permanently remove this project and its related rows in PostgreSQL and in Airtable (project, shipped submission if any, journal entries, and status comments that were synced). This cannot be undone.
+            </p>
+            <%= button_to "Delete project permanently",
+                  admin_destroy_review_project_path(project_id: @project_db.id),
+                  method: :delete,
+                  class: "review-superadmin-delete-btn",
+                  form: { class: "review-superadmin-delete-form" },
+                  data: {
+                    turbo_confirm: "Permanently delete this project from PostgreSQL and Airtable? This cannot be undone."
+                  } %>
           </div>
         <% end %>
       </div>
@@ -769,5 +937,37 @@
         alert('Failed to submit review');
       });
     }
+
+    (function() {
+      const cb = document.getElementById('reviewDoubleDipCheckbox');
+      if (!cb) return;
+      const url = '<%= admin_review_project_double_dip_path(project_id: @project_db.id) %>';
+      const csrf = document.querySelector('meta[name="csrf-token"]').content;
+      let lastOk = cb.checked;
+      cb.addEventListener('change', function() {
+        const want = cb.checked;
+        fetch(url, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-Token': csrf
+          },
+          body: JSON.stringify({ double_dip: want })
+        })
+        .then(function(r) {
+          if (r.ok) {
+            lastOk = want;
+            return;
+          }
+          return r.json().then(function(j) { throw new Error(j.error || 'Save failed'); });
+        })
+        .catch(function(e) {
+          console.error(e);
+          alert('Could not save Double-dip: ' + (e.message || 'error'));
+          cb.checked = lastOk;
+        });
+      });
+    })();
   </script>
 </div>

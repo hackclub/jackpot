@@ -40,7 +40,7 @@
             <%= link_to "Hackathon", hackathon_info_path, class: "nav-item #{'nav-active' if controller_name == 'hackathon_info'}" %>
             <% if review_privileged? %>
               <% if full_admin? %>
-                <%= link_to "Admin", admin_path, class: "nav-item nav-admin" %>
+                <%= link_to (current_user.role_super_admin? ? "Superadmin" : "Admin"), admin_path, class: "nav-item nav-admin" %>
               <% else %>
                 <%= link_to "Reviewer", reviewer_path, class: "nav-item nav-admin" %>
               <% end %>
