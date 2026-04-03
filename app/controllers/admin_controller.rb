@@ -182,8 +182,9 @@ class AdminController < ApplicationController
 
   def review
      begin
-       all_db_projects = Project.includes(:user).order(created_at: :desc)
-       pending_db_projects = Project.where(shipped: true, status: "in-review", reviewed: false).includes(:user).order(created_at: :desc)
+       all_db_projects = Project.includes(:user, :ysws_project_submission).order(created_at: :desc)
+       pending_db_projects = Project.where(shipped: true, status: "in-review", reviewed: false)
+         .includes(:user, :ysws_project_submission).order(created_at: :desc)
 
        @projects_for_review = []
        @all_projects = []
@@ -209,7 +210,7 @@ class AdminController < ApplicationController
            "created_at" => db_project.created_at&.iso8601,
            "total_hours" => db_project.total_hours || 0,
            "hours" => db_project.total_hours || 0,
-           "double_dip" => db_project.double_dip
+           "double_dip" => db_project.double_dip_effective?
          }
 
          project_item = {
@@ -222,6 +223,9 @@ class AdminController < ApplicationController
        end
 
        pending_db_projects.each do |db_project|
+         db_project.ysws_project_submission&.pull_double_dip_from_airtable!
+         db_project.reload
+
          user = db_project.user
          next unless user
 
@@ -242,7 +246,7 @@ class AdminController < ApplicationController
            "created_at" => db_project.created_at&.iso8601,
            "total_hours" => db_project.total_hours || 0,
            "hours" => db_project.total_hours || 0,
-           "double_dip" => db_project.double_dip
+           "double_dip" => db_project.double_dip_effective?
          }
 
          project_item = {
@@ -273,17 +277,26 @@ class AdminController < ApplicationController
     end
 
     dip = ActiveModel::Type::Boolean.new.cast(params[:double_dip])
-    if project.update(double_dip: dip)
-      head :ok
-    else
-      render json: { error: project.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    project.update!(double_dip: dip)
+    if (sub = project.ysws_project_submission)
+      sub.update_column(:double_dip, dip)
+      begin
+        sub.push_double_dip_to_airtable!
+      rescue StandardError => e
+        Rails.logger.error("update_review_project_double_dip: Airtable push failed: #{e.class}: #{e.message}")
+      end
     end
+    head :ok
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
   end
 
   def review_project
     begin
       project_id = params[:project_id]
-      @project_db = Project.find(project_id)
+      @project_db = Project.includes(:ysws_project_submission).find(project_id)
+      @project_db.ysws_project_submission&.pull_double_dip_from_airtable!
+      @project_db.reload
       @user = @project_db.user
 
       unless @user
@@ -321,7 +334,7 @@ class AdminController < ApplicationController
         "reviewed" => @project_db.reviewed,
         "reviewed_at" => @project_db.reviewed_at&.iso8601,
         "created_at" => @project_db.created_at&.iso8601,
-        "double_dip" => @project_db.double_dip
+        "double_dip" => @project_db.double_dip_effective?
       }
     rescue => e
       Rails.logger.error("Error loading review_project: #{e.class} - #{e.message}")

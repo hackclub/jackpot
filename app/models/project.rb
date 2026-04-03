@@ -33,6 +33,11 @@ class Project < ApplicationRecord
   scope :reviewed, -> { where(reviewed: true) }
   scope :pending_review, -> { where(status: "in-review", reviewed: false) }
 
+  # True if marked in PG or on the YSWS Project Submission row (Airtable checkbox syncs to ysws_project_submissions.double_dip).
+  def double_dip_effective?
+    ysws_project_submission&.double_dip? || double_dip?
+  end
+
   # Shipped rows that count as “the same repo already in the queue” (not displaced by a rejected resubmit).
   ACTIVE_SHIP_QUEUE_STATUSES = %w[in-review approved].freeze
 

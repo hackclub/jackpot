@@ -585,14 +585,14 @@
       <h1 class="page-title"><%= @project["name"] %></h1>
       <div class="page-header-badges">
         <span class="review-page-status-pill"><%= @project["status"] || "pending" %></span>
-        <% if @project_db.double_dip? %>
+        <% if @project_db.double_dip_effective? %>
           <span class="review-double-dip-external-badge" role="status">Project Warning!</span>
         <% end %>
       </div>
       <p class="page-meta">by <%= @user.jackpot_profile_name %> (<%= @user.email %>)</p>
     </div>
 
-    <% if @project_db.double_dip? %>
+    <% if @project_db.double_dip_effective? %>
       <div class="review-double-dip-staff-banner">
         <strong class="review-double-dip-staff-lead">Project Warning!</strong>
         <p class="review-double-dip-staff-body">This code URL has been matched with a project in another HC program. If you don't have access to the HC Unified Database please don't review this project</p>
@@ -681,7 +681,7 @@
                 </td>
                 <td rowspan="3" class="review-double-dip-cell">
                   <label class="review-double-dip-label">
-                    <input type="checkbox" id="reviewDoubleDipCheckbox" <%= @project_db.double_dip? ? "checked" : "" %> data-project-id="<%= @project_db.id %>">
+                    <input type="checkbox" id="reviewDoubleDipCheckbox" <%= @project_db.double_dip_effective? ? "checked" : "" %> data-project-id="<%= @project_db.id %>">
                     <span>Mark if code URL matches another HC program</span>
                   </label>
                 </td>
