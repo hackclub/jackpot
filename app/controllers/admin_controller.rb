@@ -49,6 +49,9 @@ class AdminController < ApplicationController
       .limit(10)
 
     @top_users_by_bolts = User.where("chip_am > 0").order(chip_am: :desc).limit(10)
+
+    @project_active_users_today = project_active_users_count_for_day(Date.current)
+    @daily_project_active_user_series = daily_project_active_user_series(days: 30)
   end
 
   def console
@@ -311,6 +314,19 @@ class AdminController < ApplicationController
   end
 
   private
+
+  # Distinct users with at least one project saved that calendar day (updated_at in app TZ).
+  def project_active_users_count_for_day(day)
+    Project.where(updated_at: day.in_time_zone.all_day).distinct.count(:user_id)
+  end
+
+  def daily_project_active_user_series(days:)
+    start_date = (days - 1).days.ago.to_date
+    end_date = Date.current
+    (start_date..end_date).map do |d|
+      [ d, project_active_users_count_for_day(d) ]
+    end
+  end
 
   # Unshipped / missing shipped_at sort after shipped rows for both asc and desc.
   def sort_review_items_by_shipped_at!(items, direction)

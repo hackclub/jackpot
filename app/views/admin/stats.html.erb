@@ -90,6 +90,33 @@
       </div>
     </div>
 
+    <% chart_max = [ @daily_project_active_user_series.map(&:last).max.to_f, 1.0 ].max %>
+    <h2 class="stats-section-title">Daily project activity</h2>
+    <p class="stats-muted">Users who saved at least one project that day (any project update; shipping not required). Counts distinct users by project <span class="stats-muted-code">updated_at</span>.</p>
+    <div class="stats-row stats-row--1">
+      <div class="stats-card stats-card--highlight">
+        <span class="stats-value stats-value--gold"><%= number_with_delimiter(@project_active_users_today) %></span>
+        <span class="stats-label">Active users today</span>
+      </div>
+    </div>
+    <div class="stats-chart-wrap">
+      <div class="stats-chart-heading">Users per day (last 30 days)</div>
+      <div class="stats-chart-scroll" role="img" aria-label="Column chart of active users per day for the last 30 days">
+        <div class="stats-chart-bars">
+          <% @daily_project_active_user_series.each do |day, count| %>
+            <% h = (count.to_f / chart_max * 100).round(1) %>
+            <div class="stats-chart-col">
+              <span class="stats-chart-value" title="<%= day.strftime('%Y-%m-%d') %>: <%= count %> users"><%= count %></span>
+              <span class="stats-chart-bar-wrap" title="<%= day.strftime('%Y-%m-%d') %>: <%= count %> users">
+                <span class="stats-chart-bar" style="height: <%= h %>%"></span>
+              </span>
+              <span class="stats-chart-xlabel"><%= day.month %>/<%= day.day %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
     <h2 class="stats-section-title">Shop &amp; Grants</h2>
     <div class="stats-row stats-row--4">
       <div class="stats-card">
@@ -176,9 +203,99 @@
   margin-bottom: 0.5rem;
 }
 
+.stats-row--1 { grid-template-columns: minmax(200px, 320px); }
 .stats-row--3 { grid-template-columns: repeat(3, 1fr); }
 .stats-row--4 { grid-template-columns: repeat(4, 1fr); }
 .stats-row--5 { grid-template-columns: repeat(5, 1fr); }
+
+.stats-muted {
+  font-size: 0.85rem;
+  color: #8a7e6a;
+  margin: -0.25rem 0 1rem;
+  line-height: 1.45;
+  max-width: 52rem;
+}
+
+.stats-muted-code {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.88em;
+  color: #a89878;
+}
+
+.stats-chart-wrap {
+  background: rgba(20, 14, 8, 0.45);
+  border: 2px solid rgba(139, 105, 20, 0.5);
+  border-radius: 12px;
+  padding: 1rem 0.75rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.stats-chart-heading {
+  font-size: 0.95rem;
+  color: #c4b89a;
+  font-style: italic;
+  font-family: Georgia, serif;
+  margin-bottom: 0.75rem;
+}
+
+.stats-chart-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stats-chart-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 5px;
+  min-height: 168px;
+  padding: 0 2px 4px;
+}
+
+.stats-chart-col {
+  flex: 1 0 18px;
+  min-width: 18px;
+  max-width: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stats-chart-value {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #c4b89a;
+  font-family: Georgia, serif;
+  line-height: 1;
+  min-height: 0.75rem;
+}
+
+.stats-chart-bar-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.stats-chart-bar {
+  display: block;
+  width: 100%;
+  max-width: 26px;
+  min-height: 2px;
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(180deg, #e8c84a 0%, #d4a017 40%, #8b6914 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.stats-chart-xlabel {
+  font-size: 0.58rem;
+  color: #6d6356;
+  font-family: Georgia, serif;
+  line-height: 1;
+  margin-top: 2px;
+}
 
 .stats-card {
   background: rgba(30, 20, 10, 0.8);
