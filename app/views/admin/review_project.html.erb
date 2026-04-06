@@ -601,7 +601,7 @@
 
     <div class="review-page-screenshot">
       <% if @project["banner_url"].present? && @project["banner_url"].match?(/\Ahttps?:\/\//i) %>
-        <img src="<%= @project["banner_url"] %>" alt="<%= @project["name"] %>">
+        <img src="<%= @project["banner_url"] %>" alt="<%= @project["name"] %>" decoding="async" fetchpriority="high" width="960" height="350">
       <% else %>
         Screenshot unavailable
       <% end %>

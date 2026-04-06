@@ -541,8 +541,36 @@ class DeckController < ApplicationController
       return render json: { error: "Image uploads not configured" }, status: :service_unavailable
     end
 
+    uuid = SecureRandom.uuid
     ext = File.extname(file.original_filename).downcase
-    key = "journal-images/#{current_user.id}/#{SecureRandom.uuid}#{ext}"
+    content_type = file.content_type.to_s
+    body = nil
+
+    # Project banner uploads: resize + JPEG so admin review / deck load smaller assets (journal stays original).
+    if ActiveModel::Type::Boolean.new.cast(params[:banner]) &&
+        content_type.start_with?("image/") &&
+        !content_type.include?("svg")
+      begin
+        require "image_processing/vips"
+        processed = ImageProcessing::Vips
+          .source(file)
+          .resize_to_limit(1280, 1280)
+          .convert("jpeg")
+          .saver(quality: 82)
+          .call
+        body = File.binread(processed.path)
+        processed.close!
+        content_type = "image/jpeg"
+        ext = ".jpg"
+      rescue LoadError, StandardError => e
+        Rails.logger.warn("upload_image: project banner resize skipped (#{e.class}: #{e.message})")
+        file.rewind if file.respond_to?(:rewind)
+        body = nil
+      end
+    end
+
+    body ||= file.read
+    key = "journal-images/#{current_user.id}/#{uuid}#{ext}"
 
     client = Aws::S3::Client.new(
       access_key_id: cdn[:key_id],
@@ -555,8 +583,8 @@ class DeckController < ApplicationController
     client.put_object(
       bucket: cdn[:bucket],
       key: key,
-      body: file.read,
-      content_type: file.content_type,
+      body: body,
+      content_type: content_type,
       acl: "public-read"
     )
 

@@ -1013,6 +1013,7 @@ function initDeck() {
      bannerPlaceholder.innerHTML = '<span class="banner-placeholder-text">Uploading...</span>';
      var formData = new FormData();
      formData.append('file', file);
+     formData.append('banner', '1');
      fetch('<%= upload_journal_image_path %>', {
        method: 'POST',
        headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
