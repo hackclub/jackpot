@@ -356,7 +356,7 @@
               <div class="project-card">
                 <div class="project-thumbnail">
                   <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
-                    <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>">
+                    <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>" loading="lazy" decoding="async" fetchpriority="low" width="640" height="180">
                   <% else %>
                     Image could not be loaded
                   <% end %>
@@ -422,7 +422,7 @@
               <a href="<%= admin_review_project_path(project["id"]) %>">
                 <div class="project-thumbnail">
                   <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
-                    <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>">
+                    <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>" loading="lazy" decoding="async" fetchpriority="low" width="640" height="180">
                   <% else %>
                     Image could not be loaded
                   <% end %>

@@ -223,9 +223,6 @@ class AdminController < ApplicationController
        end
 
        pending_db_projects.each do |db_project|
-         db_project.ysws_project_submission&.pull_double_dip_from_airtable!
-         db_project.reload
-
          user = db_project.user
          next unless user
 

@@ -404,8 +404,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_120000) do
     t.string "code_url"
     t.string "country"
     t.datetime "created_at", null: false
-    t.boolean "double_dip", default: false, null: false
     t.text "description"
+    t.boolean "double_dip", default: false, null: false
     t.string "email"
     t.string "first_name"
     t.string "github_username"
