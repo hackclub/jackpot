@@ -13,6 +13,14 @@
         </div>
       <% end %>
 
+      <%= link_to admin_users_path, class: "admin-link" do %>
+        <span class="admin-link-icon">👥</span>
+        <div>
+          Users
+          <span class="admin-link-desc">Bolts, projects, hours, journals, and shop activity per participant</span>
+        </div>
+      <% end %>
+
       <%= link_to admin_review_path, class: "admin-link" do %>
         <span class="admin-link-icon">📋</span>
         <div>
