@@ -1,3 +1,5 @@
+require "csv"
+
 class AdminController < ApplicationController
   skip_before_action :check_access_flipper
   before_action :authenticate_admin_area!
@@ -10,7 +12,21 @@ class AdminController < ApplicationController
   end
 
   def users
-    @users = User.order(created_at: :desc).includes(:projects, :journal_entries, :shop_orders)
+    list_scope = users_list_scope
+    @users = list_scope
+    @export_filter = (params[:filter].presence || "all").to_s
+
+    respond_to do |format|
+      format.html
+      format.csv do
+        filtered = apply_users_export_filter(list_scope)
+        filename = "jackpot-users-#{Date.current.iso8601}-#{@export_filter.presence || 'all'}.csv"
+        send_data "\uFEFF" + users_csv_string(filtered),
+          filename: filename,
+          type: "text/csv; charset=utf-8",
+          disposition: "attachment"
+      end
+    end
   end
 
   def show_user
@@ -463,6 +479,97 @@ class AdminController < ApplicationController
   end
 
   private
+
+  def users_list_scope
+    User.order(created_at: :desc).includes(:projects, :journal_entries, :shop_orders)
+  end
+
+  def apply_users_export_filter(scope)
+    case params[:filter].to_s
+    when "with_chips"
+      scope.where("COALESCE(chip_am, 0) > 0")
+    when "without_chips"
+      scope.where("COALESCE(chip_am, 0) <= 0")
+    when "with_projects"
+      scope.where(id: Project.select(:user_id))
+    when "without_projects"
+      scope.where.not(id: Project.where.not(user_id: nil).select(:user_id))
+    else
+      scope
+    end
+  end
+
+  def users_csv_string(users_relation)
+    rows = users_relation.to_a
+    CSV.generate(encoding: "UTF-8") do |csv|
+      csv << users_csv_headers
+      rows.each { |user| csv << users_csv_row(user) }
+    end
+  end
+
+  def users_csv_headers
+    [
+      "id",
+      "name",
+      "email",
+      "hack_club_id",
+      "slack_id",
+      "slack_username",
+      "display_name",
+      "role",
+      "bolts",
+      "projects_count",
+      "projects_pending",
+      "projects_in_review",
+      "projects_approved",
+      "projects_rejected",
+      "approved_hours_sum",
+      "logged_hours_sum",
+      "journal_entries_count",
+      "journal_hours_sum",
+      "shop_orders_count",
+      "last_sign_in_at",
+      "created_at"
+    ]
+  end
+
+  def users_csv_row(user)
+    projects = user.projects
+    pr_pending = projects.count { |p| p.status.to_s == "pending" }
+    pr_review = projects.count { |p| p.status.to_s == "in-review" }
+    pr_appr = projects.count { |p| p.status.to_s == "approved" }
+    pr_rej = projects.count { |p| p.status.to_s == "rejected" }
+    approved_h = projects.sum { |p| p.approved_hours.to_f }
+    logged_h = projects.sum { |p| p.total_hours.to_f }
+    j_entries = user.journal_entries
+    j_count = j_entries.size
+    j_hours = j_entries.sum { |e| e.hours_worked.to_f }
+    orders_n = user.shop_orders.size
+
+    [
+      user.id,
+      user.jackpot_profile_name,
+      user.email,
+      user.hack_club_id,
+      user.slack_id,
+      user.slack_username,
+      user.display_name,
+      user.role,
+      user.chip_am.to_f,
+      projects.size,
+      pr_pending,
+      pr_review,
+      pr_appr,
+      pr_rej,
+      approved_h,
+      logged_h,
+      j_count,
+      j_hours,
+      orders_n,
+      user.last_sign_in_at&.iso8601,
+      user.created_at.iso8601
+    ]
+  end
 
   def require_super_admin!
     return if current_user.role_super_admin?
