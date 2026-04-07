@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Hackatime API returns fractional hours; store/display to 2 decimal places (half-up), not truncated down.
-# Chips: 1 hr = 50 chips, rounded to 2 decimal places (same as historical Jackpot behavior).
+# Chips: only whole hours count toward the 1h = 50 chips rate — hours are floored before conversion,
+# then chips are rounded to 2 decimal places (e.g. 1.9h → 1h → 50 chips; 5.5h → 5h → 250 chips).
 module JackpotHours
   module_function
 
@@ -10,6 +11,7 @@ module JackpotHours
   end
 
   def chips_from_approved_hours(hours)
-    (BigDecimal(hours.to_s) * 50).round(2).to_f
+    floored_whole_hours = BigDecimal(hours.to_s).floor(0)
+    (floored_whole_hours * 50).round(2).to_f
   end
 end

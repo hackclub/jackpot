@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :shop_orders, dependent: :destroy
   has_many :shop_item_requests, dependent: :destroy
   has_many :project_comments, dependent: :destroy
+  has_many :user_admin_notes, dependent: :destroy
   enum :role, { user: 0, reviewer: 1, admin: 2, super_admin: 3 }, prefix: true
 
   validates :hack_club_id, presence: true, uniqueness: true

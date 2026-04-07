@@ -1,6 +1,7 @@
 class AdminController < ApplicationController
   skip_before_action :check_access_flipper
   before_action :authenticate_admin_area!
+  before_action :require_super_admin!, only: %i[create_user_note update_user_chip_am]
 
   def index
     Rails.logger.info "Current user hack_club_id: #{current_user&.hack_club_id}"
@@ -10,6 +11,69 @@ class AdminController < ApplicationController
 
   def users
     @users = User.order(created_at: :desc).includes(:projects, :journal_entries, :shop_orders)
+  end
+
+  def show_user
+    @user = User.includes(:projects, :journal_entries, :shop_orders).find(params[:id])
+    @projects = @user.projects.order(position: :asc)
+    return unless current_user.role_super_admin?
+
+    @superadmin_notes = @user.user_admin_notes.includes(:author).newest_first.to_a
+  end
+
+  def create_user_note
+    user = User.find(params[:id])
+    body = params[:body].to_s.strip
+    if body.blank?
+      redirect_to admin_user_path(user), alert: "Note cannot be empty."
+      return
+    end
+
+    note = user.user_admin_notes.build(author: current_user, note_type: "general", body: body)
+    if note.save
+      redirect_to admin_user_path(user), notice: "Note saved."
+    else
+      redirect_to admin_user_path(user), alert: note.errors.full_messages.join(", ")
+    end
+  end
+
+  def update_user_chip_am
+    user = User.find(params[:id])
+    note_body = params[:note].to_s.strip
+
+    if note_body.blank?
+      redirect_to admin_user_path(user), alert: "A note is required when changing bolts."
+      return
+    end
+
+    begin
+      after = BigDecimal(params[:chip_am].to_s)
+    rescue ArgumentError
+      redirect_to admin_user_path(user), alert: "Invalid bolt amount."
+      return
+    end
+
+    if after.negative?
+      redirect_to admin_user_path(user), alert: "Bolt amount cannot be negative."
+      return
+    end
+
+    before_am = user.chip_am.to_d
+
+    User.transaction do
+      user.update!(chip_am: after)
+      user.user_admin_notes.create!(
+        author: current_user,
+        note_type: "bolt_adjustment",
+        body: note_body,
+        chip_am_before: before_am,
+        chip_am_after: after
+      )
+    end
+
+    redirect_to admin_user_path(user), notice: "Bolt balance updated."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to admin_user_path(params[:id]), alert: e.record.errors.full_messages.join(", ")
   end
 
   def stats
@@ -399,6 +463,12 @@ class AdminController < ApplicationController
   end
 
   private
+
+  def require_super_admin!
+    return if current_user.role_super_admin?
+
+    redirect_to admin_users_path, alert: "Only super-admins can do that."
+  end
 
   # Distinct users with at least one project saved that calendar day (updated_at in app TZ).
   def project_active_users_count_for_day(day)

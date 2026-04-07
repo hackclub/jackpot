@@ -856,3 +856,262 @@
   padding: 2rem;
 }
 
+.admin-users-toolbar--split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-users-toolbar--split .admin-users-search {
+  flex: 1;
+  min-width: 14rem;
+  max-width: 28rem;
+}
+
+.admin-users-sort-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-users-sort-label {
+  font-size: 0.8rem;
+  color: #b0a080;
+  font-weight: 600;
+  font-family: 'Georgia', serif;
+  white-space: nowrap;
+}
+
+.admin-users-sort-select {
+  padding: 0.45rem 2rem 0.45rem 0.65rem;
+  background: rgba(30, 20, 10, 0.9);
+  border: 2px solid #8b6914;
+  border-radius: 8px;
+  color: #e8dcc8;
+  font-size: 0.85rem;
+  font-family: 'Georgia', serif;
+  cursor: pointer;
+  min-width: 14rem;
+  max-width: 100%;
+}
+
+.admin-users-sort-select:focus {
+  outline: none;
+  border-color: #d4a017;
+}
+
+a.admin-users-profile-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+a.admin-users-profile-link:hover .admin-users-name {
+  color: #d4a017;
+  text-decoration: underline;
+}
+
+/* Admin — single user profile */
+.admin-user-profile-title {
+  font-size: 2rem;
+  color: #d4a017;
+  margin: 0 0 1.25rem;
+  text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.5);
+}
+
+.admin-user-profile-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.admin-user-profile-card {
+  background: rgba(30, 20, 10, 0.75);
+  border: 1px solid rgba(139, 105, 20, 0.45);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.admin-user-profile-card--highlight {
+  border-color: #d4a017;
+  background: rgba(50, 40, 20, 0.5);
+}
+
+.admin-user-profile-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8b6914;
+  margin-bottom: 0.35rem;
+}
+
+.admin-user-profile-value {
+  font-size: 0.95rem;
+  color: #e8dcc8;
+  word-break: break-word;
+}
+
+.admin-user-profile-bolts {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #d4a017;
+}
+
+.admin-user-section-title {
+  font-size: 1.25rem;
+  color: #d4a017;
+  margin: 2rem 0 0.75rem;
+  border-bottom: 1px solid rgba(139, 105, 20, 0.4);
+  padding-bottom: 0.35rem;
+}
+
+.admin-user-projects-table {
+  margin-bottom: 0.5rem;
+}
+
+.admin-user-superadmin-panel {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  background: rgba(40, 25, 15, 0.55);
+  border: 2px solid rgba(180, 50, 50, 0.35);
+  border-radius: 12px;
+}
+
+.admin-user-superadmin-lead {
+  color: #c4a898;
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem;
+  line-height: 1.45;
+}
+
+.admin-user-notes-list {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+
+.admin-user-note {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(20, 12, 8, 0.6);
+  border: 1px solid rgba(139, 105, 20, 0.35);
+  border-radius: 8px;
+}
+
+.admin-user-note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: #8b6914;
+  margin-bottom: 0.5rem;
+}
+
+.admin-user-note-badge {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(194, 65, 12, 0.45);
+  color: #fde68a;
+}
+
+.admin-user-note-badge--general {
+  background: rgba(100, 80, 140, 0.45);
+  color: #e8dcc8;
+}
+
+.admin-user-note-adjustment {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #d4a017;
+  margin: 0 0 0.5rem;
+}
+
+.admin-user-note-body {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #e8dcc8;
+  line-height: 1.5;
+}
+
+.admin-user-note-forms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.admin-user-note-form-block {
+  padding: 1rem;
+  background: rgba(20, 12, 8, 0.45);
+  border-radius: 8px;
+  border: 1px solid rgba(139, 105, 20, 0.25);
+}
+
+.admin-user-form-title {
+  font-size: 1rem;
+  color: #d4a017;
+  margin: 0 0 0.75rem;
+}
+
+.admin-user-field-label {
+  display: block;
+  font-size: 0.82rem;
+  color: #b0a080;
+  margin-bottom: 0.35rem;
+}
+
+.admin-user-textarea,
+.admin-user-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.75rem;
+  background: rgba(234, 225, 200, 0.85);
+  border: 1px solid #8b6914;
+  border-radius: 6px;
+  color: #1e1410;
+  font-family: 'Georgia', serif;
+  font-size: 0.9rem;
+}
+
+.admin-user-textarea:focus,
+.admin-user-input:focus {
+  outline: none;
+  border-color: #d4a017;
+}
+
+.admin-user-submit {
+  padding: 0.55rem 1.2rem;
+  background: #8b6914;
+  border: 2px solid #d4a017;
+  border-radius: 6px;
+  color: #f0e6d2;
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.admin-user-submit:hover {
+  background: #a67f18;
+}
+
+.admin-user-submit--danger {
+  border-color: #c2410c;
+  background: rgba(194, 65, 12, 0.45);
+  color: #fff;
+}
+
+.admin-user-submit--danger:hover {
+  background: rgba(194, 65, 12, 0.65);
+}
+

@@ -59,6 +59,9 @@ Rails.application.routes.draw do
   get "/admin", to: "admin#index", as: :admin
   get "/admin/stats", to: "admin#stats", as: :admin_stats
   get "/admin/users", to: "admin#users", as: :admin_users
+  get "/admin/users/:id", to: "admin#show_user", as: :admin_user
+  post "/admin/users/:id/notes", to: "admin#create_user_note", as: :admin_user_notes
+  patch "/admin/users/:id/chip_am", to: "admin#update_user_chip_am", as: :admin_user_chip_am
   get "/admin/items_request", to: "admin#items_request", as: :admin_items_request
   patch "/admin/items_request/:id", to: "admin#update_item_request", as: :admin_update_item_request
   get "/admin/review", to: "admin#review", as: :admin_review

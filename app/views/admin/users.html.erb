@@ -9,12 +9,29 @@
     </p>
 
     <p class="admin-users-lead">
-      Wallet balances, deck projects, approved and logged hours, journals, and shop orders. Search filters the table.
+      Wallet balances, deck projects, approved and logged hours, journals, and shop orders. Search filters the table; sort reorders rows. Open a participant for their project list and (super-admin) internal notes.
     </p>
 
     <% if @users.any? %>
-    <div class="admin-users-toolbar">
+    <div class="admin-users-toolbar admin-users-toolbar--split">
       <input type="search" id="adminUsersSearch" class="admin-users-search" placeholder="Search by name, email, Hack Club ID, Slack…" autocomplete="off" aria-label="Filter users">
+      <div class="admin-users-sort-wrap">
+        <label class="admin-users-sort-label" for="adminUsersSort">Sort by</label>
+        <select id="adminUsersSort" class="admin-users-sort-select" aria-label="Sort users">
+          <option value="created_desc" selected>Newest first</option>
+          <option value="created_asc">Oldest first</option>
+          <option value="name_asc">Name A–Z</option>
+          <option value="name_desc">Name Z–A</option>
+          <option value="chips_desc">Bolts (high → low)</option>
+          <option value="chips_asc">Bolts (low → high)</option>
+          <option value="approved_h_desc">Approved hours (high → low)</option>
+          <option value="approved_h_asc">Approved hours (low → high)</option>
+          <option value="logged_h_desc">Logged hours (high → low)</option>
+          <option value="logged_h_asc">Logged hours (low → high)</option>
+          <option value="journal_h_desc">Journal hours (high → low)</option>
+          <option value="journal_h_asc">Journal hours (low → high)</option>
+        </select>
+      </div>
     </div>
 
     <div class="admin-users-table-wrap">
@@ -33,6 +50,7 @@
             <th class="admin-users-num">Orders</th>
             <th>Last sign-in</th>
             <th>Joined</th>
+            <th>Profile</th>
           </tr>
         </thead>
         <tbody>
@@ -49,9 +67,19 @@
             <% j_hours = j_entries.sum { |e| e.hours_worked.to_f } %>
             <% orders_n = user.shop_orders.size %>
             <% search_blob = [ user.email, user.jackpot_profile_name, user.hack_club_id, user.slack_username, user.slack_id, user.display_name ].compact.map(&:to_s).join(" ").downcase %>
-            <tr data-user-search="<%= ERB::Util.html_escape(search_blob) %>">
+            <tr
+              data-user-search="<%= ERB::Util.html_escape(search_blob) %>"
+              data-sort-created="<%= user.created_at.to_i %>"
+              data-sort-name="<%= ERB::Util.html_escape(user.jackpot_profile_name.to_s.downcase) %>"
+              data-sort-chips="<%= user.chip_am.to_f %>"
+              data-sort-approved-h="<%= approved_h %>"
+              data-sort-logged-h="<%= logged_h %>"
+              data-sort-journal-h="<%= j_hours %>"
+            >
               <td class="admin-users-participant">
-                <span class="admin-users-name"><%= user.jackpot_profile_name %></span>
+                <%= link_to admin_user_path(user), class: "admin-users-profile-link" do %>
+                  <span class="admin-users-name"><%= user.jackpot_profile_name %></span>
+                <% end %>
                 <span class="admin-users-email"><%= user.email %></span>
                 <% if user.hack_club_id.present? %>
                   <span class="admin-users-meta">HC ID: <%= user.hack_club_id %></span>
@@ -71,6 +99,7 @@
               <td class="admin-users-num"><%= orders_n %></td>
               <td class="admin-users-date"><%= user.last_sign_in_at ? user.last_sign_in_at.strftime("%b %d, %Y") : "—" %></td>
               <td class="admin-users-date"><%= user.created_at.strftime("%b %d, %Y") %></td>
+              <td><%= link_to "View", admin_user_path(user), class: "admin-link-inline" %></td>
             </tr>
           <% end %>
         </tbody>
@@ -86,15 +115,55 @@
 <script>
   (function() {
     var input = document.getElementById('adminUsersSearch');
-    if (!input) return;
+    var sortSelect = document.getElementById('adminUsersSort');
+    var tbody = document.querySelector('.admin-users-table tbody');
+    if (!tbody) return;
+
+    var SORT_KEY_ATTR = {
+      created: 'data-sort-created',
+      name: 'data-sort-name',
+      chips: 'data-sort-chips',
+      approved_h: 'data-sort-approved-h',
+      logged_h: 'data-sort-logged-h',
+      journal_h: 'data-sort-journal-h'
+    };
+
+    function parseSort(val) {
+      var m = val.match(/^(.+)_(asc|desc)$/);
+      if (!m) return { key: 'created', desc: true };
+      return { key: m[1], desc: m[2] === 'desc' };
+    }
+
+    function sortRows() {
+      var sel = sortSelect.value;
+      var p = parseSort(sel);
+      var attr = SORT_KEY_ATTR[p.key] || SORT_KEY_ATTR.created;
+      var mult = p.desc ? -1 : 1;
+      var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var av = a.getAttribute(attr) || '';
+        var bv = b.getAttribute(attr) || '';
+        if (attr === 'data-sort-name') {
+          return mult * av.localeCompare(bv);
+        }
+        var an = parseFloat(av, 10);
+        var bn = parseFloat(bv, 10);
+        if (!isNaN(an) && !isNaN(bn)) return mult * (an - bn);
+        return mult * String(av).localeCompare(String(bv));
+      });
+      rows.forEach(function(r) { tbody.appendChild(r); });
+    }
+
     function filterUsers() {
       var q = input.value.toLowerCase().trim();
-      document.querySelectorAll('.admin-users-table tbody tr').forEach(function(tr) {
+      tbody.querySelectorAll('tr').forEach(function(tr) {
         var blob = (tr.getAttribute('data-user-search') || '').toLowerCase();
         tr.style.display = (!q || blob.indexOf(q) !== -1) ? '' : 'none';
       });
     }
+
     input.addEventListener('input', filterUsers);
+    sortSelect.addEventListener('change', sortRows);
   })();
 </script>
 <% end %>

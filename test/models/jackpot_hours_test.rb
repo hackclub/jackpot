@@ -9,9 +9,12 @@ class JackpotHoursTest < ActiveSupport::TestCase
     assert_in_delta 11.6, JackpotHours.hackatime_hours_from_api_total(11.599), 1e-9
   end
 
-  test "chips_from_approved_hours matches hours × 50 rounded to 2 decimals" do
-    assert_in_delta 575.0, JackpotHours.chips_from_approved_hours(11.5), 1e-9
-    assert_in_delta 599.5, JackpotHours.chips_from_approved_hours(11.99), 1e-9
-    assert_in_delta 25.0, JackpotHours.chips_from_approved_hours(0.5), 1e-9
+  test "chips_from_approved_hours uses floored whole hours × 50 (always round hours down for chips)" do
+    assert_in_delta 550.0, JackpotHours.chips_from_approved_hours(11.5), 1e-9
+    assert_in_delta 550.0, JackpotHours.chips_from_approved_hours(11.99), 1e-9
+    assert_in_delta 50.0, JackpotHours.chips_from_approved_hours(1.9), 1e-9
+    assert_in_delta 250.0, JackpotHours.chips_from_approved_hours(5.5), 1e-9
+    assert_in_delta 0.0, JackpotHours.chips_from_approved_hours(0.5), 1e-9
+    assert_in_delta 50.0, JackpotHours.chips_from_approved_hours(1.0), 1e-9
   end
 end
