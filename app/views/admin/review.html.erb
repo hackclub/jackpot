@@ -96,6 +96,39 @@
       border-color: #d4a017;
     }
 
+    .fraud-filter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+      flex-shrink: 0;
+    }
+
+    .fraud-filter-label {
+      font-size: 0.8rem;
+      color: #b0a080;
+      font-weight: 600;
+      font-family: 'Georgia', serif;
+      white-space: nowrap;
+    }
+
+    .fraud-filter-select {
+      padding: 0.45rem 2rem 0.45rem 0.65rem;
+      background: rgba(30, 20, 10, 0.9);
+      border: 2px solid #8b6914;
+      border-radius: 8px;
+      color: #e8dcc8;
+      font-size: 0.85rem;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      min-width: 9rem;
+    }
+
+    .fraud-filter-select:focus {
+      outline: none;
+      border-color: #d4a017;
+    }
+
     .shipped-stat {
       color: #c8b898;
       font-size: 0.75rem;
@@ -257,6 +290,19 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     }
 
+    .project-fraud-check-badge {
+      display: inline-block;
+      padding: 0.4rem 0.85rem;
+      background: #c2410c;
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      font-family: 'Georgia', serif;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
     .project-footer {
       display: flex;
       justify-content: space-between;
@@ -332,12 +378,22 @@
         <button type="button" class="tab-btn active" onclick="switchTab('all', this)">All Projects (<%= @all_projects.length %>)</button>
         <button type="button" class="tab-btn" onclick="switchTab('pending', this)">Pending Review (<%= @projects_for_review.length %>)</button>
       </div>
-      <div class="ship-sort-wrap">
-        <label class="ship-sort-label" for="shipSortSelect">Ship date</label>
-        <select id="shipSortSelect" class="ship-sort-select" aria-label="Sort projects by ship date">
-          <option value="asc" <%= "selected" if (@ship_sort || "desc") == "asc" %>>Oldest first</option>
-          <option value="desc" <%= "selected" if (@ship_sort || "desc") == "desc" %>>Newest first</option>
-        </select>
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem 1.5rem;">
+        <div class="ship-sort-wrap">
+          <label class="ship-sort-label" for="shipSortSelect">Ship date</label>
+          <select id="shipSortSelect" class="ship-sort-select" aria-label="Sort projects by ship date">
+            <option value="asc" <%= "selected" if (@ship_sort || "desc") == "asc" %>>Oldest first</option>
+            <option value="desc" <%= "selected" if (@ship_sort || "desc") == "desc" %>>Newest first</option>
+          </select>
+        </div>
+        <div class="fraud-filter-wrap">
+          <label class="fraud-filter-label" for="fraudCheckFilter">Ask fraud check</label>
+          <select id="fraudCheckFilter" class="fraud-filter-select" aria-label="Filter by whether Ask fraud check is set">
+            <option value="any">Any</option>
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -353,7 +409,7 @@
             <% next if item.nil? || item[:project].nil? %>
             <% project = item[:project] %>
             <a href="<%= admin_review_project_path(project["id"]) %>">
-              <div class="project-card">
+              <div class="project-card" data-fraud-check="<%= project["fraud_check"] ? "true" : "false" %>">
                 <div class="project-thumbnail">
                   <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
                     <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>" loading="lazy" decoding="async" fetchpriority="low" width="640" height="180">
@@ -370,6 +426,9 @@
                   <div class="project-tags">
                     <% if project["double_dip"] %>
                       <span class="project-warning-badge-external">Project Warning!</span>
+                    <% end %>
+                    <% if project["fraud_check"] %>
+                      <span class="project-fraud-check-badge">Ask fraud check</span>
                     <% end %>
                     <% if project["project_type"].present? %>
                       <span class="tag"><%= project["project_type"] %></span>
@@ -418,7 +477,7 @@
           <% @projects_for_review.each do |item| %>
             <% next if item.nil? || item[:project].nil? %>
             <% project = item[:project] %>
-            <div class="project-card">
+            <div class="project-card" data-fraud-check="<%= project["fraud_check"] ? "true" : "false" %>">
               <a href="<%= admin_review_project_path(project["id"]) %>">
                 <div class="project-thumbnail">
                   <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
@@ -436,6 +495,9 @@
                   <div class="project-tags">
                     <% if project["double_dip"] %>
                       <span class="project-warning-badge-external">Project Warning!</span>
+                    <% end %>
+                    <% if project["fraud_check"] %>
+                      <span class="project-fraud-check-badge">Ask fraud check</span>
                     <% end %>
                     <% if project["project_type"].present? %>
                       <span class="tag"><%= project["project_type"] %></span>
@@ -471,7 +533,6 @@
             <% end %>
           </div>
         <% end %>
-      </div>
     </div>
 
   <script>
@@ -498,20 +559,24 @@
       }
     }
 
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-      const searchTerm = e.target.value.toLowerCase();
+    function applyReviewFilters() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const fraudMode = document.getElementById('fraudCheckFilter').value;
       document.querySelectorAll('.project-card').forEach(card => {
         const title = card.querySelector('.project-title').textContent.toLowerCase();
         const desc = card.querySelector('.project-description').textContent.toLowerCase();
+        const fraudOn = card.getAttribute('data-fraud-check') === 'true';
+        const matchSearch = title.includes(searchTerm) || desc.includes(searchTerm);
+        let matchFraud = true;
+        if (fraudMode === 'on') matchFraud = fraudOn;
+        else if (fraudMode === 'off') matchFraud = !fraudOn;
         const hideTarget = card.parentElement && card.parentElement.tagName === 'A' ? card.parentElement : card;
-        if (title.includes(searchTerm) || desc.includes(searchTerm)) {
-          hideTarget.style.display = '';
-        } else {
-          hideTarget.style.display = 'none';
-        }
+        hideTarget.style.display = (matchSearch && matchFraud) ? '' : 'none';
       });
-    });
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', applyReviewFilters);
+    document.getElementById('fraudCheckFilter').addEventListener('change', applyReviewFilters);
 
     document.getElementById('shipSortSelect').addEventListener('change', function() {
       const base = '<%= admin_review_path %>';

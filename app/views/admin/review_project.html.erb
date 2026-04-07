@@ -89,6 +89,20 @@
       white-space: nowrap;
     }
 
+    .review-fraud-check-external-badge {
+      display: inline-block;
+      background: #c2410c;
+      color: #fff;
+      padding: 0.4rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      font-family: Georgia, serif;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      white-space: nowrap;
+    }
+
     .review-double-dip-staff-banner {
       max-width: 52rem;
       margin: 0 auto 1.75rem;
@@ -110,6 +124,31 @@
     .review-double-dip-staff-body {
       font-size: 0.95rem;
       color: #f0e0dc;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .review-fraud-check-staff-banner {
+      max-width: 52rem;
+      margin: 0 auto 1.75rem;
+      padding: 1rem 1.25rem;
+      background: rgba(120, 53, 15, 0.35);
+      border: 2px solid #c2410c;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .review-fraud-check-staff-lead {
+      display: block;
+      font-family: Georgia, serif;
+      font-size: 1.05rem;
+      color: #fff;
+      margin: 0 0 0.6rem;
+    }
+
+    .review-fraud-check-staff-body {
+      font-size: 0.95rem;
+      color: #fde68a;
       line-height: 1.5;
       margin: 0;
     }
@@ -282,6 +321,30 @@
       width: 1.1rem;
       height: 1.1rem;
       accent-color: #d4a017;
+      cursor: pointer;
+    }
+
+    .review-fraud-check-cell {
+      vertical-align: middle;
+      text-align: center;
+      width: 7rem;
+    }
+
+    .review-fraud-check-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: #e8dcc8;
+      user-select: none;
+    }
+
+    .review-fraud-check-label input {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: #ea580c;
       cursor: pointer;
     }
 
@@ -588,6 +651,7 @@
         <% if @project_db.double_dip_effective? %>
           <span class="review-double-dip-external-badge" role="status">Project Warning!</span>
         <% end %>
+        <span id="reviewFraudCheckBadge" class="review-fraud-check-external-badge" role="status" style="<%= @project_db.fraud_check? ? '' : 'display:none' %>">Ask fraud check</span>
       </div>
       <p class="page-meta">by <%= @user.jackpot_profile_name %> (<%= @user.email %>)</p>
     </div>
@@ -598,6 +662,11 @@
         <p class="review-double-dip-staff-body">This code URL has been matched with a project in another HC program. If you don't have access to the HC Unified Database please don't review this project</p>
       </div>
     <% end %>
+
+    <div id="reviewFraudCheckBanner" class="review-fraud-check-staff-banner" style="<%= @project_db.fraud_check? ? '' : 'display:none' %>">
+      <strong class="review-fraud-check-staff-lead">Ask fraud check</strong>
+      <p class="review-fraud-check-staff-body">A reviewer asked for a fraud check on this submission. Clear the checkbox below when the review is complete.</p>
+    </div>
 
     <div class="review-page-screenshot">
       <% if @project["banner_url"].present? && @project["banner_url"].match?(/\Ahttps?:\/\//i) %>
@@ -651,7 +720,7 @@
             <a href="<%= @project["playable_url"] %>" target="_blank" class="quick-link-btn">▶ Live Demo</a>
           <% end %>
           <% if @user.slack_id.present? %>
-            <a href="https://joe.fraud.hackclub.com/profile/<%= ERB::Util.url_encode(@user.slack_id.to_s) %>" target="_blank" class="quick-link-btn">Fraud Check</a>
+            <a href="https://joe.fraud.hackclub.com/profile/<%= ERB::Util.url_encode(@user.slack_id.to_s) %>" target="_blank" class="quick-link-btn">Joe Tool</a>
           <% end %>
         </div>
 
@@ -668,7 +737,10 @@
                 <th>Project</th>
                 <th>Raw Hours</th>
                 <th>New hours to approve</th>
-                <th>Double-dip</th>
+                <% if current_user.role_super_admin? %>
+                  <th>Double-dip</th>
+                <% end %>
+                <th>Ask fraud check</th>
               </tr>
             </thead>
             <tbody>
@@ -679,10 +751,18 @@
                   <div style="font-size: 0.75rem; color: #a08030; margin-bottom: 0.35rem;">Previously banked: <strong><%= @banked_hours.round(2) %></strong> h · Pending this round (capped to queued submission): <strong><%= @pending_review_hours.round(2) %></strong> h max</div>
                   <input type="number" class="review-hours-input" value="<%= @pending_review_hours.to_f.round(2) %>" step="0.5" min="0" max="<%= @pending_review_hours.to_f.round(2) %>" style="width: 100%; background: transparent; border: 1px solid #8b6914; color: #d4a017; padding: 0.3rem;">
                 </td>
-                <td rowspan="3" class="review-double-dip-cell">
-                  <label class="review-double-dip-label">
-                    <input type="checkbox" id="reviewDoubleDipCheckbox" <%= @project_db.double_dip_effective? ? "checked" : "" %> data-project-id="<%= @project_db.id %>">
-                    <span>Mark if code URL matches another HC program</span>
+                <% if current_user.role_super_admin? %>
+                  <td rowspan="3" class="review-double-dip-cell">
+                    <label class="review-double-dip-label">
+                      <input type="checkbox" id="reviewDoubleDipCheckbox" <%= @project_db.double_dip_effective? ? "checked" : "" %> data-project-id="<%= @project_db.id %>">
+                      <span>Mark if code URL matches another HC program</span>
+                    </label>
+                  </td>
+                <% end %>
+                <td rowspan="3" class="review-fraud-check-cell">
+                  <label class="review-fraud-check-label">
+                    <input type="checkbox" id="reviewFraudCheckCheckbox" <%= @project_db.fraud_check? ? "checked" : "" %> data-project-id="<%= @project_db.id %>">
+                    <span>Ask fraud check</span>
                   </label>
                 </td>
               </tr>
@@ -965,6 +1045,42 @@
         .catch(function(e) {
           console.error(e);
           alert('Could not save Double-dip: ' + (e.message || 'error'));
+          cb.checked = lastOk;
+        });
+      });
+    })();
+
+    (function() {
+      const cb = document.getElementById('reviewFraudCheckCheckbox');
+      if (!cb) return;
+      const url = '<%= admin_review_project_fraud_check_path(project_id: @project_db.id) %>';
+      const csrf = document.querySelector('meta[name="csrf-token"]').content;
+      let lastOk = cb.checked;
+      cb.addEventListener('change', function() {
+        const want = cb.checked;
+        fetch(url, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-Token': csrf
+          },
+          body: JSON.stringify({ fraud_check: want })
+        })
+        .then(function(r) {
+          if (r.ok) {
+            lastOk = want;
+            var b = document.getElementById('reviewFraudCheckBadge');
+            var ban = document.getElementById('reviewFraudCheckBanner');
+            if (b) b.style.display = want ? '' : 'none';
+            if (ban) ban.style.display = want ? 'block' : 'none';
+            return;
+          }
+          return r.json().then(function(j) { throw new Error(j.error || 'Save failed'); });
+        })
+        .catch(function(e) {
+          console.error(e);
+          alert('Could not save Ask fraud check: ' + (e.message || 'error'));
           cb.checked = lastOk;
         });
       });

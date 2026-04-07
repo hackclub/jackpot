@@ -210,7 +210,8 @@ class AdminController < ApplicationController
            "created_at" => db_project.created_at&.iso8601,
            "total_hours" => db_project.total_hours || 0,
            "hours" => db_project.total_hours || 0,
-           "double_dip" => db_project.double_dip_effective?
+           "double_dip" => db_project.double_dip_effective?,
+           "fraud_check" => db_project.fraud_check?
          }
 
          project_item = {
@@ -243,7 +244,8 @@ class AdminController < ApplicationController
            "created_at" => db_project.created_at&.iso8601,
            "total_hours" => db_project.total_hours || 0,
            "hours" => db_project.total_hours || 0,
-           "double_dip" => db_project.double_dip_effective?
+           "double_dip" => db_project.double_dip_effective?,
+           "fraud_check" => db_project.fraud_check?
          }
 
          project_item = {
@@ -267,7 +269,24 @@ class AdminController < ApplicationController
      end
    end
 
+  def update_review_project_fraud_check
+    project = Project.find_by(id: params[:project_id])
+    unless project
+      return head :not_found
+    end
+
+    fc = ActiveModel::Type::Boolean.new.cast(params[:fraud_check])
+    project.update!(fraud_check: fc)
+    head :ok
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
+  end
+
   def update_review_project_double_dip
+    unless current_user.role_super_admin?
+      return head :forbidden
+    end
+
     project = Project.find_by(id: params[:project_id])
     unless project
       return head :not_found
@@ -331,7 +350,8 @@ class AdminController < ApplicationController
         "reviewed" => @project_db.reviewed,
         "reviewed_at" => @project_db.reviewed_at&.iso8601,
         "created_at" => @project_db.created_at&.iso8601,
-        "double_dip" => @project_db.double_dip_effective?
+        "double_dip" => @project_db.double_dip_effective?,
+        "fraud_check" => @project_db.fraud_check?
       }
     rescue => e
       Rails.logger.error("Error loading review_project: #{e.class} - #{e.message}")
@@ -493,7 +513,7 @@ class AdminController < ApplicationController
       return
     end
 
-    if %w[stats review review_project update_review_project_double_dip].include?(action_name)
+    if %w[stats review review_project update_review_project_double_dip update_review_project_fraud_check].include?(action_name)
       unless current_user.review_privileged?
         Rails.logger.warn "Non-staff tried to access admin review/stats. User: #{current_user.hack_club_id}"
         redirect_to root_path, alert: "Access denied."

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_04_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_07_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -127,6 +127,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_120000) do
     t.text "description"
     t.boolean "double_dip", default: false, null: false
     t.datetime "first_shipped_at"
+    t.boolean "fraud_check", default: false, null: false
     t.string "github_username"
     t.decimal "hackatime_hours", precision: 10, scale: 2, default: "0.0", null: false
     t.string "hackatime_project"
