@@ -45,6 +45,14 @@
       color: #8b6914;
     }
 
+    .search-bar-hint {
+      font-size: 0.8rem;
+      color: #7a7058;
+      margin: -1.25rem 0 1.75rem;
+      padding-left: 0.25rem;
+      font-family: 'Georgia', serif;
+    }
+
     .tabs-row {
       display: flex;
       flex-wrap: wrap;
@@ -96,7 +104,8 @@
       border-color: #d4a017;
     }
 
-    .fraud-filter-wrap {
+    .fraud-filter-wrap,
+    .status-filter-wrap {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -104,7 +113,8 @@
       flex-shrink: 0;
     }
 
-    .fraud-filter-label {
+    .fraud-filter-label,
+    .status-filter-label {
       font-size: 0.8rem;
       color: #b0a080;
       font-weight: 600;
@@ -112,7 +122,8 @@
       white-space: nowrap;
     }
 
-    .fraud-filter-select {
+    .fraud-filter-select,
+    .status-filter-select {
       padding: 0.45rem 2rem 0.45rem 0.65rem;
       background: rgba(30, 20, 10, 0.9);
       border: 2px solid #8b6914;
@@ -124,7 +135,12 @@
       min-width: 9rem;
     }
 
-    .fraud-filter-select:focus {
+    .status-filter-select {
+      min-width: 11rem;
+    }
+
+    .fraud-filter-select:focus,
+    .status-filter-select:focus {
       outline: none;
       border-color: #d4a017;
     }
@@ -371,7 +387,8 @@
       <%= render "admin/staff_panel_back_link" %>
     </div>
 
-    <input type="text" class="search-bar" placeholder="Search project reviews..." id="searchInput">
+    <input type="text" class="search-bar" placeholder="Search by project title, description, or participant…" id="searchInput" autocomplete="off">
+    <p class="search-bar-hint">Includes participant name, email, Slack username, and Hack Club ID.</p>
 
     <div class="tabs-row">
       <div class="tabs">
@@ -384,6 +401,16 @@
           <select id="shipSortSelect" class="ship-sort-select" aria-label="Sort projects by ship date">
             <option value="asc" <%= "selected" if (@ship_sort || "desc") == "asc" %>>Oldest first</option>
             <option value="desc" <%= "selected" if (@ship_sort || "desc") == "desc" %>>Newest first</option>
+          </select>
+        </div>
+        <div class="status-filter-wrap">
+          <label class="status-filter-label" for="statusFilter">Status</label>
+          <select id="statusFilter" class="status-filter-select" aria-label="Filter by project status">
+            <option value="any">Any status</option>
+            <option value="pending">Pending</option>
+            <option value="in-review">In review</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
           </select>
         </div>
         <div class="fraud-filter-wrap">
@@ -408,8 +435,10 @@
           <% @all_projects.each do |item| %>
             <% next if item.nil? || item[:project].nil? %>
             <% project = item[:project] %>
+            <% u = item[:user] %>
+            <% user_search_blob = [ u&.email, u&.jackpot_profile_name, u&.slack_username, u&.display_name, u&.slack_id, u&.hack_club_id ].compact.map(&:to_s).join(" ").downcase %>
             <a href="<%= admin_review_project_path(project["id"]) %>">
-              <div class="project-card" data-fraud-check="<%= project["fraud_check"] ? "true" : "false" %>">
+              <div class="project-card" data-fraud-check="<%= project["fraud_check"] ? "true" : "false" %>" data-status="<%= ERB::Util.html_escape((project["status"].presence || "pending").to_s.downcase) %>" data-user-search="<%= ERB::Util.html_escape(user_search_blob) %>">
                 <div class="project-thumbnail">
                   <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
                     <img src="<%= project["banner_url"] %>" alt="<%= project["name"] %>" loading="lazy" decoding="async" fetchpriority="low" width="640" height="180">
@@ -477,7 +506,9 @@
           <% @projects_for_review.each do |item| %>
             <% next if item.nil? || item[:project].nil? %>
             <% project = item[:project] %>
-            <div class="project-card" data-fraud-check="<%= project["fraud_check"] ? "true" : "false" %>">
+            <% u = item[:user] %>
+            <% user_search_blob = [ u&.email, u&.jackpot_profile_name, u&.slack_username, u&.display_name, u&.slack_id, u&.hack_club_id ].compact.map(&:to_s).join(" ").downcase %>
+            <div class="project-card" data-fraud-check="<%= project["fraud_check"] ? "true" : "false" %>" data-status="<%= ERB::Util.html_escape((project["status"].presence || "pending").to_s.downcase) %>" data-user-search="<%= ERB::Util.html_escape(user_search_blob) %>">
               <a href="<%= admin_review_project_path(project["id"]) %>">
                 <div class="project-thumbnail">
                   <% if project["banner_url"].present? && project["banner_url"].match?(/\Ahttps?:\/\//i) %>
@@ -560,23 +591,32 @@
     }
 
     function applyReviewFilters() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
       const fraudMode = document.getElementById('fraudCheckFilter').value;
+      const statusMode = document.getElementById('statusFilter').value;
       document.querySelectorAll('.project-card').forEach(card => {
         const title = card.querySelector('.project-title').textContent.toLowerCase();
         const desc = card.querySelector('.project-description').textContent.toLowerCase();
+        const userBlob = (card.getAttribute('data-user-search') || '').toLowerCase();
         const fraudOn = card.getAttribute('data-fraud-check') === 'true';
-        const matchSearch = title.includes(searchTerm) || desc.includes(searchTerm);
+        const cardStatus = (card.getAttribute('data-status') || 'pending').toLowerCase();
+        const matchSearch = !searchTerm ||
+          title.includes(searchTerm) ||
+          desc.includes(searchTerm) ||
+          userBlob.includes(searchTerm);
         let matchFraud = true;
         if (fraudMode === 'on') matchFraud = fraudOn;
         else if (fraudMode === 'off') matchFraud = !fraudOn;
+        let matchStatus = true;
+        if (statusMode !== 'any') matchStatus = cardStatus === statusMode;
         const hideTarget = card.parentElement && card.parentElement.tagName === 'A' ? card.parentElement : card;
-        hideTarget.style.display = (matchSearch && matchFraud) ? '' : 'none';
+        hideTarget.style.display = (matchSearch && matchFraud && matchStatus) ? '' : 'none';
       });
     }
 
-    document.getElementById('searchInput').addEventListener('keyup', applyReviewFilters);
+    document.getElementById('searchInput').addEventListener('input', applyReviewFilters);
     document.getElementById('fraudCheckFilter').addEventListener('change', applyReviewFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyReviewFilters);
 
     document.getElementById('shipSortSelect').addEventListener('change', function() {
       const base = '<%= admin_review_path %>';

@@ -712,3 +712,147 @@
   line-height: 1.5;
 }
 
+/* Admin — all users (bolts, projects, hours, …) */
+.admin-content--wide {
+  max-width: min(1400px, 100%);
+}
+
+.admin-users-lead {
+  color: #c4b89a;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 1.25rem;
+}
+
+.admin-users-toolbar {
+  margin-bottom: 1rem;
+}
+
+.admin-users-search {
+  width: 100%;
+  max-width: 28rem;
+  padding: 0.75rem 1rem;
+  background: rgba(30, 20, 10, 0.85);
+  border: 2px solid #8b6914;
+  border-radius: 8px;
+  color: #f0e6d2;
+  font-family: 'Georgia', serif;
+  font-size: 0.95rem;
+}
+
+.admin-users-search::placeholder {
+  color: #8b6914;
+}
+
+.admin-users-search:focus {
+  outline: none;
+  border-color: #d4a017;
+}
+
+.admin-users-table-wrap {
+  overflow-x: auto;
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  min-width: 960px;
+}
+
+.admin-users-table th,
+.admin-users-table td {
+  padding: 0.65rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(139, 105, 20, 0.35);
+  vertical-align: top;
+  color: #e8dcc8;
+}
+
+.admin-users-table th {
+  background: rgba(139, 105, 20, 0.2);
+  color: #d4a017;
+  font-weight: 700;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.admin-users-table tbody tr:hover {
+  background: rgba(50, 35, 15, 0.35);
+}
+
+.admin-users-participant {
+  min-width: 12rem;
+}
+
+.admin-users-name {
+  display: block;
+  font-weight: 700;
+  color: #f0e6d2;
+}
+
+.admin-users-email {
+  display: block;
+  font-size: 0.8rem;
+  color: #a89878;
+  word-break: break-all;
+}
+
+.admin-users-meta {
+  display: block;
+  font-size: 0.75rem;
+  color: #7a7058;
+}
+
+.admin-users-role {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(139, 105, 20, 0.35);
+  color: #e8dcc8;
+}
+
+.admin-users-role--super_admin {
+  background: rgba(180, 50, 50, 0.35);
+  color: #ffb0b0;
+}
+
+.admin-users-role--admin {
+  background: rgba(100, 80, 140, 0.5);
+  color: #e0d4ff;
+}
+
+.admin-users-role--reviewer {
+  background: rgba(40, 100, 120, 0.45);
+  color: #b8e8f0;
+}
+
+.admin-users-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.admin-users-nowrap {
+  white-space: nowrap;
+}
+
+.admin-users-date {
+  font-size: 0.82rem;
+  color: #c4b89a;
+  white-space: nowrap;
+}
+
+.admin-users-empty {
+  text-align: center;
+  color: #8b6914;
+  padding: 2rem;
+}
+

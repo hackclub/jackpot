@@ -8,6 +8,10 @@ class AdminController < ApplicationController
     cleanup_corrupted_projects
   end
 
+  def users
+    @users = User.order(created_at: :desc).includes(:projects, :journal_entries, :shop_orders)
+  end
+
   def stats
     @total_projects = Project.count
     @pending_projects = Project.where(status: "pending").count

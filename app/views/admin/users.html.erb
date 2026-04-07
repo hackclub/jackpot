@@ -1,0 +1,100 @@
+<% content_for(:title) { "Users — Admin" } %>
+
+<div class="admin-page">
+  <div class="admin-content admin-content--wide">
+    <h1>Users</h1>
+
+    <p style="margin: 0 0 1rem;">
+      <%= link_to "← Admin home", admin_path, class: "admin-link-inline" %>
+    </p>
+
+    <p class="admin-users-lead">
+      Wallet balances, deck projects, approved and logged hours, journals, and shop orders. Search filters the table.
+    </p>
+
+    <% if @users.any? %>
+    <div class="admin-users-toolbar">
+      <input type="search" id="adminUsersSearch" class="admin-users-search" placeholder="Search by name, email, Hack Club ID, Slack…" autocomplete="off" aria-label="Filter users">
+    </div>
+
+    <div class="admin-users-table-wrap">
+      <table class="admin-users-table">
+        <thead>
+          <tr>
+            <th>Participant</th>
+            <th>Role</th>
+            <th class="admin-users-num">Bolts</th>
+            <th class="admin-users-num">Projects</th>
+            <th class="admin-users-nowrap" title="pending / in-review / approved / rejected">P / I / A / R</th>
+            <th class="admin-users-num">Approved h</th>
+            <th class="admin-users-num">Logged h</th>
+            <th class="admin-users-num">Journal</th>
+            <th class="admin-users-num">J. h</th>
+            <th class="admin-users-num">Orders</th>
+            <th>Last sign-in</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @users.each do |user| %>
+            <% projects = user.projects %>
+            <% pr_pending = projects.count { |p| p.status.to_s == "pending" } %>
+            <% pr_review = projects.count { |p| p.status.to_s == "in-review" } %>
+            <% pr_appr = projects.count { |p| p.status.to_s == "approved" } %>
+            <% pr_rej = projects.count { |p| p.status.to_s == "rejected" } %>
+            <% approved_h = projects.sum { |p| p.approved_hours.to_f } %>
+            <% logged_h = projects.sum { |p| p.total_hours.to_f } %>
+            <% j_entries = user.journal_entries %>
+            <% j_count = j_entries.size %>
+            <% j_hours = j_entries.sum { |e| e.hours_worked.to_f } %>
+            <% orders_n = user.shop_orders.size %>
+            <% search_blob = [ user.email, user.jackpot_profile_name, user.hack_club_id, user.slack_username, user.slack_id, user.display_name ].compact.map(&:to_s).join(" ").downcase %>
+            <tr data-user-search="<%= ERB::Util.html_escape(search_blob) %>">
+              <td class="admin-users-participant">
+                <span class="admin-users-name"><%= user.jackpot_profile_name %></span>
+                <span class="admin-users-email"><%= user.email %></span>
+                <% if user.hack_club_id.present? %>
+                  <span class="admin-users-meta">HC ID: <%= user.hack_club_id %></span>
+                <% end %>
+                <% if user.slack_username.present? %>
+                  <span class="admin-users-meta">@<%= user.slack_username %></span>
+                <% end %>
+              </td>
+              <td><span class="admin-users-role admin-users-role--<%= user.role %>"><%= user.role.to_s.humanize %></span></td>
+              <td class="admin-users-num"><%= number_with_precision(user.chip_am.to_f, precision: 1) %></td>
+              <td class="admin-users-num"><%= projects.size %></td>
+              <td class="admin-users-nowrap admin-users-num" title="pending / in-review / approved / rejected"><%= pr_pending %> / <%= pr_review %> / <%= pr_appr %> / <%= pr_rej %></td>
+              <td class="admin-users-num"><%= number_with_precision(approved_h, precision: 1) %></td>
+              <td class="admin-users-num"><%= number_with_precision(logged_h, precision: 1) %></td>
+              <td class="admin-users-num"><%= j_count %></td>
+              <td class="admin-users-num"><%= number_with_precision(j_hours, precision: 1) %></td>
+              <td class="admin-users-num"><%= orders_n %></td>
+              <td class="admin-users-date"><%= user.last_sign_in_at ? user.last_sign_in_at.strftime("%b %d, %Y") : "—" %></td>
+              <td class="admin-users-date"><%= user.created_at.strftime("%b %d, %Y") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <% else %>
+      <p class="admin-users-empty">No users yet.</p>
+    <% end %>
+  </div>
+</div>
+
+<% if @users.any? %>
+<script>
+  (function() {
+    var input = document.getElementById('adminUsersSearch');
+    if (!input) return;
+    function filterUsers() {
+      var q = input.value.toLowerCase().trim();
+      document.querySelectorAll('.admin-users-table tbody tr').forEach(function(tr) {
+        var blob = (tr.getAttribute('data-user-search') || '').toLowerCase();
+        tr.style.display = (!q || blob.indexOf(q) !== -1) ? '' : 'none';
+      });
+    }
+    input.addEventListener('input', filterUsers);
+  })();
+</script>
+<% end %>
