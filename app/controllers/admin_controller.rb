@@ -481,7 +481,7 @@ class AdminController < ApplicationController
   private
 
   def users_list_scope
-    User.order(created_at: :desc).includes(:projects, :journal_entries, :shop_orders)
+    User.order(created_at: :desc).includes(:projects, :journal_entries)
   end
 
   def apply_users_export_filter(scope)
@@ -512,60 +512,28 @@ class AdminController < ApplicationController
       "id",
       "name",
       "email",
-      "hack_club_id",
-      "slack_id",
-      "slack_username",
-      "display_name",
       "role",
-      "bolts",
-      "projects_count",
-      "projects_pending",
-      "projects_in_review",
-      "projects_approved",
-      "projects_rejected",
-      "approved_hours_sum",
-      "logged_hours_sum",
-      "journal_entries_count",
-      "journal_hours_sum",
-      "shop_orders_count",
+      "current_chips",
+      "total_chips_ever",
+      "total_approved_hours",
+      "total_logged_hours",
       "last_sign_in_at",
       "created_at"
     ]
   end
 
   def users_csv_row(user)
-    projects = user.projects
-    pr_pending = projects.count { |p| p.status.to_s == "pending" }
-    pr_review = projects.count { |p| p.status.to_s == "in-review" }
-    pr_appr = projects.count { |p| p.status.to_s == "approved" }
-    pr_rej = projects.count { |p| p.status.to_s == "rejected" }
-    approved_h = projects.sum { |p| p.approved_hours.to_f }
-    logged_h = projects.sum { |p| p.total_hours.to_f }
-    j_entries = user.journal_entries
-    j_count = j_entries.size
-    j_hours = j_entries.sum { |e| e.hours_worked.to_f }
-    orders_n = user.shop_orders.size
+    m = user.admin_user_row_metrics
 
     [
       user.id,
       user.jackpot_profile_name,
       user.email,
-      user.hack_club_id,
-      user.slack_id,
-      user.slack_username,
-      user.display_name,
       user.role,
       user.chip_am.to_f,
-      projects.size,
-      pr_pending,
-      pr_review,
-      pr_appr,
-      pr_rej,
-      approved_h,
-      logged_h,
-      j_count,
-      j_hours,
-      orders_n,
+      m[:total_chips_ever],
+      m[:total_approved_hours],
+      m[:total_logged_hours],
       user.last_sign_in_at&.iso8601,
       user.created_at.iso8601
     ]

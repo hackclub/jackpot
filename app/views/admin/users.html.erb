@@ -9,7 +9,7 @@
     </p>
 
     <p class="admin-users-lead">
-      Wallet balances, deck projects, approved and logged hours, journals, and shop orders. Search filters the table; sort reorders rows. Open a participant for their project list and (super-admin) internal notes.
+      Participant, role, wallet and lifetime chips, approved and logged hours, last sign-in. Search filters the table; sort reorders rows. Open a participant for their project list and (super-admin) internal notes.
     </p>
 
     <div class="admin-users-export">
@@ -26,7 +26,7 @@
         </select>
         <%= submit_tag "Download .csv", class: "admin-users-export-btn" %>
       <% end %>
-      <p class="admin-users-export-hint">Export uses the same columns as the table (plus id and raw timestamps). Filters apply only to the download, not the on-page list.</p>
+      <p class="admin-users-export-hint">Export matches the table columns (plus id, email, and raw timestamps). Filters apply only to the download, not the on-page list.</p>
     </div>
 
     <% if @users.any? %>
@@ -39,14 +39,16 @@
           <option value="created_asc">Oldest first</option>
           <option value="name_asc">Name A–Z</option>
           <option value="name_desc">Name Z–A</option>
-          <option value="chips_desc">Bolts (high → low)</option>
-          <option value="chips_asc">Bolts (low → high)</option>
+          <option value="chips_desc">Current bolts (high → low)</option>
+          <option value="chips_asc">Current bolts (low → high)</option>
+          <option value="total_chips_desc">Total bolts ever (high → low)</option>
+          <option value="total_chips_asc">Total bolts ever (low → high)</option>
           <option value="approved_h_desc">Approved hours (high → low)</option>
           <option value="approved_h_asc">Approved hours (low → high)</option>
           <option value="logged_h_desc">Logged hours (high → low)</option>
           <option value="logged_h_asc">Logged hours (low → high)</option>
-          <option value="journal_h_desc">Journal hours (high → low)</option>
-          <option value="journal_h_asc">Journal hours (low → high)</option>
+          <option value="last_sign_desc">Last sign-in (newest)</option>
+          <option value="last_sign_asc">Last sign-in (oldest)</option>
         </select>
       </div>
     </div>
@@ -57,41 +59,27 @@
           <tr>
             <th>Participant</th>
             <th>Role</th>
-            <th class="admin-users-num">Bolts</th>
-            <th class="admin-users-num">Projects</th>
-            <th class="admin-users-nowrap" title="pending / in-review / approved / rejected">P / I / A / R</th>
-            <th class="admin-users-num">Approved h</th>
-            <th class="admin-users-num">Logged h</th>
-            <th class="admin-users-num">Journal</th>
-            <th class="admin-users-num">J. h</th>
-            <th class="admin-users-num">Orders</th>
+            <th class="admin-users-num" title="Wallet balance">Current</th>
+            <th class="admin-users-num" title="Lifetime bolts awarded on approved projects">Total (ever)</th>
+            <th class="admin-users-num" title="Sum of approved hours on approved projects">Approved h</th>
+            <th class="admin-users-num" title="Hackatime hours on all projects plus journal hours">Logged h</th>
             <th>Last sign-in</th>
-            <th>Joined</th>
             <th>Profile</th>
           </tr>
         </thead>
         <tbody>
           <% @users.each do |user| %>
-            <% projects = user.projects %>
-            <% pr_pending = projects.count { |p| p.status.to_s == "pending" } %>
-            <% pr_review = projects.count { |p| p.status.to_s == "in-review" } %>
-            <% pr_appr = projects.count { |p| p.status.to_s == "approved" } %>
-            <% pr_rej = projects.count { |p| p.status.to_s == "rejected" } %>
-            <% approved_h = projects.sum { |p| p.approved_hours.to_f } %>
-            <% logged_h = projects.sum { |p| p.total_hours.to_f } %>
-            <% j_entries = user.journal_entries %>
-            <% j_count = j_entries.size %>
-            <% j_hours = j_entries.sum { |e| e.hours_worked.to_f } %>
-            <% orders_n = user.shop_orders.size %>
+            <% m = user.admin_user_row_metrics %>
             <% search_blob = [ user.email, user.jackpot_profile_name, user.hack_club_id, user.slack_username, user.slack_id, user.display_name ].compact.map(&:to_s).join(" ").downcase %>
             <tr
               data-user-search="<%= ERB::Util.html_escape(search_blob) %>"
               data-sort-created="<%= user.created_at.to_i %>"
               data-sort-name="<%= ERB::Util.html_escape(user.jackpot_profile_name.to_s.downcase) %>"
               data-sort-chips="<%= user.chip_am.to_f %>"
-              data-sort-approved-h="<%= approved_h %>"
-              data-sort-logged-h="<%= logged_h %>"
-              data-sort-journal-h="<%= j_hours %>"
+              data-sort-total-chips="<%= m[:total_chips_ever] %>"
+              data-sort-approved-h="<%= m[:total_approved_hours] %>"
+              data-sort-logged-h="<%= m[:total_logged_hours] %>"
+              data-sort-last-sign="<%= user.last_sign_in_at ? user.last_sign_in_at.to_i : 0 %>"
             >
               <td class="admin-users-participant">
                 <%= link_to admin_user_path(user), class: "admin-users-profile-link" do %>
@@ -107,15 +95,10 @@
               </td>
               <td><span class="admin-users-role admin-users-role--<%= user.role %>"><%= user.role.to_s.humanize %></span></td>
               <td class="admin-users-num"><%= number_with_precision(user.chip_am.to_f, precision: 1) %></td>
-              <td class="admin-users-num"><%= projects.size %></td>
-              <td class="admin-users-nowrap admin-users-num" title="pending / in-review / approved / rejected"><%= pr_pending %> / <%= pr_review %> / <%= pr_appr %> / <%= pr_rej %></td>
-              <td class="admin-users-num"><%= number_with_precision(approved_h, precision: 1) %></td>
-              <td class="admin-users-num"><%= number_with_precision(logged_h, precision: 1) %></td>
-              <td class="admin-users-num"><%= j_count %></td>
-              <td class="admin-users-num"><%= number_with_precision(j_hours, precision: 1) %></td>
-              <td class="admin-users-num"><%= orders_n %></td>
+              <td class="admin-users-num"><%= number_with_precision(m[:total_chips_ever], precision: 1) %></td>
+              <td class="admin-users-num"><%= number_with_precision(m[:total_approved_hours], precision: 1) %></td>
+              <td class="admin-users-num"><%= number_with_precision(m[:total_logged_hours], precision: 1) %></td>
               <td class="admin-users-date"><%= user.last_sign_in_at ? user.last_sign_in_at.strftime("%b %d, %Y") : "—" %></td>
-              <td class="admin-users-date"><%= user.created_at.strftime("%b %d, %Y") %></td>
               <td><%= link_to "View", admin_user_path(user), class: "admin-link-inline" %></td>
             </tr>
           <% end %>
@@ -140,9 +123,10 @@
       created: 'data-sort-created',
       name: 'data-sort-name',
       chips: 'data-sort-chips',
+      total_chips: 'data-sort-total-chips',
       approved_h: 'data-sort-approved-h',
       logged_h: 'data-sort-logged-h',
-      journal_h: 'data-sort-journal-h'
+      last_sign: 'data-sort-last-sign'
     };
 
     function parseSort(val) {
