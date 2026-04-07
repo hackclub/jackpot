@@ -1,0 +1,131 @@
+<% content_for(:title) { "#{@user.jackpot_profile_name} — User — Admin" } %>
+
+<div class="admin-page">
+  <div class="admin-content admin-content--wide">
+    <p style="margin: 0 0 0.5rem;">
+      <%= link_to "← All users", admin_users_path, class: "admin-link-inline" %>
+    </p>
+
+    <h1 class="admin-user-profile-title"><%= @user.jackpot_profile_name %></h1>
+
+    <div class="admin-user-profile-summary">
+      <div class="admin-user-profile-card">
+        <span class="admin-user-profile-label">Email</span>
+        <span class="admin-user-profile-value"><%= @user.email %></span>
+      </div>
+      <div class="admin-user-profile-card">
+        <span class="admin-user-profile-label">Hack Club ID</span>
+        <span class="admin-user-profile-value"><%= @user.hack_club_id.presence || "—" %></span>
+      </div>
+      <div class="admin-user-profile-card">
+        <span class="admin-user-profile-label">Slack</span>
+        <span class="admin-user-profile-value"><%= @user.slack_username.present? ? "@#{@user.slack_username}" : (@user.slack_id.presence || "—") %></span>
+      </div>
+      <div class="admin-user-profile-card">
+        <span class="admin-user-profile-label">Role</span>
+        <span class="admin-user-profile-value"><span class="admin-users-role admin-users-role--<%= @user.role %>"><%= @user.role.to_s.humanize %></span></span>
+      </div>
+      <div class="admin-user-profile-card admin-user-profile-card--highlight">
+        <span class="admin-user-profile-label">Bolts (wallet)</span>
+        <span class="admin-user-profile-value admin-user-profile-bolts"><%= number_with_precision(@user.chip_am.to_f, precision: 1) %></span>
+      </div>
+      <div class="admin-user-profile-card">
+        <span class="admin-user-profile-label">Last sign-in</span>
+        <span class="admin-user-profile-value"><%= @user.last_sign_in_at ? @user.last_sign_in_at.strftime("%b %d, %Y %H:%M") : "—" %></span>
+      </div>
+      <div class="admin-user-profile-card">
+        <span class="admin-user-profile-label">Joined</span>
+        <span class="admin-user-profile-value"><%= @user.created_at.strftime("%b %d, %Y") %></span>
+      </div>
+    </div>
+
+    <h2 class="admin-user-section-title">Projects (<%= @projects.size %>)</h2>
+    <% if @projects.any? %>
+      <div class="admin-users-table-wrap">
+        <table class="admin-users-table admin-user-projects-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Shipped</th>
+              <th class="admin-users-num">Logged h</th>
+              <th class="admin-users-num">Approved h</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @projects.each do |p| %>
+              <tr>
+                <td><%= p.name.presence || "Untitled" %></td>
+                <td><%= p.status.presence || "—" %></td>
+                <td><%= p.shipped? ? "Yes" : "No" %></td>
+                <td class="admin-users-num"><%= number_with_precision(p.total_hours.to_f, precision: 1) %></td>
+                <td class="admin-users-num"><%= p.approved_hours.present? ? number_with_precision(p.approved_hours.to_f, precision: 1) : "—" %></td>
+                <td><%= link_to "Open in review", admin_review_project_path(p.id), class: "admin-link-inline" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p class="admin-users-empty">No projects yet.</p>
+    <% end %>
+
+    <% if current_user.role_super_admin? %>
+      <section class="admin-user-superadmin-panel" aria-labelledby="superadmin-notes-heading">
+        <h2 id="superadmin-notes-heading" class="admin-user-section-title">Super-admin — private notes</h2>
+        <p class="admin-user-superadmin-lead">Only super-admins can see this section. Use it for internal coordination and bolt adjustments.</p>
+
+        <% if @superadmin_notes.present? %>
+          <ul class="admin-user-notes-list">
+            <% @superadmin_notes.each do |n| %>
+              <li class="admin-user-note">
+                <div class="admin-user-note-meta">
+                  <span><%= n.created_at.strftime("%b %d, %Y %H:%M") %></span>
+                  <span><%= n.author&.jackpot_profile_name || n.author&.email || "Unknown" %></span>
+                  <% if n.bolt_adjustment? %>
+                    <span class="admin-user-note-badge">Bolt change</span>
+                  <% else %>
+                    <span class="admin-user-note-badge admin-user-note-badge--general">Note</span>
+                  <% end %>
+                </div>
+                <% if n.bolt_adjustment? %>
+                  <p class="admin-user-note-adjustment">
+                    <%= number_with_precision(n.chip_am_before.to_f, precision: 1) %>
+                    →
+                    <%= number_with_precision(n.chip_am_after.to_f, precision: 1) %>
+                    bolts
+                  </p>
+                <% end %>
+                <div class="admin-user-note-body"><%= simple_format(n.body) %></div>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="admin-users-empty" style="margin-bottom: 1rem;">No notes yet.</p>
+        <% end %>
+
+        <div class="admin-user-note-forms">
+          <div class="admin-user-note-form-block">
+            <h3 class="admin-user-form-title">Add a note</h3>
+            <%= form_with url: admin_user_notes_path(@user), method: :post, local: true, class: "admin-user-form" do %>
+              <%= text_area_tag :body, nil, rows: 4, class: "admin-user-textarea", placeholder: "Internal note (super-admins only)…", required: true, "aria-label": "Note body" %>
+              <%= submit_tag "Save note", class: "admin-user-submit" %>
+            <% end %>
+          </div>
+
+          <div class="admin-user-note-form-block">
+            <h3 class="admin-user-form-title">Adjust bolt balance</h3>
+            <%= form_with url: admin_user_chip_am_path(@user), method: :patch, local: true, class: "admin-user-form" do %>
+              <label class="admin-user-field-label" for="chip_am_input">New balance (bolts)</label>
+              <%= number_field_tag :chip_am, @user.chip_am, step: 0.1, min: 0, id: "chip_am_input", class: "admin-user-input", required: true %>
+              <label class="admin-user-field-label" for="chip_am_note">Reason (required)</label>
+              <%= text_area_tag :note, nil, rows: 3, id: "chip_am_note", class: "admin-user-textarea", placeholder: "Why is this change being made?", required: true, "aria-label": "Reason for bolt change" %>
+              <%= submit_tag "Update balance", class: "admin-user-submit admin-user-submit--danger" %>
+            <% end %>
+          </div>
+        </div>
+      </section>
+    <% end %>
+  </div>
+</div>
