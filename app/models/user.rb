@@ -313,6 +313,17 @@ class User < ApplicationRecord
     end
   end
 
+  # Totals for the admin users table when `projects` and `journal_entries` are preloaded (avoids N+1).
+  def admin_user_row_metrics
+    plist = projects.to_a
+    approved = plist.select { |p| p.status.to_s == "approved" }
+    {
+      total_chips_ever: approved.sum { |p| p.chips_earned.to_f },
+      total_approved_hours: approved.sum { |p| p.approved_hours.to_f },
+      total_logged_hours: plist.sum { |p| p.hackatime_hours.to_f } + journal_entries.sum { |e| e.hours_worked.to_f }
+    }
+  end
+
   private
 
   def safe_profile_photo_url
