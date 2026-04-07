@@ -12,6 +12,23 @@
       Wallet balances, deck projects, approved and logged hours, journals, and shop orders. Search filters the table; sort reorders rows. Open a participant for their project list and (super-admin) internal notes.
     </p>
 
+    <div class="admin-users-export">
+      <%= form_with url: admin_users_path, method: :get, local: true, class: "admin-users-export-form", data: { turbo: false } do %>
+        <%= hidden_field_tag :format, "csv" %>
+        <span class="admin-users-export-title">Export CSV</span>
+        <label class="admin-users-export-label" for="exportFilter">Include</label>
+        <select name="filter" id="exportFilter" class="admin-users-export-select" aria-label="Rows to include in CSV export">
+          <option value="all" <%= "selected" if (@export_filter || "all") == "all" %>>Everyone</option>
+          <option value="with_chips" <%= "selected" if @export_filter == "with_chips" %>>With bolts (&gt; 0)</option>
+          <option value="without_chips" <%= "selected" if @export_filter == "without_chips" %>>No bolts (0)</option>
+          <option value="with_projects" <%= "selected" if @export_filter == "with_projects" %>>Has at least one project</option>
+          <option value="without_projects" <%= "selected" if @export_filter == "without_projects" %>>No projects</option>
+        </select>
+        <%= submit_tag "Download .csv", class: "admin-users-export-btn" %>
+      <% end %>
+      <p class="admin-users-export-hint">Export uses the same columns as the table (plus id and raw timestamps). Filters apply only to the download, not the on-page list.</p>
+    </div>
+
     <% if @users.any? %>
     <div class="admin-users-toolbar admin-users-toolbar--split">
       <input type="search" id="adminUsersSearch" class="admin-users-search" placeholder="Search by name, email, Hack Club ID, Slack…" autocomplete="off" aria-label="Filter users">
