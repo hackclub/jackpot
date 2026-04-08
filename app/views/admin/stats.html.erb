@@ -137,6 +137,25 @@
       </div>
     </div>
 
+    <div class="stats-row stats-row--4">
+      <div class="stats-card stats-card--highlight">
+        <span class="stats-value"><%= number_to_currency(@shop_usd_pending_and_fulfilled, precision: 0) %></span>
+        <span class="stats-label">Shop $ total (pending + fulfilled)</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--green"><%= number_to_currency(@shop_usd_fulfilled, precision: 0) %></span>
+        <span class="stats-label">Shop $ fulfilled</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--orange"><%= number_to_currency(@shop_usd_pending, precision: 0) %></span>
+        <span class="stats-label">Shop $ pending</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-value stats-value--red"><%= number_to_currency(@shop_usd_rejected, precision: 0) %></span>
+        <span class="stats-label">Shop $ rejected (refunded)</span>
+      </div>
+    </div>
+
     <h2 class="stats-section-title" style="font-size: 1rem;">Orders by Category</h2>
     <div class="stats-tags">
       <% @orders_by_category.each do |category, count| %>
