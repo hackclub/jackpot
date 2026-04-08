@@ -22,9 +22,8 @@ class Airtable::ProjectSyncJob < Airtable::BaseSyncJob
       "Status" => project.status,
       "Reviewed" => project.reviewed,
       "Reviewed At" => project.reviewed_at&.iso8601,
-      # Match platform stats: only approved projects contribute approved hours (rollup/sum in Airtable).
-      "Approved Hours" => (project.status.to_s == "approved" ? project.approved_hours.to_f : 0.0),
-      "Chips Earned" => (project.status.to_s == "approved" ? project.chips_earned.to_f : 0.0),
+      "Approved Hours" => project.approved_hours.to_f,
+      "Chips Earned" => project.chips_earned.to_f,
       "Admin Feedback" => project.admin_feedback,
       "Hour Justification" => project.hour_justification,
       "Banner URL" => project.banner_url,

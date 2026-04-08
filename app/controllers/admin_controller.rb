@@ -100,7 +100,7 @@ class AdminController < ApplicationController
     @rejected_projects = Project.where(status: "rejected").count
 
     @total_logged_hours = Project.sum(:total_hours).to_f
-    @approved_hours = Project.where(status: "approved").sum(:approved_hours).to_f
+    @approved_hours = Project.sum_approved_hours_for_admin_stats.to_f
     @pending_review_hours = Project.where(status: "in-review").sum(:total_hours).to_f
     @journal_hours_total = JournalEntry.sum(:hours_worked).to_f
     @journal_entries_count = JournalEntry.count
@@ -131,11 +131,11 @@ class AdminController < ApplicationController
       .count
       .sort_by { |_, v| -v }
 
+    contrib = Project::APPROVED_HOURS_CONTRIBUTION_SQL
     @top_users_by_hours = User.joins(:projects)
-      .where(projects: { status: "approved" })
-      .select("users.*, SUM(projects.approved_hours) AS total_approved_hours")
       .group("users.id")
-      .order("total_approved_hours DESC")
+      .select("users.*, SUM(#{contrib}) AS total_approved_hours")
+      .order(Arel.sql("total_approved_hours DESC NULLS LAST"))
       .limit(10)
 
     @top_users_by_bolts = User.where("chip_am > 0").order(chip_am: :desc).limit(10)

@@ -49,6 +49,7 @@
         <span class="stats-label">Journal Hours (<%= number_with_delimiter(@journal_entries_count) %> entries)</span>
       </div>
     </div>
+    <p class="stats-muted">Approved hours includes banked time on <span class="stats-muted-code">in-review</span> projects (after a new ship, hours already approved stay in <span class="stats-muted-code">past_approved_hours</span> until that round is reviewed).</p>
 
     <h2 class="stats-section-title">Bolts (Currency)</h2>
     <div class="stats-row stats-row--3">
