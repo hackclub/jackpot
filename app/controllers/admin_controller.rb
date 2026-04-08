@@ -117,8 +117,14 @@ class AdminController < ApplicationController
 
     @total_orders = ShopOrder.count
     @pending_orders = ShopOrder.where(status: "pending").count
-    @fulfilled_orders = ShopOrder.where(status: "fulfilled").count
+    @fulfilled_orders = ShopOrder.where(status: "sent").count
     @total_grant_value = ShopOrder.sum(:price_usd_total_snapshot).to_f
+
+    # USD at checkout (`price_usd_total_snapshot`); NULL snapshots are omitted from SQL SUM.
+    @shop_usd_pending_and_fulfilled = ShopOrder.where(status: %w[pending sent]).sum(:price_usd_total_snapshot).to_f
+    @shop_usd_fulfilled = ShopOrder.where(status: "sent").sum(:price_usd_total_snapshot).to_f
+    @shop_usd_pending = ShopOrder.where(status: "pending").sum(:price_usd_total_snapshot).to_f
+    @shop_usd_rejected = ShopOrder.where(status: "refunded").sum(:price_usd_total_snapshot).to_f
 
     @orders_by_category = ShopOrder.joins("LEFT JOIN shop_items ON shop_items.id = shop_orders.shop_item_id")
       .group("COALESCE(shop_items.category, 'Uncategorized')")
@@ -481,13 +487,19 @@ class AdminController < ApplicationController
   private
 
   def users_list_scope
-    User.order(created_at: :desc).includes(:projects, :journal_entries)
+    User.order(created_at: :desc).includes(:projects, :journal_entries, :shop_orders)
   end
 
   def apply_users_export_filter(scope)
     case params[:filter].to_s
     when "with_chips"
       scope.where("COALESCE(chip_am, 0) > 0")
+    when "have_or_had_chips"
+      # Wallet balance > 0, or lifetime bolts earned on at least one approved project (may have spent down).
+      scope.where(
+        "COALESCE(users.chip_am, 0) > 0 OR EXISTS (SELECT 1 FROM projects p WHERE p.user_id = users.id AND p.status = ? AND COALESCE(p.chips_earned, 0) > 0)",
+        "approved"
+      )
     when "without_chips"
       scope.where("COALESCE(chip_am, 0) <= 0")
     when "with_projects"
@@ -517,6 +529,8 @@ class AdminController < ApplicationController
       "total_chips_ever",
       "total_approved_hours",
       "total_logged_hours",
+      "shop_usd_pending_and_fulfilled",
+      "shop_usd_fulfilled",
       "last_sign_in_at",
       "created_at"
     ]
@@ -534,6 +548,8 @@ class AdminController < ApplicationController
       m[:total_chips_ever],
       m[:total_approved_hours],
       m[:total_logged_hours],
+      m[:shop_usd_pending_and_fulfilled],
+      m[:shop_usd_fulfilled],
       user.last_sign_in_at&.iso8601,
       user.created_at.iso8601
     ]

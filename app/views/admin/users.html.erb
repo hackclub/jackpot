@@ -9,7 +9,7 @@
     </p>
 
     <p class="admin-users-lead">
-      Participant, role, wallet and lifetime chips, approved and logged hours, last sign-in. Search filters the table; sort reorders rows. Open a participant for their project list and (super-admin) internal notes.
+      Participant, role, wallet and lifetime chips, approved and logged hours, shop order USD (pending + fulfilled, and fulfilled-only), last sign-in. Search filters the table; sort reorders rows. Open a participant for their project list and (super-admin) internal notes.
     </p>
 
     <div class="admin-users-export">
@@ -20,6 +20,7 @@
         <select name="filter" id="exportFilter" class="admin-users-export-select" aria-label="Rows to include in CSV export">
           <option value="all" <%= "selected" if (@export_filter || "all") == "all" %>>Everyone</option>
           <option value="with_chips" <%= "selected" if @export_filter == "with_chips" %>>With bolts (&gt; 0)</option>
+          <option value="have_or_had_chips" <%= "selected" if @export_filter == "have_or_had_chips" %>>Have or had bolts</option>
           <option value="without_chips" <%= "selected" if @export_filter == "without_chips" %>>No bolts (0)</option>
           <option value="with_projects" <%= "selected" if @export_filter == "with_projects" %>>Has at least one project</option>
           <option value="without_projects" <%= "selected" if @export_filter == "without_projects" %>>No projects</option>
@@ -47,6 +48,10 @@
           <option value="approved_h_asc">Approved hours (low → high)</option>
           <option value="logged_h_desc">Logged hours (high → low)</option>
           <option value="logged_h_asc">Logged hours (low → high)</option>
+          <option value="shop_usd_tot_desc">Shop $ total (pending + fulfilled, high → low)</option>
+          <option value="shop_usd_tot_asc">Shop $ total (pending + fulfilled, low → high)</option>
+          <option value="shop_usd_fulfilled_desc">Shop $ fulfilled (high → low)</option>
+          <option value="shop_usd_fulfilled_asc">Shop $ fulfilled (low → high)</option>
           <option value="last_sign_desc">Last sign-in (newest)</option>
           <option value="last_sign_asc">Last sign-in (oldest)</option>
         </select>
@@ -63,6 +68,8 @@
             <th class="admin-users-num" title="Lifetime bolts awarded on approved projects">Total (ever)</th>
             <th class="admin-users-num" title="Sum of approved hours on approved projects">Approved h</th>
             <th class="admin-users-num" title="Hackatime hours on all projects plus journal hours">Logged h</th>
+            <th class="admin-users-num" title="USD at checkout: pending + fulfilled orders (not refunded)">$ total orders</th>
+            <th class="admin-users-num" title="USD at checkout: fulfilled (sent) orders only">$ fulfilled</th>
             <th>Last sign-in</th>
             <th>Profile</th>
           </tr>
@@ -79,6 +86,8 @@
               data-sort-total-chips="<%= m[:total_chips_ever] %>"
               data-sort-approved-h="<%= m[:total_approved_hours] %>"
               data-sort-logged-h="<%= m[:total_logged_hours] %>"
+              data-sort-shop-usd-tot="<%= m[:shop_usd_pending_and_fulfilled] %>"
+              data-sort-shop-usd-fulfilled="<%= m[:shop_usd_fulfilled] %>"
               data-sort-last-sign="<%= user.last_sign_in_at ? user.last_sign_in_at.to_i : 0 %>"
             >
               <td class="admin-users-participant">
@@ -98,6 +107,8 @@
               <td class="admin-users-num"><%= number_with_precision(m[:total_chips_ever], precision: 1) %></td>
               <td class="admin-users-num"><%= number_with_precision(m[:total_approved_hours], precision: 1) %></td>
               <td class="admin-users-num"><%= number_with_precision(m[:total_logged_hours], precision: 1) %></td>
+              <td class="admin-users-num"><%= number_to_currency(m[:shop_usd_pending_and_fulfilled], precision: 0) %></td>
+              <td class="admin-users-num"><%= number_to_currency(m[:shop_usd_fulfilled], precision: 0) %></td>
               <td class="admin-users-date"><%= user.last_sign_in_at ? user.last_sign_in_at.strftime("%b %d, %Y") : "—" %></td>
               <td><%= link_to "View", admin_user_path(user), class: "admin-link-inline" %></td>
             </tr>
@@ -126,6 +137,8 @@
       total_chips: 'data-sort-total-chips',
       approved_h: 'data-sort-approved-h',
       logged_h: 'data-sort-logged-h',
+      shop_usd_tot: 'data-sort-shop-usd-tot',
+      shop_usd_fulfilled: 'data-sort-shop-usd-fulfilled',
       last_sign: 'data-sort-last-sign'
     };
 

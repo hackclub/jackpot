@@ -29,6 +29,15 @@
         <span class="admin-user-profile-label">Bolts (wallet)</span>
         <span class="admin-user-profile-value admin-user-profile-bolts"><%= number_with_precision(@user.chip_am.to_f, precision: 1) %></span>
       </div>
+      <% um = @user.admin_user_row_metrics %>
+      <div class="admin-user-profile-card">
+        <span class="admin-user-profile-label">Shop $ total (pending + fulfilled)</span>
+        <span class="admin-user-profile-value"><%= number_to_currency(um[:shop_usd_pending_and_fulfilled], precision: 0) %></span>
+      </div>
+      <div class="admin-user-profile-card">
+        <span class="admin-user-profile-label">Shop $ fulfilled</span>
+        <span class="admin-user-profile-value"><%= number_to_currency(um[:shop_usd_fulfilled], precision: 0) %></span>
+      </div>
       <div class="admin-user-profile-card">
         <span class="admin-user-profile-label">Last sign-in</span>
         <span class="admin-user-profile-value"><%= @user.last_sign_in_at ? @user.last_sign_in_at.strftime("%b %d, %Y %H:%M") : "—" %></span>

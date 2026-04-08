@@ -313,14 +313,19 @@ class User < ApplicationRecord
     end
   end
 
-  # Totals for the admin users table when `projects` and `journal_entries` are preloaded (avoids N+1).
+  # Totals for the admin users table when `projects`, `journal_entries`, and `shop_orders` are preloaded (avoids N+1).
   def admin_user_row_metrics
     plist = projects.to_a
     approved = plist.select { |p| p.status.to_s == "approved" }
+    orders = shop_orders.to_a
+    shop_usd_pending_and_fulfilled = orders.select { |o| %w[pending sent].include?(o.status.to_s) }.sum { |o| o.price_usd_total_snapshot.to_f }
+    shop_usd_fulfilled = orders.select { |o| o.status.to_s == "sent" }.sum { |o| o.price_usd_total_snapshot.to_f }
     {
       total_chips_ever: approved.sum { |p| p.chips_earned.to_f },
       total_approved_hours: approved.sum { |p| p.approved_hours.to_f },
-      total_logged_hours: plist.sum { |p| p.hackatime_hours.to_f } + journal_entries.sum { |e| e.hours_worked.to_f }
+      total_logged_hours: plist.sum { |p| p.hackatime_hours.to_f } + journal_entries.sum { |e| e.hours_worked.to_f },
+      shop_usd_pending_and_fulfilled: shop_usd_pending_and_fulfilled,
+      shop_usd_fulfilled: shop_usd_fulfilled
     }
   end
 
