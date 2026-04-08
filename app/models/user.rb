@@ -322,7 +322,7 @@ class User < ApplicationRecord
     shop_usd_fulfilled = orders.select { |o| o.status.to_s == "sent" }.sum { |o| o.price_usd_total_snapshot.to_f }
     {
       total_chips_ever: approved.sum { |p| p.chips_earned.to_f },
-      total_approved_hours: approved.sum { |p| p.approved_hours.to_f },
+      total_approved_hours: plist.sum(&:approved_hours_contribution_for_admin_stats),
       total_logged_hours: plist.sum { |p| p.hackatime_hours.to_f } + journal_entries.sum { |e| e.hours_worked.to_f },
       shop_usd_pending_and_fulfilled: shop_usd_pending_and_fulfilled,
       shop_usd_fulfilled: shop_usd_fulfilled

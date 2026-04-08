@@ -41,6 +41,32 @@ class Project < ApplicationRecord
   # Shipped rows that count as “the same repo already in the queue” (not displaced by a rejected resubmit).
   ACTIVE_SHIP_QUEUE_STATUSES = %w[in-review approved].freeze
 
+  # SQL fragment: hours already approved for admin stats. After a re-ship, `approved_hours` is cleared but
+  # `past_approved_hours` keeps the banked total until the new round is approved (see DeckController ship).
+  APPROVED_HOURS_CONTRIBUTION_SQL = <<~SQL.squish.freeze
+    (CASE projects.status
+      WHEN 'approved' THEN COALESCE(projects.approved_hours, 0)
+      WHEN 'in-review' THEN COALESCE(projects.past_approved_hours, 0)
+      ELSE 0
+    END)
+  SQL
+
+  def self.sum_approved_hours_for_admin_stats
+    sum(Arel.sql(APPROVED_HOURS_CONTRIBUTION_SQL))
+  end
+
+  # Per-row contribution (matches APPROVED_HOURS_CONTRIBUTION_SQL) for preloaded associations / CSV.
+  def approved_hours_contribution_for_admin_stats
+    case status.to_s
+    when "approved"
+      approved_hours.to_f
+    when "in-review"
+      past_approved_hours.to_f
+    else
+      0.0
+    end
+  end
+
   # While waiting for review, only hours captured at the last ship / "Ship update" count toward this submission.
   # Additional Hackatime/journal time is ignored until the participant taps Ship update again.
   def total_hours_basis_for_queue_review
