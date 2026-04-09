@@ -5,8 +5,8 @@
       <div class="hero-main-stack">
         <%= image_tag "https://user-cdn.hackclub-assets.com/019d2a63-7408-7245-8d63-3d235c8d486c/centralmg-123ccef9.png", alt: "Center Art", class: "hero-center" %>
         <div class="hero-signup-wrap">
-          <%= button_to "/auth/hack_club", method: :post, data: { turbo: false }, class: "hero-signup-link" do %>
-            <%= image_tag "https://cdn.hackclub.com/019d2a76-da0e-7705-9aea-4a3e891ea743/join_button-ef8551aa.png", alt: "Join", class: "hero-signup-btn", loading: "lazy" %>
+          <%= link_to hackathon_info_path, class: "hero-signup-link" do %>
+            <%= image_tag "buttons/signup_hack.png", alt: "Signup", class: "hero-signup-btn", loading: "lazy" %>
           <% end %>
         </div>
       </div>
@@ -50,8 +50,8 @@
           </div>
         </div>
         <div class="section-1__join-wrap">
-          <%= link_to hackathon_info_path, class: "section-1__join-link" do %>
-            <%= image_tag "buttons/SignUp_btn2.png", alt: "Signup", class: "section-1__join-btn", loading: "lazy" %>
+          <%= button_to "/auth/hack_club", method: :post, data: { turbo: false }, class: "section-1__join-link" do %>
+            <%= image_tag "https://cdn.hackclub.com/019d2a76-da0e-7705-9aea-4a3e891ea743/join_button-ef8551aa.png", alt: "Join", class: "section-1__join-btn", loading: "lazy" %>
           <% end %>
         </div>
         <div class="section-1__carousel-wrap">
@@ -371,8 +371,8 @@ body {
   pointer-events: auto;
   line-height: 0;
   z-index: 250;
-  /* Pull hero CTA up + nudge slightly right */
-  transform: translate(clamp(10px, 1vw, 24px), clamp(-220px, -32vh, -150px));
+  /* Pull hero CTA up + slight left nudge (optical center vs. artwork) */
+  transform: translate(clamp(-18px, -1.2vw, -6px), clamp(-220px, -32vh, -150px));
 }
 
 /* Chevron sits in the same stacking context as hero art; below Signup */
@@ -1951,8 +1951,8 @@ body {
     width: 100%;
     display: flex;
     justify-content: center;
-    /* slight right nudge (optical balance vs. asset) + vertical lift */
-    transform: translate(clamp(8px, 1.6vw, 18px), clamp(-72px, -12vh, -36px)) !important;
+    /* slight left nudge (optical center) + vertical lift */
+    transform: translate(clamp(-12px, -1.4vw, -4px), clamp(-72px, -12vh, -36px)) !important;
   }
 
   .page-section--hero .hero-signup-link {
