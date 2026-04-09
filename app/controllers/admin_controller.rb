@@ -3,7 +3,7 @@ require "csv"
 class AdminController < ApplicationController
   skip_before_action :check_access_flipper
   before_action :authenticate_admin_area!
-  before_action :require_super_admin!, only: %i[create_user_note update_user_chip_am]
+  before_action :require_super_admin!, only: %i[create_user_note update_user_chip_am update_user_review_queue_priority]
 
   def index
     Rails.logger.info "Current user hack_club_id: #{current_user&.hack_club_id}"
@@ -88,6 +88,15 @@ class AdminController < ApplicationController
     end
 
     redirect_to admin_user_path(user), notice: "Bolt balance updated."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to admin_user_path(params[:id]), alert: e.record.errors.full_messages.join(", ")
+  end
+
+  def update_user_review_queue_priority
+    user = User.find(params[:id])
+    on = params[:review_queue_priority] == "1"
+    user.update!(review_queue_priority: on)
+    redirect_to admin_user_path(user), notice: on ? "Review queue priority enabled." : "Review queue priority disabled."
   rescue ActiveRecord::RecordInvalid => e
     redirect_to admin_user_path(params[:id]), alert: e.record.errors.full_messages.join(", ")
   end
@@ -350,6 +359,8 @@ class AdminController < ApplicationController
        @ship_sort = %w[asc desc].include?(params[:ship_sort].to_s) ? params[:ship_sort] : "desc"
        sort_review_items_by_shipped_at!(@all_projects, @ship_sort)
        sort_review_items_by_shipped_at!(@projects_for_review, @ship_sort)
+       pin_shipped_projects_for_review_queue_priority!(@all_projects)
+       pin_shipped_projects_for_review_queue_priority!(@projects_for_review)
      rescue => e
        Rails.logger.error("FATAL ERROR in review action: #{e.class} - #{e.message}")
        Rails.logger.error(e.backtrace.join("\n"))
@@ -572,6 +583,14 @@ class AdminController < ApplicationController
     (start_date..end_date).map do |d|
       [ d, project_active_users_count_for_day(d) ]
     end
+  end
+
+  # Priority users: all shipped projects appear first (within current ship-date sort), then the rest.
+  def pin_shipped_projects_for_review_queue_priority!(items)
+    priority, rest = items.partition do |item|
+      item[:user]&.review_queue_priority? && item.dig(:project, "shipped")
+    end
+    items.replace(priority + rest)
   end
 
   # Unshipped / missing shipped_at sort after shipped rows for both asc and desc.

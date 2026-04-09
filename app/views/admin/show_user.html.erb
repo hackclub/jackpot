@@ -81,6 +81,18 @@
     <% end %>
 
     <% if current_user.role_super_admin? %>
+      <section class="admin-user-superadmin-panel" aria-labelledby="superadmin-review-priority-heading">
+        <h2 id="superadmin-review-priority-heading" class="admin-user-section-title">Super-admin — review queue</h2>
+        <p class="admin-user-superadmin-lead">When enabled, this participant’s shipped projects appear at the top of the admin review queue for all reviewers (order still respects ship-date sort within the priority group). Unshipped projects are unchanged.</p>
+        <%= form_with url: admin_user_review_queue_priority_path(@user), method: :patch, local: true, class: "admin-user-form admin-user-priority-form" do %>
+          <label class="admin-user-priority-toggle">
+            <%= check_box_tag :review_queue_priority, "1", @user.review_queue_priority?, id: "review_queue_priority_checkbox" %>
+            <span>Priority in review queue</span>
+          </label>
+          <%= submit_tag "Save", class: "admin-user-submit" %>
+        <% end %>
+      </section>
+
       <section class="admin-user-superadmin-panel" aria-labelledby="superadmin-notes-heading">
         <h2 id="superadmin-notes-heading" class="admin-user-section-title">Super-admin — private notes</h2>
         <p class="admin-user-superadmin-lead">Only super-admins can see this section. Use it for internal coordination and bolt adjustments.</p>
