@@ -108,7 +108,7 @@
     </div>
 
     <% @projects.each do |project| %>
-      <% reviewer_name = project.reviewed_by&.name %>
+      <% reviewer_name = project.reviewed_by&.jackpot_profile_name.presence || project.reviewed_by&.jackpot_profile_name || project.reviewed_by&.display_name.presence %>
       <template id="statusProjectTemplate-<%= project.id %>">
         <div class="status-project-detail">
           <h3 class="status-project-detail__title"><%= project.name %></h3>
@@ -142,7 +142,7 @@
                 <% project.project_comments.sort_by(&:created_at).each do |c| %>
                   <div class="status-project-comment">
                     <div class="status-project-comment__head">
-                      <span class="status-project-comment__author"><%= c.user.name %></span>
+                      <span class="status-project-comment__author"><%= c.user&.slack_username.presence || c.user&.jackpot_profile_name || "Unknown" %></span>
                       <span class="status-project-comment__time"><%= c.created_at.strftime("%m/%d/%y %l:%M %P").strip %></span>
                     </div>
                     <div class="status-project-comment__body"><%= c.body %></div>
