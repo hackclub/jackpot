@@ -5,6 +5,7 @@ class DeckController < ApplicationController
   MAIN_HC_RESHIP_BLOCKED_MSG = "This project has already been submitted to the main HC database - please contact @Emma".freeze
   ZERO_HOURS_SHIP_MSG = "You need logged hours (Hackatime + journal) before you can ship.".freeze
   SHIP_SUBMISSION_NOTE_REQUIRED_MSG = "Describe what changed in this submission (Update for reviewers) before shipping.".freeze
+  SHIP_CLOSED_SEASON_MSG = "Jackpot is closing the first season - re-opening soon!".freeze
 
   def index
     projects = current_user.projects.includes(:ysws_project_submission).order(position: :asc).to_a
@@ -109,6 +110,8 @@ class DeckController < ApplicationController
     else
       @show_tutorial = Rails.application.config.x.tutorial_on_every_login || !current_user.tutorial_completed?
     end
+
+    @ship_closed = Rails.application.config.x.ship_closed
   end
 
   def save_project
@@ -212,6 +215,15 @@ class DeckController < ApplicationController
   end
 
   def ship_project
+    if Rails.application.config.x.ship_closed
+      if request.xhr?
+        return render json: { error: SHIP_CLOSED_SEASON_MSG }, status: :unprocessable_entity
+      else
+        flash[:alert] = SHIP_CLOSED_SEASON_MSG
+        return redirect_to deck_path
+      end
+    end
+
     project_index = params[:project_index].to_i
     project = current_user.projects.order(position: :asc)[project_index]
     ship_note = params[:ship_submission_note].to_s.strip.presence

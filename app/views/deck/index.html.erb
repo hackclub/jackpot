@@ -342,6 +342,9 @@ function initDeck() {
     try { deckHackatimeClaimed = JSON.parse(el.textContent); } catch (e) { console.warn(e); }
   })();
 
+  var SHIP_CLOSED = <%= @ship_closed ? 'true' : 'false' %>;
+  var SHIP_CLOSED_MSG = <%= raw DeckController::SHIP_CLOSED_SEASON_MSG.to_json %>;
+
   function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -899,7 +902,7 @@ function initDeck() {
      var detailShipSubmissionNoteRow = document.getElementById('detailShipSubmissionNoteRow');
      var detailShipSubmissionNote = document.getElementById('detailShipSubmissionNote');
      if (detailShipSubmissionNoteRow && detailShipSubmissionNote) {
-       var showShipNote = showShipBtn && !showShipUpdateLocked && !blockShipOtherPending && (!inReviewQueue || pendingQueueShipUpdate);
+       var showShipNote = showShipBtn && !SHIP_CLOSED && !showShipUpdateLocked && !blockShipOtherPending && (!inReviewQueue || pendingQueueShipUpdate);
        detailShipSubmissionNoteRow.style.display = showShipNote ? 'flex' : 'none';
        if (showShipNote) detailShipSubmissionNote.value = '';
        detailShipSubmissionNote.required = !!showShipNote;
@@ -912,6 +915,7 @@ function initDeck() {
 
      detailShippedRow.style.display = isShipped ? 'flex' : 'none';
      if (detailShipBtn) {
+       detailShipBtn.classList.remove('ship-btn--season-closed');
        detailShipBtn.classList.toggle('ship-update--main-hc-locked', showShipUpdateLocked);
        var needMoreHoursForQueueUpdate = !!(inReviewQueue && !pendingQueueShipUpdate && !showShipUpdateLocked && !blockShipOtherPending);
        detailShipBtn.classList.toggle('ship-btn--other-pending', !!(blockShipOtherPending && !showShipUpdateLocked));
@@ -941,6 +945,12 @@ function initDeck() {
          detailShipBtn.title = pendingQueueShipUpdate ? 'Add new logged hours to your pending submission and move to the back of the review queue' : '';
          detailShipBtn.style.display = showShipBtn ? 'inline-block' : 'none';
          detailShipBtn.textContent = (inReviewQueue || pendingQueueShipUpdate || canReship) ? 'Ship update' : 'Ship It';
+       }
+       if (SHIP_CLOSED && detailShipBtn.style.display !== 'none') {
+         detailShipBtn.classList.add('ship-btn--season-closed');
+         detailShipBtn.style.opacity = '0.65';
+         detailShipBtn.style.cursor = 'not-allowed';
+         detailShipBtn.title = SHIP_CLOSED_MSG;
        }
      }
      if (currentDetailData) currentDetailData.blockShipOtherPending = blockShipOtherPending;
@@ -1111,6 +1121,10 @@ function initDeck() {
    if (detailShipBtn) {
      detailShipBtn.addEventListener('click', function() {
        if (!currentDetailData) return;
+       if (SHIP_CLOSED) {
+         alert(SHIP_CLOSED_MSG);
+         return;
+       }
        if (currentDetailData.blockShipOtherPending) {
          alert(SHIP_BLOCKED_OTHER_PENDING_MSG);
          return;

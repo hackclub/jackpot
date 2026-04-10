@@ -27,6 +27,9 @@ module Jackpot
     # Tutorial: true = show on every login; false = only first time (default)
     config.x.tutorial_on_every_login = false
 
+    # When true, participants cannot ship or ship-update projects (deck only; admins unaffected).
+    config.x.ship_closed = true
+
     # Track per-request cache hits and misses via ActiveSupport::Notifications
     ActiveSupport::Notifications.subscribe("cache_read.active_support") do |*args|
       event = ActiveSupport::Notifications::Event.new(*args)
