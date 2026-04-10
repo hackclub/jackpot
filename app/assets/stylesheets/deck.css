@@ -764,6 +764,17 @@
   opacity: 0.72;
 }
 
+/* Season closed — shipping disabled; click still shows message */
+.project-ship-btn.ship-btn--season-closed {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.project-ship-btn.ship-btn--season-closed:hover {
+  filter: none;
+  opacity: 0.72;
+}
+
 .project-delete-btn {
   border: 1px solid #5c2a2a;
   border-radius: 6px;
