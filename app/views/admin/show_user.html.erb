@@ -93,6 +93,18 @@
         <% end %>
       </section>
 
+      <section class="admin-user-superadmin-panel" aria-labelledby="superadmin-reship-shipping-heading">
+        <h2 id="superadmin-reship-shipping-heading" class="admin-user-section-title">Super-admin — reship (season ship lock)</h2>
+        <p class="admin-user-superadmin-lead">While Jackpot’s season ship lock is on, only participants with this enabled can use Ship / Ship update on the deck. Each submission after an earlier ship is tagged “Reship” in the review queue for reviewers and admins. Turning this off returns them to the normal locked state (existing “Reship” tags on past submissions stay for history).</p>
+        <%= form_with url: admin_user_reship_shipping_path(@user), method: :patch, local: true, class: "admin-user-form admin-user-priority-form" do %>
+          <label class="admin-user-priority-toggle">
+            <%= check_box_tag :reship_shipping_enabled, "1", @user.reship_shipping_enabled?, id: "reship_shipping_enabled_checkbox" %>
+            <span>Allow shipping (reship program)</span>
+          </label>
+          <%= submit_tag "Save", class: "admin-user-submit" %>
+        <% end %>
+      </section>
+
       <section class="admin-user-superadmin-panel" aria-labelledby="superadmin-notes-heading">
         <h2 id="superadmin-notes-heading" class="admin-user-section-title">Super-admin — private notes</h2>
         <p class="admin-user-superadmin-lead">Only super-admins can see this section. Use it for internal coordination and bolt adjustments.</p>

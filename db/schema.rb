@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_09_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_12_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -139,6 +139,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_120000) do
     t.string "playable_url"
     t.integer "position", default: 0
     t.string "project_type"
+    t.boolean "reship_submission", default: false, null: false
     t.boolean "reviewed", default: false, null: false
     t.datetime "reviewed_at"
     t.bigint "reviewed_by_user_id"
@@ -249,6 +250,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_120000) do
     t.bigint "user_id", null: false
     t.index ["shop_item_id"], name: "index_shop_orders_on_shop_item_id"
     t.index ["user_id"], name: "index_shop_orders_on_user_id"
+  end
+
+  create_table "site_flag_settings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "enabled", default: false, null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_site_flag_settings_on_key", unique: true
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -398,6 +407,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_120000) do
     t.string "profile_photo_url"
     t.jsonb "projects", default: []
     t.string "provider"
+    t.boolean "reship_shipping_enabled", default: false, null: false
     t.boolean "review_queue_priority", default: false, null: false
     t.integer "role"
     t.string "slack_id"

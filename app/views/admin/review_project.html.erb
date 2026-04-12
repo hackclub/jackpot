@@ -117,6 +117,20 @@
       white-space: nowrap;
     }
 
+    .review-reship-badge {
+      display: inline-block;
+      background: #1d4ed8;
+      color: #dbeafe;
+      padding: 0.4rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      font-family: Georgia, serif;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      white-space: nowrap;
+    }
+
     .review-double-dip-staff-banner {
       max-width: 52rem;
       margin: 0 auto 1.75rem;
@@ -163,6 +177,31 @@
     .review-fraud-check-staff-body {
       font-size: 0.95rem;
       color: #fde68a;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .review-reship-staff-banner {
+      max-width: 52rem;
+      margin: 0 auto 1.75rem;
+      padding: 1rem 1.25rem;
+      background: rgba(29, 78, 216, 0.2);
+      border: 2px solid #2563eb;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .review-reship-staff-lead {
+      display: block;
+      font-family: Georgia, serif;
+      font-size: 1.05rem;
+      color: #dbeafe;
+      margin: 0 0 0.6rem;
+    }
+
+    .review-reship-staff-body {
+      font-size: 0.95rem;
+      color: #bfdbfe;
       line-height: 1.5;
       margin: 0;
     }
@@ -665,6 +704,9 @@
         <% if @user.review_queue_priority? %>
           <span class="review-priority-badge" role="status">Priority</span>
         <% end %>
+        <% if @user.reship_shipping_enabled? || @project_db.reship_submission? %>
+          <span class="review-reship-badge" role="status">Reship</span>
+        <% end %>
         <% if @project_db.double_dip_effective? %>
           <span class="review-double-dip-external-badge" role="status">Project Warning!</span>
         <% end %>
@@ -677,6 +719,13 @@
       <div class="review-double-dip-staff-banner">
         <strong class="review-double-dip-staff-lead">Project Warning!</strong>
         <p class="review-double-dip-staff-body">This code URL has been matched with a project in another HC program. If you don't have access to the HC Unified Database please don't review this project</p>
+      </div>
+    <% end %>
+
+    <% if @user.reship_shipping_enabled? || @project_db.reship_submission? %>
+      <div class="review-reship-staff-banner" role="status">
+        <strong class="review-reship-staff-lead">Reship</strong>
+        <p class="review-reship-staff-body">This participant is in the reship program (season ship lock bypass) and/or this submission was tagged as a reship. Use the normal Jackpot review workflow.</p>
       </div>
     <% end %>
 

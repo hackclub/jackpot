@@ -3,7 +3,7 @@ require "csv"
 class AdminController < ApplicationController
   skip_before_action :check_access_flipper
   before_action :authenticate_admin_area!
-  before_action :require_super_admin!, only: %i[create_user_note update_user_chip_am update_user_review_queue_priority]
+  before_action :require_super_admin!, only: %i[create_user_note update_user_chip_am update_user_review_queue_priority update_user_reship_shipping]
 
   def index
     Rails.logger.info "Current user hack_club_id: #{current_user&.hack_club_id}"
@@ -97,6 +97,15 @@ class AdminController < ApplicationController
     on = params[:review_queue_priority] == "1"
     user.update!(review_queue_priority: on)
     redirect_to admin_user_path(user), notice: on ? "Review queue priority enabled." : "Review queue priority disabled."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to admin_user_path(params[:id]), alert: e.record.errors.full_messages.join(", ")
+  end
+
+  def update_user_reship_shipping
+    user = User.find(params[:id])
+    on = params[:reship_shipping_enabled] == "1"
+    user.update!(reship_shipping_enabled: on)
+    redirect_to admin_user_path(user), notice: on ? "Reship shipping enabled (season lock bypass)." : "Reship shipping disabled."
   rescue ActiveRecord::RecordInvalid => e
     redirect_to admin_user_path(params[:id]), alert: e.record.errors.full_messages.join(", ")
   end
@@ -310,7 +319,8 @@ class AdminController < ApplicationController
            "total_hours" => db_project.total_hours || 0,
            "hours" => db_project.total_hours || 0,
            "double_dip" => db_project.double_dip_effective?,
-           "fraud_check" => db_project.fraud_check?
+           "fraud_check" => db_project.fraud_check?,
+           "reship_submission" => db_project.reship_submission?
          }
 
          project_item = {
@@ -344,7 +354,8 @@ class AdminController < ApplicationController
            "total_hours" => db_project.total_hours || 0,
            "hours" => db_project.total_hours || 0,
            "double_dip" => db_project.double_dip_effective?,
-           "fraud_check" => db_project.fraud_check?
+           "fraud_check" => db_project.fraud_check?,
+           "reship_submission" => db_project.reship_submission?
          }
 
          project_item = {
@@ -452,7 +463,8 @@ class AdminController < ApplicationController
         "reviewed_at" => @project_db.reviewed_at&.iso8601,
         "created_at" => @project_db.created_at&.iso8601,
         "double_dip" => @project_db.double_dip_effective?,
-        "fraud_check" => @project_db.fraud_check?
+        "fraud_check" => @project_db.fraud_check?,
+        "reship_submission" => @project_db.reship_submission?
       }
     rescue => e
       Rails.logger.error("Error loading review_project: #{e.class} - #{e.message}")
