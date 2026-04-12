@@ -28,6 +28,7 @@ module Jackpot
     config.x.tutorial_on_every_login = false
 
     # When true, participants cannot ship or ship-update projects (deck only; admins unaffected).
+    # Exception: users with reship_shipping_enabled (super-admin toggle on the user) bypass this lock.
     config.x.ship_closed = true
 
     # Track per-request cache hits and misses via ActiveSupport::Notifications

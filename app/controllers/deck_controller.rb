@@ -111,7 +111,7 @@ class DeckController < ApplicationController
       @show_tutorial = Rails.application.config.x.tutorial_on_every_login || !current_user.tutorial_completed?
     end
 
-    @ship_closed = Rails.application.config.x.ship_closed
+    @ship_closed = Rails.application.config.x.ship_closed && !current_user.reship_shipping_enabled?
   end
 
   def save_project
@@ -215,7 +215,7 @@ class DeckController < ApplicationController
   end
 
   def ship_project
-    if Rails.application.config.x.ship_closed
+    if Rails.application.config.x.ship_closed && !current_user.reship_shipping_enabled?
       if request.xhr?
         return render json: { error: SHIP_CLOSED_SEASON_MSG }, status: :unprocessable_entity
       else
@@ -231,6 +231,7 @@ class DeckController < ApplicationController
     if project
       refresh_logged_totals_for_project!(project, current_user)
       project.reload
+      tag_reship_submission = current_user.reship_shipping_enabled? && project.shipped?
 
       unless ship_note
         if request.xhr?
@@ -279,7 +280,8 @@ class DeckController < ApplicationController
           status: "in-review",
           shipped_at: Time.current,
           shipping_queue_snapshot_total_hours: project.total_hours.to_f,
-          hour_justification: ship_note
+          hour_justification: ship_note,
+          reship_submission: project.reship_submission? || tag_reship_submission
         )
         project.ysws_project_submission&.update_columns(ship_status: "Pending", updated_at: Time.current)
 
@@ -366,7 +368,8 @@ class DeckController < ApplicationController
         shipped_at: now,
         first_shipped_at: project.first_shipped_at || now,
         shipping_queue_snapshot_total_hours: project.total_hours.to_f,
-        hour_justification: ship_note
+        hour_justification: ship_note,
+        reship_submission: project.reship_submission? || tag_reship_submission
       }
       if reship_from_approved
         attrs.merge!(

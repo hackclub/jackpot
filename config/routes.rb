@@ -63,6 +63,7 @@ Rails.application.routes.draw do
   post "/admin/users/:id/notes", to: "admin#create_user_note", as: :admin_user_notes
   patch "/admin/users/:id/chip_am", to: "admin#update_user_chip_am", as: :admin_user_chip_am
   patch "/admin/users/:id/review_queue_priority", to: "admin#update_user_review_queue_priority", as: :admin_user_review_queue_priority
+  patch "/admin/users/:id/reship_shipping", to: "admin#update_user_reship_shipping", as: :admin_user_reship_shipping
   get "/admin/items_request", to: "admin#items_request", as: :admin_items_request
   patch "/admin/items_request/:id", to: "admin#update_item_request", as: :admin_update_item_request
   get "/admin/review", to: "admin#review", as: :admin_review
