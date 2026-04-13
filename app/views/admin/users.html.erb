@@ -9,7 +9,7 @@
     </p>
 
     <p class="admin-users-lead">
-      Participant, role, wallet and lifetime chips, approved and logged hours, shop order USD (pending + fulfilled, and fulfilled-only), last sign-in. Search filters the table; sort reorders rows. Open a participant for their project list and (super-admin) internal notes.
+      Participant, role, wallet and lifetime chips, approved and logged hours, shop order USD (pending + fulfilled, and fulfilled-only), last sign-in. Search and label filter (Priority / Reship flags from super-admin settings) narrow the table; sort reorders rows. Open a participant for their project list and (super-admin) internal notes.
     </p>
 
     <div class="admin-users-export">
@@ -33,9 +33,19 @@
     <% if @users.any? %>
     <div class="admin-users-toolbar admin-users-toolbar--split">
       <input type="search" id="adminUsersSearch" class="admin-users-search" placeholder="Search by name, email, Hack Club ID, Slack…" autocomplete="off" aria-label="Filter users">
-      <div class="admin-users-sort-wrap">
-        <label class="admin-users-sort-label" for="adminUsersSort">Sort by</label>
-        <select id="adminUsersSort" class="admin-users-sort-select" aria-label="Sort users">
+      <div class="admin-users-toolbar-filters">
+        <div class="admin-users-filter-wrap">
+          <label class="admin-users-sort-label" for="adminUsersLabelFilter">Label</label>
+          <select id="adminUsersLabelFilter" class="admin-users-sort-select admin-users-label-filter-select" aria-label="Filter users by Priority or Reship label">
+            <option value="any" selected>Any label</option>
+            <option value="priority">Priority</option>
+            <option value="reship">Reship</option>
+            <option value="both">Priority &amp; Reship</option>
+          </select>
+        </div>
+        <div class="admin-users-sort-wrap">
+          <label class="admin-users-sort-label" for="adminUsersSort">Sort by</label>
+          <select id="adminUsersSort" class="admin-users-sort-select" aria-label="Sort users">
           <option value="created_desc" selected>Newest first</option>
           <option value="created_asc">Oldest first</option>
           <option value="name_asc">Name A–Z</option>
@@ -54,7 +64,8 @@
           <option value="shop_usd_fulfilled_asc">Shop $ fulfilled (low → high)</option>
           <option value="last_sign_desc">Last sign-in (newest)</option>
           <option value="last_sign_asc">Last sign-in (oldest)</option>
-        </select>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -80,6 +91,8 @@
             <% search_blob = [ user.email, user.jackpot_profile_name, user.hack_club_id, user.slack_username, user.slack_id, user.display_name ].compact.map(&:to_s).join(" ").downcase %>
             <tr
               data-user-search="<%= ERB::Util.html_escape(search_blob) %>"
+              data-user-priority="<%= user.review_queue_priority? ? "true" : "false" %>"
+              data-user-reship="<%= user.reship_shipping_enabled? ? "true" : "false" %>"
               data-sort-created="<%= user.created_at.to_i %>"
               data-sort-name="<%= ERB::Util.html_escape(user.jackpot_profile_name.to_s.downcase) %>"
               data-sort-chips="<%= user.chip_am.to_f %>"
@@ -126,6 +139,7 @@
 <script>
   (function() {
     var input = document.getElementById('adminUsersSearch');
+    var labelFilter = document.getElementById('adminUsersLabelFilter');
     var sortSelect = document.getElementById('adminUsersSort');
     var tbody = document.querySelector('.admin-users-table tbody');
     if (!tbody) return;
@@ -170,13 +184,22 @@
 
     function filterUsers() {
       var q = input.value.toLowerCase().trim();
+      var labelVal = labelFilter ? labelFilter.value : 'any';
       tbody.querySelectorAll('tr').forEach(function(tr) {
         var blob = (tr.getAttribute('data-user-search') || '').toLowerCase();
-        tr.style.display = (!q || blob.indexOf(q) !== -1) ? '' : 'none';
+        var priority = tr.getAttribute('data-user-priority') === 'true';
+        var reship = tr.getAttribute('data-user-reship') === 'true';
+        var matchSearch = !q || blob.indexOf(q) !== -1;
+        var matchLabel = true;
+        if (labelVal === 'priority') matchLabel = priority;
+        else if (labelVal === 'reship') matchLabel = reship;
+        else if (labelVal === 'both') matchLabel = priority && reship;
+        tr.style.display = (matchSearch && matchLabel) ? '' : 'none';
       });
     }
 
     input.addEventListener('input', filterUsers);
+    if (labelFilter) labelFilter.addEventListener('change', filterUsers);
     sortSelect.addEventListener('change', sortRows);
   })();
 </script>

@@ -939,6 +939,19 @@
   max-width: 28rem;
 }
 
+.admin-users-toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem 1.25rem;
+}
+
+.admin-users-filter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .admin-users-sort-wrap {
   display: flex;
   align-items: center;
@@ -969,6 +982,10 @@
 .admin-users-sort-select:focus {
   outline: none;
   border-color: #d4a017;
+}
+
+.admin-users-label-filter-select {
+  min-width: 11rem;
 }
 
 a.admin-users-profile-link {
