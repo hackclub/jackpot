@@ -126,6 +126,23 @@ class AdminShopController < ApplicationController
     end
   end
 
+  def bulk_update_items_active
+    unless params.key?(:active) || params.key?("active")
+      return render json: { error: "active is required" }, status: :unprocessable_entity
+    end
+
+    active = ActiveModel::Type::Boolean.new.cast(params[:active])
+    ActiveRecord::Base.transaction do
+      ShopItem.find_each { |item| item.update!(active: active) }
+    end
+    render json: { success: true }
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
+  rescue StandardError => e
+    Rails.logger.error("bulk_update_items_active failed: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+    render json: { error: "Failed to update items." }, status: :internal_server_error
+  end
+
   def update_item
     item = ShopItem.find(params[:id])
     if item.update(item_params)

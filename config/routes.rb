@@ -49,6 +49,7 @@ Rails.application.routes.draw do
   patch "/admin/shop/categories/:id", to: "admin_shop#update_category", as: :admin_shop_update_category
   patch "/admin/shop/grant_types/:id", to: "admin_shop#update_grant_type", as: :admin_shop_update_grant_type
   patch "/admin/shop/items/:id", to: "admin_shop#update_item", as: :admin_shop_update_item
+  post "/admin/shop/items/bulk_active", to: "admin_shop#bulk_update_items_active", as: :admin_shop_bulk_items_active
   post "/admin/shop/items/reorder", to: "admin_shop#reorder_items", as: :admin_shop_reorder_items
   patch "/admin/shop/purchases_lock", to: "admin_shop#update_purchases_lock", as: :admin_shop_purchases_lock
   delete "/admin/shop/items/:id", to: "admin_shop#delete_item", as: :admin_shop_delete_item
