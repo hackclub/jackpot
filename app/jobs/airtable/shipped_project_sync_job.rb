@@ -18,6 +18,11 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
   def field_mapping(submission)
     # Ship status: only sent when AIRTABLE_YSWS_SHIP_STATUS_FIELD is set to the *exact* Airtable column name.
     # Add that field in Airtable first (e.g. Single select: Pending, Approved, Rejected — or Single line text).
+    #
+    # Every field below still syncs Jackpot → Airtable on each run, except:
+    # "Optional - Override Hours Spent Justification" — not listed here, so Airtable keeps whatever is there
+    # (including manual edits). That column is pulled into PG after sync via
+    # YswsProjectSubmission#pull_optional_override_hours_justification_from_airtable!
     fields = {
       "Code URL" => submission.code_url,
       "Playable URL" => submission.playable_url,
@@ -35,8 +40,7 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
       "Country" => submission.country,
       "ZIP / Postal Code" => submission.postal_code,
       "Birthday" => submission.birthday,
-      "Optional - Override Hours Spent" => submission.approved_hours&.to_f,
-      "Optional - Override Hours Spent Justification" => submission.optional_override_hours_spent_justification
+      "Optional - Override Hours Spent" => submission.approved_hours&.to_f
     }
     if (name = ship_status_airtable_field_name.presence)
       fields[name] = submission.ship_status
@@ -64,10 +68,11 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
   def sync_single_record(record, index = nil, raise_on_error: false)
     project = record.project
     identity = fetch_identity(project.user)
-    record.apply_mirror_fields!(identity, justification_text(project))
+    record.apply_mirror_fields!(identity)
     super(record, index, raise_on_error: raise_on_error)
     record.pull_automation_first_submitted_at_from_airtable!
     record.pull_double_dip_from_airtable!
+    record.pull_optional_override_hours_justification_from_airtable!
   end
 
   def fetch_identity(user)
@@ -78,81 +83,5 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
       Rails.logger.warn("ShippedProjectSyncJob: failed to fetch identity for user #{user.id}: #{e.message}")
       {}
     end
-  end
-
-  def justification_text(project)
-    if project.reviewed? && project.status.to_s == "approved"
-      return approved_override_hours_justification(project)
-    end
-
-    # In review (or other non-approved shipped states): no duplicate row — same YSWS record, status Pending.
-    parts = []
-    banked = project.past_approved_hours.to_f
-    all_logged = project.total_hours.to_f
-    basis = project.total_hours_basis_for_queue_review.to_f
-    pending = project.pending_review_hours
-    beyond = project.hours_logged_beyond_current_queue_submission.to_f
-
-    parts << "Submission total (Hackatime + journal, as of last ship / Ship update): #{format_hours_justification(basis)} h."
-    if beyond > 0.02
-      parts << "Additional time logged since then (#{format_hours_justification(beyond)} h) is not part of this submission until they tap Ship update."
-    elsif (all_logged - basis).abs > 0.02
-      parts << "Current all-time logged on deck: #{format_hours_justification(all_logged)} h."
-    end
-    if banked.positive?
-      parts << "Total hours already approved (banked): #{format_hours_justification(banked)} h."
-      parts << "Hours in scope for this review round (submission total minus banked): #{format_hours_justification(pending)} h."
-    else
-      parts << "Hours in scope for this review (no prior approval on this project): #{format_hours_justification(pending)} h."
-    end
-    parts << "Hour justification from participant: #{project.hour_justification}" if project.hour_justification.present?
-    parts.join("\n")
-  end
-
-  # Default copy for Airtable "Optional - Override Hours Spent Justification" when the submission is approved.
-  def approved_override_hours_justification(project)
-    mention = reviewer_mention_for_justification(project)
-    approved_total = project.approved_hours.to_f
-    raw = project.total_hours.to_f
-    delta = raw - approved_total
-    reduced = delta > 0.02
-
-    lines = []
-    lines << "Total hours approved (cumulative on this project): #{format_hours_justification(approved_total)} h."
-    lines << "Total logged at review (Hackatime + journal): #{format_hours_justification(raw)} h."
-    if reduced
-      lines << "Reduction from logged: #{format_hours_justification(delta)} h less approved than logged."
-    else
-      lines << "Approved total matches or exceeds logged time (no reduction)."
-    end
-    lines << "Project reviewed by #{mention}. Demo and repository looked solid, including heartbeats."
-    body = lines.join("\n")
-
-    comment = project.admin_feedback.to_s.strip
-    if comment.present?
-      body += "\n\nReviewer note: #{comment}"
-    end
-    body
-  end
-
-  # Prefer name snapshotted on approve (avoids nil reviewed_by / deleted admin users); else load User by id.
-  def reviewer_mention_for_justification(project)
-    label = project.read_attribute(:approver_display_name).presence
-    if label.blank?
-      uid = project.read_attribute(:reviewed_by_user_id)
-      reviewer = User.find_by(id: uid) if uid.present?
-      reviewer ||= project.reviewed_by
-      label = reviewer&.jackpot_profile_name
-    end
-    label = label.to_s.delete_prefix("@").strip
-    label = "unknown" if label.blank?
-    "@#{label}"
-  end
-
-  def format_hours_justification(n)
-    f = n.to_f
-    return "0.0" unless f.finite?
-
-    format("%.1f", f)
   end
 end
