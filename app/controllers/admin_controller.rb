@@ -29,6 +29,28 @@ class AdminController < ApplicationController
     end
   end
 
+  def journals_export
+    respond_to do |format|
+      format.csv do
+        entries = JournalEntry.includes(:user, :project).order(
+          Arel.sql(<<~SQL.squish)
+            journal_entries.project_id NULLS LAST,
+            journal_entries.project_name ASC,
+            journal_entries.project_index ASC,
+            journal_entries.user_id ASC,
+            journal_entries.created_at ASC
+          SQL
+        )
+        filename = "jackpot-journal-entries-#{Date.current.iso8601}.csv"
+        send_data "\uFEFF" + journals_csv_string(entries),
+          filename: filename,
+          type: "text/csv; charset=utf-8",
+          disposition: "attachment"
+      end
+      format.html { redirect_to admin_path, alert: "Use the journal CSV link on the admin home page." }
+    end
+  end
+
   def show_user
     @user = User.includes(:projects, :journal_entries, :shop_orders).find(params[:id])
     @projects = @user.projects.order(position: :asc)
@@ -575,6 +597,55 @@ class AdminController < ApplicationController
       m[:shop_usd_fulfilled],
       user.last_sign_in_at&.iso8601,
       user.created_at.iso8601
+    ]
+  end
+
+  def journals_csv_string(entries_relation)
+    rows = entries_relation.to_a
+    CSV.generate(encoding: "UTF-8") do |csv|
+      csv << journals_csv_headers
+      rows.each { |entry| csv << journals_csv_row(entry) }
+    end
+  end
+
+  def journals_csv_headers
+    %w[
+      project_id
+      project_name_on_record
+      project_name_stored_on_entry
+      project_index
+      user_id
+      user_email
+      user_display_name
+      journal_entry_id
+      time_done
+      hours_worked
+      description
+      tools_used
+      created_at
+      updated_at
+    ]
+  end
+
+  def journals_csv_row(entry)
+    tools = entry.tools_used
+    tools_str = tools.is_a?(Array) ? tools.join("; ") : tools.to_s
+
+    [
+      entry.project_id,
+      entry.project&.name,
+      entry.project_name,
+      entry.project_index,
+      entry.user_id,
+      entry.user&.email,
+      entry.user&.display_name,
+      entry.id,
+      entry.time_done&.iso8601,
+      entry.hours_worked,
+      entry.description,
+      tools_str,
+      entry.created_at.iso8601,
+      entry.updated_at.iso8601
     ]
   end
 
