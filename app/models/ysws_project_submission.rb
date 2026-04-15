@@ -58,7 +58,9 @@ class YswsProjectSubmission < ApplicationRecord
     [ token, base_id ]
   end
 
-  def apply_mirror_fields!(identity, justification_text)
+  # Does not set optional_override_hours_spent_justification — that Airtable field is edited manually
+  # and must not be overwritten on each sync.
+  def apply_mirror_fields!(identity)
     p = project
     addr = self.class.address_from_identity(identity)
     assign_attributes(
@@ -79,8 +81,7 @@ class YswsProjectSubmission < ApplicationRecord
       country: addr&.dig("country") || identity["country"],
       postal_code: addr&.dig("postal_code") || identity["postal_code"],
       birthday: identity["birthday"],
-      approved_hours: p.approved_hours,
-      optional_override_hours_spent_justification: justification_text
+      approved_hours: p.approved_hours
     )
     save!
   end
@@ -120,6 +121,10 @@ class YswsProjectSubmission < ApplicationRecord
 
   def self.double_dip_airtable_field_name
     ENV.fetch("AIRTABLE_YSWS_DOUBLE_DIP_FIELD", "Double-dip")
+  end
+
+  def self.optional_override_hours_justification_airtable_field_name
+    ENV.fetch("AIRTABLE_YSWS_OVERRIDE_HOURS_JUSTIFICATION_FIELD", "Optional - Override Hours Spent Justification")
   end
 
   def self.parse_airtable_boolean(raw)
@@ -207,6 +212,35 @@ class YswsProjectSubmission < ApplicationRecord
     Rails.logger.info("YswsProjectSubmission##{id}: Airtable record #{aid} missing for double-dip pull")
   rescue StandardError => e
     Rails.logger.warn("YswsProjectSubmission##{id} pull double-dip: #{e.message}")
+  end
+
+  # Long text edited in Airtable only (Jackpot does not push this field). Mirror into PG for consistency.
+  def pull_optional_override_hours_justification_from_airtable!
+    aid = airtable_id
+    return if aid.blank?
+
+    token, base_id = self.class.airtable_api_credentials
+    return unless token.present? && base_id.present?
+
+    field = self.class.optional_override_hours_justification_airtable_field_name
+    tbl = Norairrecord.table(token, base_id, self.class.airtable_shipped_table_name)
+    rec = tbl.find(aid)
+    raw = rec[field]
+    new_val =
+      case raw
+      when nil then nil
+      when String then raw
+      else raw.to_s
+      end
+    new_val = nil if new_val.is_a?(String) && new_val.strip.empty?
+
+    if optional_override_hours_spent_justification != new_val
+      update_column(:optional_override_hours_spent_justification, new_val)
+    end
+  rescue Norairrecord::RecordNotFoundError
+    Rails.logger.info("YswsProjectSubmission##{id}: Airtable record #{aid} missing for hours justification pull")
+  rescue StandardError => e
+    Rails.logger.warn("YswsProjectSubmission##{id} pull hours justification: #{e.message}")
   end
 
   def push_double_dip_to_airtable!
