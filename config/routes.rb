@@ -60,6 +60,7 @@ Rails.application.routes.draw do
   get "/admin", to: "admin#index", as: :admin
   get "/admin/stats", to: "admin#stats", as: :admin_stats
   get "/admin/users", to: "admin#users", as: :admin_users
+  get "/admin/journals", to: "admin#journals_export", as: :admin_journals_export
   get "/admin/users/:id", to: "admin#show_user", as: :admin_user
   post "/admin/users/:id/notes", to: "admin#create_user_note", as: :admin_user_notes
   patch "/admin/users/:id/chip_am", to: "admin#update_user_chip_am", as: :admin_user_chip_am

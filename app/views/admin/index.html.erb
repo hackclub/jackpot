@@ -21,6 +21,14 @@
         </div>
       <% end %>
 
+      <%= link_to admin_journals_export_path(format: :csv), class: "admin-link", data: { turbo: false } do %>
+        <span class="admin-link-icon"></span>
+        <div>
+          Journal entries (CSV)
+          <span class="admin-link-desc">All journal rows in one spreadsheet, sorted by project then time</span>
+        </div>
+      <% end %>
+
       <%= link_to admin_review_path, class: "admin-link" do %>
         <span class="admin-link-icon">📋</span>
         <div>
