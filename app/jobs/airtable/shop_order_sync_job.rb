@@ -7,7 +7,7 @@ class Airtable::ShopOrderSyncJob < Airtable::BaseSyncJob
     ShopOrder.all
   end
 
-  def field_mapping(order)
+  def field_mapping(order, is_new_airtable_record: false)
     fields = {
       "item_name" => order.item_name,
       "price" => order.price.to_f,

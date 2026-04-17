@@ -7,7 +7,7 @@ class Airtable::ProjectCommentSyncJob < Airtable::BaseSyncJob
     ProjectComment.all
   end
 
-  def field_mapping(comment)
+  def field_mapping(comment, is_new_airtable_record: false)
     {
       "Body" => comment.body,
       "Created At" => comment.created_at&.iso8601

@@ -7,7 +7,7 @@ class Airtable::UserSyncJob < Airtable::BaseSyncJob
     User.all
   end
 
-  def field_mapping(user)
+  def field_mapping(user, is_new_airtable_record: false)
     {
       "Email" => user.email,
       "Name" => user.display_name,

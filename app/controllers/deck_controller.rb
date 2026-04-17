@@ -4,7 +4,10 @@ class DeckController < ApplicationController
 
   MAIN_HC_RESHIP_BLOCKED_MSG = "This project has already been submitted to the main HC database - please contact @Emma".freeze
   ZERO_HOURS_SHIP_MSG = "You need logged hours (Hackatime + journal) before you can ship.".freeze
-  SHIP_SUBMISSION_NOTE_REQUIRED_MSG = "Describe what changed in this submission (Update for reviewers) before shipping.".freeze
+  RESHIP_SHIP_SUBMISSION_NOTE_MIN_LENGTH = 40
+  SHIP_SUBMISSION_NOTE_REQUIRED_MSG = "Describe what changed since your last ship (Update for reviewers) before shipping.".freeze
+  SHIP_SUBMISSION_NOTE_TOO_SHORT_MSG =
+    "Your update for reviewers must be at least #{RESHIP_SHIP_SUBMISSION_NOTE_MIN_LENGTH} characters — explain what changed since the last ship.".freeze
   SHIP_CLOSED_SEASON_MSG = "Jackpot is closing the first season - re-opening soon!".freeze
 
   def index
@@ -226,19 +229,31 @@ class DeckController < ApplicationController
 
     project_index = params[:project_index].to_i
     project = current_user.projects.order(position: :asc)[project_index]
-    ship_note = params[:ship_submission_note].to_s.strip.presence
+    raw_ship_note = params[:ship_submission_note].to_s.strip
+    ship_note = raw_ship_note.presence
 
     if project
       refresh_logged_totals_for_project!(project, current_user)
       project.reload
       tag_reship_submission = current_user.reship_shipping_enabled? && project.shipped?
+      pure_first_ship = !project.shipped? && project.first_shipped_at.blank?
 
-      unless ship_note
-        if request.xhr?
-          return render json: { error: SHIP_SUBMISSION_NOTE_REQUIRED_MSG }, status: :unprocessable_entity
-        else
-          flash[:alert] = SHIP_SUBMISSION_NOTE_REQUIRED_MSG
-          return redirect_to deck_path
+      unless pure_first_ship
+        if ship_note.blank?
+          if request.xhr?
+            return render json: { error: SHIP_SUBMISSION_NOTE_REQUIRED_MSG }, status: :unprocessable_entity
+          else
+            flash[:alert] = SHIP_SUBMISSION_NOTE_REQUIRED_MSG
+            return redirect_to deck_path
+          end
+        end
+        if ship_note.length < RESHIP_SHIP_SUBMISSION_NOTE_MIN_LENGTH
+          if request.xhr?
+            return render json: { error: SHIP_SUBMISSION_NOTE_TOO_SHORT_MSG }, status: :unprocessable_entity
+          else
+            flash[:alert] = SHIP_SUBMISSION_NOTE_TOO_SHORT_MSG
+            return redirect_to deck_path
+          end
         end
       end
 
@@ -658,6 +673,7 @@ class DeckController < ApplicationController
     Rails.logger.info "Approving project for user #{user_id} project_id=#{project.id}: +#{new_hours} h (total #{new_total}) = +#{chips_delta} chips"
 
     begin
+      submitter_update_comment = project.hour_justification.to_s.strip
       merged_justification = justification.presence || project.hour_justification
 
       # Always update the Project record so status page shows review (single source of truth)
@@ -676,7 +692,18 @@ class DeckController < ApplicationController
 
       user.approve_project(resolved_index, new_total, merged_justification, feedback, new_chip_award: chips_delta) if resolved_index.present?
 
-      project.ysws_project_submission&.update_column(:ship_status, "Approved")
+      submission = YswsProjectSubmission.ensure_row_for_project!(project.reload)
+      if submission && floor > 0
+        entry = YswsProjectSubmission.build_update_desc_entry(
+          past_approved_hours: floor,
+          user_comment: submitter_update_comment,
+          new_hours: new_hours
+        )
+        combined = [ submission.update_desc_log.to_s.strip, entry ].reject(&:blank?).join("\n\n")
+        submission.update!(update_desc_log: combined)
+      end
+
+      submission&.sync_override_justification_range_end_to_approval_date!(project.reviewed_at&.in_time_zone&.to_date)
 
       Rails.logger.info "Project approved. User #{user_id} earned #{chips_delta} chips (delta). New balance: #{user.reload.chip_am}"
       render json: { success: true, message: "Project approved", chips_earned: chips_delta }

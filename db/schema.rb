@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_12_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_17_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -443,6 +443,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_12_120000) do
     t.string "slack_id"
     t.string "state"
     t.date "synced_at"
+    t.text "update_desc_log"
     t.datetime "updated_at", null: false
     t.index ["project_id"], name: "index_ysws_project_submissions_on_project_id", unique: true
   end

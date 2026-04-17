@@ -15,14 +15,11 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
       .includes(project: [ :user, :reviewed_by ])
   end
 
-  def field_mapping(submission)
+  def field_mapping(submission, is_new_airtable_record: false)
     # Ship status: only sent when AIRTABLE_YSWS_SHIP_STATUS_FIELD is set to the *exact* Airtable column name.
-    # Add that field in Airtable first (e.g. Single select: Pending, Approved, Rejected — or Single line text).
     #
-    # Every field below still syncs Jackpot → Airtable on each run, except:
-    # "Optional - Override Hours Spent Justification" — not listed here, so Airtable keeps whatever is there
-    # (including manual edits). That column is pulled into PG after sync via
-    # YswsProjectSubmission#pull_optional_override_hours_justification_from_airtable!
+    # "Optional - Override Hours Spent Justification" is pushed only when creating a new Airtable row so manual
+    # edits on existing rows are not overwritten. PG still mirrors Airtable after each sync via pull.
     fields = {
       "Code URL" => submission.code_url,
       "Playable URL" => submission.playable_url,
@@ -44,6 +41,14 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     }
     if (name = ship_status_airtable_field_name.presence)
       fields[name] = submission.ship_status
+    end
+    ud_field = YswsProjectSubmission.update_desc_airtable_field_name
+    if submission.update_desc_log.to_s.strip.present?
+      fields[ud_field] = submission.update_desc_log
+    end
+    if is_new_airtable_record
+      ov_field = YswsProjectSubmission.optional_override_hours_justification_airtable_field_name
+      fields[ov_field] = YswsProjectSubmission.default_optional_override_hours_justification_for_new_row(submission)
     end
     fields.compact
   end

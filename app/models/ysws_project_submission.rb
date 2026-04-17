@@ -58,8 +58,8 @@ class YswsProjectSubmission < ApplicationRecord
     [ token, base_id ]
   end
 
-  # Does not set optional_override_hours_spent_justification — that Airtable field is edited manually
-  # and must not be overwritten on each sync.
+  # Does not set optional_override_hours_spent_justification from identity — that field is seeded once
+  # when the Airtable row is created (see ShippedProjectSyncJob), then edited in Airtable; PG mirrors via pull.
   def apply_mirror_fields!(identity)
     p = project
     addr = self.class.address_from_identity(identity)
@@ -125,6 +125,67 @@ class YswsProjectSubmission < ApplicationRecord
 
   def self.optional_override_hours_justification_airtable_field_name
     ENV.fetch("AIRTABLE_YSWS_OVERRIDE_HOURS_JUSTIFICATION_FIELD", "Optional - Override Hours Spent Justification")
+  end
+
+  # Hackatime analysis range start (optional env). Range end is ship-day in the template, then set to approval date on approve.
+  def self.override_justification_hackatime_range_start
+    if (s = ENV["AIRTABLE_YSWS_OVERRIDE_JUSTIFICATION_RANGE_START"].presence)
+      Date.parse(s)
+    else
+      Date.new(2026, 2, 13)
+    end
+  end
+
+  # Replaces the first "MM/DD/YY to MM/DD/YY" span (Hackatime analysis range) with the same start and +approval_date+ as end.
+  def self.rewrite_override_justification_range_end(text, approval_date)
+    return text if text.blank? || approval_date.blank?
+
+    new_end = approval_date.strftime("%m/%d/%y")
+    text.sub(/\b(\d{2}\/\d{2}\/\d{2}) to \d{2}\/\d{2}\/\d{2}\b/) { "#{Regexp.last_match(1)} to #{new_end}" }
+  end
+
+  # Default body for "Optional - Override Hours Spent Justification" on *new* Airtable rows only.
+  # +range_end+ is usually ship-day until #sync_override_justification_range_end_to_approval_date! runs at approval.
+  def self.default_optional_override_hours_justification_for_new_row(submission, range_end: Time.zone.today)
+    project = submission.project
+    return nil unless project
+
+    hack_names = Array(project.hackatime_projects).map(&:to_s).map(&:strip).reject(&:blank?).join(", ")
+    hack_names = "—" if hack_names.blank?
+
+    start_d = override_justification_hackatime_range_start
+    end_d = range_end
+    range_str = "#{start_d.strftime('%m/%d/%y')} to #{end_d.strftime('%m/%d/%y')}"
+
+    ht = project.hackatime_hours.to_f.round(2)
+    total_logged = project.total_hours.to_f.round(2)
+    cum_approved = (project.approved_hours.presence || project.past_approved_hours).to_f.round(2)
+    reduction = (total_logged - cum_approved).round(2)
+    reduction = 0.0 if reduction.negative?
+
+    <<~TEXT.strip
+      The project includes [leave empty, I'll manually enter this].
+      The commit history shows [leave empty, I'll manually enter this] commits. #{cum_approved} hours is consistent with this scope.
+      Hackatime project #{hack_names} analyzed from #{range_str} shows #{ht} hours tracked. The heartbeat pattern is consistent with active development.
+
+      Total hours approved (cumulative on this project): #{cum_approved} h.
+      Total logged at review (Hackatime + journal): #{total_logged} h.
+      Reduction from logged: #{reduction}h less approved than logged.
+      Project reviewed by @Emma. Demo and repository looked solid, including heartbeats.
+    TEXT
+  end
+
+  def self.update_desc_airtable_field_name
+    ENV.fetch("AIRTABLE_YSWS_UPDATE_DESC_FIELD", "Update_desc")
+  end
+
+  # Appended (in PG) on each admin approval when the project already had banked approved hours.
+  def self.build_update_desc_entry(past_approved_hours:, user_comment:, new_hours:)
+    past = past_approved_hours.to_f.round(2)
+    newly = new_hours.to_f.round(2)
+    comment = user_comment.to_s.strip.presence || "(no description provided)"
+    "This project was previously approved for #{past} hours in this program. " \
+      "The submitter has since added #{comment}. Approving #{newly} hours for the update."
   end
 
   def self.parse_airtable_boolean(raw)
@@ -214,7 +275,7 @@ class YswsProjectSubmission < ApplicationRecord
     Rails.logger.warn("YswsProjectSubmission##{id} pull double-dip: #{e.message}")
   end
 
-  # Long text edited in Airtable only (Jackpot does not push this field). Mirror into PG for consistency.
+  # Long text: Jackpot seeds on new Airtable rows, updates the range end on approval, then mirrors Airtable → PG.
   def pull_optional_override_hours_justification_from_airtable!
     aid = airtable_id
     return if aid.blank?
@@ -257,6 +318,40 @@ class YswsProjectSubmission < ApplicationRecord
     rec.save
   rescue StandardError => e
     Rails.logger.error("YswsProjectSubmission##{id} push double-dip: #{e.class}: #{e.message}")
+  end
+
+  def push_optional_override_hours_justification_to_airtable!
+    aid = airtable_id
+    return if aid.blank?
+
+    token, base_id = self.class.airtable_api_credentials
+    return unless token.present? && base_id.present?
+
+    field = self.class.optional_override_hours_justification_airtable_field_name
+    tbl = Norairrecord.table(token, base_id, self.class.airtable_shipped_table_name)
+    rec = tbl.find(aid)
+    rec[field] = optional_override_hours_spent_justification
+    rec.save
+  rescue StandardError => e
+    Rails.logger.error("YswsProjectSubmission##{id} push optional override justification: #{e.class}: #{e.message}")
+  end
+
+  def sync_override_justification_range_end_to_approval_date!(approval_date)
+    return if approval_date.blank?
+
+    if optional_override_hours_spent_justification.blank? && airtable_id.present?
+      pull_optional_override_hours_justification_from_airtable!
+      reload
+    end
+
+    text = optional_override_hours_spent_justification.to_s
+    return if text.blank?
+
+    new_text = self.class.rewrite_override_justification_range_end(text, approval_date)
+    return if new_text == text
+
+    update_column(:optional_override_hours_spent_justification, new_text)
+    push_optional_override_hours_justification_to_airtable!
   end
 
   def self.github_from_code_url(code_url)

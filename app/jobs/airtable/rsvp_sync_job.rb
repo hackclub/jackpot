@@ -7,7 +7,7 @@ class Airtable::RsvpSyncJob < Airtable::BaseSyncJob
     RsvpTable.all
   end
 
-  def field_mapping(rsvp)
+  def field_mapping(rsvp, is_new_airtable_record: false)
     {
       "email" => rsvp.email,
       "user_agent" => rsvp.user_agent,

@@ -15,7 +15,7 @@ class Airtable::JournalEntrySyncJob < Airtable::BaseSyncJob
     Airtable::PushRecordJob.perform_later(Airtable::ProjectSyncJob.name, entry.project_id)
   end
 
-  def field_mapping(entry)
+  def field_mapping(entry, is_new_airtable_record: false)
     {
       "Project Name" => entry.project_name,
       "id" => entry.id.to_s,

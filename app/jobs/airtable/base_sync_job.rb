@@ -56,15 +56,16 @@ class Airtable::BaseSyncJob < ApplicationJob
   end
 
   def sync_single_record(record, index = nil, raise_on_error: false)
-    fields = field_mapping(record)
     prefix = "Record ##{record.id}"
     prefix += " (#{index + 1})" if index
 
     if record.send(airtable_id_field).present?
       log("#{prefix}: updating #{airtable_id_field}=#{record.send(airtable_id_field)}")
+      fields = field_mapping(record, is_new_airtable_record: false)
       update_airtable_record(record, fields)
     else
       log("#{prefix}: creating new")
+      fields = field_mapping(record, is_new_airtable_record: true)
       create_airtable_record(record, fields)
     end
 
@@ -100,6 +101,7 @@ class Airtable::BaseSyncJob < ApplicationJob
     # Nil out first so create_airtable_record doesn't recurse back here.
     record.update_column(airtable_id_field, nil)
     record.reload
+    fields = field_mapping(record, is_new_airtable_record: true)
     create_airtable_record(record, fields)
   end
 
@@ -111,7 +113,7 @@ class Airtable::BaseSyncJob < ApplicationJob
     raise NotImplementedError
   end
 
-  def field_mapping(_record)
+  def field_mapping(_record, is_new_airtable_record: false)
     raise NotImplementedError
   end
 
