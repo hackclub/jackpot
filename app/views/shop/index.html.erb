@@ -13,13 +13,24 @@
 </div>
 
 <div class="shop-page" data-shop-purchases-locked="<%= @shop_purchases_locked ? 'true' : 'false' %>">
-  <button type="button" class="shop-rules-btn shop-addprize-btn shop-rules-btn--cube" id="addPrizeBtn" aria-label="Add Prize">
-    <span class="shop-rules-btn-sr">Add Prize</span>
-    <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/add_prize_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
-    <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/add_prize_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
-    <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/add_prize_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
-    <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/add_prize_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
-  </button>
+  <span
+    class="shop-program-closed-wrap"
+    title="This function is no longer active — online program closed."
+  >
+    <button
+      type="button"
+      class="shop-rules-btn shop-addprize-btn shop-rules-btn--cube shop-addprize-btn--inactive"
+      id="addPrizeBtn"
+      aria-label="Add Prize (unavailable — online program closed)"
+      disabled
+    >
+      <span class="shop-rules-btn-sr">Add Prize</span>
+      <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/add_prize_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
+      <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/add_prize_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
+      <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/add_prize_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
+      <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/add_prize_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
+    </button>
+  </span>
   <button type="button" class="shop-rules-btn shop-rules-btn--cube" id="shopRulesBtn" aria-label="Shop Rules">
     <span class="shop-rules-btn-sr">Shop Rules</span>
     <span class="shop-rules-btn-face" aria-hidden="true"><%= image_tag "buttons/shop_rules_btn.png", alt: "", class: "shop-rules-btn-face-img" %></span>
@@ -37,9 +48,6 @@
       </div>
       <div class="shop-right">
         <div class="shop-top-bar">
-          <div class="shop-upgrade-countdown" aria-live="polite">
-            Next shop upgrade: <span id="shopUpgradeCountdown">--:--:--</span>
-          </div>
           <% if admin? %>
             <label class="shop-reorder-toggle" for="shopReorderItems">
               <input type="checkbox" id="shopReorderItems" style="accent-color: #d4a017;">
@@ -453,7 +461,6 @@
   var shopRulesBtn = document.getElementById('shopRulesBtn');
   var shopRulesModal = document.getElementById('shopRulesModal');
   var shopRulesModalClose = document.getElementById('shopRulesModalClose');
-  var shopUpgradeCountdown = document.getElementById('shopUpgradeCountdown');
   var modal = document.getElementById('shopBuyModal');
   var modalClose = document.getElementById('shopModalClose');
   var modalCancel = document.getElementById('shopModalCancel');
@@ -504,101 +511,6 @@
     shopRulesModal.classList.remove('active');
     shopRulesModal.setAttribute('aria-hidden', 'true');
   }
-
-  // Countdown to next Friday 00:00 in America/New_York (EST/EDT), loops weekly.
-  function tzParts(date, timeZone) {
-    var dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone: timeZone,
-      hour12: false,
-      weekday: 'short',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-    var parts = dtf.formatToParts(date);
-    var out = {};
-    parts.forEach(function(p) { if (p.type !== 'literal') out[p.type] = p.value; });
-    return out;
-  }
-
-  function tzOffsetMs(date, timeZone) {
-    var p = tzParts(date, timeZone);
-    var asUtc = Date.UTC(
-      parseInt(p.year, 10),
-      parseInt(p.month, 10) - 1,
-      parseInt(p.day, 10),
-      parseInt(p.hour, 10),
-      parseInt(p.minute, 10),
-      parseInt(p.second, 10)
-    );
-    return asUtc - date.getTime();
-  }
-
-  function zonedTimeToUtcMs(ymdhms, timeZone) {
-    var utcGuess = Date.UTC(ymdhms.year, ymdhms.month - 1, ymdhms.day, ymdhms.hour, ymdhms.minute, ymdhms.second);
-    var d1 = new Date(utcGuess);
-    var off1 = tzOffsetMs(d1, timeZone);
-    var utc1 = utcGuess - off1;
-    var d2 = new Date(utc1);
-    var off2 = tzOffsetMs(d2, timeZone);
-    return utcGuess - off2;
-  }
-
-  function nextFridayMidnightUtcMs(now) {
-    var tz = 'America/New_York';
-    var p = tzParts(now, tz);
-    var weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-    var dow = weekdayMap[p.weekday] == null ? 0 : weekdayMap[p.weekday];
-    var hour = parseInt(p.hour, 10);
-    var minute = parseInt(p.minute, 10);
-    var second = parseInt(p.second, 10);
-
-    var days = (5 - dow + 7) % 7; // 5 = Friday
-    if (days === 0 && (hour > 0 || minute > 0 || second > 0)) days = 7;
-
-    // Use "today at noon" in NY to safely add days across months/DST.
-    var baseNoonUtc = zonedTimeToUtcMs({
-      year: parseInt(p.year, 10),
-      month: parseInt(p.month, 10),
-      day: parseInt(p.day, 10),
-      hour: 12, minute: 0, second: 0
-    }, tz);
-    var fridayNoonUtc = baseNoonUtc + (days * 86400000);
-    var fri = tzParts(new Date(fridayNoonUtc), tz);
-
-    return zonedTimeToUtcMs({
-      year: parseInt(fri.year, 10),
-      month: parseInt(fri.month, 10),
-      day: parseInt(fri.day, 10),
-      hour: 0, minute: 0, second: 0
-    }, tz);
-  }
-
-  function pad2(n) { return String(n).padStart(2, '0'); }
-  function renderCountdown() {
-    if (!shopUpgradeCountdown) return;
-    var now = new Date();
-    var target = nextFridayMidnightUtcMs(now);
-    var ms = target - now.getTime();
-    if (ms < 0) ms = 0;
-
-    var totalSeconds = Math.floor(ms / 1000);
-    var days = Math.floor(totalSeconds / 86400);
-    var hours = Math.floor((totalSeconds % 86400) / 3600);
-    var minutes = Math.floor((totalSeconds % 3600) / 60);
-    var seconds = totalSeconds % 60;
-    shopUpgradeCountdown.textContent = pad2(days) + ':' + pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
-  }
-
-  if (window.__shopUpgradeCountdownInterval) {
-    clearInterval(window.__shopUpgradeCountdownInterval);
-    window.__shopUpgradeCountdownInterval = null;
-  }
-  renderCountdown();
-  window.__shopUpgradeCountdownInterval = setInterval(renderCountdown, 1000);
 
   function setHidden(el, isHidden) {
     if (!el) return;
@@ -795,7 +707,7 @@
     });
   });
 
-  if (addPrizeBtn) addPrizeBtn.onclick = openAddPrizeModal;
+  if (addPrizeBtn && !addPrizeBtn.disabled) addPrizeBtn.onclick = openAddPrizeModal;
   if (addPrizeModalClose) addPrizeModalClose.onclick = closeAddPrizeModal;
   if (addPrizeModal) {
     addPrizeModal.addEventListener('click', function(e) {

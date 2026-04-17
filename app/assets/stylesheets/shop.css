@@ -79,6 +79,47 @@
   top: 145px; /* sits above Shop Rules */
 }
 
+/* Add Prize: program closed — hover shows native title tooltip on wrapper */
+.shop-program-closed-wrap {
+  position: fixed;
+  left: 17%;
+  top: 145px;
+  z-index: 6;
+  transform: translateX(-50%);
+  cursor: help;
+  line-height: 0;
+}
+
+.shop-program-closed-wrap .shop-rules-btn.shop-addprize-btn.shop-addprize-btn--inactive {
+  position: relative;
+  left: 0;
+  top: 0;
+  transform: translate(0, 0) perspective(1000px) rotateX(0deg);
+  opacity: 0.58;
+  cursor: not-allowed;
+  filter: grayscale(0.25);
+  pointer-events: none;
+}
+
+.shop-program-closed-wrap .shop-rules-btn.shop-addprize-btn.shop-addprize-btn--inactive:hover {
+  transform: translate(0, 0) perspective(1000px) rotateX(0deg);
+}
+
+.shop-program-closed-wrap .shop-rules-btn.shop-addprize-btn.shop-addprize-btn--inactive .shop-rules-btn-face-img {
+  filter: brightness(0.88);
+}
+
+.shop-program-closed-wrap .shop-rules-btn.shop-addprize-btn.shop-addprize-btn--inactive:hover .shop-rules-btn-face-img {
+  filter: brightness(0.92);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-program-closed-wrap .shop-rules-btn.shop-addprize-btn.shop-addprize-btn--inactive,
+  .shop-program-closed-wrap .shop-rules-btn.shop-addprize-btn.shop-addprize-btn--inactive:hover {
+    transform: none;
+  }
+}
+
 .shop-rules-btn:hover {
   transform: translate(-50%, 0) perspective(1000px) rotateX(360deg);
 }
