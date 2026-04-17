@@ -127,6 +127,19 @@ class YswsProjectSubmission < ApplicationRecord
     ENV.fetch("AIRTABLE_YSWS_OVERRIDE_HOURS_JUSTIFICATION_FIELD", "Optional - Override Hours Spent Justification")
   end
 
+  def self.update_desc_airtable_field_name
+    ENV.fetch("AIRTABLE_YSWS_UPDATE_DESC_FIELD", "Update_desc")
+  end
+
+  # Appended (in PG) on each admin approval when the project already had banked approved hours.
+  def self.build_update_desc_entry(past_approved_hours:, user_comment:, new_hours:)
+    past = past_approved_hours.to_f.round(2)
+    newly = new_hours.to_f.round(2)
+    comment = user_comment.to_s.strip.presence || "(no description provided)"
+    "This project was previously approved for #{past} hours in this program. " \
+      "The submitter has since added #{comment}. Approving #{newly} hours for the update."
+  end
+
   def self.parse_airtable_boolean(raw)
     case raw
     when true then true

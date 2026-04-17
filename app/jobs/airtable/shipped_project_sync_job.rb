@@ -45,6 +45,10 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     if (name = ship_status_airtable_field_name.presence)
       fields[name] = submission.ship_status
     end
+    ud_field = YswsProjectSubmission.update_desc_airtable_field_name
+    if submission.update_desc_log.to_s.strip.present?
+      fields[ud_field] = submission.update_desc_log
+    end
     fields.compact
   end
 

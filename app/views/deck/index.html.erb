@@ -263,8 +263,8 @@
          </div>
 
          <div class="detail-stat-row" id="detailShipSubmissionNoteRow" style="display: none;">
-           <span class="detail-label">Update for reviewers <span class="detail-label-required" aria-hidden="true">*</span></span>
-           <textarea class="detail-value detail-description-edit" id="detailShipSubmissionNote" rows="3" maxlength="10000" placeholder="Describe what changed in this submission — this does not replace your project description." aria-required="true"></textarea>
+           <span class="detail-label">What changed since your last ship <span class="detail-label-required" aria-hidden="true">*</span></span>
+           <textarea class="detail-value detail-description-edit" id="detailShipSubmissionNote" rows="3" maxlength="10000" placeholder="Required for updates (not your first ship). Describe what you added or changed since the last submission — at least <%= DeckController::RESHIP_SHIP_SUBMISSION_NOTE_MIN_LENGTH %> characters." aria-required="false"></textarea>
          </div>
          </div>
 
@@ -344,6 +344,9 @@ function initDeck() {
 
   var SHIP_CLOSED = <%= @ship_closed ? 'true' : 'false' %>;
   var SHIP_CLOSED_MSG = <%= raw DeckController::SHIP_CLOSED_SEASON_MSG.to_json %>;
+  var RESHIP_SHIP_NOTE_MIN_LEN = <%= DeckController::RESHIP_SHIP_SUBMISSION_NOTE_MIN_LENGTH %>;
+  var SHIP_NOTE_REQUIRED_MSG = <%= raw DeckController::SHIP_SUBMISSION_NOTE_REQUIRED_MSG.to_json %>;
+  var SHIP_NOTE_TOO_SHORT_MSG = <%= raw DeckController::SHIP_SUBMISSION_NOTE_TOO_SHORT_MSG.to_json %>;
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -902,7 +905,8 @@ function initDeck() {
      var detailShipSubmissionNoteRow = document.getElementById('detailShipSubmissionNoteRow');
      var detailShipSubmissionNote = document.getElementById('detailShipSubmissionNote');
      if (detailShipSubmissionNoteRow && detailShipSubmissionNote) {
-       var showShipNote = showShipBtn && !SHIP_CLOSED && !showShipUpdateLocked && !blockShipOtherPending && (!inReviewQueue || pendingQueueShipUpdate);
+       var pureFirstShip = !isShipped && !hasFirstShippedAt;
+       var showShipNote = showShipBtn && !SHIP_CLOSED && !showShipUpdateLocked && !blockShipOtherPending && (!inReviewQueue || pendingQueueShipUpdate) && !pureFirstShip;
        detailShipSubmissionNoteRow.style.display = showShipNote ? 'flex' : 'none';
        if (showShipNote) detailShipSubmissionNote.value = '';
        detailShipSubmissionNote.required = !!showShipNote;
@@ -1174,10 +1178,18 @@ function initDeck() {
 
        var shipNoteEl = document.getElementById('detailShipSubmissionNote');
        var shipNoteTrim = shipNoteEl ? shipNoteEl.value.trim() : '';
-       if (!shipNoteTrim) {
-         alert('Describe what changed in this submission (Update for reviewers) before shipping.');
-         if (shipNoteEl) shipNoteEl.focus();
-         return;
+       var pureFirstShipClick = currentDetailData.shipped !== 'true' && !(currentDetailData.firstShippedAt && String(currentDetailData.firstShippedAt).trim().length > 0);
+       if (!pureFirstShipClick) {
+         if (!shipNoteTrim) {
+           alert(SHIP_NOTE_REQUIRED_MSG);
+           if (shipNoteEl) shipNoteEl.focus();
+           return;
+         }
+         if (shipNoteTrim.length < RESHIP_SHIP_NOTE_MIN_LEN) {
+           alert(SHIP_NOTE_TOO_SHORT_MSG);
+           if (shipNoteEl) shipNoteEl.focus();
+           return;
+         }
        }
 
        var formData = new FormData();
