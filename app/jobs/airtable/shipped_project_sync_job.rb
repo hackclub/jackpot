@@ -18,8 +18,7 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
   def field_mapping(submission, is_new_airtable_record: false)
     # Ship status: only sent when AIRTABLE_YSWS_SHIP_STATUS_FIELD is set to the *exact* Airtable column name.
     #
-    # "Optional - Override Hours Spent Justification" is pushed only when creating a new Airtable row so manual
-    # edits on existing rows are not overwritten. PG still mirrors Airtable after each sync via pull.
+    # "Optional - Override Hours Spent Justification" is rebuilt from the project on every sync (full replace).
     fields = {
       "Code URL" => submission.code_url,
       "Playable URL" => submission.playable_url,
@@ -46,10 +45,8 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     if submission.update_desc_log.to_s.strip.present?
       fields[ud_field] = submission.update_desc_log
     end
-    if is_new_airtable_record
-      ov_field = YswsProjectSubmission.optional_override_hours_justification_airtable_field_name
-      fields[ov_field] = YswsProjectSubmission.default_optional_override_hours_justification_for_new_row(submission)
-    end
+    ov_field = YswsProjectSubmission.optional_override_hours_justification_airtable_field_name
+    fields[ov_field] = YswsProjectSubmission.build_optional_override_hours_justification(submission)
     fields.compact
   end
 
@@ -74,10 +71,12 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     project = record.project
     identity = fetch_identity(project.user)
     record.apply_mirror_fields!(identity)
+    project.reload
+    body = YswsProjectSubmission.build_optional_override_hours_justification(record)
+    record.update_column(:optional_override_hours_spent_justification, body) if body.present?
     super(record, index, raise_on_error: raise_on_error)
     record.pull_automation_first_submitted_at_from_airtable!
     record.pull_double_dip_from_airtable!
-    record.pull_optional_override_hours_justification_from_airtable!
   end
 
   def fetch_identity(user)

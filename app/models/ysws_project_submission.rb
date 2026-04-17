@@ -127,7 +127,7 @@ class YswsProjectSubmission < ApplicationRecord
     ENV.fetch("AIRTABLE_YSWS_OVERRIDE_HOURS_JUSTIFICATION_FIELD", "Optional - Override Hours Spent Justification")
   end
 
-  # Hackatime analysis range start (optional env). Range end is ship-day in the template, then set to approval date on approve.
+  # Hackatime analysis range start (optional env). Range end is today while in review, or last approval date when approved.
   def self.override_justification_hackatime_range_start
     if (s = ENV["AIRTABLE_YSWS_OVERRIDE_JUSTIFICATION_RANGE_START"].presence)
       Date.parse(s)
@@ -136,19 +136,18 @@ class YswsProjectSubmission < ApplicationRecord
     end
   end
 
-  # Replaces the first "MM/DD/YY to MM/DD/YY" span (Hackatime analysis range) with the same start and +approval_date+ as end.
-  def self.rewrite_override_justification_range_end(text, approval_date)
-    return text if text.blank? || approval_date.blank?
-
-    new_end = approval_date.strftime("%m/%d/%y")
-    text.sub(/\b(\d{2}\/\d{2}\/\d{2}) to \d{2}\/\d{2}\/\d{2}\b/) { "#{Regexp.last_match(1)} to #{new_end}" }
-  end
-
-  # Default body for "Optional - Override Hours Spent Justification" on *new* Airtable rows only.
-  # +range_end+ is usually ship-day until #sync_override_justification_range_end_to_approval_date! runs at approval.
-  def self.default_optional_override_hours_justification_for_new_row(submission, range_end: Time.zone.today)
+  # Full "Optional - Override Hours Spent Justification" body from current project totals (Jackpot → Airtable; overwrites each sync).
+  # +range_end+ defaults to last approval date when approved, otherwise today (in-review / pending).
+  def self.build_optional_override_hours_justification(submission, range_end: nil)
     project = submission.project
     return nil unless project
+
+    range_end ||=
+      if project.reviewed? && project.status.to_s == "approved" && project.reviewed_at.present?
+        project.reviewed_at.in_time_zone.to_date
+      else
+        Time.zone.today
+      end
 
     hack_names = Array(project.hackatime_projects).map(&:to_s).map(&:strip).reject(&:blank?).join(", ")
     hack_names = "—" if hack_names.blank?
@@ -275,7 +274,7 @@ class YswsProjectSubmission < ApplicationRecord
     Rails.logger.warn("YswsProjectSubmission##{id} pull double-dip: #{e.message}")
   end
 
-  # Long text: Jackpot seeds on new Airtable rows, updates the range end on approval, then mirrors Airtable → PG.
+  # Optional: mirror Airtable → PG (not run after shipped sync; Jackpot owns the computed justification text).
   def pull_optional_override_hours_justification_from_airtable!
     aid = airtable_id
     return if aid.blank?
@@ -336,21 +335,12 @@ class YswsProjectSubmission < ApplicationRecord
     Rails.logger.error("YswsProjectSubmission##{id} push optional override justification: #{e.class}: #{e.message}")
   end
 
-  def sync_override_justification_range_end_to_approval_date!(approval_date)
-    return if approval_date.blank?
+  def rebuild_and_push_optional_override_justification!
+    body = self.class.build_optional_override_hours_justification(self)
+    return if body.blank?
 
-    if optional_override_hours_spent_justification.blank? && airtable_id.present?
-      pull_optional_override_hours_justification_from_airtable!
-      reload
-    end
-
-    text = optional_override_hours_spent_justification.to_s
-    return if text.blank?
-
-    new_text = self.class.rewrite_override_justification_range_end(text, approval_date)
-    return if new_text == text
-
-    update_column(:optional_override_hours_spent_justification, new_text)
+    update_column(:optional_override_hours_spent_justification, body)
+    reload
     push_optional_override_hours_justification_to_airtable!
   end
 

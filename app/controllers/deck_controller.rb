@@ -703,7 +703,7 @@ class DeckController < ApplicationController
         submission.update!(update_desc_log: combined)
       end
 
-      submission&.sync_override_justification_range_end_to_approval_date!(project.reviewed_at&.in_time_zone&.to_date)
+      submission&.rebuild_and_push_optional_override_justification!
 
       Rails.logger.info "Project approved. User #{user_id} earned #{chips_delta} chips (delta). New balance: #{user.reload.chip_am}"
       render json: { success: true, message: "Project approved", chips_earned: chips_delta }
