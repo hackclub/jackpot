@@ -7,7 +7,7 @@ class Airtable::ProjectSyncJob < Airtable::BaseSyncJob
     Project.all.includes(:user)
   end
 
-  def field_mapping(project)
+  def field_mapping(project, is_new_airtable_record: false)
     {
       "Name" => project.name,
       "Description" => project.description,

@@ -7,7 +7,7 @@ class Airtable::ShopItemSyncJob < Airtable::BaseSyncJob
     ShopItem.all
   end
 
-  def field_mapping(item)
+  def field_mapping(item, is_new_airtable_record: false)
     {
       "Name" => item.name,
       "Description" => item.description,
