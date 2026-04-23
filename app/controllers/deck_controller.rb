@@ -2,8 +2,6 @@ class DeckController < ApplicationController
    before_action :authenticate_user!
    before_action :authenticate_review_privileged!, only: [ :approve_project_admin, :reject_project_admin, :comment_review_project_admin ]
 
-  MAIN_HC_RESHIP_BLOCKED_MSG = "This project has already been submitted to the main HC database - please contact @Emma".freeze
-  ZERO_HOURS_SHIP_MSG = "You need logged hours (Hackatime + journal) before you can ship.".freeze
   RESHIP_SHIP_SUBMISSION_NOTE_MIN_LENGTH = 40
   SHIP_SUBMISSION_NOTE_REQUIRED_MSG = "Describe what changed since your last ship (Update for reviewers) before shipping.".freeze
   SHIP_SUBMISSION_NOTE_TOO_SHORT_MSG =
@@ -271,14 +269,6 @@ class DeckController < ApplicationController
             return redirect_to deck_path
           end
         end
-        if project.total_hours.to_f <= 1e-6
-          if request.xhr?
-            return render json: { error: ZERO_HOURS_SHIP_MSG }, status: :unprocessable_entity
-          else
-            flash[:alert] = ZERO_HOURS_SHIP_MSG
-            return redirect_to deck_path
-          end
-        end
         if project.hours_logged_beyond_current_queue_submission <= 1e-6
           msg = "Log more hours on this project, then use Ship update to add them to your pending submission and move it to the back of the queue."
           if request.xhr?
@@ -307,25 +297,8 @@ class DeckController < ApplicationController
         end
       end
 
-      if project.total_hours.to_f <= 1e-6
-        if request.xhr?
-          return render json: { error: ZERO_HOURS_SHIP_MSG }, status: :unprocessable_entity
-        else
-          flash[:alert] = ZERO_HOURS_SHIP_MSG
-          return redirect_to deck_path
-        end
-      end
-
       if project.shipped? && project.status.to_s != "rejected"
         if project.reviewed? && project.status.to_s == "approved"
-          if project.pending_review_hours > 1e-6 && project.reship_blocked_by_main_hc_database?
-            if request.xhr?
-              return render json: { error: MAIN_HC_RESHIP_BLOCKED_MSG }, status: :unprocessable_entity
-            else
-              flash[:alert] = MAIN_HC_RESHIP_BLOCKED_MSG
-              return redirect_to deck_path
-            end
-          end
           if !project.reshippable?
             msg = "Log more time (beyond what was already approved) before shipping an update."
             if request.xhr?
