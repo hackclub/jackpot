@@ -102,12 +102,14 @@ class Project < ApplicationRecord
     end
   end
 
+  # Always false: ship updates after the YSWS row is stamped in Airtable must still be allowed;
+  # the same submission row is updated on re-queue (see DeckController#ship_project).
   def reship_blocked_by_main_hc_database?
-    ysws_project_submission&.automation_first_submitted_at.present?
+    false
   end
 
   def reshippable?
-    shipped? && reviewed? && status.to_s == "approved" && pending_review_hours > 1e-6 && !reship_blocked_by_main_hc_database?
+    shipped? && reviewed? && status.to_s == "approved" && pending_review_hours > 1e-6
   end
 
   def hackatime_ship_names
