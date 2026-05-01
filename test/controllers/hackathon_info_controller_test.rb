@@ -19,4 +19,15 @@ class HackathonInfoControllerTest < ActionDispatch::IntegrationTest
     get "/jackpot/hackathonInfo"
     assert_redirected_to "/hackathon_info"
   end
+
+  test "includes current confirmed participants bar and label" do
+    get "/hackathon_info"
+    assert_response :success
+    assert_select ".hackathon-participants-counter-bare"
+    assert_select ".hackathon-signup-progress--confirmed .hackathon-signup-label",
+      text: "Current confirmed participants"
+    assert_select ".hackathon-participants-quick-questions", text: /For any quick questions, DM/
+    assert_select ".hackathon-participants-quick-questions a[href='https://hackclub.enterprise.slack.com/team/U078DFX40A2']",
+      text: "@Emma"
+  end
 end
