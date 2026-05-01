@@ -63,6 +63,22 @@
           <% end %>
         </div>
       </div>
+
+      <div class="hackathon-signup-counter-bare hackathon-participants-counter-bare" role="region" aria-label="<%= "Current confirmed participants: #{@hackathon_confirmed_count}" %>">
+        <div class="hackathon-signup-progress hackathon-signup-progress--vegas hackathon-signup-progress--confirmed">
+          <div class="hackathon-signup-progress-head">
+            <span class="hackathon-signup-label">Current confirmed participants</span>
+          </div>
+          <div class="hackathon-progress-track hackathon-progress-track--vegas hackathon-progress-track--confirmed">
+            <div class="hackathon-progress-fill hackathon-progress-fill--vegas hackathon-progress-fill--confirmed" style="width: 100%;"></div>
+            <span class="hackathon-signup-count hackathon-signup-count--on-bar hackathon-signup-count--confirmed"><%= @hackathon_confirmed_count %></span>
+          </div>
+        </div>
+      </div>
+      <p class="hackathon-participants-quick-questions">
+        For any quick questions, DM
+        <%= link_to "@Emma", "https://hackclub.enterprise.slack.com/team/U078DFX40A2", target: "_blank", rel: "noopener noreferrer", class: "faq-link" %>
+      </p>
     </section>
 
     <section class="faq-section">
@@ -490,6 +506,54 @@
   padding: 0.75rem 0 0;
 }
 
+.hackathon-participants-counter-bare {
+  margin-top: 1.75rem;
+  padding-bottom: 0.25rem;
+}
+
+.hackathon-signup-progress--confirmed .hackathon-signup-label {
+  color: rgba(255, 220, 140, 0.95);
+}
+
+.hackathon-progress-track--confirmed {
+  border-color: rgba(200, 150, 50, 0.55);
+}
+
+.hackathon-progress-fill--confirmed {
+  background: linear-gradient(
+    90deg,
+    #6b5410 0%,
+    #b8860b 30%,
+    #f0c855 58%,
+    #ffe08a 100%
+  );
+  box-shadow: 0 0 14px rgba(255, 200, 80, 0.45);
+}
+
+.hackathon-progress-fill--confirmed::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 48%,
+    rgba(255, 240, 200, 0.25) 52%,
+    transparent 100%
+  );
+}
+
+.hackathon-signup-count--confirmed {
+  text-shadow:
+    0 0 14px rgba(255, 200, 100, 0.85),
+    0 0 36px rgba(255, 180, 50, 0.45);
+}
+
+.hackathon-participants-quick-questions {
+  margin: 0.8rem auto 0;
+  text-align: center;
+  font-size: clamp(1.15rem, 2.7vw, 1.4rem);
+  line-height: 1.45;
+  color: rgba(255, 248, 240, 0.94);
+}
+
 .hackathon-faq-list--tight {
   margin-top: 0;
   margin-bottom: 0;
@@ -751,7 +815,9 @@
   }
 
   .hackathon-progress-fill--vegas,
-  .hackathon-progress-fill--vegas::after {
+  .hackathon-progress-fill--vegas::after,
+  .hackathon-progress-fill--confirmed,
+  .hackathon-progress-fill--confirmed::after {
     animation: none;
   }
 
@@ -761,6 +827,15 @@
   }
 
   .hackathon-progress-fill--vegas::after {
+    display: none;
+  }
+
+  .hackathon-progress-fill--confirmed {
+    background: linear-gradient(90deg, #7a6420, #c9a227, #efd96c);
+    background-size: 100% 100%;
+  }
+
+  .hackathon-progress-fill--confirmed::after {
     display: none;
   }
 
