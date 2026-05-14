@@ -60,12 +60,16 @@ class Airtable::ShippedProjectSyncJob < Airtable::BaseSyncJob
     ENV["AIRTABLE_YSWS_SHIP_STATUS_FIELD"]
   end
 
+  public
+
   def push_record!(submission)
     return unless submission.is_a?(YswsProjectSubmission)
     return unless submission.project&.shipped?
 
     super
   end
+
+  private
 
   def sync_single_record(record, index = nil, raise_on_error: false)
     project = record.project
