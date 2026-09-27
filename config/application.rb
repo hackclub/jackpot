@@ -6,6 +6,8 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+require_relative "../lib/read_only_mode"
+
 module Jackpot
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -30,6 +32,9 @@ module Jackpot
     # When true, participants cannot ship or ship-update projects (deck only; admins unaffected).
     # Users with reship_shipping_enabled bypass the lock when it is on.
     config.x.ship_closed = false
+
+    config.x.read_only = true
+    config.middleware.use ReadOnlyMode
 
     # Track per-request cache hits and misses via ActiveSupport::Notifications
     ActiveSupport::Notifications.subscribe("cache_read.active_support") do |*args|

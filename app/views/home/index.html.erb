@@ -49,11 +49,13 @@
             </div>
           </div>
         </div>
-        <div class="section-1__join-wrap">
-          <%= button_to "/auth/hack_club", method: :post, data: { turbo: false }, class: "section-1__join-link" do %>
-            <%= image_tag "https://cdn.hackclub.com/019d2a76-da0e-7705-9aea-4a3e891ea743/join_button-ef8551aa.png", alt: "Join", class: "section-1__join-btn", loading: "lazy" %>
-          <% end %>
-        </div>
+        <% unless read_only_mode? %>
+          <div class="section-1__join-wrap">
+            <%= button_to "/auth/hack_club", method: :post, data: { turbo: false }, class: "section-1__join-link" do %>
+              <%= image_tag "https://cdn.hackclub.com/019d2a76-da0e-7705-9aea-4a3e891ea743/join_button-ef8551aa.png", alt: "Join", class: "section-1__join-btn", loading: "lazy" %>
+            <% end %>
+          </div>
+        <% end %>
         <div class="section-1__carousel-wrap">
           <%= image_tag "RSVP_comp/first_section/subtitle_carousel.png", alt: "", class: "section-1__carousel-subtitle", loading: "lazy", aria: { hidden: true } %>
           <div class="section-1__carousel">

@@ -51,7 +51,3 @@ production:
     class: Airtable::ShippedProjectSyncJob
     queue: literally_whenever
     schedule: every 5 minutes
-  hackatime_hours_sync:
-    class: HackatimeHoursSyncJob
-    queue: literally_whenever
-    schedule: every 5 minutes

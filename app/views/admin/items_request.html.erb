@@ -34,7 +34,7 @@
                   <td><%= req.item_name %></td>
                   <td><%= number_to_currency(req.price, unit: "$") %></td>
                   <td>
-                    <% if req.reference_link.present? %>
+                    <% if req.reference_link.to_s.match?(/\Ahttps?:\/\//i) %>
                       <%= link_to "Link", req.reference_link, target: "_blank", rel: "noopener noreferrer" %>
                     <% else %>
                       —
@@ -69,7 +69,7 @@
                     <% end %>
                     <span class="admin-items-request-item-meta">
                       <%= number_to_currency(req.price, unit: "$") %>
-                      <% if req.reference_link.present? %>
+                      <% if req.reference_link.to_s.match?(/\Ahttps?:\/\//i) %>
                         · <%= link_to "Link", req.reference_link, target: "_blank", rel: "noopener noreferrer" %>
                       <% end %>
                     </span>

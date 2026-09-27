@@ -8,7 +8,7 @@ class AdminController < ApplicationController
   def index
     Rails.logger.info "Current user hack_club_id: #{current_user&.hack_club_id}"
     Rails.logger.info "Is admin? #{admin?}"
-    cleanup_corrupted_projects
+    cleanup_corrupted_projects unless read_only_mode?
   end
 
   def users
@@ -184,9 +184,6 @@ class AdminController < ApplicationController
     @daily_project_active_user_series = daily_project_active_user_series(days: 30)
   end
 
-  def console
-  end
-
   def airtable_sync
     @sync_jobs = [
       { name: "Users", job_class: "Airtable::UserSyncJob", model: User, table_env: "AIRTABLE_USERS_TABLE", table_default: "_users" },
@@ -201,7 +198,7 @@ class AdminController < ApplicationController
     ]
 
     @sync_jobs.each do |job|
-      job[:before_stats]&.call
+      job[:before_stats]&.call unless read_only_mode?
       model = job[:model]
       job[:total] = model.count
       job[:synced] = model.where.not(airtable_id: nil).count
@@ -249,40 +246,6 @@ class AdminController < ApplicationController
     Airtable::AdminForceSyncJob.perform_later
     redirect_to admin_airtable_sync_path,
       notice: "Full Airtable reconcile is queued (runs in the background). Refresh this page in a minute to see updated counts—ensure bin/jobs (or your Solid Queue worker) is running."
-  end
-
-  # Executes Ruby code submitted from the admin console.
-  # Captures stdout and the return value, with a 30-second timeout.
-  def execute_console
-    code = params[:code].to_s
-
-    if code.blank?
-      return render json: { output: "", result: "No code provided." }
-    end
-
-    output = StringIO.new
-    result = nil
-
-    begin
-      Timeout.timeout(30) do
-        old_stdout = $stdout
-        $stdout = output
-
-        # rubocop:disable Security/Eval
-        result = eval(code, TOPLEVEL_BINDING, "admin_console", 1)
-        # rubocop:enable Security/Eval
-
-        $stdout = old_stdout
-      end
-    rescue Timeout::Error
-      $stdout = STDOUT
-      return render json: { output: output.string, result: "Error: Execution timed out after 30 seconds." }
-    rescue Exception => e
-      $stdout = STDOUT
-      return render json: { output: output.string, result: "#{e.class}: #{e.message}\n#{e.backtrace&.first(10)&.join("\n")}" }
-    end
-
-    render json: { output: output.string, result: result.inspect }
   end
 
   def items_request
@@ -445,8 +408,10 @@ class AdminController < ApplicationController
     begin
       project_id = params[:project_id]
       @project_db = Project.includes(:ysws_project_submission).find(project_id)
-      @project_db.ysws_project_submission&.pull_double_dip_from_airtable!
-      @project_db.reload
+      unless read_only_mode?
+        @project_db.ysws_project_submission&.pull_double_dip_from_airtable!
+        @project_db.reload
+      end
       @user = @project_db.user
 
       unless @user

@@ -8,6 +8,7 @@ class ShopItemRequest < ApplicationRecord
   validates :item_name, presence: true
   validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :reference_link, presence: true
+  validate :safe_reference_link
 
   pushes_airtable_with Airtable::ShopItemRequestSyncJob
 
@@ -27,6 +28,12 @@ class ShopItemRequest < ApplicationRecord
   end
 
   private
+
+  def safe_reference_link
+    return if reference_link.blank?
+
+    errors.add(:reference_link, "must start with http:// or https://") unless reference_link.to_s.strip.match?(/\Ahttps?:\/\//i)
+  end
 
   def assign_week
     self.week ||= self.class.week_for_time(created_at || Time.current)

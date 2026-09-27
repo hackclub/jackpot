@@ -93,14 +93,6 @@
         </div>
       <% end %>
 
-      <%= link_to admin_console_path, class: "admin-link" do %>
-        <span class="admin-link-icon">💎</span>
-        <div>
-          Ruby Console
-          <span class="admin-link-desc">Execute Ruby code on the server</span>
-        </div>
-      <% end %>
-
       <% if current_user.role_super_admin? %>
         <div class="admin-link" style="opacity: 0.8; cursor: default;">
           <span class="admin-link-icon">✦</span>

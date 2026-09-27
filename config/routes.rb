@@ -73,8 +73,6 @@ Rails.application.routes.draw do
   patch "/admin/review/project/:project_id/double_dip", to: "admin#update_review_project_double_dip", as: :admin_review_project_double_dip
   patch "/admin/review/project/:project_id/fraud_check", to: "admin#update_review_project_fraud_check", as: :admin_review_project_fraud_check
   delete "/admin/review/project/:project_id", to: "admin#destroy_review_project", as: :admin_destroy_review_project
-  get "/admin/console", to: "admin#console", as: :admin_console
-  post "/admin/console", to: "admin#execute_console", as: :admin_console_execute
   get "/admin/airtable_sync", to: "admin#airtable_sync", as: :admin_airtable_sync
   post "/admin/airtable_sync/force", to: "admin#force_airtable_sync", as: :admin_force_airtable_sync
 

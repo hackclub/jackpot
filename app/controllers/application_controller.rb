@@ -7,12 +7,32 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
-  helper_method :current_user, :user_signed_in?, :admin?, :review_privileged?, :full_admin?
+  helper_method :current_user, :user_signed_in?, :admin?, :review_privileged?, :full_admin?, :read_only_mode?
 
   before_action :check_access_flipper
   before_action :initialize_request_counters
+  around_action :prevent_database_writes, if: :read_only_mode?
+
+  rescue_from ActiveRecord::ReadOnlyError, with: :render_read_only
 
   private
+
+  def read_only_mode?
+    Rails.application.config.x.read_only
+  end
+
+  def prevent_database_writes(&)
+    ActiveRecord::Base.while_preventing_writes(&)
+  end
+
+  def render_read_only(exception)
+    Rails.logger.warn("Blocked write in read-only mode: #{exception.message}")
+    if request.xhr? || request.format.json?
+      render json: { error: ReadOnlyMode::MESSAGE }, status: :forbidden
+    else
+      render plain: ReadOnlyMode::MESSAGE, status: :forbidden
+    end
+  end
 
   def shop_purchases_locked?
     value = Rails.cache.read(SHOP_PURCHASES_LOCKED_KEY)
@@ -70,6 +90,7 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user!
     return if user_signed_in?
+    return redirect_to(root_path, alert: ReadOnlyMode::MESSAGE) if read_only_mode?
 
     store_location
     redirect_to "/auth/hackclub", alert: "Please sign in to continue."

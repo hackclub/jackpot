@@ -7,6 +7,12 @@ class DeckController < ApplicationController
   SHIP_SUBMISSION_NOTE_TOO_SHORT_MSG =
     "Your update for reviewers must be at least #{RESHIP_SHIP_SUBMISSION_NOTE_MIN_LENGTH} characters — explain what changed since the last ship.".freeze
   SHIP_CLOSED_SEASON_MSG = "Jackpot is closing the first season - re-opening soon!".freeze
+  UPLOAD_IMAGE_EXTENSIONS = {
+    "image/png" => ".png",
+    "image/jpeg" => ".jpg",
+    "image/gif" => ".gif",
+    "image/webp" => ".webp"
+  }.freeze
 
   def index
     projects = current_user.projects.includes(:ysws_project_submission).order(position: :asc).to_a
@@ -32,26 +38,30 @@ class DeckController < ApplicationController
 
      @projects = projects.map.with_index do |project, index|
        linked = project.hackatime_projects || []
-       hackatime_hours_raw = linked.sum do |hp_name|
-         hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
-         Rails.logger.info("  project[#{index}] #{hp_name}: #{hours}h from hackatime")
-         hours
+       hackatime_hours = if read_only_mode?
+                           project.hackatime_hours.to_f
+       else
+                           hackatime_hours_raw = linked.sum do |hp_name|
+                             hours = service.get_project_hours(hackatime_id, hp_name, start_date: start_date)
+                             Rails.logger.info("  project[#{index}] #{hp_name}: #{hours}h from hackatime")
+                             hours
+                           end
+                           JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
        end
-       hackatime_hours = JackpotHours.hackatime_hours_from_api_total(hackatime_hours_raw)
 
-       if (project.hackatime_hours.to_d - hackatime_hours.to_d).abs > 0.000_05
+       if !read_only_mode? && (project.hackatime_hours.to_d - hackatime_hours.to_d).abs > 0.000_05
          project.update_column(:hackatime_hours, hackatime_hours)
        end
 
        project_journals = journal_by_project_id[project.id] || []
        journal_hours = project_journals.sum(&:hours_worked).to_f
        total_hours = hackatime_hours + journal_hours
-       if (project.total_hours.to_d - total_hours.to_d).abs > 0.000_05
+       if !read_only_mode? && (project.total_hours.to_d - total_hours.to_d).abs > 0.000_05
          project.update_column(:total_hours, total_hours)
        end
        Rails.logger.info("  project[#{index}]: hackatime=#{hackatime_hours}h + journal=#{journal_hours}h = #{total_hours}h")
 
-       if project.shipped? && project.status.to_s == "in-review" && !project.reviewed? &&
+       if !read_only_mode? && project.shipped? && project.status.to_s == "in-review" && !project.reviewed? &&
            project.read_attribute(:shipping_queue_snapshot_total_hours).blank?
          project.update_column(:shipping_queue_snapshot_total_hours, total_hours)
          project.reload
@@ -102,9 +112,11 @@ class DeckController < ApplicationController
     empty_count = [ 4 - @projects.size, 0 ].max
     @projects += Array.new(empty_count, nil)
 
-    @hackatime_projects = service.get_user_projects(hackatime_id)
+    @hackatime_projects = read_only_mode? ? [] : service.get_user_projects(hackatime_id)
 
-    if Rails.env.development? && request.local?
+    if read_only_mode?
+      @show_tutorial = false
+    elsif Rails.env.development? && request.local?
       # Localhost convenience: skip tutorial entirely.
       current_user.update!(tutorial_completed: true) unless current_user.tutorial_completed?
       @show_tutorial = false
@@ -112,7 +124,7 @@ class DeckController < ApplicationController
       @show_tutorial = Rails.application.config.x.tutorial_on_every_login || !current_user.tutorial_completed?
     end
 
-    @ship_closed = Rails.application.config.x.ship_closed && !current_user.reship_shipping_enabled?
+    @ship_closed = read_only_mode? || (Rails.application.config.x.ship_closed && !current_user.reship_shipping_enabled?)
   end
 
   def save_project
@@ -531,8 +543,9 @@ class DeckController < ApplicationController
       return render json: { error: "No file provided" }, status: :unprocessable_entity
     end
 
-    unless file.content_type.start_with?("image/")
-      return render json: { error: "Only image files are allowed" }, status: :unprocessable_entity
+    ext = UPLOAD_IMAGE_EXTENSIONS[file.content_type.to_s.downcase]
+    unless ext
+      return render json: { error: "Only PNG, JPEG, GIF, or WebP images are allowed" }, status: :unprocessable_entity
     end
 
     if file.size > 10.megabytes
@@ -545,14 +558,11 @@ class DeckController < ApplicationController
     end
 
     uuid = SecureRandom.uuid
-    ext = File.extname(file.original_filename).downcase
-    content_type = file.content_type.to_s
+    content_type = file.content_type.to_s.downcase
     body = nil
 
     # Project banner uploads: resize + JPEG so admin review / deck load smaller assets (journal stays original).
-    if ActiveModel::Type::Boolean.new.cast(params[:banner]) &&
-        content_type.start_with?("image/") &&
-        !content_type.include?("svg")
+    if ActiveModel::Type::Boolean.new.cast(params[:banner])
       begin
         require "image_processing/vips"
         processed = ImageProcessing::Vips

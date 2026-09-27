@@ -343,7 +343,7 @@ function initDeck() {
   })();
 
   var SHIP_CLOSED = <%= @ship_closed ? 'true' : 'false' %>;
-  var SHIP_CLOSED_MSG = <%= raw DeckController::SHIP_CLOSED_SEASON_MSG.to_json %>;
+  var SHIP_CLOSED_MSG = <%= raw (read_only_mode? ? ReadOnlyMode::MESSAGE : DeckController::SHIP_CLOSED_SEASON_MSG).to_json %>;
   var RESHIP_SHIP_NOTE_MIN_LEN = <%= DeckController::RESHIP_SHIP_SUBMISSION_NOTE_MIN_LENGTH %>;
   var SHIP_NOTE_REQUIRED_MSG = <%= raw DeckController::SHIP_SUBMISSION_NOTE_REQUIRED_MSG.to_json %>;
   var SHIP_NOTE_TOO_SHORT_MSG = <%= raw DeckController::SHIP_SUBMISSION_NOTE_TOO_SHORT_MSG.to_json %>;
